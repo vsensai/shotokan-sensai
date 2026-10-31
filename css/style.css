@@ -314,52 +314,6 @@ main:has(> .version) {
   opacity: 0.65;
 }
 
-.fortschritt {
-  margin: 1.1rem 0 0;
-}
-
-.fort-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  max-width: 520px;
-}
-
-.fort-stat {
-  display: block;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.78rem;
-}
-
-.fort-label {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.3rem;
-}
-
-.fort-label b {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.fort-bar {
-  display: block;
-  height: 3px;
-  margin-top: 0.3rem;
-  border-radius: 2px;
-  background: var(--line);
-  overflow: hidden;
-}
-
-.fort-bar i {
-  display: block;
-  height: 100%;
-  background: var(--red);
-  opacity: 0.6;
-}
-
-
 .unit-section h2 {
   margin-top: 1.6rem;
 }
@@ -1872,13 +1826,9 @@ main:fullscreen {
     padding-right: 2rem;
   }
 
-  /* Startseite: alle fünf Kacheln in einer Reihe, Fortschritt über die ganze Breite */
+  /* Startseite: alle fünf Kacheln in einer Reihe */
   .hero ~ .tiles {
     grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-
-  .fort-stats {
-    max-width: none;
   }
 
   /* Themenlisten (Lernen, Quiz) zweispaltig */

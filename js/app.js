@@ -81,7 +81,6 @@
     setNav('');
     setTitle('');
     app.innerHTML = '';
-    const read = learnLessons.filter((l) => store.data.read[l.id]).length;
     const tile = (href, title, text) => el('a', { class: 'tile', href }, el('h3', { text: title }), el('p', { text }));
     app.append(
       el(
@@ -99,34 +98,9 @@
         tile('#/ansage', 'Kata-Trainer', 'Alle Kata – Embusen und Schrittfolgen'),
         tile('#/exam', 'Prüfungen', 'DJKB-Prüfungsprogramm: Kihon, Kata, Kumite')
       ),
-      progressStrip(read),
       versionLine()
     );
     finishView();
-  }
-
-  // Dezenter Fortschritt unter den Karten: gelesen, gefragt, gefestigt (ab Fach 4).
-  function progressStrip(read) {
-    const total = SK.questions.length;
-    const asked = Object.keys(store.data.asked).filter((id) => qById[id]).length;
-    const sure = Object.keys(store.data.srs).filter((id) => qById[id] && store.data.srs[id].b >= 4).length;
-    const stat = (href, label, n, max) => {
-      // Breite per CSSOM, die CSP erlaubt keine style-Attribute.
-      const fill = el('i');
-      fill.style.width = `${max ? (100 * n) / max : 0}%`;
-      return el('a', { class: 'fort-stat', href }, el('span', { class: 'fort-label' }, label, el('b', { text: `${n}/${max}` })), el('span', { class: 'fort-bar' }, fill));
-    };
-    return el(
-      'section',
-      { class: 'fortschritt', 'aria-label': 'Dein Fortschritt' },
-      el(
-        'div',
-        { class: 'fort-stats' },
-        stat('#/wissen', 'Gelesen', read, learnLessons.length),
-        stat('#/quiz', 'Gefragt', asked, total),
-        stat('#/review', 'Gefestigt', sure, total)
-      )
-    );
   }
 
   function versionLine() {
