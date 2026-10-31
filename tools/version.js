@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* Versionsnummer an einer Stelle pflegen: setzt SK.VERSION samt Datum und Uhrzeit in js/core.js
-   und hängt ?v=<Version> an alle lokalen Dateien in index.html, damit Browser nach einem Update
+   sowie die Versionszeile der Startseite in index.html und hängt ?v=<Version> an alle lokalen Dateien in index.html, damit Browser nach einem Update
    keine alten Dateien aus dem Zwischenspeicher mischen.
 
    node tools/version.js                 aktuelle Version zeigen und index.html prüfen
@@ -54,7 +54,10 @@ core = core
   .replace(/SK\.VERSION = '[^']*';/, `SK.VERSION = '${next}';`)
   .replace(/SK\.VERSION_DATE = '[^']*';/, `SK.VERSION_DATE = '${parts.day}.${parts.month}.${parts.year}';`)
   .replace(/SK\.VERSION_TIME = '[^']*';/, `SK.VERSION_TIME = '${parts.hour}:${parts.minute}';`);
-index = index.replace(ASSET, `$1$2?v=${next}"`);
+index = index
+  .replace(ASSET, `$1$2?v=${next}"`)
+  // Versionszeile der fest eingetragenen Startseite
+  .replace(/(<p class="version">)Version [^<]*· /, `$1Version ${next} · Stand ${parts.day}.${parts.month}.${parts.year}, ${parts.hour}:${parts.minute} Uhr · `);
 fs.writeFileSync(coreFile, core);
 fs.writeFileSync(indexFile, index);
 console.log(`Version ${current} → ${next} (Stand ${parts.day}.${parts.month}.${parts.year}, ${parts.hour}:${parts.minute} Uhr)`);

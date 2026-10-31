@@ -38,7 +38,7 @@
       else {
         const doc = new DOMParser().parseFromString(await (await fetch('../../index.html')).text(), 'text/html');
         const norm = (n) => (n ? n.outerHTML.replace(/>\s+</g, '><').replace(/\s+/g, ' ') : 'FEHLT');
-        const same = ['.hero', '.tiles'].every((s) => norm(doc.querySelector(`#app > ${s}`)) === norm(app.querySelector(`:scope > ${s}`)));
+        const same = ['.hero', '.tiles', '.version'].every((s) => norm(doc.querySelector(`#app > ${s}`)) === norm(app.querySelector(`:scope > ${s}`)));
         log.push(`Startseite in index.html: ${same ? 'gleich wie viewStart()' : 'FEHLER'}`);
         if (!same) throw new Error('Startseite in index.html weicht von viewStart() in js/app.js ab');
       }
