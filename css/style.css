@@ -2098,7 +2098,8 @@ main:fullscreen {
   display: block;
 }
 
-.f3d-img:not([src]) {
+.f3d-img:not([src]),
+.f3d-live .f3d-img {
   visibility: hidden;
 }
 
