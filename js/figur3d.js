@@ -368,6 +368,15 @@ float foot2(vec2 q, vec2 heel, vec2 toe){
   return d;
 }
 
+vec3 lapel(vec3 gi, float d, inout float kind){
+  // d: Abstand zur Vorderkante der oberen (linken) Jackenhälfte, > 0 auf ihr, < 0 auf der unteren
+  vec3 c = gi;
+  if (d > 0.0 && d < 0.04) { c = gi * 0.66; kind = 4.0; } // Revers: dunklerer Stoffstreifen der oberen Lage
+  if (d < 0.0 && d > -0.04) c = gi * mix(0.7, 1.0, -d / 0.04); // Schatten der oberen Lage auf der unteren
+  float ln = 1.0 - smoothstep(0.005, 0.005 + 0.0025, abs(d));
+  if (ln > 0.5) kind = 4.0;
+  return mix(c, gi * 0.5, ln);
+}
 vec3 baseCol(float m, vec3 p, out float kind){
   kind = 0.0;
   vec3 gi = uStyle == 2 ? vec3(0.72, 0.5, 0.3) : uTint == 1 ? vec3(0.66, 0.7, 0.76) : vec3(0.93, 0.925, 0.91);
@@ -395,20 +404,16 @@ vec3 baseCol(float m, vec3 p, out float kind){
     if (ff > 0.0 && hh > 0.53 && abs(uu) < vx) { kind = 1.0; return skin; }
     // Kragen: dunklerer Stoffstreifen entlang des Ausschnitts
     if (ff > 0.0 && hh > 0.53 - 0.02 && abs(uu) < max(vx, 0.0) + 0.03) { kind = 4.0; return gi * 0.7; }
-    float lu = mix(0.115, -0.004, clamp((hh - 0.12) / (0.53 - 0.12), 0.0, 1.0));
-    if (ff > 0.0 && hh > 0.118 && hh < 0.53) {
-      float ln = 1.0 - smoothstep(0.003, 0.0055, abs(uu - lu));
-      if (ln > 0.0) { if (ln > 0.5) kind = 4.0; return mix(gi, gi * 0.62, ln); }
-      if (uu - lu > 0.0 && uu - lu < 0.03) { return gi * 0.965; }
-    }
+    // Vorderkante: linke Hälfte liegt über der rechten (vom Hals zur rechten Hüfte)
+    float lu = mix(-0.115, 0.004, clamp((hh - 0.12) / (0.53 - 0.12), 0.0, 1.0));
+    if (ff > 0.0 && hh > 0.118 && hh < 0.53) return lapel(gi, uu - lu, kind);
   }
   if (m > 5.5) {
-    // Jackensaum, Vorderkante der Jacke
+    // Jackensaum; Vorderkante läuft unter dem Gürtel bis zum Saum weiter
     vec3 q = jq(p);
     float hem = 1.0 - smoothstep(0.01, 0.016, q.y - jbot(q.z));
-    float edge = q.z > 0.0 ? 1.0 - smoothstep(0.003, 0.0055, abs(q.x - mix(0.07, 0.1, clamp(-q.y / 0.2, 0.0, 1.0)))) : 0.0;
-    if (edge > 0.5) kind = 4.0;
-    return gi * (1.0 - 0.07 * hem) * (1.0 - 0.36 * edge);
+    vec3 c = q.z > 0.0 ? lapel(gi, q.x + mix(0.115, 0.13, clamp(-q.y / 0.2, 0.0, 1.0)), kind) : gi;
+    return c * (1.0 - 0.07 * hem);
   }
   return gi;
 }
