@@ -220,8 +220,6 @@
     return unit;
   };
 
-  // Hinweis zu den Bewegungsgrafiken – einmal pro Seite (Lexikon, Lektionen mit Bewegungsgrafiken)
-  SK.gfxHint = '<p class="muted small gfx-hint">In den Grafiken: gestrichelt bzw. blass = Ausgangsstellung, blau = bewegtes Körperteil, rot gestrichelt = Weg, Zahlen = Reihenfolge. „▶ Bewegung“ spielt den Ablauf ab. 3D-Figuren lassen sich mit dem Finger drehen; „Phasenbild“ zeigt alle Zwischenstellungen.</p>';
   SK.glossaryHtml = function (items) {
     return `<div class="lex-grid">${items
       .map(

@@ -171,8 +171,7 @@
     const prev = pos > 0 ? learnLessons[pos - 1] : null;
     const next = pos >= 0 ? learnLessons[pos + 1] : null;
     const learn = el('div', { class: 'learn' });
-    // Hinweis zu den Bewegungsgrafiken einmal oben statt in jedem Bild
-    learn.innerHTML = (/data-gfx="(mv|tc|as):/.test(lesson.learn) ? SK.gfxHint : '') + lesson.learn;
+    learn.innerHTML = lesson.learn;
     const n = (qByLesson[id] || []).length;
     app.innerHTML = '';
     app.append(
@@ -262,12 +261,10 @@
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       if (!count.hidden) count.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-    const hint = el('div', { html: SK.gfxHint });
     app.append(
       el('h1', { text: 'Lexikon' }),
       el('p', { class: 'small' }, el('a', { href: '#/kompakt', text: 'Kompakt-Übersicht (Spickzettel je Gürtel, druckbar) ›' })),
       form,
-      hint.firstChild,
       count,
       results,
       catList

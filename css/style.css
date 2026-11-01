@@ -913,10 +913,6 @@ figure.gfx svg {
   stroke: none;
 }
 
-.gfx-hint {
-  margin: 0.4rem 0 0;
-}
-
 .lex-img svg {
   width: 100%;
   height: auto;
