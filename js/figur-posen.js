@@ -48,14 +48,16 @@
 
   /* ---------- Hände (rechte Hand; links = mx) ---------- */
   const H = {
-    hip: [-0.15, -0.37, -0.03],
+    // Hikite: Faust seitlich auf der Hüfte, Unterarm waagerecht, Ellbogen nach hinten (siehe figur3d.js)
+    hip: [-0.215, -0.34, -0.01],
     chudan: [0.0, -0.13, 0.53],
     jodan: [0.0, 0.03, 0.52],
     gedan: [-0.37, -0.55, 0.14],
     gedanPrep: [0.12, 0.02, 0.1],
     guardF: [-0.06, -0.1, 0.42],
     guardR: [-0.02, -0.2, 0.18],
-    yoi: [-0.1, -0.42, 0.13],
+    // Yoi: Arme fast gestreckt, Fäuste vor den Oberschenkeln
+    yoi: [-0.12, -0.54, 0.17],
     side: [-0.21, -0.43, 0.02],
   };
   const L = mx;

@@ -94,7 +94,12 @@
       const sh = toW([0.185 * sg, -0.035, 0]);
       const target = toW(P['h' + s]);
       const ep = P['e' + s];
-      const pole = len(ep) > 0.01 ? sub(toW(ep), chest) : add(add(mul(lc, 0.35 * sg), mul(up, -1)), mul(fc, -0.35));
+      // Hand an der Hüfte (Hikite): Ellbogen nach hinten statt zur Seite
+      const hv = P['h' + s];
+      // (weich übergeblendet, damit der Ellbogen in Bewegungen nicht springt)
+      const cl = (v) => Math.max(0, Math.min(1, v));
+      const kh = cl((0.25 - hv[2]) / 0.2) * cl((-0.15 - hv[1]) / 0.1) * cl((hv[1] + 0.5) / 0.06) * cl((Math.abs(hv[0]) - 0.08) / 0.06);
+      const pole = len(ep) > 0.01 ? sub(toW(ep), chest) : add(add(mul(lc, (0.35 - 0.25 * kh) * sg), mul(up, -1)), mul(fc, -0.35 - 0.65 * kh));
       const [elbow, wrist] = ik(sh, target, UARM, FARM, pole);
       J['sh' + s] = sh;
       J['elbow' + s] = elbow;
@@ -147,7 +152,12 @@
         const fd = J['fd' + s];
         const wd = J['wd' + s];
         [1, -1].forEach((k) => cone(add(add(w, mul(fd, 0.03)), mul(wd, 0.016 * k)), add(add(w, mul(fd, 0.17)), mul(wd, 0.013 * k)), 0.021, 0.015, 1));
-      } else cone(J['fist' + s], J['fist' + s], 0.043, 0.043, 1);
+      } else {
+        // Faust: kurze Walze quer über die Knöchel, damit sie nicht wie eine Kugel wirkt
+        const f = J['fist' + s];
+        const wd = J['wd' + s];
+        cone(add(f, mul(wd, 0.016)), add(f, mul(wd, -0.016)), 0.042, 0.042, 1);
+      }
       const k = J['knee' + s];
       const a = J['ankle' + s];
       cone(J['hip' + s], k, 0.088, 0.07, 0);
