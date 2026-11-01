@@ -5,7 +5,6 @@
   const E = window.Figur3D;
   const D = SK.fig3dDefs || {};
   const esc = (s) => SK.util.esc(s);
-  const RED = '#a3151a';
 
   let avail = null;
   function ok() {
@@ -95,194 +94,22 @@
     }
     ctx.restore();
     if (!C) return false;
-    overlay(ctx, w, h, e, st, C, P, J, PP);
+    overlay(ctx, w, h, e, C, J);
     return true;
   }
 
-  // Bahn, Trefferpunkt, Gewicht, Zusatzzeichen
-  function overlay(g, w, h, e, st, C, P, J, PP) {
+  // Einteilung der Übersichtsbilder (Höhen, Trefferzonen)
+  function overlay(g, w, h, e, C, J) {
     const pr = (p) => {
       const q = C.project(p);
       return e.mirrored ? [w - q[0], q[1]] : q;
     };
     const s = h / 400;
     const font = (px, wt) => `${wt || 700} ${px * s}px system-ui, "Segoe UI", Roboto, sans-serif`;
-    const { add, mul, mix, sub, norm } = E.v;
-    const text = (x, y, t, col, align) => {
-      g.font = font(12);
-      g.textAlign = align || 'center';
-      g.lineWidth = 4 * s;
-      g.strokeStyle = 'rgba(255,255,255,.92)';
-      g.strokeText(t, x, y);
-      g.fillStyle = col || RED;
-      g.fillText(t, x, y);
-    };
-    const dashLine = (pts, col, wd) => {
-      g.lineWidth = (wd || 2.2) * s;
-      g.lineCap = 'round';
-      g.setLineDash([7 * s, 6 * s]);
-      g.strokeStyle = col || RED;
-      g.beginPath();
-      pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])));
-      g.stroke();
-      g.setLineDash([]);
-    };
-    const arrowHead = (a, b, col) => {
-      const ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
-      if (Math.hypot(b[0] - a[0], b[1] - a[1]) < 1) return;
-      g.fillStyle = col || RED;
-      g.beginPath();
-      g.moveTo(b[0], b[1]);
-      g.lineTo(b[0] - Math.cos(ang - 0.45) * 12 * s, b[1] - Math.sin(ang - 0.45) * 12 * s);
-      g.lineTo(b[0] - Math.cos(ang + 0.45) * 12 * s, b[1] - Math.sin(ang + 0.45) * 12 * s);
-      g.fill();
-    };
+    const { add, mul, mix } = E.v;
     g.save();
-    const resting = !st.playing;
-    // Gewicht und Maße bei Ständen
-    if (e.d.labels && resting && st.t > 0.8) {
-      ['L', 'R'].forEach((k, i) => {
-        if (J['ankle' + k][1] > 0.12 || !P.w[i]) return;
-        const p = pr(mix(J['heel' + k], J['toe' + k], 0.5));
-        g.font = font(15, 800);
-        g.textAlign = 'center';
-        g.lineWidth = 4 * s;
-        g.strokeStyle = 'rgba(255,255,255,.92)';
-        const t = `${Math.round(P.w[i] * 100)} %`;
-        g.strokeText(t, p[0], p[1] + 26 * s);
-        g.fillStyle = P.w[i] >= 0.6 ? '#9b1010' : '#d0453f';
-        g.fillText(t, p[0], p[1] + 26 * s);
-      });
-      const hl = J.heelL;
-      const hr = J.heelR;
-      const dim = (a, b, label) => {
-        const A = pr(a);
-        const B = pr(b);
-        if (Math.hypot(A[0] - B[0], A[1] - B[1]) < 18 * s) return;
-        dashLine([A, B], '#5f6b74', 1.4);
-        g.font = font(11, 600);
-        g.fillStyle = '#5f6b74';
-        g.textAlign = 'center';
-        g.fillText(label, (A[0] + B[0]) / 2, (A[1] + B[1]) / 2 - 6 * s);
-      };
-      if (Math.abs(hl[2] - hr[2]) > 0.15) dim([Math.min(hl[0], hr[0]) - 0.2, 0.002, hr[2]], [Math.min(hl[0], hr[0]) - 0.2, 0.002, hl[2]], 'Länge');
-      if (Math.abs(hl[0] - hr[0]) > 0.15) dim([hl[0], 0.002, Math.min(hl[2], hr[2]) - 0.16], [hr[0], 0.002, Math.min(hl[2], hr[2]) - 0.16], 'Breite');
-    }
-    // Trefferpunkt mit Beschriftung
-    const hitInfo = e.d.hit;
-    if (hitInfo && resting && J[hitInfo.at]) {
-      const p = pr(J[hitInfo.at]);
-      g.fillStyle = '#d32f2f';
-      g.strokeStyle = '#fff';
-      g.lineWidth = 2 * s;
-      g.beginPath();
-      g.arc(p[0], p[1], 6 * s, 0, Math.PI * 2);
-      g.fill();
-      g.stroke();
-      if (!st.plain && hitInfo.text) {
-        const right = p[0] < w * 0.62;
-        const tx = right ? Math.min(w - 8 * s, p[0] + 46 * s) : Math.max(8 * s, p[0] - 46 * s);
-        const ty = Math.max(18 * s, p[1] - 34 * s);
-        g.strokeStyle = '#d32f2f';
-        g.lineWidth = 1.3 * s;
-        g.beginPath();
-        g.moveTo(p[0], p[1]);
-        g.lineTo(tx, ty + 3 * s);
-        g.stroke();
-        text(tx, ty, hitInfo.text, '#b71c1c', right ? 'start' : 'end');
-      }
-    }
+    // Keine Beschriftungen an den Figuren; nur die beiden Übersichtsbilder (Höhen, Trefferzonen) zeigen ihre Einteilung
     (e.d.marks || []).forEach((m) => {
-      if (m === 'kiai' && resting) {
-        const c = add(add(J.head, mul(J.hf, 0.2)), mul(J.up, -0.03));
-        [-0.06, 0, 0.06].forEach((dy) => {
-          const a = pr(add(c, [0, dy * 0.6, 0]));
-          const b = pr(add(add(c, mul(J.hf, 0.12)), [0, dy * 1.6, 0]));
-          g.strokeStyle = '#d32f2f';
-          g.lineWidth = 3 * s;
-          g.lineCap = 'round';
-          g.beginPath();
-          g.moveTo(a[0], a[1]);
-          g.lineTo(b[0], b[1]);
-          g.stroke();
-        });
-        if (!st.plain) { const q = pr(add(c, add(mul(J.hf, 0.16), [0, 0.12, 0]))); text(q[0], q[1], 'Kiai!'); }
-      }
-      if (m === 'kime' && resting) {
-        const f = pr(J.fistR);
-        for (let i = 0; i < 8; i++) {
-          const a = (i / 8) * Math.PI * 2;
-          g.strokeStyle = '#d32f2f';
-          g.lineWidth = 2.5 * s;
-          g.beginPath();
-          g.moveTo(f[0] + Math.cos(a) * 13 * s, f[1] + Math.sin(a) * 13 * s);
-          g.lineTo(f[0] + Math.cos(a) * 23 * s, f[1] + Math.sin(a) * 23 * s);
-          g.stroke();
-        }
-      }
-      if (m === 'sundome' && resting) {
-        const c = pr(add(J.fistR, mul(norm(sub(J.fistR, J.elbowR)), 0.16)));
-        g.setLineDash([4 * s, 3 * s]);
-        g.strokeStyle = '#90a4ae';
-        g.lineWidth = 2.5 * s;
-        g.beginPath();
-        g.arc(c[0], c[1], 14 * s, 0, Math.PI * 2);
-        g.stroke();
-        g.setLineDash([]);
-        if (!st.plain) text(c[0], c[1] - 22 * s, 'Stopp vor dem Ziel', '#546e7a');
-      }
-      if (m === 'turn') {
-        const c = pr(add(J.head, [0, 0.28, 0]));
-        g.strokeStyle = RED;
-        g.lineWidth = 2.6 * s;
-        g.beginPath();
-        g.ellipse(c[0], c[1], 34 * s, 9 * s, 0, Math.PI * 0.1, Math.PI * 1.75);
-        g.stroke();
-        arrowHead([c[0] + 30 * s, c[1] - 6 * s], [c[0] + 34 * s, c[1] + 2 * s]);
-      }
-      if (m === 'line') {
-        const a = pr([0, 0.003, -1.2]);
-        const b = pr([0, 0.003, 1.4]);
-        dashLine([a, b], '#78909c', 1.8);
-        if (!st.plain) text(b[0], b[1] - 8 * s, 'Angriffslinie', '#c62828');
-      }
-      if (m === 'maai' && PP) {
-        const a = pr([0, 0.01, P.L.z + 0.25]);
-        const b = pr([0, 0.01, PP.R.z - 0.25]);
-        g.strokeStyle = RED;
-        g.lineWidth = 2.5 * s;
-        g.beginPath();
-        g.moveTo(a[0], a[1]);
-        g.lineTo(b[0], b[1]);
-        g.stroke();
-        arrowHead(b, a);
-        arrowHead(a, b);
-        if (!st.plain) text((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 - 10 * s, 'Maai');
-      }
-      if (m === 'gaze' && PP) {
-        const JP = E.solve(PP);
-        dashLine([pr(J.head), pr(JP.head)], RED, 1.8);
-      }
-      if (m.startsWith('ring:') && J[m.slice(5)]) {
-        const p = pr(J[m.slice(5)]);
-        g.strokeStyle = '#d32f2f';
-        g.lineWidth = 3 * s;
-        g.beginPath();
-        g.arc(p[0], p[1], 16 * s, 0, Math.PI * 2);
-        g.stroke();
-      }
-      if (m.startsWith('arm:')) {
-        const k = m.slice(4);
-        const a = pr(mix(J['elbow' + k], J['wrist' + k], 0.1));
-        const b = pr(mix(J['elbow' + k], J['wrist' + k], 0.9));
-        g.strokeStyle = 'rgba(211,47,47,.55)';
-        g.lineWidth = 16 * s;
-        g.lineCap = 'round';
-        g.beginPath();
-        g.moveTo(a[0], a[1]);
-        g.lineTo(b[0], b[1]);
-        g.stroke();
-      }
       if (m === 'levels') {
         // Jodan (Gesicht), Chudan (Brust), Gedan (Unterbauch) nach der Definition im JKA-Kata-Buch
         const yTop = pr(add(J.head, [0, 0.12, 0]))[1];
