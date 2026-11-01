@@ -47,7 +47,7 @@
     R: { x: -0.1, z: 0, y: 0.075, yaw: -8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0], tu: 0 },
     hL: [0.16, -0.38, 0.02], hR: [-0.16, -0.38, 0.02], eL: [0, 0, 0], eR: [0, 0, 0],
     // offene Hand (0 = Faust, 1 = offen), Handflächen-Normale und Fingerrichtung (Brustkoordinaten, 0 = automatisch)
-    oL: 0, oR: 0, nL: 0, nR: 0, pL: [0, 0, 0], pR: [0, 0, 0], fL: [0, 0, 0], fR: [0, 0, 0],
+    oL: 0, oR: 0, pL: [0, 0, 0], pR: [0, 0, 0], fL: [0, 0, 0], fR: [0, 0, 0],
     w: [0.5, 0.5],
   };
   function full(p) {
@@ -113,8 +113,6 @@
       J['fist' + s] = add(wrist, mul(fa, 0.045));
       // offene Hand: Finger in Unterarmrichtung oder vorgegeben, Handfläche quer dazu
       J['open' + s] = P['o' + s] > 0.5;
-      // Nukite: Fingerspitzen bündig, Daumen angelegt
-      J['nk' + s] = P['n' + s] > 0.5;
       const fd0 = P['f' + s];
       const fd = len(fd0) > 0.01 ? norm(sub(toW(fd0), chest)) : fa;
       const pv0 = P['p' + s];
@@ -188,33 +186,18 @@
       const hf = open ? fd : norm(sub(J['fist' + s], w));
       const pn = norm(cross(wd, hf));
       const at = (f, p, q) => add(add(add(w, mul(hf, f)), mul(pn, p)), mul(wd, q * th));
-      // Unterarm: zum Handgelenk hin flacher (Handgelenk breiter als dick)
-      cone(mix(e, w, 0.55), w, 0.033, 0.03, FL(pn, 1.3, 0.02));
+      // Gliederpuppe: Unterarm endet vor dem Handgelenk, dort eine Gelenkkugel
+      cone(mix(e, w, 0.55), mix(e, w, 0.94), 0.033, 0.028, 1);
+      cone(w, w, 0.02, 0.02, SK(0.003));
       if (open) {
-        // Offene Hand (Shuto, Nukite): flacher Handteller mit gewölbter Knöchellinie, geschlossene Finger,
-        // Daumen wächst aus dem Daumenballen und liegt gebeugt an
-        const nk = J['nk' + s];
-        group([add(w, mul(hf, 0.04)), add(w, mul(hf, 0.15)), 0.045, 0.02], () => {
-          cone(at(0.022, 0.001, 0.003), at(0.06, 0.0, 0.0), 0.032, 0.038, FL(pn, 2.4, 0.014));
-          // [q, Ansatz, Länge, Beugung zur Handfläche, Radius]
-          (nk ? [[0.025, 0.09, 0.077, 0.004, 0.0088], [0.0085, 0.094, 0.073, 0.011, 0.0092], [-0.0085, 0.092, 0.074, 0.005, 0.0088], [-0.024, 0.083, 0.064, 0.003, 0.0078]]
-            : [[0.025, 0.09, 0.074, 0.003, 0.0088], [0.0085, 0.094, 0.083, 0.004, 0.0092], [-0.0085, 0.092, 0.078, 0.004, 0.0088], [-0.024, 0.083, 0.062, 0.004, 0.0078]])
-            .forEach(([q, f0, l, b, r]) => cone(at(f0, 0.0, q), at(f0 + l, b, q * 1.03), r, r * 0.82, SK(0.005)));
-          cone(at(0.014, 0.006, 0.02), at(0.046, 0.01, 0.034), 0.013, 0.011, SK(0.014));
-          cone(at(0.046, 0.01, 0.034), at(0.08, 0.012, 0.03), 0.0105, 0.009, SK(0.006));
+        // offene Hand als flaches Paddel (Shuto, Nukite)
+        group([add(w, mul(hf, 0.06)), add(w, mul(hf, 0.06)), 0.07, 0.07], () => {
+          cone(at(0.035, 0, 0), at(0.1, 0.004, -0.003), 0.03, 0.024, FL(pn, 2.1, 0.008));
         });
       } else {
-        // Faust: Hand als flacher Block, davor die Grundglieder als flache Stoßfläche, darunter die eingerollten
-        // Mittelglieder; Daumen aus dem Ballen, quer über Zeige- und Mittelfinger
+        // Faust als runder Block
         group([add(w, mul(hf, 0.05)), add(w, mul(hf, 0.05)), 0.05, 0.05], () => {
-          cone(at(0.012, 0.01, 0.0), at(0.058, 0.012, -0.002), 0.032, 0.04, FL(pn, 1.7, 0.012));
-          [0.0255, 0.0085, -0.0085, -0.025].forEach((q, i) => {
-            const f0 = 0.087 - [0.002, 0, 0.002, 0.008][i];
-            cone(at(f0, -0.004, q), at(f0 - 0.004, 0.026, q), 0.0105 - 0.0006 * i, 0.0105 - 0.0006 * i, SK(0.005));
-          });
-          cone(at(0.064, 0.036, 0.022), at(0.062, 0.034, -0.024), 0.011, 0.0095, SK(0.012));
-          cone(at(0.016, 0.018, 0.026), at(0.048, 0.032, 0.04), 0.0145, 0.012, SK(0.016));
-          cone(at(0.048, 0.033, 0.041), at(0.076, 0.046, 0.006), 0.0118, 0.01, SK(0.0045));
+          cone(at(0.036, 0.01, 0), at(0.05, 0.012, 0), 0.037, 0.039, FL(pn, 1.5, 0.008));
         });
       }
       const k = J['knee' + s];
@@ -223,24 +206,22 @@
       cone(k, mix(k, a, 0.84), 0.07, 0.064, 0);
       // Unterschenkel: zum Knöchel hin schlanker
       cone(mix(k, a, 0.72), a, 0.038, 0.032, 1);
-      // Fuß: Ferse, flache Sohle mit rundem Ballen, Spann, Achillessehne, Zehen (große Zehe innen)
+      // Gliederpuppe: Gelenkkugel am Knöchel, keilförmiger Fuß (hinten hoch, vorn flach und rund)
       const dir = J['dir' + s];
       const sole = J['sole' + s];
       const inner = mul(norm(cross(sole, dir)), s === 'L' ? 1 : -1);
       const O = (f, d, q) => add(add(add(a, mul(dir, f)), mul(sole, d)), mul(inner, q));
-      group([J['heel' + s], J['toe' + s], 0.05, 0.04], () => {
-        cone(O(-0.04, 0.043, 0.0), O(-0.028, 0.046, 0.002), 0.03, 0.029, SK(0.02));
-        cone(O(-0.012, 0.05, -0.004), O(0.108, 0.054, 0.006), 0.034, 0.047, FL(add(sole, mul(inner, -0.25)), 2.2, 0.022));
-        cone(O(0.0, 0.004, 0.006), O(0.11, 0.038, 0.012), 0.03, 0.018, SK(0.028));
-        cone(O(-0.026, -0.075, 0.0), O(-0.042, 0.02, 0.0), 0.014, 0.019, SK(0.02));
-        const ta = J['tu' + s] * 65 * D;
-        const td = add(mul(dir, Math.cos(ta)), mul(sole, -Math.sin(ta)));
-        const tdn = add(mul(dir, Math.sin(ta)), mul(sole, Math.cos(ta)));
-        // [Ansatz f, q, Länge, Radius]: kurz, dick, eng beieinander, leicht nach unten gekrümmt
-        [[0.146, 0.032, 0.026, 0.0138], [0.148, 0.0105, 0.021, 0.009], [0.143, -0.0065, 0.018, 0.0086], [0.134, -0.0225, 0.015, 0.0082], [0.121, -0.037, 0.012, 0.0078]].forEach(([f, q, l, r], j) => {
-          const a0 = O(f, 0.075 - r - 0.006 + (j ? 0 : 0.0), q);
-          cone(a0, add(add(a0, mul(td, l)), mul(tdn, 0.003)), r, r * 0.92, SK(j ? 0.007 : 0.014));
-        });
+      // Puppe ohne Zehen: der Vorderfuß knickt beim Fußballen-Tritt nur leicht ab
+      const ta = J['tu' + s] * 28 * D;
+      const td = add(mul(dir, Math.cos(ta)), mul(sole, -Math.sin(ta)));
+      const tdn = add(mul(dir, Math.sin(ta)), mul(sole, Math.cos(ta)));
+      // Vorderfuß um den Ballen gedreht (Zehen hochgezogen beim Mae-geri)
+      const B = O(0.1, 0.058, 0.004);
+      const V = (f, d, q) => add(add(add(B, mul(td, f)), mul(tdn, d)), mul(inner, q));
+      group([J['heel' + s], J['toe' + s], 0.06, 0.05], () => {
+        cone(a, a, 0.025, 0.025, SK(0.003));
+        cone(O(-0.03, 0.041, 0.0), O(0.07, 0.046, 0.004), 0.033, 0.028, FL(sole, 1.2, 0.006));
+        cone(V(-0.045, -0.008, 0.0), V(0.035, 0.0, 0.004), 0.04, 0.032, FL(tdn, 2.2, 0.012));
       });
     });
     // Gürtelknoten mit Enden

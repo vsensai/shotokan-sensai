@@ -27,7 +27,7 @@
     return {
       pelvis: mx(f.pelvis), yaw: -f.yaw, chest: -f.chest, lean: f.lean, look: -f.look,
       L: ft(f.R), R: ft(f.L), hL: mx(f.hR), hR: mx(f.hL), eL: mx(f.eR), eR: mx(f.eL),
-      oL: f.oR, oR: f.oL, nL: f.nR, nR: f.nL, pL: mx(f.pR), pR: mx(f.pL), fL: mx(f.fR), fR: mx(f.fL), w: [f.w[1], f.w[0]],
+      oL: f.oR, oR: f.oL, pL: mx(f.pR), pR: mx(f.pL), fL: mx(f.fR), fR: mx(f.fL), w: [f.w[1], f.w[0]],
     };
   }
   // Ganze Stellung um die senkrechte Achse durch c drehen (Grad, wie yaw)
@@ -158,7 +158,7 @@
   D['tc:awase-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hR: [0.0, 0.04, 0.5], hL: [0.04, -0.26, 0.38], eL: [0.25, -0.7, 0.05] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
   D['tc:otoshi-zuki'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.25, 0.35, 0.15] }), M(S.zks, { lean: 8, hL: L(H.hip), hR: [-0.05, -0.42, 0.45] }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:mawashi-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.45, -0.1, 0.22], eR: [-1, 0, 0] }), M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.06, 0.0, 0.4], eR: [-0.8, 0.1, 0.2] })], M(hit('fistR', 'Faust'), { eff: 'fistR', ghost: [0], view: 'front3' }));
-  D['tc:nukite'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [0.0, -0.13, 0.48], oR: 1, nR: 1, pR: [1, 0, 0] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
+  D['tc:nukite'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [0.0, -0.13, 0.48], oR: 1, pR: [1, 0, 0] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
 
   /* ---------- Schläge ---------- */
   D['tc:uraken-uchi'] = T(M(KB, { look: -90, hR: [0.14, -0.02, 0.14] }), M(KB, { look: -90, hR: [-0.7, 0.04, 0.12], eR: [-0.3, 0.4, -0.3] }), M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front' }));
