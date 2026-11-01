@@ -50,18 +50,12 @@
     };
     const t0 = d.keys[0].t;
     const t1 = d.keys[d.keys.length - 1].t;
-    const e = { key, d, pose, partner, cam, mirrored, t0, t1, start: E.solve(pose(t0)) };
+    const e = { key, d, pose, partner, cam, mirrored, t0, t1 };
     entries.set(key, e);
     return e;
   }
 
   /* ---------- Zeichnen ---------- */
-  const footDecal = (J, s, a, w) => ({ heel: J['heel' + s], toe: J['toe' + s], w, a, side: s });
-  function decals(e, P, J) {
-    const out = ['L', 'R'].filter((s) => J['ankle' + s][1] < 0.12).map((s) => footDecal(J, s, 1, P.w[s === 'L' ? 0 : 1]));
-    (e.d.startPrint || '').split('').forEach((s) => out.push(footDecal(e.start, s, 0.32, 0.3)));
-    return out;
-  }
   function paint(ctx, w, h, e, st) {
     const t = st.t;
     const P = e.pose(t);
@@ -78,9 +72,9 @@
     else if (!st.playing && st.ghost !== false) ghosts = (e.d.ghost || []).filter((x) => Math.abs(x - t) > 0.05);
     const PP = e.partner ? e.partner(t) : null;
     let C;
-    if (!ghosts.length && !PP) C = E.draw(ctx, w, h, P, cam, { mode: 0, decals: decals(e, P, J) });
+    if (!ghosts.length && !PP) C = E.draw(ctx, w, h, P, cam, { mode: 0 });
     else {
-      C = E.draw(ctx, w, h, P, cam, { mode: 1, decals: decals(e, P, J) });
+      C = E.draw(ctx, w, h, P, cam, { mode: 1 });
       ghosts.forEach((x) => {
         ctx.globalAlpha = st.phase ? 0.24 : 0.3;
         E.draw(ctx, w, h, e.pose(x), cam, { mode: 2 });
