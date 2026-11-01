@@ -256,6 +256,7 @@
 in vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`;
   const FS = `#version 300 es
 precision highp float;
+precision highp int;
 out vec4 o;
 uniform vec2 uRes;
 uniform vec3 uRo, uCw, uCu, uCv;
@@ -295,11 +296,12 @@ vec2 mapX(vec3 p, bool fine){
     float sc = 1.0, k = 0.024;
     if (mi > 99.5) {
       // abgeflachte Haut: Achse (Winkel), Faktor, Übergang
-      int v = int(mi - 100.0 + 0.5);
-      float tt = float(v / 65536) * (3.14159265 / 127.0), pp = float((v / 256) % 256) * (6.2831853 / 256.0);
+      // nur Gleitkomma: Ganzzahlen sind auf Handy-Grafikchips oft nur 16 Bit groß
+      float v = floor(mi - 100.0 + 0.5);
+      float tt = floor(v / 65536.0) * (3.14159265 / 127.0), pp = mod(floor(v / 256.0), 256.0) * (6.2831853 / 256.0);
       vec3 ax = vec3(sin(tt) * cos(pp), cos(tt), sin(tt) * sin(pp));
-      sc = 1.0 + float((v / 16) % 16) * 0.15;
-      k = float(v % 16) * 0.0025;
+      sc = 1.0 + mod(floor(v / 16.0), 16.0) * 0.15;
+      k = mod(v, 16.0) * 0.0025;
       pa += ax * dot(pa, ax) * (sc - 1.0);
       ba += ax * dot(ba, ax) * (sc - 1.0);
       mi = 1.0;
