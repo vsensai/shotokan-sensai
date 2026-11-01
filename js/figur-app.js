@@ -235,6 +235,22 @@
     const w = Math.round(cw * dpr(cap));
     return [w, Math.round(w * 0.8)];
   }
+  // Großansicht: die Bühne füllt das Fenster, das Bild folgt ihrem Seitenverhältnis
+  function sizeBig(stage, cap) {
+    const r = dpr(cap);
+    return [Math.max(120, Math.round(stage.clientWidth * r)), Math.max(120, Math.round(stage.clientHeight * r))];
+  }
+  // Die Kamera skaliert mit der Bildhöhe (fester senkrechter Blickwinkel). Ist die Bühne höher als 5:4 (Handy hochkant),
+  // den Blickwinkel weiten, damit die Figur in die Breite passt. Eine einzelne Figur ist schmaler als das Bild: sie darf
+  // größer werden als in der 5:4-Ansicht (Maßstab k × Bildbreite statt 0,8 × Breite); weite Tritte und Partner brauchen Rand.
+  // Breite Fenster bleiben bei 30°.
+  const FOV = 30;
+  function fovFor(w, h, k) {
+    const scale = Math.min(h, w * k);
+    if (scale >= h) return FOV;
+    const f = (1 / Math.tan((FOV * Math.PI) / 360)) * (scale / h);
+    return (Math.atan(1 / f) * 360) / Math.PI;
+  }
   function fallback(box) {
     const stage = box.querySelector('.f3d-stage');
     const key = box.dataset.f3d;
@@ -323,7 +339,8 @@
         L.dirty = false;
         const stage = L.cv.parentElement;
         const big = L.box.classList.contains('f3d-big');
-        const [w, h] = sizeOf(stage, L.st.playing || L.drag ? (big ? 1.25 : 1.75) : (big ? 2 : 2.5));
+        const [w, h] = big ? sizeBig(stage, L.st.playing || L.drag ? 1.25 : 2) : sizeOf(stage, L.st.playing || L.drag ? 1.75 : 2.5);
+        if (big) L.st.cam.fov = fovFor(w, h, L.e.partner ? 0.9 : 1.12);
         if (L.cv.width !== w || L.cv.height !== h) { L.cv.width = w; L.cv.height = h; }
         const st = Object.assign({}, L.st, { t: Math.min(L.st.t, L.e.t1) });
         if (!paint(L.ctx, w, h, L.e, st)) { stopLive(); return; }

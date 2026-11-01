@@ -2231,16 +2231,36 @@ main:fullscreen {
 }
 
 .f3d-dlg {
-  width: min(calc(100vw - 16px), calc((100dvh - 9.5rem) * 1.25 + 1.6rem), 60rem);
+  width: min(calc(100vw - 16px), 64rem);
+  height: calc(100dvh - 16px);
   max-width: none;
-  max-height: calc(100dvh - 16px);
+  max-height: none;
+  flex-direction: column;
   padding: 0.6rem 0.8rem 0.5rem;
   border: 0;
   border-radius: var(--radius);
   background: var(--bg);
   color: var(--ink);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
-  overflow: auto;
+  overflow: hidden;
+}
+
+.f3d-dlg[open] {
+  display: flex;
+}
+
+.f3d-dlg-body,
+.f3d-dlg-body .f3d-big {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.f3d-big .f3d-stage {
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: auto;
 }
 
 .f3d-dlg::backdrop {
@@ -2281,6 +2301,15 @@ main:fullscreen {
 
 .f3d-big .f3d-stage:active {
   cursor: grabbing;
+}
+
+.f3d-dlg .f3d-tools {
+  gap: 0.3rem;
+}
+
+.f3d-dlg .gfx-btn {
+  padding: 0.3rem 0.55rem;
+  white-space: nowrap;
 }
 
 .f3d-dlg-hint {
