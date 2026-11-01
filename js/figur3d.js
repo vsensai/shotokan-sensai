@@ -90,6 +90,8 @@
       J['ankle' + s] = ank;
       J['heel' + s] = add(add(ank, mul(sole, 0.042)), mul(dir, -0.055));
       J['toe' + s] = add(add(ank, mul(sole, 0.048)), mul(dir, 0.165));
+      J['dir' + s] = dir;
+      J['sole' + s] = sole;
       // Arm (Hand in Brustkoordinaten: x links, y oben, z vorne)
       const sh = toW([0.185 * sg, -0.035, 0]);
       const target = toW(P['h' + s]);
@@ -127,6 +129,14 @@
   function prims(J) {
     const P = [];
     const cone = (a, b, ra, rb, m) => P.push([a, b, ra, rb, m]);
+    // Gruppe (Hand, Fuß): vorweg eine grobe Ersatzform (Material 10 + Anzahl der Teile).
+    // Der Shader rechnet die Einzelteile nur nahe der Oberfläche; Schatten und Verdeckung nehmen nur die Ersatzform.
+    const group = (proxy, fn) => {
+      const i0 = P.length;
+      P.push(null);
+      fn();
+      P[i0] = proxy.concat(10 + P.length - i0 - 1);
+    };
     const { pel, chest, up, lc, lp, fp } = J;
     [1, -1].forEach((s) => {
       cone(add(add(pel, mul(lp, 0.062 * s)), mul(up, 0.03)), add(add(chest, mul(lc, 0.078 * s)), mul(up, -0.06)), 0.112, 0.12, 5);
@@ -149,20 +159,51 @@
       cone(J['sh' + s], e, 0.058, 0.05, 0);
       cone(e, mix(e, w, 0.7), 0.05, 0.047, 0);
       cone(mix(e, w, 0.62), w, 0.033, 0.03, 1);
+      const fd = J['fd' + s];
+      const wd = J['wd' + s];
+      const th = s === 'R' ? 1 : -1;
+      // Material 1.25 = Haut mit fast harter Kante, sonst verschmelzen Finger zu einem Klumpen
       if (J['open' + s]) {
-        const fd = J['fd' + s];
-        const wd = J['wd' + s];
-        [1, -1].forEach((k) => cone(add(add(w, mul(fd, 0.03)), mul(wd, 0.016 * k)), add(add(w, mul(fd, 0.17)), mul(wd, 0.013 * k)), 0.021, 0.015, 1));
+        // Offene Hand: flacher Handteller, vier Finger, Daumen an der Seite
+        const pn = norm(cross(wd, fd));
+        const at = (f, p, q) => add(add(add(w, mul(fd, f)), mul(pn, p)), mul(wd, q * th));
+        group([add(w, mul(fd, 0.03)), add(w, mul(fd, 0.17)), 0.022, 0.016], () => {
+          cone(at(0.008, 0, 0.016), at(0.078, 0, 0.024), 0.017, 0.0145, 1.25);
+          cone(at(0.008, 0, 0.002), at(0.08, 0, 0.0), 0.017, 0.0145, 1.25);
+          cone(at(0.008, 0, -0.012), at(0.076, 0, -0.024), 0.017, 0.0135, 1.25);
+          [[0.026, 0.074], [0.009, 0.082], [-0.008, 0.077], [-0.024, 0.062]].forEach(([q, l]) => cone(at(0.082, 0, q), at(0.082 + l, 0, q * 1.1), 0.0088, 0.0078, 1.25));
+          cone(at(0.018, 0.006, 0.032), at(0.066, 0.006, 0.046), 0.0115, 0.0095, 1.25);
+        });
       } else {
-        // Faust: runde Kugel mit fast harter Kante (Material 1.25), damit sie sich vom Unterarm abhebt
-        cone(J['fist' + s], J['fist' + s], 0.045, 0.045, 1.25);
+        // Faust: Handrücken, eingerollte Finger (zwei Reihen quer über die Knöchel) und Daumen
+        const fdf = norm(sub(J['fist' + s], w));
+        const pn = norm(cross(wd, fdf));
+        const at = (f, p, q) => add(add(add(w, mul(fdf, f)), mul(pn, p)), mul(wd, q));
+        group([J['fist' + s], J['fist' + s], 0.043, 0.043], () => {
+          cone(at(0.0, 0, 0), at(0.042, -0.004, 0), 0.03, 0.033, 1.25);
+          [-0.027, -0.009, 0.009, 0.027].forEach((q, i) => cone(at(0.072 - 0.004 * Math.abs(i - 1.5), -0.006, q), at(0.058, 0.026, q * 0.9), 0.0125, 0.0115, 1.25));
+          cone(at(0.022, 0.02, 0.036 * th), at(0.062, 0.04, 0.0), 0.0125, 0.011, 1.25);
+        });
       }
       const k = J['knee' + s];
       const a = J['ankle' + s];
       cone(J['hip' + s], k, 0.088, 0.07, 0);
       cone(k, mix(k, a, 0.84), 0.07, 0.064, 0);
       cone(mix(k, a, 0.72), a, 0.04, 0.036, 1);
-      cone(J['heel' + s], J['toe' + s], 0.038, 0.029, 1);
+      // Fuß: Ferse, Außen- und Innenkante, Ballen, Spann, fünf Zehen (große Zehe innen)
+      const dir = J['dir' + s];
+      const sole = J['sole' + s];
+      const inner = mul(norm(cross(sole, dir)), s === 'L' ? 1 : -1);
+      const O = (f, d, q) => add(add(add(a, mul(dir, f)), mul(sole, d)), mul(inner, q));
+      group([J['heel' + s], J['toe' + s], 0.038, 0.029], () => {
+        cone(O(-0.046, 0.042, 0), O(-0.04, 0.043, 0), 0.032, 0.032, 1);
+        cone(O(-0.04, 0.046, -0.006), O(0.108, 0.057, -0.03), 0.028, 0.018, 1);
+        cone(O(-0.04, 0.046, 0.008), O(0.114, 0.052, 0.022), 0.028, 0.023, 1);
+        cone(O(0.118, 0.053, 0.024), O(0.112, 0.057, -0.03), 0.022, 0.018, 1);
+        cone(O(-0.005, 0.0, 0), O(0.095, 0.034, 0.002), 0.036, 0.02, 1);
+        cone(O(0.132, 0.062, 0.025), O(0.174, 0.063, 0.027), 0.0125, 0.0115, 1.25);
+        [[0.005, 0.03], [-0.009, 0.026], [-0.021, 0.022], [-0.031, 0.018]].forEach(([q, l], j) => cone(O(0.13 - 0.007 * j, 0.066, q), O(0.13 - 0.007 * j + l, 0.067, q * 1.05), 0.0088, 0.008, 1.25));
+      });
     });
     // Gürtelknoten mit Enden
     const knot = add(add(pel, mul(up, 0.09)), mul(fp, 0.14));
@@ -172,7 +213,7 @@
   }
 
   /* ---------- Shader ---------- */
-  const N = 40;
+  const N = 72;
   const VS = `#version 300 es
 in vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }`;
   const FS = `#version 300 es
@@ -182,7 +223,8 @@ uniform vec2 uRes;
 uniform vec3 uRo, uCw, uCu, uCv;
 uniform float uF;
 uniform vec4 uA[${N}], uB[${N}];
-uniform float uM[${N}];
+uniform vec4 uM[${N / 4}];
+float mat(int i){ return uM[i / 4][i % 4]; }
 uniform int uN, uMode, uStyle, uTint;
 uniform vec3 uPel, uUp, uFwd, uLeft, uHead, uHFwd, uPFwd, uPLeft;
 uniform vec4 uBound;
@@ -205,22 +247,37 @@ float jacket(vec3 p){
   float dc = max(q.y - top, bot - q.y);
   return max(ds, dc) - 0.004;
 }
-vec2 map(vec3 p){
+// fine = false: Hände und Füße nur als grobe Ersatzform (Verdeckung auf dem Boden – ohne sichtbare Umrisse)
+vec2 mapX(vec3 p, bool fine){
   float d = 1e9, best = 1e9, m = 0.0;
-  for (int i = 0; i < ${N}; i++) {
-    if (i >= uN) break;
+  int i = 0;
+  while (i < uN) {
+    float mi = mat(i);
     vec3 a = uA[i].xyz, ba = uB[i].xyz - a, pa = p - a;
     float bb = dot(ba, ba);
     float h = bb > 0.0 ? clamp(dot(pa, ba) / bb, 0.0, 1.0) : 0.0;
     float di = length(pa - ba * h) - mix(uA[i].w, uB[i].w, h);
-    if (di < best) { best = di; m = uM[i]; }
-    d = smin(d, di, abs(uM[i] - 1.25) < 0.01 ? 0.004 : 0.024);
+    if (mi > 9.5) {
+      // Ersatzform einer Gruppe: weit weg (oder grob) genügt sie, die Einzelteile werden übersprungen
+      int n = int(mi - 10.0 + 0.5);
+      if (!fine || di > 0.06) {
+        if (di < best) { best = di; m = 1.0; }
+        d = smin(d, di, 0.024);
+        i += n + 1;
+      } else i += 1;
+      continue;
+    }
+    if (di < best) { best = di; m = mi; }
+    d = smin(d, di, abs(mi - 1.25) < 0.01 ? 0.004 : 0.024);
+    i += 1;
   }
   float dj = jacket(p);
   if (dj < best) m = 6.0;
   d = smin(d, dj, 0.007);
   return vec2(d, m);
 }
+vec2 map(vec3 p){ return mapX(p, true); }
+vec2 mapC(vec3 p){ return mapX(p, false); }
 vec3 nrm(vec3 p){
   vec2 e = vec2(0.0007, -0.0007);
   return normalize(e.xyy * map(p + e.xyy).x + e.yyx * map(p + e.yyx).x + e.yxy * map(p + e.yxy).x + e.xxx * map(p + e.xxx).x);
@@ -349,7 +406,7 @@ vec4 floorCol(vec3 ro, vec3 rd){
     c = mix(c, vec3(0.36, 0.4, 0.34), 1.0 - smoothstep(0.012, 0.016, band));
     if (uStyle == 2) c = mix(c, vec3(0.9, 0.86, 0.78), 0.4);
   }
-  float d = map(p).x;
+  float d = mapC(p).x;
   float ao = mix(0.45, 1.0, smoothstep(0.0, 0.16, d));
   float sh = shadow(p + vec3(0.0, 0.002, 0.0), LIG);
   if (uStyle == 1) {
@@ -499,7 +556,7 @@ void main(){
     gl.uniform1f(U.uF, C.f);
     gl.uniform4fv(U.uA, A);
     gl.uniform4fv(U.uB, B);
-    gl.uniform1fv(U.uM, M);
+    gl.uniform4fv(U.uM, M);
     gl.uniform1i(U.uN, P.length);
     gl.uniform1i(U.uMode, opt.mode || 0);
     gl.uniform1i(U.uStyle, opt.style || 0);

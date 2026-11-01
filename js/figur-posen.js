@@ -123,7 +123,7 @@
 
   /* ---------- Stände: vom natürlichen Stand in den Stand ---------- */
   const STAND_HANDS = {
-    musubi: {}, heisoku: { hL: L(H.yoi), hR: H.yoi, oL: 0, oR: 0 }, hachiji: {},
+    musubi: { hL: L(H.yoi), hR: H.yoi, oL: 0, oR: 0 }, heisoku: { hL: L(H.yoi), hR: H.yoi, oL: 0, oR: 0 }, hachiji: {},
     zenkutsu: { hL: L(H.gedan), hR: H.hip }, ashizenkutsu: { hL: L(H.guardF), hR: H.guardR }, hizakutsu: { hL: L(H.gedan), hR: H.hip },
     kokutsu: SHUTO_END, kiba: HANDS_HIP, kosa: HANDS_HIP, ashidachi: HANDS_HIP, fudo: { hL: L(H.gedan), hR: H.hip },
     neko: SHUTO_END, sanchin: HANDS_HIP, hangetsu: HANDS_HIP, renoji: { hL: L(H.yoi), hR: H.yoi },
@@ -133,7 +133,7 @@
   const FRONT_STANDS = ['musubi', 'heisoku', 'hachiji', 'kiba', 'sanchin', 'hangetsu', 'kosa'];
   Object.keys(STAND_BASE).forEach((k) => {
     const pose = M(S[STAND_BASE[k]], STAND_HANDS[k], { w: W(k) });
-    const start = k === 'hachiji' ? M(S.heisoku) : YOI;
+    const start = k === 'hachiji' ? M(S.heisoku, STAND_HANDS.heisoku) : YOI;
     D[`st:${k}`] = { keys: [{ t: 0, p: start }, { t: 0.15, p: start }, { t: 0.85, p: pose }], best: 1, ghost: [], dur: 2.2, view: FRONT_STANDS.includes(k) ? 'front3' : 'stand', labels: true };
   });
 
