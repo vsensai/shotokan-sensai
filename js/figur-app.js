@@ -167,11 +167,24 @@
   const stills = new Map();
   const queue = [];
   let busy = false;
+  // Während des Scrollens nichts rechnen: jedes Bild belegt den Grafikchip, den der Browser fürs Scrollen braucht.
+  // Erst nach kurzer Ruhe weiterarbeiten.
+  const CALM = 180;
+  let lastScroll = 0;
+  let waitTimer = 0;
+  window.addEventListener('scroll', () => (lastScroll = performance.now()), { passive: true, capture: true });
   function pump() {
-    if (busy || !queue.length) return;
+    if (busy || !queue.length || waitTimer) return;
+    const wait = lastScroll + CALM - performance.now();
+    if (wait > 0) {
+      waitTimer = setTimeout(() => { waitTimer = 0; pump(); }, wait);
+      return;
+    }
     busy = true;
     requestAnimationFrame(() => {
-      const job = queue.shift();
+      // Sichtbare Figuren zuerst (nach schnellem Scrollen warten sonst längst vorbeigescrollte davor)
+      const vis = queue.findIndex((j) => j.box && onScreen(j.box));
+      const job = queue.splice(vis < 0 ? 0 : vis, 1)[0];
       try {
         const cv = document.createElement('canvas');
         cv.width = job.w;
@@ -192,10 +205,14 @@
       }
     });
   }
-  function still(key, w, h, plain) {
+  const onScreen = (n) => {
+    const r = n.getBoundingClientRect();
+    return r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
+  };
+  function still(key, w, h, plain, box) {
     const id = `${key}|${w}x${h}|${plain ? 1 : 0}`;
     if (!stills.has(id)) {
-      const p = new Promise((resolve, reject) => { queue.push({ key, w, h, plain, resolve, reject }); pump(); });
+      const p = new Promise((resolve, reject) => { queue.push({ key, w, h, plain, box, resolve, reject }); pump(); });
       // Fehlschlag nicht merken: beim nächsten Mal neu versuchen
       p.catch(() => stills.delete(id));
       stills.set(id, p);
@@ -231,7 +248,7 @@
     const img = stage && stage.querySelector('.f3d-img');
     if (!img) return;
     const [w, h] = sizeOf(stage, 2);
-    still(box.dataset.f3d, w, h, box.dataset.plain === '1').then((url) => { img.src = url; box.classList.add('f3d-ready'); }).catch(() => fallback(box));
+    still(box.dataset.f3d, w, h, box.dataset.plain === '1', box).then((url) => { img.src = url; box.classList.add('f3d-ready'); }).catch(() => fallback(box));
   }
   let io = null;
   function watch(root) {

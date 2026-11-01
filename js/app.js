@@ -194,48 +194,63 @@
     finishView();
   }
 
-  // arg: Suchbegriff, mit dem das Lexikon öffnet (z. B. aus der Kata-Ansage)
+  // arg: Begriff, mit dem das Lexikon öffnet (z. B. aus der Kata-Ansage). Bekannter Begriff: seine Kategorie
+  // aufklappen und hinscrollen, sonst danach suchen.
+  // Kategorien zum Aufklappen, immer nur eine offen; zugeklappte bauen keinen Inhalt (weniger Grafiken beim Scrollen).
+  // Bei der Suche eine flache Trefferliste über alle Kategorien.
   function viewLexikon(arg) {
     setNav('lexikon');
     setTitle('Lexikon');
     app.innerHTML = '';
     const search = el('input', { type: 'search', class: 'search', enterkeyhint: 'search', placeholder: 'Suchen, z. B. „Kokutsu“ oder „Ferse“', 'aria-label': 'Lexikon durchsuchen' });
-    let cat = '';
-    const chips = el(
-      'div',
-      { class: 'chips' },
-      [{ id: '', title: 'Alle' }].concat(SK.glossaryCats).map((c) =>
-        el('button', {
-          class: `chip ${c.id === cat ? 'placed' : ''}`,
-          text: c.title,
-          onclick: (e) => {
-            cat = c.id;
-            chips.querySelectorAll('.chip').forEach((b) => b.classList.toggle('placed', b === e.currentTarget));
-            filter();
-          },
-        })
-      )
-    );
-    const list = el('div');
-    list.innerHTML = SK.gfxHint + SK.glossaryHtml(SK.glossary);
-    const count = el('p', { class: 'muted small' });
     // Bindestriche, Leerzeichen, Groß-/Kleinschreibung und Umlaute ignorieren: „mae geri“ findet „Mae-geri“.
     const norm = (s) => s.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
-    list.querySelectorAll('.lex-card').forEach((c) => {
-      const n = norm(c.dataset.text);
-      c.dataset.words = n;
-      c.dataset.compact = n.replace(/ /g, '');
+    const index = SK.glossary.map((e) => {
+      const words = norm(`${e.t} ${e.de}`);
+      return { e, words, compact: words.replace(/ /g, '') };
     });
+    const cats = SK.glossaryCats.map((c) => {
+      const items = SK.glossary.filter((e) => e.cat === c.id);
+      const body = el('div', { class: 'lex-cat-body' });
+      const det = el(
+        'details',
+        { class: 'lex-cat', name: 'lexikon', 'data-cat': c.id },
+        el('summary', {}, el('span', { text: c.title }), el('span', { class: 'lex-cat-n', text: String(items.length) })),
+        body
+      );
+      det.addEventListener('toggle', () => {
+        if (!det.open) {
+          body.innerHTML = '';
+          return;
+        }
+        // Ältere Browser kennen details[name] nicht: die anderen selbst zuklappen
+        cats.forEach((o) => o.det !== det && o.det.open && (o.det.open = false));
+        if (!body.firstChild) body.innerHTML = SK.glossaryHtml(items);
+        // Schließt sich eine Kategorie weiter oben, rutscht der Inhalt – die geöffnete an den Anfang holen
+        requestAnimationFrame(() => {
+          if (det.getBoundingClientRect().top < 0 || det.dataset.jump) det.scrollIntoView({ block: 'start' });
+        });
+      });
+      return { c, det, items };
+    });
+    const catList = el('div', { class: 'lex-cats' }, cats.map((x) => x.det));
+    const results = el('div', { hidden: true });
+    const count = el('p', { class: 'muted small', hidden: true });
+    let lastQuery = null;
     function filter() {
       const tokens = norm(search.value).split(' ').filter(Boolean);
-      let shown = 0;
-      list.querySelectorAll('.lex-card').forEach((c) => {
-        const hit = !tokens.length || c.dataset.compact.includes(tokens.join('')) || tokens.every((t) => c.dataset.words.includes(t));
-        const ok = (!cat || c.dataset.cat === cat) && hit;
-        c.hidden = !ok;
-        if (ok) shown++;
-      });
-      count.textContent = shown === 1 ? '1 Eintrag' : `${shown} Einträge`;
+      const q = tokens.join(' ');
+      if (q === lastQuery) return;
+      lastQuery = q;
+      catList.hidden = !!tokens.length;
+      results.hidden = count.hidden = !tokens.length;
+      if (!tokens.length) {
+        results.innerHTML = '';
+        return;
+      }
+      const hits = index.filter((x) => x.compact.includes(tokens.join('')) || tokens.every((t) => x.words.includes(t))).map((x) => x.e);
+      count.textContent = hits.length === 1 ? '1 Eintrag' : `${hits.length} Einträge`;
+      results.innerHTML = hits.length ? SK.glossaryHtml(hits) : '';
     }
     search.addEventListener('input', filter);
     // Handy-Tastaturen melden die Lupe zuverlässig nur als Formular-Submit, nicht als keydown.
@@ -245,19 +260,37 @@
       filter();
       search.blur();
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
-      count.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!count.hidden) count.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+    const hint = el('div', { html: SK.gfxHint });
     app.append(
       el('h1', { text: 'Lexikon' }),
       el('p', { class: 'small' }, el('a', { href: '#/kompakt', text: 'Kompakt-Übersicht (Spickzettel je Gürtel, druckbar) ›' })),
       form,
-      chips,
+      hint.firstChild,
       count,
-      list
+      results,
+      catList
     );
-    if (arg) search.value = arg;
-    filter();
     finishView();
+    if (!arg) return;
+    const key = norm(arg);
+    const target = cats.find((x) => x.items.some((e) => e.t.split(' / ').some((n) => norm(n) === key)));
+    if (!target) {
+      search.value = arg;
+      filter();
+      return;
+    }
+    target.det.dataset.jump = '1';
+    target.det.open = true;
+    // toggle feuert asynchron: danach zur Karte scrollen und sie kurz hervorheben
+    target.det.addEventListener('toggle', () => requestAnimationFrame(() => {
+      delete target.det.dataset.jump;
+      const card = [...target.det.querySelectorAll('.lex-card')].find((c) => c.querySelector('h4').textContent.split(' / ').some((n) => norm(n) === key));
+      if (!card) return;
+      card.scrollIntoView({ block: 'center' });
+      card.classList.add('lex-hit');
+    }), { once: true });
   }
 
   // ---------- Kompakt-Übersicht (Spickzettel) ----------

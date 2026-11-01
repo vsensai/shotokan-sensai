@@ -824,16 +824,62 @@ figure.gfx svg {
   margin: 0.4rem 0 0.8rem;
 }
 
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 0.6rem;
+/* Lexikon: Kategorien zum Aufklappen, immer nur eine offen */
+.lex-cats {
+  margin: 0.8rem 0;
 }
 
-.chips .chip {
-  padding: 0.35rem 0.7rem;
-  font-size: 0.85rem;
+.lex-cat {
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 4rem;
+}
+
+.lex-cat > summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  padding: 0.5rem 0.2rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.lex-cat > summary::-webkit-details-marker {
+  display: none;
+}
+
+.lex-cat > summary::after {
+  content: "›";
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 1.3rem;
+  transition: transform 0.15s;
+}
+
+.lex-cat[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.lex-cat[open] > summary {
+  color: var(--red);
+}
+
+.lex-cat-n {
+  min-width: 1.8rem;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--ink);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.lex-card.lex-hit {
+  outline: 3px solid var(--red);
+  outline-offset: 2px;
 }
 
 .lex-grid {
