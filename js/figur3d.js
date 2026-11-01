@@ -379,9 +379,9 @@ vec3 baseCol(float m, vec3 p, out float kind){
     kind = 1.0; return skin;
   }
   if (m > 0.5 && m < 1.5) {
-    // Augen: zwei dunkle Punkte vorn am Kopf (Gliederpuppe, sonst ohne Gesicht)
-    vec3 q = p - uHead; float hy = dot(q, uUp), hz = dot(q, uHFwd), hx = dot(q, normalize(cross(uUp, uHFwd)));
-    if (hz > 0.04 && length(q) < 0.12 && length(vec2(abs(hx) - 0.028, hy - 0.004)) < 0.0072 && uStyle != 2) { kind = 2.0; return vec3(0.1, 0.08, 0.07); }
+    vec3 q = p - uHead; float hy = dot(q, uUp), hz = dot(q, uHFwd);
+    // Haare: Haaransatz vorn hoch über der Stirn, hinten tief im Nacken
+    if (length(q) < 0.13 && hy > mix(-0.04, 0.052, smoothstep(-0.07, 0.07, hz)) && uStyle != 2) { kind = 3.0; return mix(skin, vec3(0.2, 0.16, 0.13), 0.6); }
     kind = 1.0; return skin;
   }
   if (m > 1.5 && m < 2.5) { kind = 2.0; return ink; }
