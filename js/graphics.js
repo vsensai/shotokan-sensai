@@ -77,7 +77,7 @@
       K,
       dur,
       impact: kt[1 + (impact == null ? K - 1 : impact)],
-      attr: `dur="${dur}s" repeatCount="indefinite" keyTimes="${times.join(';')}" calcMode="linear"`,
+      attr: `dur="${dur}s" fill="freeze" keyTimes="${times.join(';')}" calcMode="linear"`,
       // Schlüsselbilder → Werte je Zeitpunkt; fn = eigene Überblendung (z. B. Gelenkwinkel)
       expand: (fr, fn) => {
         const f = fr.slice();
@@ -88,11 +88,11 @@
   }
   const animEl = (attr, vals, tl) => `<animate attributeName="${attr}" values="${vals.join(';')}" ${tl.attr}/>`;
   const animTf = (type, vals, tl) => `<animateTransform attributeName="transform" type="${type}" values="${vals.join(';')}" ${tl.attr}/>`;
-  const fadeLoop = (tl) => `<animate attributeName="opacity" values="0;1;1;0" keyTimes="0;.04;.95;1" dur="${tl.dur}s" repeatCount="indefinite"/>`;
+  const fadeLoop = (tl) => `<animate attributeName="opacity" values="0;1" keyTimes="0;.04" dur="${tl.dur}s" fill="freeze"/>`;
   function flash(x, y, tl) {
     const t = tl.impact;
     const kt = [0, Math.max(0.01, t - 0.01), t, Math.min(0.97, t + 0.1), Math.min(0.98, t + 0.15), 1].map((v) => r1(v * 1000) / 1000);
-    return `<circle cx="${x}" cy="${y}" r="7" fill="${HL}" stroke="#fff" stroke-width="2" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="${kt.join(';')}" dur="${tl.dur}s" repeatCount="indefinite"/></circle>`;
+    return `<circle cx="${x}" cy="${y}" r="7" fill="${HL}" stroke="#fff" stroke-width="2" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="${kt.join(';')}" dur="${tl.dur}s" fill="freeze"/></circle>`;
   }
   function withMode(m, fn) {
     const prev = mode.anim;
@@ -681,8 +681,8 @@
     mode.tl = tl;
         const draw = (p) => limb(fr.get(p), p, tl, pairs.has(p) || p.act ? 'act' : '');
     const pick = (f) => live.filter(f).map(draw).join('');
-    const ghosts = mode.anim ? '' : ps.filter((p) => p.ghost).map((p) => `<g opacity=".7">${limb([{ p: p.p, foot: p.foot }], p, null, 'ghost')}</g>`).join('');
-    return pick((p) => p.far) + pick((p) => p.under && !p.far) + body(s) + pick((p) => !p.far && !p.under) + ghosts;
+    // Ausgangsstellungen werden nicht als Schattenfigur gezeichnet, sie dienen nur der Animation
+    return pick((p) => p.far) + pick((p) => p.under && !p.far) + body(s) + pick((p) => !p.far && !p.under);
   }
 
   const DEFS = `<defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="4" markerHeight="4" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${ARR}"/></marker></defs>`;

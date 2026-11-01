@@ -1,5 +1,5 @@
 /* 3D-Figuren in der App: ruhende Kernbilder (einmal gerechnet, dann zwischengespeichert),
-   per Finger drehbar, ▶ Bewegung, Phasenbild. Ohne WebGL 2 bleiben die bisherigen SVG-Grafiken. */
+   per Finger drehbar, ▶ Bewegung (einmal abspielen, Endstellung halten). Ohne WebGL 2 bleiben die bisherigen SVG-Grafiken. */
 (function () {
   'use strict';
   const E = window.Figur3D;
@@ -67,21 +67,12 @@
       ctx.translate(w, 0);
       ctx.scale(-1, 1);
     }
-    let ghosts = [];
-    if (st.phase) ghosts = [0.12, 0.3, 0.48, 0.66, 0.84].map((x) => e.t0 + x * (e.t1 - e.t0)).filter((x) => Math.abs(x - t) > 0.05);
-    else if (!st.playing && st.ghost !== false) ghosts = (e.d.ghost || []).filter((x) => Math.abs(x - t) > 0.05);
     const PP = e.partner ? e.partner(t) : null;
     let C;
-    if (!ghosts.length && !PP) C = E.draw(ctx, w, h, P, cam, { mode: 0 });
+    if (!PP) C = E.draw(ctx, w, h, P, cam, { mode: 0 });
     else {
       C = E.draw(ctx, w, h, P, cam, { mode: 1 });
-      ghosts.forEach((x) => {
-        ctx.globalAlpha = st.phase ? 0.24 : 0.3;
-        E.draw(ctx, w, h, e.pose(x), cam, { mode: 2 });
-      });
-      ctx.globalAlpha = 1;
-      const figs = [{ P, tint: false, z: P.pelvis }];
-      if (PP) figs.push({ P: PP, tint: true, z: PP.pelvis });
+      const figs = [{ P, tint: false, z: P.pelvis }, { P: PP, tint: true, z: PP.pelvis }];
       const camPos = C.ro;
       figs.sort((a, b) => Math.hypot(b.z[0] - camPos[0], b.z[2] - camPos[2]) - Math.hypot(a.z[0] - camPos[0], a.z[2] - camPos[2]));
       figs.forEach((f) => E.draw(ctx, w, h, f.P, cam, { mode: 2, tint: f.tint }));
@@ -226,7 +217,7 @@
     const opt = o || {};
     const e = D[split(key).id];
     const anim = e && !e.still;
-    const tools = opt.tools === false ? '' : `<div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button><button type="button" class="gfx-btn" data-act="f3d-phase" aria-pressed="false">Phasenbild</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-home" hidden>↺ Kernbild</button></div>`;
+    const tools = opt.tools === false ? '' : `<div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-home" hidden>↺ Kernbild</button></div>`;
     return `<div class="f3d${opt.cls ? ` ${opt.cls}` : ''}" data-f3d="${esc(key)}"${opt.plain ? ' data-plain="1"' : ''}><div class="f3d-stage"><img class="f3d-img" alt="" draggable="false"><span class="f3d-badge" aria-hidden="true">3D ↻ ⤢</span></div>${tools}</div>`;
   }
   const dpr = (cap) => Math.min(window.devicePixelRatio || 1, cap);
@@ -296,10 +287,7 @@
     box.classList.remove('f3d-live');
     box.querySelectorAll('[data-act^="f3d-"]').forEach((b) => {
       if (b.dataset.act === 'f3d-home') b.hidden = true;
-      else {
-        b.setAttribute('aria-pressed', 'false');
-        if (b.dataset.act === 'f3d-play') b.textContent = '▶ Bewegung';
-      }
+      else b.setAttribute('aria-pressed', 'false');
     });
     live = null;
   }
@@ -332,7 +320,8 @@
       const L = live;
       if (L.st.playing) {
         L.st.t += dt / (L.e.d.dur || 1.6);
-        if (L.st.t > L.e.t1 + 0.35) L.st.t = L.e.t0;
+        // einmal abspielen, dann in der Endstellung stehen bleiben
+        if (L.st.t >= L.e.t1) { L.st.t = L.e.t1; L.st.playing = false; L.box.querySelector('[data-act="f3d-play"]')?.setAttribute('aria-pressed', 'false'); }
         L.dirty = true;
       }
       if (L.dirty) {
@@ -414,15 +403,10 @@
       const L = startLive(box);
       if (act === 'f3d-reset') L.st.cam = camCopy(L.e.cam);
       if (act === 'f3d-play') {
-        L.st.playing = !L.st.playing;
-        if (L.st.playing) L.st.t = L.e.t0;
-        btn.setAttribute('aria-pressed', String(L.st.playing));
-        btn.textContent = L.st.playing ? '■ Standbild' : '▶ Bewegung';
-        if (!L.st.playing) L.st.t = L.e.d.best == null ? 1 : L.e.d.best;
-      }
-      if (act === 'f3d-phase') {
-        L.st.phase = !L.st.phase;
-        btn.setAttribute('aria-pressed', String(L.st.phase));
+        // jedes Antippen spielt die Bewegung einmal von vorn
+        L.st.playing = true;
+        L.st.t = L.e.t0;
+        btn.setAttribute('aria-pressed', 'true');
       }
       kick();
     });
@@ -475,7 +459,7 @@
     const e = entry(key);
     const anim = !e.d.still;
     // data-h: die kleine Bildwarteschlange soll diese Figur nicht übernehmen
-    body.innerHTML = `<div class="f3d f3d-big f3d-ready" data-f3d="${esc(key)}" data-h="1"${plain ? ' data-plain="1"' : ''}><div class="f3d-stage"></div><div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button><button type="button" class="gfx-btn" data-act="f3d-phase" aria-pressed="false">Phasenbild</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-reset">↺ Zurücksetzen</button></div></div>`;
+    body.innerHTML = `<div class="f3d f3d-big f3d-ready" data-f3d="${esc(key)}" data-h="1"${plain ? ' data-plain="1"' : ''}><div class="f3d-stage"></div><div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-reset">↺ Zurücksetzen</button></div></div>`;
     if (!d.open) {
       d.showModal();
       history.pushState({ f3dBig: 1 }, '', location.href);

@@ -1,8 +1,8 @@
 /* Posen der 3D-Figuren: Schlüsselstellungen je Stand, Technik und Begriff.
    Koordinaten in Metern. Welt: x = linke Körperseite, y = oben, z = vorne.
    Hände in Brustkoordinaten (x links, y oben, z vorne, Ursprung Brustmitte; Schulter bei x ±0,185).
-   Jeder Eintrag: keys (Schlüsselbilder mit Zeit 0…1), best (Zeit des Kernbilds), ghost (Zeiten der
-   blassen Ausgangsstellung), view (Blickwinkel des Kernbilds), eff (Körperpunkt für die Bahn),
+   Jeder Eintrag: keys (Schlüsselbilder mit Zeit 0…1), best (Zeit des Kernbilds),
+   view (Blickwinkel des Kernbilds), eff (Körperpunkt für die Bahn),
    hit (Trefferpunkt), marks (Zusatzzeichen), partner (zweite Figur). */
 (function () {
   'use strict';
@@ -108,17 +108,17 @@
 
   /* ---------- Bausteine für Abläufe ---------- */
   // Technik: Ausgangsstellung kurz halten, dann schnell in die Endstellung (Kime)
-  const T = (from, to, o) => M({ keys: [{ t: 0, p: from }, { t: 0.22, p: from }, { t: 0.62, p: to, e: 'kime' }], best: 1, ghost: [0], dur: 1.4 }, o);
+  const T = (from, to, o) => M({ keys: [{ t: 0, p: from }, { t: 0.22, p: from }, { t: 0.62, p: to, e: 'kime' }], best: 1, dur: 1.4 }, o);
   // Mehrere Stellungen nacheinander
   const SEQ = (poses, o) => {
     const n = poses.length;
     const keys = [{ t: 0, p: poses[0] }, { t: 0.15, p: poses[0] }];
     for (let i = 1; i < n; i++) keys.push({ t: 0.15 + (0.65 * i) / (n - 1), p: poses[i], e: 'kime' });
-    return M({ keys, best: 1, ghost: [0], dur: 1.2 + 0.5 * n }, o);
+    return M({ keys, best: 1, dur: 1.2 + 0.5 * n }, o);
   };
   // Fußtritt: ausholen, treffen, zurück
-  const K = (base, chamber, ext, o) => M({ keys: [{ t: 0, p: base }, { t: 0.1, p: base }, { t: 0.34, p: chamber }, { t: 0.5, p: ext, e: 'kime' }, { t: 0.66, p: chamber }, { t: 0.9, p: base }], best: 0.5, ghost: [0.34], dur: 2 }, o);
-  const STILL = (pose, o) => M({ keys: [{ t: 0, p: pose }], best: 0, ghost: [], still: true }, o);
+  const K = (base, chamber, ext, o) => M({ keys: [{ t: 0, p: base }, { t: 0.1, p: base }, { t: 0.34, p: chamber }, { t: 0.5, p: ext, e: 'kime' }, { t: 0.66, p: chamber }, { t: 0.9, p: base }], best: 0.5, dur: 2 }, o);
+  const STILL = (pose, o) => M({ keys: [{ t: 0, p: pose }], best: 0, still: true }, o);
   const hit = (at, text) => ({ hit: { at, text } });
 
   const D = {};
@@ -136,7 +136,7 @@
   Object.keys(STAND_BASE).forEach((k) => {
     const pose = M(S[STAND_BASE[k]], STAND_HANDS[k], { w: W(k) });
     const start = k === 'hachiji' ? M(S.heisoku, STAND_HANDS.heisoku) : YOI;
-    D[`st:${k}`] = { keys: [{ t: 0, p: start }, { t: 0.15, p: start }, { t: 0.85, p: pose }], best: 1, ghost: [], dur: 2.2, view: FRONT_STANDS.includes(k) ? 'front3' : 'stand', labels: true };
+    D[`st:${k}`] = { keys: [{ t: 0, p: start }, { t: 0.15, p: start }, { t: 0.85, p: pose }], best: 1, dur: 2.2, view: FRONT_STANDS.includes(k) ? 'front3' : 'stand', labels: true };
   });
 
   /* ---------- Fauststöße ---------- */
@@ -144,20 +144,20 @@
   D['mv:gyaku-zuki'] = T(ZK_G, ZKS_PUNCH, M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   const OI_MID = { pelvis: [0, 0.71, 0.6], yaw: -18, L: { x: 0.12, z: 0.62, yaw: 10 }, R: { x: -0.01, z: 0.58, y: 0.11, yaw: 0 }, hL: L(H.gedan), hR: H.hip, w: [1, 0] };
   const OI_END = { pelvis: [0, 0.7, 1.22], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 32 }, R: { x: -0.13, z: 1.74, yaw: 4 }, hL: L(H.hip), hR: H.chudan, w: [0.3, 0.7] };
-  D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.12, p: ZK_G }, { t: 0.5, p: OI_MID }, { t: 0.82, p: OI_END, e: 'kime' }], best: 1, ghost: [0], dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
+  D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.12, p: ZK_G }, { t: 0.5, p: OI_MID }, { t: 0.82, p: OI_END, e: 'kime' }], best: 1, dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
   D['tc:choku-zuki'] = T(M(YOI, { hL: L(H.chudan), hR: H.hip }), M(YOI, { hL: L(H.hip), hR: H.chudan }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   D['tc:kizami-zuki'] = T(ZK_KAMAE, M(S.zk, { pelvis: [0, 0.71, 0.16], hL: L(H.jodan), hR: H.guardR }), M(hit('fistL', 'Faust'), { eff: 'fistL', view: 'side3' }));
   D['tc:tate-zuki'] = T(ZK_G, M(ZKS_PUNCH), M(hit('fistR', 'Faust senkrecht'), { eff: 'fistR', view: 'side3' }));
-  D['tc:sanbon-zuki'] = SEQ([MZK_G, M(MZK, { hL: L(H.hip), hR: H.jodan }), M(mirror(S.zks), { hL: L(H.chudan), hR: H.hip }), M(MZK, { hL: L(H.hip), hR: H.chudan })], M(hit('fistR', 'Faust'), { eff: 'fistR', ghost: [0.37, 0.58], view: 'side3' }));
-  D['tc:ren-zuki'] = SEQ([ZK_KAMAE, M(S.zk, { hL: L(H.jodan), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: H.chudan })], M(hit('fistR', 'Faust'), { eff: 'fistR', ghost: [0.47], view: 'side3' }));
+  D['tc:sanbon-zuki'] = SEQ([MZK_G, M(MZK, { hL: L(H.hip), hR: H.jodan }), M(mirror(S.zks), { hL: L(H.chudan), hR: H.hip }), M(MZK, { hL: L(H.hip), hR: H.chudan })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
+  D['tc:ren-zuki'] = SEQ([ZK_KAMAE, M(S.zk, { hL: L(H.jodan), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: H.chudan })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:morote-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hL: [0.07, -0.13, 0.52], hR: [-0.07, -0.13, 0.52] }), M(hit('fistR', 'Fäuste'), { eff: 'fistR', view: 'side3' }));
   D['tc:kagi-zuki'] = T(KB, M(KB, { hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3], look: 90 }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front' }));
   D['tc:ura-zuki'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.03, -0.26, 0.4], eR: [-0.15, -0.7, 0.05] }), M(hit('fistR', 'Handrücken unten'), { eff: 'fistR', view: 'side3' }));
-  D['tc:age-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.06, -0.3, 0.35] }), M(S.zks, { hL: L(H.hip), hR: [0.0, 0.07, 0.45] })], M(hit('fistR', 'Faust'), { eff: 'fistR', ghost: [0], view: 'side3' }));
+  D['tc:age-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.06, -0.3, 0.35] }), M(S.zks, { hL: L(H.hip), hR: [0.0, 0.07, 0.45] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:yama-zuki'] = T(M(S.zk, HANDS_HIP, { hL: [0.28, -0.42, 0.05], hR: [-0.18, -0.4, -0.05] }), M(S.zk, { lean: 14, hR: [0.0, 0.08, 0.5], hL: [0.04, -0.34, 0.42], eL: [0.4, -0.6, 0.1] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
   D['tc:awase-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hR: [0.0, 0.04, 0.5], hL: [0.04, -0.26, 0.38], eL: [0.25, -0.7, 0.05] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
   D['tc:otoshi-zuki'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.25, 0.35, 0.15] }), M(S.zks, { lean: 8, hL: L(H.hip), hR: [-0.05, -0.42, 0.45] }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
-  D['tc:mawashi-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.45, -0.1, 0.22], eR: [-1, 0, 0] }), M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.06, 0.0, 0.4], eR: [-0.8, 0.1, 0.2] })], M(hit('fistR', 'Faust'), { eff: 'fistR', ghost: [0], view: 'front3' }));
+  D['tc:mawashi-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.45, -0.1, 0.22], eR: [-1, 0, 0] }), M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.06, 0.0, 0.4], eR: [-0.8, 0.1, 0.2] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   D['tc:nukite'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [0.0, -0.13, 0.48], oR: 1, pR: [1, 0, 0] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
 
   /* ---------- Schläge ---------- */
@@ -192,7 +192,7 @@
   D['tc:kake-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [0.1, -0.12, 0.3], oR: 1, pR: [1, 0, 0] }), M(S.kk, { hL: L(H.hip), hR: [-0.12, 0.02, 0.42], oR: 1, pR: [-0.6, 0, 0.6], fR: [0, 1, 0.5] }), M(hit('wristR', 'Handgelenk'), { eff: 'wristR', view: 'front3' }));
   D['tc:sukui-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [-0.32, -0.55, 0.2], oR: 1, pR: [0, 1, 0] }), M(S.kk, { hL: L(H.hip), hR: [-0.04, -0.3, 0.42], oR: 1, pR: [0, 1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'side3' }));
   D['tc:haiwan-uke'] = T(M(S.kk, HANDS_HIP), M(S.kk, { hL: L(H.hip), hR: [-0.42, 0.24, 0.16], eR: [-0.6, -0.2, 0.2] }), M(hit('elbowR', 'Unterarm-Rückseite'), { eff: 'fistR', view: 'front3' }));
-  D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, ghost: [0.75], dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
+  D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
   D['tc:tate-shuto-uke'] = T(M(S.kk, { hL: [-0.15, 0.0, 0.08], hR: H.hip }), M(S.kk, { hR: H.hip, hL: [0.07, -0.02, 0.5], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] }), M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'side3' }));
   D['tc:teisho-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.38, -0.15, 0.32], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.5] }), M(S.zks, { hL: L(H.hip), hR: [0.05, -0.15, 0.36], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.6] }), M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front3' }));
   D['tc:uchiotoshi'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.15, 0.35, 0.15] }), M(S.zks, { hL: L(H.hip), hR: [-0.02, -0.25, 0.36], eR: [-0.8, -0.2, 0.3] }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
@@ -205,7 +205,7 @@
   D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, M(CHAMBER, { lean: -12, R: { x: -0.08, z: 1.13, y: 0.95, pitch: 62, kp: [0, 1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   D['tc:sonoba-geri'] = K(YOI, M(YOI, { pelvis: [0, 0.86, 0.02], L: { x: 0.16, z: 0 }, R: { x: -0.1, z: 0.3, y: 0.5, yaw: 0, pitch: -55, kp: [0, 0.5, 1] }, w: [1, 0] }), M(YOI, { lean: -8, pelvis: [0, 0.86, 0.02], R: { x: -0.1, z: 0.92, y: 0.88, yaw: 0, pitch: 8, kp: [0, 1, 0.3] }, w: [1, 0] }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   D['tc:kizami-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.82, 0.0], L: { x: 0.1, z: 0.36, y: 0.5, pitch: -55, kp: [0, 0.5, 1] }, R: { z: -0.4 }, w: [0, 1] }), M(ZK_KAMAE, { pelvis: [0, 0.82, -0.02], lean: -10, L: { x: 0.1, z: 0.88, y: 0.95, pitch: 8, kp: [0, 1, 0.3] }, R: { z: -0.4 }, w: [0, 1] }), M(hit('toeL', 'Fußballen'), { eff: 'toeL', view: 'side' }));
-  D['tc:ren-geri'] = M(D['mv:mae-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.08, p: KAMAE_K }, { t: 0.24, p: CHAMBER }, { t: 0.36, p: M(CHAMBER, { R: { z: 1.0, y: 0.6, pitch: 0, kp: [0, 1, 0.3] } }), e: 'kime' }, { t: 0.5, p: CHAMBER }, { t: 0.64, p: M(CHAMBER, { lean: -10, R: { z: 1.0, y: 1.08, pitch: 15, kp: [0, 1, 0.3] } }), e: 'kime' }, { t: 0.78, p: CHAMBER }, { t: 0.95, p: KAMAE_K }], best: 0.64, ghost: [0.36] });
+  D['tc:ren-geri'] = M(D['mv:mae-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.08, p: KAMAE_K }, { t: 0.24, p: CHAMBER }, { t: 0.36, p: M(CHAMBER, { R: { z: 1.0, y: 0.6, pitch: 0, kp: [0, 1, 0.3] } }), e: 'kime' }, { t: 0.5, p: CHAMBER }, { t: 0.64, p: M(CHAMBER, { lean: -10, R: { z: 1.0, y: 1.08, pitch: 15, kp: [0, 1, 0.3] } }), e: 'kime' }, { t: 0.78, p: CHAMBER }, { t: 0.95, p: KAMAE_K }], best: 0.64 });
   // Seitwärts aus Kiba-dachi: Fußkante nach rechts, Blick zur Seite
   const KB_K = M(KB, { look: -90 });
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
@@ -215,21 +215,21 @@
   D['mv:mawashi-geri'] = K(KAMAE_K, MW_CH, M(MW_CH, { yaw: 55, R: { x: 0.12, z: 1.0, y: 1.05, yaw: 75, pitch: 5, kp: [-0.2, 1, 0.5] } }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'front3' }));
   const US_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.2], lean: 22, look: 160, R: { x: -0.08, z: 0.32, y: 0.45, yaw: 0, pitch: -70, kp: [0, 0.4, 1] }, w: [1, 0] });
   D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 180, pitch: -70, kp: [0, -1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
-  D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: M(S.zk, { hL: [0.05, -0.05, 0.45], oL: 1, pL: [0, 0, -1], hR: H.hip }) }, { t: 0.15, p: M(S.zk, { hL: [0.05, -0.05, 0.45], oL: 1, pL: [0, 0, -1], hR: H.hip }) }, { t: 0.42, p: M(S.zk, { pelvis: [0, 0.82, 0.25], hL: [0.05, -0.05, 0.45], oL: 1, pL: [-1, 0, 0], hR: H.hip, R: { x: -0.5, z: 0.5, y: 0.72, yaw: 10, pitch: 10, kp: [-0.5, 1, 0.5] }, w: [1, 0] }) }, { t: 0.62, p: M(S.zk, { pelvis: [0, 0.82, 0.25], hL: [0.05, -0.05, 0.45], oL: 1, pL: [-1, 0, 0], hR: H.hip, R: { x: 0.08, z: 0.72, y: 0.95, yaw: 30, pitch: 15, sole: [1, 0, 0], kp: [0, 1, 0.3] }, w: [1, 0] }), e: 'kime' }], best: 1, ghost: [0], dur: 1.8, eff: 'toeR', view: 'front3' }, hit('heelR', 'Fußsohle'));
-  D['tc:ura-mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(Y_CH, { look: 0 }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], best: 0.72, ghost: [0.56], dur: 1.8, eff: 'heelR', view: 'front3' }, hit('heelR', 'Sohle / Ferse'));
-  D['tc:ushiro-mawashi-geri'] = M(D['tc:ura-mawashi-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.32, p: M(KAMAE_K, { yaw: -150, look: -170, L: { yaw: -140 }, R: { x: -0.4, z: -0.2, y: 0.4, yaw: -150, pitch: -40, kp: [0, 0.3, -1] }, w: [1, 0] }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], ghost: [0.32], marks: ['turn'] });
+  D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: M(S.zk, { hL: [0.05, -0.05, 0.45], oL: 1, pL: [0, 0, -1], hR: H.hip }) }, { t: 0.15, p: M(S.zk, { hL: [0.05, -0.05, 0.45], oL: 1, pL: [0, 0, -1], hR: H.hip }) }, { t: 0.42, p: M(S.zk, { pelvis: [0, 0.82, 0.25], hL: [0.05, -0.05, 0.45], oL: 1, pL: [-1, 0, 0], hR: H.hip, R: { x: -0.5, z: 0.5, y: 0.72, yaw: 10, pitch: 10, kp: [-0.5, 1, 0.5] }, w: [1, 0] }) }, { t: 0.62, p: M(S.zk, { pelvis: [0, 0.82, 0.25], hL: [0.05, -0.05, 0.45], oL: 1, pL: [-1, 0, 0], hR: H.hip, R: { x: 0.08, z: 0.72, y: 0.95, yaw: 30, pitch: 15, sole: [1, 0, 0], kp: [0, 1, 0.3] }, w: [1, 0] }), e: 'kime' }], best: 1, dur: 1.8, eff: 'toeR', view: 'front3' }, hit('heelR', 'Fußsohle'));
+  D['tc:ura-mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(Y_CH, { look: 0 }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], best: 0.72, dur: 1.8, eff: 'heelR', view: 'front3' }, hit('heelR', 'Sohle / Ferse'));
+  D['tc:ushiro-mawashi-geri'] = M(D['tc:ura-mawashi-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.32, p: M(KAMAE_K, { yaw: -150, look: -170, L: { yaw: -140 }, R: { x: -0.4, z: -0.2, y: 0.4, yaw: -150, pitch: -40, kp: [0, 0.3, -1] }, w: [1, 0] }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], marks: ['turn'] });
   D['tc:hiza-geri'] = K(M(S.zk, { hL: [0.06, 0.02, 0.45], hR: [-0.06, 0.02, 0.45] }), M(S.zk, { pelvis: [0, 0.84, 0.25], hL: [0.06, -0.15, 0.4], hR: [-0.06, -0.15, 0.4], R: { x: -0.08, z: 0.2, y: 0.45, pitch: -70, kp: [0, 0.6, 1] }, w: [1, 0] }), M(S.zk, { pelvis: [0, 0.86, 0.28], lean: 6, hL: [0.08, -0.38, 0.38], hR: [-0.08, -0.38, 0.38], R: { x: -0.08, z: 0.36, y: 0.5, pitch: -70, kp: [0, 1, 0.8] }, w: [1, 0] }), M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'side3' }));
   D['tc:mawashi-hiza-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.84, 0.22], yaw: 10, R: { x: -0.5, z: 0.0, y: 0.5, yaw: -40, pitch: -40, kp: [-1, 0.6, 0] }, w: [1, 0] }), M(ZK_KAMAE, { pelvis: [0, 0.86, 0.26], yaw: 45, R: { x: -0.08, z: 0.22, y: 0.55, yaw: 20, pitch: -50, kp: [0.3, 0.6, 1] }, w: [1, 0] }), M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'front3' }));
   D['tc:fumikomi'] = K(KAMAE_K, M(CHAMBER, { R: { y: 0.55, z: 0.3 } }), M(CHAMBER, { pelvis: [0, 0.74, 0.32], R: { x: -0.1, z: 0.66, y: 0.1, yaw: -60, pitch: 0, kp: [0, 0.3, 1] } }), M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'side3' }));
   D['tc:namigaeshi'] = K(KB, M(KB, { pelvis: [0.08, 0.72, 0], R: { x: -0.2, z: 0.12, y: 0.32, yaw: 30, pitch: -20, sole: [1, 0.3, 0], kp: [-1, 0.4, 0.5] }, w: [1, 0] }), M(KB, { pelvis: [0.1, 0.74, 0], R: { x: -0.04, z: 0.18, y: 0.42, yaw: 40, pitch: -10, sole: [1, 0.5, 0], kp: [-1, 0.5, 0.6] }, w: [1, 0] }), M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'front' }));
-  D['tc:nidan-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(KAMAE_K, { pelvis: [0, 1.15, 0.3], L: { x: 0.1, z: 0.62, y: 0.68, pitch: 10, kp: [0, 1, 0.5] }, R: { x: -0.08, z: 0.1, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, w: [0, 0] }) }, { t: 0.58, p: M(KAMAE_K, { pelvis: [0, 1.2, 0.32], lean: -8, L: { x: 0.1, z: 0.3, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, R: { x: -0.08, z: 1.05, y: 1.45, pitch: 15, kp: [0, 1, 0.3] }, w: [0, 0] }), e: 'kime' }], best: 1, ghost: [0.36], dur: 1.8, eff: 'toeR', view: 'side' }, hit('toeR', 'zweiter Tritt'));
+  D['tc:nidan-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(KAMAE_K, { pelvis: [0, 1.15, 0.3], L: { x: 0.1, z: 0.62, y: 0.68, pitch: 10, kp: [0, 1, 0.5] }, R: { x: -0.08, z: 0.1, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, w: [0, 0] }) }, { t: 0.58, p: M(KAMAE_K, { pelvis: [0, 1.2, 0.32], lean: -8, L: { x: 0.1, z: 0.3, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, R: { x: -0.08, z: 1.05, y: 1.45, pitch: 15, kp: [0, 1, 0.3] }, w: [0, 0] }), e: 'kime' }], best: 1, dur: 1.8, eff: 'toeR', view: 'side' }, hit('toeR', 'zweiter Tritt'));
 
   /* ---------- Fußfeger ---------- */
   const SWEEP_END = M(KAMAE_K, { pelvis: [0, 0.76, 0.24], yaw: 10, R: { x: 0.2, z: 0.56, y: 0.12, yaw: 70, pitch: 5, sole: [1, 0.2, 0.3], kp: [0.3, 0.3, 1] }, w: [1, 0] });
   D['tc:ashi-barai'] = T(KAMAE_K, SWEEP_END, { eff: 'heelR', view: 'front3' });
   D['tc:teisoku-barai'] = T(KAMAE_K, SWEEP_END, M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'front3' }));
-  D['tc:haisoku-barai'] = SEQ([ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.76, 0.02], R: { z: -0.46 }, L: { x: 0.32, z: 0.72, y: 0.14, yaw: -30, pitch: -10, kp: [0.5, 0.3, 1] }, w: [0, 1] }), M(ZK_KAMAE, { pelvis: [0, 0.76, 0.0], R: { z: -0.46 }, L: { x: -0.02, z: 0.86, y: 0.16, yaw: -60, pitch: -20, kp: [0, 0.3, 1] }, w: [0, 1] })], M(hit('toeL', 'Spann'), { eff: 'toeL', ghost: [0], view: 'front3' }));
-  D['tc:komura-barai'] = SEQ([M(MZK_G), M(MZK_G, { pelvis: [0, 0.76, 0.06], R: { x: 0.1, z: 0.8, y: 0.2, yaw: 30, kp: [0.3, 0.5, 1] }, w: [1, 0] }), M(MZK_G, { pelvis: [0, 0.74, 0.05], R: { x: 0.2, z: 0.36, y: 0.3, yaw: 40, pitch: -30, kp: [0.4, 0.4, 1] }, w: [1, 0] })], M(hit('kneeR', 'Wade'), { eff: 'ankleR', ghost: [0.47], view: 'side3' }));
+  D['tc:haisoku-barai'] = SEQ([ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.76, 0.02], R: { z: -0.46 }, L: { x: 0.32, z: 0.72, y: 0.14, yaw: -30, pitch: -10, kp: [0.5, 0.3, 1] }, w: [0, 1] }), M(ZK_KAMAE, { pelvis: [0, 0.76, 0.0], R: { z: -0.46 }, L: { x: -0.02, z: 0.86, y: 0.16, yaw: -60, pitch: -20, kp: [0, 0.3, 1] }, w: [0, 1] })], M(hit('toeL', 'Spann'), { eff: 'toeL', view: 'front3' }));
+  D['tc:komura-barai'] = SEQ([M(MZK_G), M(MZK_G, { pelvis: [0, 0.76, 0.06], R: { x: 0.1, z: 0.8, y: 0.2, yaw: 30, kp: [0.3, 0.5, 1] }, w: [1, 0] }), M(MZK_G, { pelvis: [0, 0.74, 0.05], R: { x: 0.2, z: 0.36, y: 0.3, yaw: 40, pitch: -30, kp: [0.4, 0.4, 1] }, w: [1, 0] })], M(hit('kneeR', 'Wade'), { eff: 'ankleR', view: 'side3' }));
 
   /* ---------- Haltungen ---------- */
   D['tc:chudan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.1, -0.12, 0.42], hR: [-0.02, -0.22, 0.2] }), { view: 'side3' });
@@ -245,21 +245,21 @@
   /* ---------- Begriffe ---------- */
   D['tc:yoi'] = T(S.musubi, S.hachiji, { view: 'front3' });
   const REI = M(S.musubi, { lean: 30, look: 0 });
-  D['tc:rei'] = M({ keys: [{ t: 0, p: S.musubi }, { t: 0.15, p: S.musubi }, { t: 0.45, p: REI }, { t: 0.65, p: REI }, { t: 0.9, p: S.musubi }], best: 0.5, ghost: [0], dur: 2.4, view: 'side' });
+  D['tc:rei'] = M({ keys: [{ t: 0, p: S.musubi }, { t: 0.15, p: S.musubi }, { t: 0.45, p: REI }, { t: 0.65, p: REI }, { t: 0.9, p: S.musubi }], best: 0.5, dur: 2.4, view: 'side' });
   const SEIZA = { pelvis: [0, 0.32, 0], yaw: 0, L: { x: 0.1, z: -0.08, y: 0.06, yaw: 180, sole: [0, 1, 0], kp: [0, -1, 0.6] }, R: { x: -0.1, z: -0.08, y: 0.06, yaw: 180, sole: [0, 1, 0], kp: [0, -1, 0.6] }, hL: [0.1, -0.58, 0.24], hR: [-0.1, -0.58, 0.24], oL: 1, oR: 1, pL: [0, 1, 0], pR: [0, 1, 0], w: [0, 0] };
   D['tc:seiza'] = STILL(SEIZA, { view: 'side3' });
   D['tc:mokuso'] = STILL(M(SEIZA, { look: 0, hL: [0.03, -0.46, 0.2], hR: [-0.03, -0.47, 0.18], pL: [0, -1, 0], pR: [0, -1, 0] }), { view: 'front3' });
   const KNEEL_UP = M(SEIZA, { pelvis: [0, 0.5, 0.02], L: { x: 0.12, z: 0.38, y: 0.075, yaw: 0, sole: [0, 0, 0], kp: [0, 0.3, 1] } });
-  D['tc:kiritsu'] = M({ keys: [{ t: 0, p: SEIZA }, { t: 0.15, p: SEIZA }, { t: 0.45, p: KNEEL_UP }, { t: 0.8, p: M(S.heisoku) }], best: 0.45, ghost: [0], dur: 2.2, view: 'side3' });
+  D['tc:kiritsu'] = M({ keys: [{ t: 0, p: SEIZA }, { t: 0.15, p: SEIZA }, { t: 0.45, p: KNEEL_UP }, { t: 0.8, p: M(S.heisoku) }], best: 0.45, dur: 2.2, view: 'side3' });
   const TURN0 = ZK_G;
-  D['tc:mawatte'] = M({ keys: [{ t: 0, p: TURN0 }, { t: 0.15, p: TURN0 }, { t: 0.45, p: rotate(M(TURN0, { pelvis: [0, 0.76, 0.06] }), 90, [0, 0.06]) }, { t: 0.75, p: rotate(TURN0, 180, [0, 0.06]), e: 'kime' }], best: 1, ghost: [0], dur: 2, view: 'front3', marks: ['turn'] });
+  D['tc:mawatte'] = M({ keys: [{ t: 0, p: TURN0 }, { t: 0.15, p: TURN0 }, { t: 0.45, p: rotate(M(TURN0, { pelvis: [0, 0.76, 0.06] }), 90, [0, 0.06]) }, { t: 0.75, p: rotate(TURN0, 180, [0, 0.06]), e: 'kime' }], best: 1, dur: 2, view: 'front3', marks: ['turn'] });
   D['tc:kiai'] = M(D['mv:gyaku-zuki'], { marks: ['kiai'], hit: null });
   D['tc:kime'] = M(D['mv:gyaku-zuki'], { marks: ['kime'], hit: null });
   D['tc:sun-dome'] = M(T(ZK_G, M(S.zks, { hL: L(H.hip), hR: H.jodan })), { eff: 'fistR', view: 'side', marks: ['sundome'] });
   const SLIDE = (dz) => move(ZK_KAMAE, 0, dz);
-  D['tc:yori-ashi'] = M({ keys: [{ t: 0, p: SLIDE(0) }, { t: 0.2, p: SLIDE(0) }, { t: 0.7, p: SLIDE(0.4), e: 'kime' }], best: 1, ghost: [0], dur: 1.6, eff: 'ankleL', view: 'side3' });
+  D['tc:yori-ashi'] = M({ keys: [{ t: 0, p: SLIDE(0) }, { t: 0.2, p: SLIDE(0) }, { t: 0.7, p: SLIDE(0.4), e: 'kime' }], best: 1, dur: 1.6, eff: 'ankleL', view: 'side3' });
   D['tc:suri-ashi'] = M(D['mv:oi-zuki'], { keys: [{ t: 0, p: ZK_KAMAE }, { t: 0.12, p: ZK_KAMAE }, { t: 0.5, p: M(OI_MID, { hL: L(H.guardF), hR: H.guardR }) }, { t: 0.82, p: M(OI_END, { hL: L(H.guardR), hR: H.guardF }), e: 'kime' }], hit: null });
-  D['tc:tai-sabaki'] = M({ keys: [{ t: 0, p: M(S.hachiji, { hL: L(H.guardF), hR: H.guardR }) }, { t: 0.2, p: M(S.hachiji, { hL: L(H.guardF), hR: H.guardR }) }, { t: 0.7, p: M(S.hachiji, { pelvis: [-0.32, 0.86, -0.12], yaw: 25, L: { x: -0.12, z: -0.02, yaw: 30 }, R: { x: -0.52, z: -0.24, yaw: 0 }, hL: L(H.guardF), hR: H.guardR }), e: 'kime' }], best: 1, ghost: [0], dur: 1.6, eff: 'ankleR', view: 'front', marks: ['line'] });
+  D['tc:tai-sabaki'] = M({ keys: [{ t: 0, p: M(S.hachiji, { hL: L(H.guardF), hR: H.guardR }) }, { t: 0.2, p: M(S.hachiji, { hL: L(H.guardF), hR: H.guardR }) }, { t: 0.7, p: M(S.hachiji, { pelvis: [-0.32, 0.86, -0.12], yaw: 25, L: { x: -0.12, z: -0.02, yaw: 30 }, R: { x: -0.52, z: -0.24, yaw: 0 }, hL: L(H.guardF), hR: H.guardR }), e: 'kime' }], best: 1, dur: 1.6, eff: 'ankleR', view: 'front', marks: ['line'] });
 
   /* ---------- Mit Partner (grau) ---------- */
   const OPP = (p, dz) => move(rotate(p, 180, [0, 0]), 0, dz);

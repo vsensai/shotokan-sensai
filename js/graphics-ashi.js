@@ -93,7 +93,7 @@
         if (moved) seg++;
       }
       vals.push(end);
-      const kt = `keyTimes="${times.join(';')}" dur="${dur}s" repeatCount="indefinite" calcMode="linear"`;
+      const kt = `keyTimes="${times.join(';')}" dur="${dur}s" fill="freeze" calcMode="linear"`;
       const tr = vals.map((v) => `${r1(v[0])} ${r1(v[1])}`).join(';');
       const rot = vals.map((v) => r1(v[2])).join(';');
       finals += `<g><animateTransform attributeName="transform" type="translate" values="${tr}" ${kt}/><g><animateTransform attributeName="transform" type="rotate" values="${rot}" ${kt}/>${foot(0, 0, 0, 0.7, { side, scale: SC })}</g></g>`;

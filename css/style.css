@@ -2117,7 +2117,7 @@ main:fullscreen {
   }
 }
 
-/* 3D-Figuren: ruhendes Kernbild, beim Ziehen drehbar, ▶ Bewegung, Phasenbild */
+/* 3D-Figuren: ruhendes Kernbild, beim Ziehen drehbar, ▶ Bewegung */
 .f3d-stage {
   position: relative;
   width: 100%;
