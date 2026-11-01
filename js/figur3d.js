@@ -111,7 +111,8 @@
       const fd0 = P['f' + s];
       const fd = len(fd0) > 0.01 ? norm(sub(toW(fd0), chest)) : fa;
       const pv0 = P['p' + s];
-      let palm = len(pv0) > 0.01 ? sub(toW(pv0), chest) : mul(up, -1);
+      // ohne Vorgabe: Handfläche unten, an der Hüfte (Hikite) nach oben – über „zur Mitte“ gedreht wie beim Stoß
+      let palm = len(pv0) > 0.01 ? sub(toW(pv0), chest) : add(mul(up, 2 * kh - 1), mul(lc, -sg * Math.sin(Math.PI * kh)));
       palm = sub(palm, mul(fd, dot(palm, fd)));
       if (len(palm) < 0.05) palm = cross(fd, lc);
       J['fd' + s] = fd;
@@ -153,10 +154,16 @@
         const wd = J['wd' + s];
         [1, -1].forEach((k) => cone(add(add(w, mul(fd, 0.03)), mul(wd, 0.016 * k)), add(add(w, mul(fd, 0.17)), mul(wd, 0.013 * k)), 0.021, 0.015, 1));
       } else {
-        // Faust: kurze Walze quer über die Knöchel, damit sie nicht wie eine Kugel wirkt
-        const f = J['fist' + s];
+        // Faust: Handrücken, eingerollte Finger (zwei Reihen quer über die Knöchel) und Daumen
+        const fd = norm(sub(J['fist' + s], w));
         const wd = J['wd' + s];
-        cone(add(f, mul(wd, 0.016)), add(f, mul(wd, -0.016)), 0.042, 0.042, 1);
+        const pn = norm(cross(wd, fd));
+        const th = s === 'R' ? 1 : -1;
+        const at = (f, p, q) => add(add(add(w, mul(fd, f)), mul(pn, p)), mul(wd, q));
+        // (Material 1.25 = Haut mit fast harter Kante, sonst verschmelzen Finger zu einem Klumpen)
+        cone(at(0.0, 0, 0), at(0.042, -0.004, 0), 0.03, 0.033, 1.25);
+        [-0.027, -0.009, 0.009, 0.027].forEach((q, i) => cone(at(0.072 - 0.004 * Math.abs(i - 1.5), -0.006, q), at(0.058, 0.026, q * 0.9), 0.0125, 0.0115, 1.25));
+        cone(at(0.022, 0.02, 0.036 * th), at(0.062, 0.04, 0.0), 0.0125, 0.011, 1.25);
       }
       const k = J['knee' + s];
       const a = J['ankle' + s];
@@ -215,7 +222,7 @@ vec2 map(vec3 p){
     float h = bb > 0.0 ? clamp(dot(pa, ba) / bb, 0.0, 1.0) : 0.0;
     float di = length(pa - ba * h) - mix(uA[i].w, uB[i].w, h);
     if (di < best) { best = di; m = uM[i]; }
-    d = smin(d, di, 0.024);
+    d = smin(d, di, abs(uM[i] - 1.25) < 0.01 ? 0.004 : 0.024);
   }
   float dj = jacket(p);
   if (dj < best) m = 6.0;
