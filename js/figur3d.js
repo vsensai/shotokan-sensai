@@ -42,8 +42,9 @@
 
   const DEF = {
     pelvis: [0, 0.9, 0], yaw: 0, chest: 0, lean: 0, look: 0,
-    L: { x: 0.1, z: 0, y: 0.075, yaw: 8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0] },
-    R: { x: -0.1, z: 0, y: 0.075, yaw: -8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0] },
+    // tu: Zehen hochgezogen (0 … 1), z. B. Fußballen beim Mae-geri
+    L: { x: 0.1, z: 0, y: 0.075, yaw: 8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0], tu: 0 },
+    R: { x: -0.1, z: 0, y: 0.075, yaw: -8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0], tu: 0 },
     hL: [0.16, -0.38, 0.02], hR: [-0.16, -0.38, 0.02], eL: [0, 0, 0], eR: [0, 0, 0],
     // offene Hand (0 = Faust, 1 = offen), Handflächen-Normale und Fingerrichtung (Brustkoordinaten, 0 = automatisch)
     oL: 0, oR: 0, pL: [0, 0, 0], pR: [0, 0, 0], fL: [0, 0, 0], fR: [0, 0, 0],
@@ -89,7 +90,9 @@
       J['knee' + s] = knee;
       J['ankle' + s] = ank;
       J['heel' + s] = add(add(ank, mul(sole, 0.042)), mul(dir, -0.055));
-      J['toe' + s] = add(add(ank, mul(sole, 0.048)), mul(dir, 0.165));
+      // Bei hochgezogenen Zehen ist der vorderste Punkt der Fußballen
+      J['toe' + s] = add(add(ank, mul(sole, 0.048)), mul(dir, 0.165 - 0.04 * F.tu));
+      J['tu' + s] = F.tu;
       J['dir' + s] = dir;
       J['sole' + s] = sole;
       // Arm (Hand in Brustkoordinaten: x links, y oben, z vorne)
@@ -201,8 +204,12 @@
         cone(O(-0.04, 0.046, 0.008), O(0.114, 0.052, 0.022), 0.028, 0.023, 1);
         cone(O(0.118, 0.053, 0.024), O(0.112, 0.057, -0.03), 0.022, 0.018, 1);
         cone(O(-0.005, 0.0, 0), O(0.095, 0.034, 0.002), 0.036, 0.02, 1);
-        cone(O(0.132, 0.062, 0.025), O(0.174, 0.063, 0.027), 0.0125, 0.0115, 1.25);
-        [[0.005, 0.03], [-0.009, 0.026], [-0.021, 0.022], [-0.031, 0.018]].forEach(([q, l], j) => cone(O(0.13 - 0.007 * j, 0.066, q), O(0.13 - 0.007 * j + l, 0.067, q * 1.05), 0.0088, 0.008, 1.25));
+        // Zehen: bei tu > 0 vom Ballen aus nach oben (zum Spann hin) gebogen
+        const ta = J['tu' + s] * 65 * D;
+        const td = add(mul(dir, Math.cos(ta)), mul(sole, -Math.sin(ta)));
+        const toe = (f, d, q, l, ra, rb) => { const a0 = O(f, d, q); cone(a0, add(add(a0, mul(td, l)), mul(inner, q * 0.05)), ra, rb, 1.25); };
+        toe(0.132, 0.062, 0.025, 0.042, 0.0125, 0.0115);
+        [[0.005, 0.03], [-0.009, 0.026], [-0.021, 0.022], [-0.031, 0.018]].forEach(([q, l], j) => toe(0.13 - 0.007 * j, 0.066, q, l, 0.0088, 0.008));
       });
     });
     // Gürtelknoten mit Enden

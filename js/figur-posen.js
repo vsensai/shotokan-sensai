@@ -277,6 +277,18 @@
   D['fig:levels'] = STILL(M(S.hachiji, { hL: L(H.side), hR: H.side, oL: 1, oR: 1, fL: [0, -1, 0], fR: [0, -1, 0] }), { view: 'front', marks: ['levels'] });
   D['fig:targets'] = STILL(M(S.hachiji, { hL: [0.3, -0.5, 0.06], hR: [-0.3, -0.5, 0.06], oL: 1, oR: 1, fL: [0, -1, 0], fR: [0, -1, 0] }), { view: 'front', marks: ['targets'] });
 
+  /* ---------- Hochgezogene Zehen bei Tritten mit dem Fußballen ---------- */
+  // Sobald der Tretfuß in der Luft ist, sind die Zehen hochgezogen; beim Abstellen senken sie sich wieder.
+  const KOSHI = { 'mv:mae-geri': 'R', 'tc:mae-geri-kekomi': 'R', 'tc:ren-geri': 'R', 'tc:sonoba-geri': 'R', 'tc:kizami-geri': 'L', 'mv:mawashi-geri': 'R', 'tc:nidan-geri': 'LR' };
+  Object.keys(KOSHI).forEach((id) => {
+    D[id].keys = D[id].keys.map((k) => {
+      const f = E.full(k.p);
+      const up = {};
+      KOSHI[id].split('').forEach((s) => { if (f[s].y > 0.15) up[s] = { tu: 1 }; });
+      return Object.keys(up).length ? M(k, { p: M(k.p, up) }) : k;
+    });
+  });
+
   SK.fig3dDefs = D;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };
 })();
