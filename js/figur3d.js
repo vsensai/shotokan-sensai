@@ -160,7 +160,7 @@
     const { pel, chest, up, lc, lp, fp } = J;
     // Oberkörper als V: breite Brust, schmale Taille
     [1, -1].forEach((s) => {
-      cone(add(add(pel, mul(lp, 0.045 * s)), mul(up, 0.05)), add(add(chest, mul(lc, 0.07 * s)), mul(up, -0.045)), 0.09, 0.115, 5);
+      cone(add(add(pel, mul(lp, 0.045 * s)), mul(up, 0.05)), add(add(chest, mul(lc, 0.07 * s)), mul(up, -0.045)), 0.108, 0.13, 5);
     });
     // Gesäß als durchgehende Form; darüber hängt die Jacke (Shader: jacket)
     const seat = mul(fp, -0.012);
@@ -229,10 +229,17 @@
         cone(V(-0.045, -0.008, 0.0), V(0.035, 0.0, 0.004), 0.04, 0.032, FL(tdn, 2.2, 0.012));
       });
     });
-    // Gürtelknoten mit Enden
-    const knot = add(add(pel, mul(up, 0.09)), mul(fp, 0.14));
-    cone(knot, knot, 0.026, 0.026, 2);
-    [1, -1].forEach((s) => cone(knot, add(add(add(knot, mul(up, -0.14)), mul(lp, 0.035 * s)), mul(fp, 0.025)), 0.016, 0.015, 2));
+    // Gürtel als eigener Ring um die Taille (über der Jacke)
+    for (let i = 0; i < 12; i++) {
+      const a0 = (i / 12) * 2 * Math.PI, a1 = ((i + 1) / 12) * 2 * Math.PI;
+      const P0 = add(add(add(pel, mul(up, 0.09)), mul(lp, Math.sin(a0) * 0.166)), mul(fp, Math.cos(a0) * 0.13 - 0.004));
+      const P1 = add(add(add(pel, mul(up, 0.09)), mul(lp, Math.sin(a1) * 0.166)), mul(fp, Math.cos(a1) * 0.13 - 0.004));
+      cone(P0, P1, 0.019, 0.019, 2);
+    }
+    // Gürtelknoten: flacher Querknoten, zwei gleich lange Enden hängen leicht auseinander
+    const knot = add(add(pel, mul(up, 0.09)), mul(fp, 0.142));
+    cone(add(knot, mul(lp, 0.02)), add(knot, mul(lp, -0.02)), 0.019, 0.019, 2);
+    [1, -1].forEach((s) => { const k0 = add(knot, mul(lp, 0.012 * s)); cone(k0, add(add(add(k0, mul(up, -0.12)), mul(lp, 0.03 * s)), mul(fp, 0.012)), 0.012, 0.011, 2); });
     return P;
   }
 
@@ -261,12 +268,12 @@ const vec3 FIL = normalize(vec3(0.7, 0.45, -0.6));
 float smin(float a, float b, float k){ float h = max(k - abs(a - b), 0.0) / k; return min(a, b) - h * h * k * 0.25; }
 // Unterer Teil der Gi-Jacke: ovaler, leicht ausgestellter Stoff, hinten länger als vorne
 vec3 jq(vec3 p){ vec3 q = p - uPel; return vec3(dot(q, uPLeft), dot(q, uUp), dot(q, uPFwd)); }
-float jbot(float z){ return mix(-0.19, -0.12, smoothstep(-0.12, 0.13, z)); }
+float jbot(float z){ return mix(-0.25, -0.21, smoothstep(-0.12, 0.13, z)); }
 float jacket(vec3 p){
   vec3 q = jq(p);
   float top = 0.07, bot = jbot(q.z);
   float u = clamp((top - q.y) / (top + 0.2), 0.0, 1.0);
-  float rx = mix(0.158, 0.19, u), rz = mix(0.118, 0.152, u * u);
+  float rx = mix(0.19, 0.25, u), rz = mix(0.142, 0.2, u * u);
   float e = length(vec2(q.x / rx, (q.z + 0.006) / rz));
   float ds = (e - 1.0) * min(rx, rz) * 0.9;
   float dc = max(q.y - top, bot - q.y);
@@ -293,6 +300,7 @@ vec2 mapX(vec3 p, bool fine){
       mi = 1.0;
     } else if (mi > 1.29 && mi < 1.5) { k = (mi - 1.3) * 0.2; mi = 1.0; }
     else if (abs(mi - 1.25) < 0.01) k = 0.004;
+    else if (abs(mi - 2.0) < 0.01) k = 0.006; // Gürtel: knappe Kante, kein weißer Saum
     float bb = dot(ba, ba);
     float h = bb > 0.0 ? clamp(dot(pa, ba) / bb, 0.0, 1.0) : 0.0;
     float di = (length(pa - ba * h) - mix(uA[i].w, uB[i].w, h)) / sc;
@@ -378,12 +386,16 @@ vec3 baseCol(float m, vec3 p, out float kind){
   if (m > 1.5 && m < 2.5) { kind = 2.0; return ink; }
   if (m > 4.5) {
     vec3 q = p - uPel; float hh = dot(q, uUp), uu = dot(q, uLeft), ff = dot(q, uFwd);
-    float bt = smoothstep(0.06, 0.064, hh) * (1.0 - smoothstep(0.116, 0.12, hh));
+    float bt = 0.0; // Gürtel ist ein eigener Ring
     if (bt > 0.5) kind = 2.0;
     if (bt > 0.0) return mix(gi, ink, bt);
-    if (ff > 0.0 && hh > 0.37 && abs(uu) < (hh - 0.37) * 0.85) { kind = 1.0; return skin; }
-    float lu = mix(0.115, -0.03, clamp((hh - 0.12) / 0.27, 0.0, 1.0));
-    if (ff > 0.0 && hh > 0.118 && hh < 0.43) {
+    // Ausschnitt: kleines V unter dem Hals, darunter kreuzen die Revers
+    float vx = (hh - 0.47) * 0.6;
+    if (ff > 0.0 && hh > 0.47 && abs(uu) < vx) { kind = 1.0; return skin; }
+    // Kragen: dunklerer Stoffstreifen entlang des Ausschnitts
+    if (ff > 0.0 && hh > 0.47 - 0.02 && abs(uu) < max(vx, 0.0) + 0.03) { kind = 4.0; return gi * 0.7; }
+    float lu = mix(0.115, -0.004, clamp((hh - 0.12) / (0.47 - 0.12), 0.0, 1.0));
+    if (ff > 0.0 && hh > 0.118 && hh < 0.47) {
       float ln = 1.0 - smoothstep(0.003, 0.0055, abs(uu - lu));
       if (ln > 0.0) { if (ln > 0.5) kind = 4.0; return mix(gi, gi * 0.62, ln); }
       if (uu - lu > 0.0 && uu - lu < 0.03) { return gi * 0.965; }
