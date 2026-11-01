@@ -180,8 +180,9 @@
     ['L', 'R'].forEach((s) => {
       const e = J['elbow' + s];
       const w = J['wrist' + s];
-      cone(J['sh' + s], e, 0.054, 0.044, 0);
-      cone(e, mix(e, w, 0.72), 0.044, 0.038, 0);
+      // sehr weiter Gi-Ärmel (wie die Hose), offener Saum kurz vor dem Handgelenk
+      cone(J['sh' + s], e, 0.068, 0.064, 0);
+      cone(e, mix(e, w, 0.86), 0.064, 0.08, 0.1);
       const fd = J['fd' + s];
       const wd = J['wd' + s];
       const th = s === 'R' ? 1 : -1;
