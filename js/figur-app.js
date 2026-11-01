@@ -227,7 +227,7 @@
     const e = D[split(key).id];
     const anim = e && !e.still;
     const tools = opt.tools === false ? '' : `<div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button><button type="button" class="gfx-btn" data-act="f3d-phase" aria-pressed="false">Phasenbild</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-home" hidden>↺ Kernbild</button></div>`;
-    return `<div class="f3d${opt.cls ? ` ${opt.cls}` : ''}" data-f3d="${esc(key)}"${opt.plain ? ' data-plain="1"' : ''}><div class="f3d-stage"><img class="f3d-img" alt="" draggable="false"><span class="f3d-badge" aria-hidden="true">3D ↻</span></div>${tools}</div>`;
+    return `<div class="f3d${opt.cls ? ` ${opt.cls}` : ''}" data-f3d="${esc(key)}"${opt.plain ? ' data-plain="1"' : ''}><div class="f3d-stage"><img class="f3d-img" alt="" draggable="false"><span class="f3d-badge" aria-hidden="true">3D ↻ ⤢</span></div>${tools}</div>`;
   }
   const dpr = (cap) => Math.min(window.devicePixelRatio || 1, cap);
   function sizeOf(stage, cap) {
@@ -297,10 +297,11 @@
     stage.appendChild(cv);
     box.classList.add('f3d-live');
     box.querySelector('[data-act="f3d-home"]') && (box.querySelector('[data-act="f3d-home"]').hidden = false);
-    live = { box, cv, ctx: cv.getContext('2d'), e, st: { t: e.d.best == null ? 1 : e.d.best, cam: Object.assign({}, e.cam), plain: box.dataset.plain === '1' }, dirty: true };
+    live = { box, cv, ctx: cv.getContext('2d'), e, st: { t: e.d.best == null ? 1 : e.d.best, cam: camCopy(e.cam), plain: box.dataset.plain === '1' }, dirty: true };
     loop();
     return live;
   }
+  const camCopy = (c) => Object.assign({}, c, { target: c.target.slice() });
   let raf = 0;
   let last = 0;
   function loop() {
@@ -321,7 +322,8 @@
       if (L.dirty) {
         L.dirty = false;
         const stage = L.cv.parentElement;
-        const [w, h] = sizeOf(stage, L.st.playing || L.drag ? 1.75 : 2.5);
+        const big = L.box.classList.contains('f3d-big');
+        const [w, h] = sizeOf(stage, L.st.playing || L.drag ? (big ? 1.25 : 1.75) : (big ? 2 : 2.5));
         if (L.cv.width !== w || L.cv.height !== h) { L.cv.width = w; L.cv.height = h; }
         const st = Object.assign({}, L.st, { t: Math.min(L.st.t, L.e.t1) });
         if (!paint(L.ctx, w, h, L.e, st)) { stopLive(); return; }
@@ -348,7 +350,7 @@
     let drag = null;
     document.addEventListener('pointerdown', (ev) => {
       const stage = ev.target.closest && ev.target.closest('.f3d-ready .f3d-stage, .f3d-live .f3d-stage');
-      if (!stage) return;
+      if (!stage || stage.closest('.f3d-big')) return;
       const box = stage.closest('.f3d');
       drag = { box, x: ev.clientX, y: ev.clientY, moved: false, mouse: ev.pointerType === 'mouse' };
     });
@@ -369,13 +371,23 @@
       drag.y = ev.clientY;
       kick();
     });
-    const end = () => {
+    let tapped = null;
+    const end = (ev) => {
       if (drag && live && live.box === drag.box) { live.drag = false; kick(); }
+      // Antippen ohne Ziehen öffnet die Großansicht
+      tapped = drag && !drag.moved && ev.type === 'pointerup' ? drag.box : null;
       drag = null;
     };
     document.addEventListener('pointerup', end);
     document.addEventListener('pointercancel', end);
     document.addEventListener('click', (ev) => {
+      if (tapped && ev.target.closest && ev.target.closest('.f3d-stage') && tapped.contains(ev.target)) {
+        const box = tapped;
+        tapped = null;
+        openBig(box);
+        return;
+      }
+      tapped = null;
       const btn = ev.target.closest && ev.target.closest('[data-act^="f3d-"]');
       if (!btn) return;
       const box = btn.closest('.f3d');
@@ -383,6 +395,7 @@
       const act = btn.dataset.act;
       if (act === 'f3d-home') { stopLive(); return; }
       const L = startLive(box);
+      if (act === 'f3d-reset') L.st.cam = camCopy(L.e.cam);
       if (act === 'f3d-play') {
         L.st.playing = !L.st.playing;
         if (L.st.playing) L.st.t = L.e.t0;
@@ -398,6 +411,173 @@
     });
     window.addEventListener('resize', () => kick());
   }
+  /* ---------- Großansicht: Fenster mit großer Figur, Zoomen und Verschieben ---------- */
+  let dlg = null;
+  const ZMIN = 0.5;
+  const ZMAX = 3.5;
+  function bigDialog() {
+    if (dlg) return dlg;
+    dlg = document.createElement('dialog');
+    dlg.className = 'f3d-dlg';
+    dlg.setAttribute('aria-label', 'Großansicht');
+    const coarse = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+    const hint = coarse ? 'Ein Finger: drehen · Zwei Finger: zoomen und verschieben · Doppeltippen: vergrößern'
+      : 'Ziehen: drehen · Mausrad: zoomen · Rechte Maustaste oder Umschalt + Ziehen: verschieben · Doppelklick: vergrößern';
+    dlg.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen">✕</button></div><div class="f3d-dlg-body"></div><p class="f3d-dlg-hint muted small">${esc(hint)}</p>`;
+    document.body.appendChild(dlg);
+    dlg.querySelector('.f3d-dlg-x').addEventListener('click', () => dlg.close());
+    // Tippen neben das Fenster schließt es
+    dlg.addEventListener('click', (ev) => {
+      const r = dlg.getBoundingClientRect();
+      if (ev.target === dlg && (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom)) dlg.close();
+    });
+    dlg.addEventListener('close', () => {
+      if (live && live.box.classList.contains('f3d-big')) stopLive();
+      dlg.querySelector('.f3d-dlg-body').innerHTML = '';
+      // Zurück-Taste: eigenen Verlaufseintrag wieder entfernen
+      if (history.state && history.state.f3dBig) history.back();
+    });
+    window.addEventListener('popstate', () => { if (dlg.open) dlg.close(); });
+    return dlg;
+  }
+  function titleOf(box) {
+    if (box.dataset.plain === '1') return '';
+    const fig = box.closest('figure');
+    const cap = fig && fig.querySelector('figcaption b');
+    if (cap) return cap.textContent;
+    const card = box.closest('.k-card, .lex-item, article');
+    const h = card && card.querySelector('h3, h4, dt, b');
+    return h ? h.textContent : '';
+  }
+  function openBig(small) {
+    const d = bigDialog();
+    const key = small.dataset.f3d;
+    const plain = small.dataset.plain === '1';
+    d.querySelector('.f3d-dlg-title').textContent = titleOf(small) || (plain ? '' : 'Figur');
+    const body = d.querySelector('.f3d-dlg-body');
+    const e = entry(key);
+    const anim = !e.d.still;
+    // data-h: die kleine Bildwarteschlange soll diese Figur nicht übernehmen
+    body.innerHTML = `<div class="f3d f3d-big f3d-ready" data-f3d="${esc(key)}" data-h="1"${plain ? ' data-plain="1"' : ''}><div class="f3d-stage"></div><div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button><button type="button" class="gfx-btn" data-act="f3d-phase" aria-pressed="false">Phasenbild</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-reset">↺ Zurücksetzen</button></div></div>`;
+    if (!d.open) {
+      d.showModal();
+      history.pushState({ f3dBig: 1 }, '', location.href);
+    }
+    const box = body.firstChild;
+    startLive(box);
+    bindBig(box.querySelector('.f3d-stage'));
+  }
+  // Bildschirmpunkt (CSS-Pixel, vom Mittelpunkt aus) → Verschiebung des Blickpunkts in der Bildebene
+  function shift(L, stage, dx, dy) {
+    const C = E.camera(L.st.cam, 1, 1);
+    const k = (2 * L.st.cam.dist) / (C.f * (stage.clientHeight || 1));
+    const sx = L.e.mirrored ? -dx : dx;
+    const t = L.st.cam.target;
+    const b = L.e.cam.target;
+    for (let i = 0; i < 3; i++) t[i] += -C.cu[i] * sx * k + C.cv[i] * dy * k;
+    // nicht aus dem Bild verlieren
+    const off = [t[0] - b[0], t[1] - b[1], t[2] - b[2]];
+    const n = Math.hypot(...off);
+    if (n > 1.4) for (let i = 0; i < 3; i++) t[i] = b[i] + (off[i] * 1.4) / n;
+  }
+  // Zoomen um den Punkt (px, py) relativ zur Bildmitte: der Punkt bleibt unter Finger bzw. Maus
+  function zoomAt(L, stage, f, px, py) {
+    const base = L.e.cam.dist;
+    const cur = L.st.cam.dist;
+    const next = Math.max(base / ZMAX, Math.min(base / ZMIN, cur / f));
+    if (next === cur) return;
+    shift(L, stage, -px, -py);
+    L.st.cam.dist = next;
+    shift(L, stage, px, py);
+  }
+  function bindBig(stage) {
+    const pts = new Map();
+    let pinch = null;
+    let lastTap = 0;
+    let lastType = '';
+    const rel = (x, y) => {
+      const r = stage.getBoundingClientRect();
+      return [x - r.left - r.width / 2, y - r.top - r.height / 2];
+    };
+    const two = () => {
+      const [a, b] = [...pts.values()];
+      return { d: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    };
+    stage.addEventListener('contextmenu', (ev) => ev.preventDefault());
+    stage.addEventListener('pointerdown', (ev) => {
+      if (!live || live.box !== stage.parentElement) return;
+      stage.setPointerCapture && stage.setPointerCapture(ev.pointerId);
+      lastType = ev.pointerType;
+      pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, x0: ev.clientX, y0: ev.clientY, n: pts.size, pan: ev.button === 2 || ev.button === 1 || ev.shiftKey });
+      if (pts.size === 2) pinch = two();
+      live.drag = true;
+    });
+    stage.addEventListener('pointermove', (ev) => {
+      const p = pts.get(ev.pointerId);
+      if (!p || !live) return;
+      const L = live;
+      if (pts.size >= 2 && pinch) {
+        p.x = ev.clientX;
+        p.y = ev.clientY;
+        const now = two();
+        const [cx, cy] = rel(now.x, now.y);
+        if (pinch.d > 10) zoomAt(L, stage, now.d / pinch.d, cx, cy);
+        shift(L, stage, now.x - pinch.x, now.y - pinch.y);
+        pinch = now;
+      } else {
+        const dx = ev.clientX - p.x;
+        const dy = ev.clientY - p.y;
+        p.x = ev.clientX;
+        p.y = ev.clientY;
+        if (p.pan) shift(L, stage, dx, dy);
+        else {
+          L.st.cam.yaw -= dx * 0.45 * (L.e.mirrored ? -1 : 1);
+          L.st.cam.pitch = Math.max(-4, Math.min(86, L.st.cam.pitch + dy * 0.35));
+        }
+      }
+      kick();
+    });
+    const up = (ev) => {
+      const p = pts.get(ev.pointerId);
+      if (!p) return;
+      pts.delete(ev.pointerId);
+      // Doppeltippen mit dem Finger (die Maus nutzt dblclick)
+      if (ev.type === 'pointerup' && ev.pointerType !== 'mouse' && !p.n && !pts.size && Math.hypot(ev.clientX - p.x0, ev.clientY - p.y0) < 10) {
+        const now = performance.now();
+        if (now - lastTap < 320) {
+          lastTap = 0;
+          dbl(ev.clientX, ev.clientY);
+        } else lastTap = now;
+      }
+      pinch = pts.size === 2 ? two() : null;
+      if (!pts.size && live) {
+        live.drag = false;
+        kick();
+      }
+    };
+    stage.addEventListener('pointerup', up);
+    stage.addEventListener('pointercancel', up);
+    stage.addEventListener('wheel', (ev) => {
+      if (!live) return;
+      ev.preventDefault();
+      const [cx, cy] = rel(ev.clientX, ev.clientY);
+      zoomAt(live, stage, Math.exp(-ev.deltaY * (ev.deltaMode === 1 ? 0.05 : 0.0018)), cx, cy);
+      kick();
+    }, { passive: false });
+    // Doppeltippen: auf die Stelle vergrößern, nochmal: zurück
+    const dbl = (x, y) => {
+      if (!live) return;
+      const L = live;
+      if (L.st.cam.dist < L.e.cam.dist * 0.9) L.st.cam = Object.assign(camCopy(L.e.cam), { yaw: L.st.cam.yaw, pitch: L.st.cam.pitch });
+      else {
+        const [cx, cy] = rel(x, y);
+        zoomAt(L, stage, 2.2, cx, cy);
+      }
+      kick();
+    };
+    stage.addEventListener('dblclick', (ev) => { if (lastType === 'mouse') dbl(ev.clientX, ev.clientY); });
+  }
+
   // Erst einrichten, wenn die erste Figur gebraucht wird – die WebGL-Prüfung kostet beim Start Zeit.
   let started = false;
   function start() {
@@ -407,5 +587,5 @@
     else document.addEventListener('DOMContentLoaded', init);
   }
 
-  SK.fig3d = { ok, has, html, entry, paint, still };
+  SK.fig3d = { ok, has, html, entry, paint, still, openBig };
 })();
