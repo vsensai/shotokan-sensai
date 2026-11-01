@@ -117,7 +117,9 @@
       const fd = len(fd0) > 0.01 ? norm(sub(toW(fd0), chest)) : fa;
       const pv0 = P['p' + s];
       // ohne Vorgabe: Handfläche unten, an der Hüfte (Hikite) nach oben – über „zur Mitte“ gedreht wie beim Stoß
-      let palm = len(pv0) > 0.01 ? sub(toW(pv0), chest) : add(mul(up, 2 * kh - 1), mul(lc, -sg * Math.sin(Math.PI * kh)));
+      // tief vor dem Körper (Yoi, natürliche Stände): Handfläche zum Körper, Faustrücken nach vorn
+      const ky = cl((-0.4 - hv[1]) / 0.08) * cl((hv[2] + 0.05) / 0.1);
+      let palm = len(pv0) > 0.01 ? sub(toW(pv0), chest) : add(add(mul(up, (2 * kh - 1) * (1 - ky)), mul(lc, -sg * Math.sin(Math.PI * kh))), mul(fc, -ky));
       palm = sub(palm, mul(fd, dot(palm, fd)));
       if (len(palm) < 0.05) palm = cross(fd, lc);
       J['fd' + s] = fd;

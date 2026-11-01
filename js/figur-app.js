@@ -138,23 +138,6 @@
       g.fill();
     };
     g.save();
-    // Bahn des wichtigsten Körperpunkts
-    if (e.d.eff && !e.d.still && st.trail !== false) {
-      const pts = [];
-      const tEnd = e.d.best && e.d.best < e.t1 ? Math.max(e.d.best, st.t) : e.t1;
-      for (let i = 0; i <= 48; i++) {
-        const tt = e.t0 + ((tEnd - e.t0) * i) / 48;
-        pts.push(pr(E.solve(e.pose(tt))[e.d.eff]));
-      }
-      g.lineWidth = 5 * s;
-      g.strokeStyle = 'rgba(255,255,255,.7)';
-      g.lineCap = 'round';
-      g.beginPath();
-      pts.forEach((p, i) => (i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])));
-      g.stroke();
-      dashLine(pts);
-      arrowHead(pts[pts.length - 6], pts[pts.length - 1]);
-    }
     const resting = !st.playing;
     // Gewicht und Maße bei Ständen
     if (e.d.labels && resting && st.t > 0.8) {
