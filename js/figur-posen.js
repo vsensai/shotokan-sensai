@@ -118,7 +118,7 @@
   const KB = M(S.kb, HANDS_HIP);
   // Shuto-uke: vordere Hand vor der vorderen Schulter Richtung Gegner, Fingerspitzen etwa auf Schulterhöhe,
   // Handfläche schräg nach vorn-außen, Ellbogen nach unten; hintere Hand offen, Handfläche oben, vor dem Solarplexus
-  const SHUTO_END = { oL: 1, oR: 1, hL: [0.43, -0.14, 0.16], pL: [0.98, 0, -0.09], fL: [0.54, 0.8, 0.25], eL: [0.15, -1, 0.35], hR: [0.02, -0.2, 0.15], pR: [0, 1, 0], fR: [0.6, 0, 0.6] };
+  const SHUTO_END = { oL: 1, oR: 1, hL: [0.43, -0.14, 0.16], pL: [0.98, 0, -0.09], fL: [0.54, 0.8, 0.25], eL: [0.15, -1, 0.35], hR: [0.02, -0.2, 0.2], eR: [-0.7, -0.6, 0.2], pR: [0, 1, 0], fR: [0.6, 0, 0.6] };
   const KK_SHUTO = M(S.kk, SHUTO_END);
   const YOI = S.hachiji;
 
@@ -199,18 +199,21 @@
   D['tc:hasami-uchi'] = T(M(S.zks, { hL: [0.55, 0.05, 0.15], hR: [-0.55, 0.05, 0.15] }), M(S.zks, { hL: [0.14, -0.27, 0.34], hR: [-0.14, -0.27, 0.34], eL: [0.7, -0.3, 0], eR: [-0.7, -0.3, 0] }), M(hit('fistR', 'Hammerfäuste'), { eff: 'fistR', view: 'front3' }));
 
   /* ---------- Abwehr ---------- */
-  D['mv:age-uke'] = T(M(MZK, { hR: H.hip, hL: [0.06, 0.28, 0.22], eL: L(UP_OUT) }), M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
+  // Age-uke: die abwehrende Faust steigt vor der Brust auf (innen), die andere zieht außen vorbei zur Hüfte
+  const AU_PREP = M(MZK, { hR: H.hip, hL: [0.06, 0.28, 0.22], eL: L(UP_OUT) });
+  const AU_MID = M(MZK, { hR: [-0.06, -0.04, 0.3], eR: [-0.4, -0.6, 0.4], hL: [0.12, 0.04, 0.4], eL: [0.5, -0.6, 0.3] });
+  D['mv:age-uke'] = M({ keys: [{ t: 0, p: AU_PREP }, { t: 0.22, p: AU_PREP }, { t: 0.42, p: AU_MID, e: 'lin' }, { t: 0.62, p: M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), e: 'kime' }], best: 1, dur: 1.4, eff: 'fistR', view: 'front3' }, hit('elbowR', 'Unterarm'));
   // Gedan-barai: Faust holt an der Gegenschulter (Ohrhöhe) aus, Ellbogen vor dem Körper; die Bahn führt deutlich vor dem
   // Bauch schräg nach unten, damit Arm und Faust nicht in den Oberkörper tauchen
   const GB_PREP = M(S.zk, { hL: [-0.13, 0.1, 0.24], eL: [0.1, -0.5, 0.8], hR: H.chudan });
   const GB_MID = M(S.zk, { hL: [0.08, -0.26, 0.38], hR: [-0.12, -0.28, 0.22] });
   D['mv:gedan-barai'] = M({ keys: [{ t: 0, p: GB_PREP }, { t: 0.22, p: GB_PREP }, { t: 0.44, p: GB_MID, e: 'lin' }, { t: 0.62, p: ZK_G, e: 'kime' }], best: 1, dur: 1.4, eff: 'fistL', view: 'front3' }, hit('fistL', 'Unterarm'));
   D['mv:soto-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [-0.45, 0.06, -0.06] }), M(MZK, { hL: L(H.hip), hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm innen'), { eff: 'fistR', view: 'front3' }));
-  D['mv:uchi-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [0.14, -0.22, 0.12] }), M(MZK, { hL: L(H.hip), hR: [-0.2, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm außen'), { eff: 'fistR', view: 'front3' }));
-  D['tc:shuto-uke'] = T(M(S.kk, { oL: 1, oR: 1, hL: [-0.12, 0.05, 0.1], pL: [-1, 0, 0], hR: [-0.02, -0.15, 0.45], pR: [0, -1, 0] }), KK_SHUTO, M(hit('tipL', 'Handkante'), { eff: 'wristL', view: 'front3' }));
-  D['tc:morote-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [0.14, -0.22, 0.12] }), M(S.kk, { hR: [-0.2, 0.0, 0.32], eR: DOWN_FWD, hL: [-0.12, -0.25, 0.28] }), M(hit('fistL', 'Stütze am Ellbogen'), { eff: 'fistR', view: 'front3' }));
+  D['mv:uchi-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [0.12, -0.2, 0.25], eR: [-0.5, -0.6, 0.5] }), M(MZK, { hL: L(H.hip), hR: [-0.2, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm außen'), { eff: 'fistR', view: 'front3' }));
+  D['tc:shuto-uke'] = T(M(S.kk, { oL: 1, oR: 1, hL: [-0.13, 0.08, 0.23], eL: [0.1, -0.5, 0.8], pL: [-1, 0, 0], hR: [-0.02, -0.15, 0.45], pR: [0, -1, 0] }), KK_SHUTO, M(hit('tipL', 'Handkante'), { eff: 'wristL', view: 'front3' }));
+  D['tc:morote-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [0.12, -0.2, 0.25], eR: [-0.5, -0.6, 0.5] }), M(S.kk, { hR: [-0.2, 0.0, 0.32], eR: DOWN_FWD, hL: [-0.14, -0.24, 0.33], eL: [0.5, -0.6, 0.4] }), M(hit('fistL', 'Stütze am Ellbogen'), { eff: 'fistR', view: 'front3' }));
   D['tc:juji-uke'] = T(M(S.zks, HANDS_HIP), M(S.zks, { oL: 1, oR: 1, hL: [-0.04, 0.3, 0.3], hR: [0.04, 0.3, 0.3], pL: [0, 0, 1], pR: [0, 0, 1], fL: [0, 1, 0.2], fR: [0, 1, 0.2] }), M(hit('wristR', 'Handgelenke gekreuzt'), { eff: 'wristR', view: 'front3' }));
-  D['tc:kakiwake-uke'] = T(M(S.kk, { hL: [-0.05, -0.2, 0.25], hR: [0.05, -0.18, 0.25] }), M(S.kk, { hL: [0.24, 0.02, 0.3], hR: [-0.24, 0.02, 0.3], eL: L(DOWN_FWD), eR: DOWN_FWD }), M(hit('fistR', 'auseinander'), { eff: 'fistR', view: 'front' }));
+  D['tc:kakiwake-uke'] = T(M(S.kk, { hL: [-0.05, -0.2, 0.31], hR: [0.05, -0.18, 0.31] }), M(S.kk, { hL: [0.24, 0.02, 0.3], hR: [-0.24, 0.02, 0.3], eL: L(DOWN_FWD), eR: DOWN_FWD }), M(hit('fistR', 'auseinander'), { eff: 'fistR', view: 'front' }));
   D['tc:nagashi-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.28, 0.05, 0.32], oR: 1, pR: [1, 0, 0], fR: [0, 1, 0.3] }), M(S.zks, { hL: L(H.hip), hR: [0.08, 0.06, 0.26], oR: 1, pR: [1, 0, 0.3], fR: [0, 1, 0.3] }), M(hit('wristR', 'Handfläche'), { eff: 'tipR', view: 'front3' }));
   D['tc:te-nagashi-uke'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.02, -0.12, 0.5], oR: 1, pR: [1, 0, 0], fR: [0, 0.4, 1] }), M(S.zk, { chest: 18, hL: L(H.guardF), hR: [0.16, -0.16, 0.36], oR: 1, pR: [1, 0, -0.2], fR: [0.2, 0.3, 1] }), M(hit('wristR', 'Handfläche lenkt ab'), { eff: 'tipR', view: 'side3' }));
   D['tc:gedan-nagashi-uke'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.42, -0.5, 0.18], oR: 1, pR: [1, 0, 0] }), M(S.zk, { hL: L(H.guardF), hR: [0.1, -0.48, 0.33], oR: 1, pR: [1, 0, 0] }), M(hit('wristR', 'Unterarm'), { eff: 'wristR', view: 'front3' }));
@@ -219,7 +222,7 @@
   D['tc:sukui-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [-0.32, -0.55, 0.2], oR: 1, pR: [0, 1, 0] }), M(S.kk, { hL: L(H.hip), hR: [-0.04, -0.3, 0.42], oR: 1, pR: [0, 1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'side3' }));
   D['tc:haiwan-uke'] = T(M(S.kk, HANDS_HIP), M(S.kk, { hL: L(H.hip), hR: [-0.42, 0.24, 0.16], eR: [-0.6, -0.2, 0.2] }), M(hit('elbowR', 'Unterarm-Rückseite'), { eff: 'fistR', view: 'front3' }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
-  D['tc:tate-shuto-uke'] = T(M(S.kk, { hL: [-0.15, 0.0, 0.08], hR: H.hip }), M(S.kk, { hR: H.hip, hL: [0.07, -0.02, 0.5], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] }), M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'side3' }));
+  D['tc:tate-shuto-uke'] = T(M(S.kk, { hL: [-0.15, 0.02, 0.23], eL: [0.1, -0.5, 0.8], hR: H.hip }), M(S.kk, { hR: H.hip, hL: [0.07, -0.02, 0.5], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] }), M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'side3' }));
   D['tc:teisho-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.38, -0.15, 0.32], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.5] }), M(S.zks, { hL: L(H.hip), hR: [0.05, -0.15, 0.36], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.6] }), M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front3' }));
   D['tc:uchiotoshi'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.15, 0.35, 0.15] }), M(S.zks, { hL: L(H.hip), hR: [-0.02, -0.25, 0.36], eR: [-0.8, -0.2, 0.3] }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
   D['tc:manji-uke'] = T(M(S.kk, HANDS_HIP), M(S.kk, { hL: [0.42, -0.52, 0.18], hR: [-0.34, 0.24, 0.02], eR: [-0.7, 0.2, -0.2] }), M(hit('fistL', 'unten und oben'), { eff: 'fistL', view: 'front3' }));

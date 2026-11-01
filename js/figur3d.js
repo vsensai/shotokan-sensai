@@ -107,7 +107,11 @@
       // (weich übergeblendet, damit der Ellbogen in Bewegungen nicht springt)
       const cl = (v) => Math.max(0, Math.min(1, v));
       const kh = cl((0.25 - hv[2]) / 0.2) * cl((-0.15 - hv[1]) / 0.1) * cl((hv[1] + 0.5) / 0.06) * cl((Math.abs(hv[0]) - 0.08) / 0.06);
-      const pole = len(ep) > 0.01 ? sub(toW(ep), chest) : add(add(mul(lc, (0.35 - 0.25 * kh) * sg), mul(up, -1)), mul(fc, -0.35 - 0.65 * kh));
+      // Vorgegebene Ellbogenrichtung weich einblenden (Länge ≥ 0,5 = ganz): in Bewegungen von/zu einer Stellung ohne Vorgabe
+      // springt der Ellbogen sonst bei kleinen Zwischenwerten in deren (evtl. verkehrte) Richtung, auch in den Körper
+      const auto = add(add(mul(lc, (0.35 - 0.25 * kh) * sg), mul(up, -1)), mul(fc, -0.35 - 0.65 * kh));
+      const we = cl(len(ep) / 0.5);
+      const pole = we > 0 ? add(mul(norm(auto), 1 - we), mul(norm(sub(toW(ep), chest)), we)) : auto;
       const [elbow, wrist] = ik(sh, target, UARM, FARM, pole);
       J['sh' + s] = sh;
       J['elbow' + s] = elbow;
@@ -676,11 +680,14 @@ void main(){
   }
   function timeline(keys) {
     const K = keys.map((k) => Object.assign({ t: k.t, e: k.e || 'io' }, { p: full(k.p) }));
+    // gleiche Nachbarbilder = Halten: dort nicht interpolieren (die Kurve würde sonst gegen die folgende Bewegung ausschwingen)
+    K.forEach((k, i) => (k.hold = i > 0 && JSON.stringify(k.p) === JSON.stringify(K[i - 1].p)));
     return (t) => {
       if (t <= K[0].t) return K[0].p;
       if (t >= K[K.length - 1].t) return K[K.length - 1].p;
       let i = 0;
       while (K[i + 1].t < t) i++;
+      if (K[i + 1].hold) return K[i].p;
       const u = ease[K[i + 1].e]((t - K[i].t) / (K[i + 1].t - K[i].t));
       const g = (j) => K[Math.max(0, Math.min(K.length - 1, j))].p;
       return blend(g(i - 1), g(i), g(i + 1), g(i + 2), u);
