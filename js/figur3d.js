@@ -132,7 +132,8 @@
   }
 
   /* ---------- Körperformen: [a, b, ra, rb, Material] ---------- */
-  // Material: 0 Gi, 1 Haut, 2 Gürtel, 4 Kopf, 5 Jacke (Gürtel, Revers)
+  // Material: 0 Gi, 1 Haut, 2 Gürtel, 4 Kopf, 5 Jacke (Gürtel, Revers);
+  // 1.25 Haut mit fast harter Kante, 1.3 … 1.49 Haut mit eigenem Übergang, ab 100 abgeflachte Haut (siehe FL)
   function prims(J) {
     const P = [];
     const cone = (a, b, ra, rb, m) => P.push([a, b, ra, rb, m]);
@@ -143,6 +144,20 @@
       P.push(null);
       fn();
       P[i0] = proxy.concat(10 + P.length - i0 - 1);
+    };
+    // Haut mit eigenem Verschmelzungsradius k (weicher Übergang, z. B. Daumen aus dem Ballen)
+    const SK = (k) => 1.3 + Math.min(0.038, Math.max(0.001, k)) * 5;
+    // Haut, entlang Achse n um Faktor fl abgeflacht (Handteller, Sohle, Handgelenk), Verschmelzungsradius k
+    const FL = (n, fl, k) => {
+      n = norm(n);
+      if (n[1] < 0) n = mul(n, -1);
+      const ti = Math.round((Math.acos(Math.min(1, n[1])) / Math.PI) * 127);
+      let ph = Math.atan2(n[2], n[0]);
+      if (ph < 0) ph += 2 * Math.PI;
+      const pi = Math.round((ph / (2 * Math.PI)) * 256) % 256;
+      const fi = Math.max(0, Math.min(15, Math.round((fl - 1) / 0.15)));
+      const ki = Math.max(1, Math.min(15, Math.round(k / 0.0025)));
+      return 100 + ((ti * 256 + pi) * 16 + fi) * 16 + ki;
     };
     const { pel, chest, up, lc, lp, fp } = J;
     [1, -1].forEach((s) => {
@@ -165,66 +180,67 @@
       const w = J['wrist' + s];
       cone(J['sh' + s], e, 0.058, 0.05, 0);
       cone(e, mix(e, w, 0.7), 0.05, 0.047, 0);
-      cone(mix(e, w, 0.62), w, 0.033, 0.03, 1);
       const fd = J['fd' + s];
       const wd = J['wd' + s];
       const th = s === 'R' ? 1 : -1;
-      // Material 1.25 = Haut mit fast harter Kante, sonst verschmelzen Finger zu einem Klumpen
-      if (J['open' + s] && J['nk' + s]) {
-        // Nukite: Finger fest geschlossen, Spitzen von Zeige-, Mittel- und Ringfinger bündig
-        // (Mittelfinger leicht gebeugt), Daumen gebeugt an der Handfläche
-        const pn = norm(cross(wd, fd));
-        const at = (f, p, q) => add(add(add(w, mul(fd, f)), mul(pn, p)), mul(wd, q * th));
-        group([add(w, mul(fd, 0.03)), add(w, mul(fd, 0.15)), 0.022, 0.014], () => {
-          cone(at(0.006, 0, 0.011), at(0.078, 0, 0.018), 0.0145, 0.0115, 1);
-          cone(at(0.006, 0, -0.008), at(0.076, 0, -0.017), 0.0145, 0.011, 1);
-          cone(at(0.012, 0.008, 0.016), at(0.04, 0.008, 0.02), 0.012, 0.0105, 1);
-          [[0.0185, 0.07, 0.001], [0.006, 0.071, 0.006], [-0.0065, 0.068, 0.003], [-0.0185, 0.056, 0.001]].forEach(([q, l, b]) => cone(at(0.08, 0, q), at(0.08 + l, b, q * 0.97), 0.0074, 0.006, 1.25));
-          cone(at(0.03, 0.012, 0.025), at(0.064, 0.017, 0.016), 0.0095, 0.0082, 1.25);
-        });
-      } else if (J['open' + s]) {
-        // Offene Hand: schmalerer Handteller, Finger geschlossen und zur Spitze schmaler, Daumen angelegt
-        const pn = norm(cross(wd, fd));
-        const at = (f, p, q) => add(add(add(w, mul(fd, f)), mul(pn, p)), mul(wd, q * th));
-        group([add(w, mul(fd, 0.03)), add(w, mul(fd, 0.16)), 0.022, 0.014], () => {
-          cone(at(0.006, 0, 0.012), at(0.078, 0, 0.02), 0.015, 0.012, 1);
-          cone(at(0.006, 0, -0.008), at(0.076, 0, -0.019), 0.015, 0.0115, 1);
-          [[0.0195, 0.07], [0.0065, 0.078], [-0.0065, 0.074], [-0.019, 0.06]].forEach(([q, l]) => cone(at(0.08, 0, q), at(0.08 + l, 0.002, q * 1.02), 0.0072, 0.0058, 1.25));
-          cone(at(0.02, 0.008, 0.03), at(0.06, 0.006, 0.034), 0.0105, 0.0085, 1.25);
+      const open = J['open' + s];
+      // Handachsen: f nach vorn (Finger bzw. Faust), p zur Handfläche, q zur Daumenseite
+      const hf = open ? fd : norm(sub(J['fist' + s], w));
+      const pn = norm(cross(wd, hf));
+      const at = (f, p, q) => add(add(add(w, mul(hf, f)), mul(pn, p)), mul(wd, q * th));
+      // Unterarm: zum Handgelenk hin flacher (Handgelenk breiter als dick)
+      cone(mix(e, w, 0.55), w, 0.033, 0.03, FL(pn, 1.3, 0.02));
+      if (open) {
+        // Offene Hand (Shuto, Nukite): flacher Handteller mit gewölbter Knöchellinie, geschlossene Finger,
+        // Daumen wächst aus dem Daumenballen und liegt gebeugt an
+        const nk = J['nk' + s];
+        group([add(w, mul(hf, 0.04)), add(w, mul(hf, 0.15)), 0.045, 0.02], () => {
+          cone(at(0.022, 0.001, 0.003), at(0.06, 0.0, 0.0), 0.032, 0.038, FL(pn, 2.4, 0.014));
+          // [q, Ansatz, Länge, Beugung zur Handfläche, Radius]
+          (nk ? [[0.025, 0.09, 0.077, 0.004, 0.0088], [0.0085, 0.094, 0.073, 0.011, 0.0092], [-0.0085, 0.092, 0.074, 0.005, 0.0088], [-0.024, 0.083, 0.064, 0.003, 0.0078]]
+            : [[0.025, 0.09, 0.074, 0.003, 0.0088], [0.0085, 0.094, 0.083, 0.004, 0.0092], [-0.0085, 0.092, 0.078, 0.004, 0.0088], [-0.024, 0.083, 0.062, 0.004, 0.0078]])
+            .forEach(([q, f0, l, b, r]) => cone(at(f0, 0.0, q), at(f0 + l, b, q * 1.03), r, r * 0.82, SK(0.005)));
+          cone(at(0.014, 0.006, 0.02), at(0.046, 0.01, 0.034), 0.013, 0.011, SK(0.014));
+          cone(at(0.046, 0.01, 0.034), at(0.08, 0.012, 0.03), 0.0105, 0.009, SK(0.006));
         });
       } else {
-        // Faust: flacher Handrücken (zwei Teile), Fingerglieder als flache Stoßfläche, Daumen quer davor
-        const fdf = norm(sub(J['fist' + s], w));
-        const pn = norm(cross(wd, fdf));
-        const at = (f, p, q) => add(add(add(w, mul(fdf, f)), mul(pn, p)), mul(wd, q));
-        group([J['fist' + s], J['fist' + s], 0.042, 0.042], () => {
-          cone(at(0.0, 0.002, 0.009), at(0.048, 0.0, 0.017), 0.021, 0.02, 1);
-          cone(at(0.0, 0.002, -0.009), at(0.048, 0.0, -0.017), 0.021, 0.02, 1);
-          [-0.0255, -0.0085, 0.0085, 0.0255].forEach((q, i) => cone(at(0.066 - 0.003 * Math.abs(i - 1.5), 0.0, q), at(0.064 - 0.004 * Math.abs(i - 1.5), 0.03, q), 0.0108, 0.0102, 1.25));
-          cone(at(0.026, 0.026, 0.034 * th), at(0.058, 0.04, 0.006 * th), 0.0115, 0.0098, 1.25);
+        // Faust: Hand als flacher Block, davor die Grundglieder als flache Stoßfläche, darunter die eingerollten
+        // Mittelglieder; Daumen aus dem Ballen, quer über Zeige- und Mittelfinger
+        group([add(w, mul(hf, 0.05)), add(w, mul(hf, 0.05)), 0.05, 0.05], () => {
+          cone(at(0.012, 0.01, 0.0), at(0.058, 0.012, -0.002), 0.032, 0.04, FL(pn, 1.7, 0.012));
+          [0.0255, 0.0085, -0.0085, -0.025].forEach((q, i) => {
+            const f0 = 0.087 - [0.002, 0, 0.002, 0.008][i];
+            cone(at(f0, -0.004, q), at(f0 - 0.004, 0.026, q), 0.0105 - 0.0006 * i, 0.0105 - 0.0006 * i, SK(0.005));
+          });
+          cone(at(0.064, 0.036, 0.022), at(0.062, 0.034, -0.024), 0.011, 0.0095, SK(0.012));
+          cone(at(0.016, 0.018, 0.026), at(0.048, 0.032, 0.04), 0.0145, 0.012, SK(0.016));
+          cone(at(0.048, 0.033, 0.041), at(0.076, 0.046, 0.006), 0.0118, 0.01, SK(0.0045));
         });
       }
       const k = J['knee' + s];
       const a = J['ankle' + s];
       cone(J['hip' + s], k, 0.088, 0.07, 0);
       cone(k, mix(k, a, 0.84), 0.07, 0.064, 0);
-      cone(mix(k, a, 0.72), a, 0.04, 0.036, 1);
-      // Fuß: schmale Ferse, flache Außenkante, Gewölbe innen, Ballen, Spann, Zehen geschlossen
+      // Unterschenkel: zum Knöchel hin schlanker
+      cone(mix(k, a, 0.72), a, 0.038, 0.032, 1);
+      // Fuß: Ferse, flache Sohle mit rundem Ballen, Spann, Achillessehne, Zehen (große Zehe innen)
       const dir = J['dir' + s];
       const sole = J['sole' + s];
       const inner = mul(norm(cross(sole, dir)), s === 'L' ? 1 : -1);
       const O = (f, d, q) => add(add(add(a, mul(dir, f)), mul(sole, d)), mul(inner, q));
-      group([J['heel' + s], J['toe' + s], 0.036, 0.027], () => {
-        cone(O(-0.05, 0.044, 0), O(-0.038, 0.048, 0), 0.027, 0.027, 1);
-        cone(O(-0.036, 0.058, -0.006), O(0.104, 0.062, -0.027), 0.016, 0.014, 1);
-        cone(O(-0.03, 0.05, 0.008), O(0.112, 0.056, 0.02), 0.022, 0.019, 1);
-        cone(O(0.116, 0.058, 0.022), O(0.108, 0.062, -0.027), 0.018, 0.0145, 1);
-        cone(O(-0.008, 0.008, 0), O(0.096, 0.042, 0.0), 0.03, 0.016, 1);
+      group([J['heel' + s], J['toe' + s], 0.05, 0.04], () => {
+        cone(O(-0.04, 0.043, 0.0), O(-0.028, 0.046, 0.002), 0.03, 0.029, SK(0.02));
+        cone(O(-0.012, 0.05, -0.004), O(0.108, 0.054, 0.006), 0.034, 0.047, FL(add(sole, mul(inner, -0.25)), 2.2, 0.022));
+        cone(O(0.0, 0.004, 0.006), O(0.11, 0.038, 0.012), 0.03, 0.018, SK(0.028));
+        cone(O(-0.026, -0.075, 0.0), O(-0.042, 0.02, 0.0), 0.014, 0.019, SK(0.02));
         const ta = J['tu' + s] * 65 * D;
         const td = add(mul(dir, Math.cos(ta)), mul(sole, -Math.sin(ta)));
-        const toe = (f, d, q, l, ra, rb) => { const a0 = O(f, d, q); cone(a0, add(add(a0, mul(td, l)), mul(inner, q * 0.03)), ra, rb, 1.25); };
-        toe(0.13, 0.064, 0.022, 0.038, 0.0118, 0.0108);
-        [[0.0035, 0.026], [-0.0085, 0.023], [-0.0195, 0.02], [-0.029, 0.016]].forEach(([q, l], j) => toe(0.126 - 0.008 * j, 0.067, q, l, 0.0068, 0.0062));
+        const tdn = add(mul(dir, Math.sin(ta)), mul(sole, Math.cos(ta)));
+        // [Ansatz f, q, Länge, Radius]: kurz, dick, eng beieinander, leicht nach unten gekrümmt
+        [[0.146, 0.032, 0.026, 0.0138], [0.148, 0.0105, 0.021, 0.009], [0.143, -0.0065, 0.018, 0.0086], [0.134, -0.0225, 0.015, 0.0082], [0.121, -0.037, 0.012, 0.0078]].forEach(([f, q, l, r], j) => {
+          const a0 = O(f, 0.075 - r - 0.006 + (j ? 0 : 0.0), q);
+          cone(a0, add(add(a0, mul(td, l)), mul(tdn, 0.003)), r, r * 0.92, SK(j ? 0.007 : 0.014));
+        });
       });
     });
     // Gürtelknoten mit Enden
@@ -276,9 +292,22 @@ vec2 mapX(vec3 p, bool fine){
   while (i < uN) {
     float mi = mat(i);
     vec3 a = uA[i].xyz, ba = uB[i].xyz - a, pa = p - a;
+    float sc = 1.0, k = 0.024;
+    if (mi > 99.5) {
+      // abgeflachte Haut: Achse (Winkel), Faktor, Übergang
+      int v = int(mi - 100.0 + 0.5);
+      float tt = float(v / 65536) * (3.14159265 / 127.0), pp = float((v / 256) % 256) * (6.2831853 / 256.0);
+      vec3 ax = vec3(sin(tt) * cos(pp), cos(tt), sin(tt) * sin(pp));
+      sc = 1.0 + float((v / 16) % 16) * 0.15;
+      k = float(v % 16) * 0.0025;
+      pa += ax * dot(pa, ax) * (sc - 1.0);
+      ba += ax * dot(ba, ax) * (sc - 1.0);
+      mi = 1.0;
+    } else if (mi > 1.29 && mi < 1.5) { k = (mi - 1.3) * 0.2; mi = 1.0; }
+    else if (abs(mi - 1.25) < 0.01) k = 0.004;
     float bb = dot(ba, ba);
     float h = bb > 0.0 ? clamp(dot(pa, ba) / bb, 0.0, 1.0) : 0.0;
-    float di = length(pa - ba * h) - mix(uA[i].w, uB[i].w, h);
+    float di = (length(pa - ba * h) - mix(uA[i].w, uB[i].w, h)) / sc;
     if (mi > 9.5) {
       // Ersatzform einer Gruppe: weit weg (oder grob) genügt sie, die Einzelteile werden übersprungen
       int n = int(mi - 10.0 + 0.5);
@@ -290,7 +319,7 @@ vec2 mapX(vec3 p, bool fine){
       continue;
     }
     if (di < best) { best = di; m = mi; }
-    d = smin(d, di, abs(mi - 1.25) < 0.01 ? 0.004 : 0.024);
+    d = smin(d, di, max(k, 0.001));
     i += 1;
   }
   float dj = jacket(p);
