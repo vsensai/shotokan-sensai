@@ -130,7 +130,7 @@
   }
 
   /* ---------- Körperformen: [a, b, ra, rb, Material] ---------- */
-  // Material: 0 Gi, 1 Haut, 2 Gürtel, 4 Kopf, 5 Jacke (Gürtel, Revers);
+  // Material: 0 Gi, 0.1 Gi-Hosenbein mit offenem Saum, 1 Haut, 2 Gürtel, 4 Kopf, 5 Jacke (Gürtel, Revers);
   // 1.25 Haut mit fast harter Kante, 1.3 … 1.49 Haut mit eigenem Übergang, ab 100 abgeflachte Haut (siehe FL)
   function prims(J) {
     const P = [];
@@ -164,7 +164,10 @@
     });
     // Gesäß als durchgehende Form; darüber hängt die Jacke (Shader: jacket)
     const seat = mul(fp, -0.012);
-    cone(add(add(J.hipL, seat), mul(up, -0.01)), add(add(J.hipR, seat), mul(up, -0.01)), 0.092, 0.092, 0);
+    // Gesäß etwas weiter hinten, damit es im breiten Stand nicht als Querbalken zwischen den Beinen sichtbar ist
+    cone(add(add(J.hipL, mul(fp, -0.03)), mul(up, 0.0)), add(add(J.hipR, mul(fp, -0.03)), mul(up, 0.0)), 0.088, 0.088, 0);
+    // Schritt der Hose: füllt unter der Jacke den Raum zwischen den Oberschenkeln
+    cone(add(add(pel, mul(lp, 0.035)), mul(up, -0.15)), add(add(pel, mul(lp, -0.035)), mul(up, -0.15)), 0.068, 0.068, 0);
     // Schultern: Nacken fällt zu runden Schultern ab
     [1, -1].forEach((s) => { const sh = s > 0 ? J.shL : J.shR; cone(add(chest, mul(up, 0.02)), sh, 0.05, 0.055, 5); cone(sh, sh, 0.062, 0.062, 0); });
     // Hals reicht bis in den Kopf und geht weich in ihn über (sonst Kerbe unter dem Kinn)
@@ -203,10 +206,11 @@
       }
       const k = J['knee' + s];
       const a = J['ankle' + s];
-      cone(J['hip' + s], k, 0.088, 0.07, 0);
-      cone(k, mix(k, a, 0.84), 0.07, 0.064, 0);
+      // weite Gi-Hose: locker, unten ausgestellt, offener Saum knapp über dem Knöchel
+      cone(J['hip' + s], k, 0.112, 0.094, 0);
+      cone(k, mix(k, a, 0.88), 0.094, 0.108, 0.1);
       // Unterschenkel: zum Knöchel hin schlanker
-      cone(mix(k, a, 0.72), a, 0.038, 0.032, 1);
+      cone(mix(k, a, 0.68), a, 0.038, 0.031, 1);
       // Gliederpuppe: Gelenkkugel am Knöchel, keilförmiger Fuß (hinten hoch, vorn flach und rund)
       const dir = J['dir' + s];
       const sole = J['sole' + s];
@@ -292,6 +296,11 @@ vec2 mapX(vec3 p, bool fine){
     float bb = dot(ba, ba);
     float h = bb > 0.0 ? clamp(dot(pa, ba) / bb, 0.0, 1.0) : 0.0;
     float di = (length(pa - ba * h) - mix(uA[i].w, uB[i].w, h)) / sc;
+    if (mi > 0.05 && mi < 0.2) {
+      // Hosenbein mit offenem Saum: dünner Stoffschlauch, am Ende b gerade abgeschnitten
+      di = max(max(di, -di - 0.012), dot(pa - ba, ba) / sqrt(bb));
+      mi = 0.0;
+    }
     if (mi > 9.5) {
       // Ersatzform einer Gruppe: weit weg (oder grob) genügt sie, die Einzelteile werden übersprungen
       int n = int(mi - 10.0 + 0.5);
