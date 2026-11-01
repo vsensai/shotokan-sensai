@@ -100,7 +100,9 @@
   const MZK_G = mirror(ZK_G);
   const MZK = mirror(S.zk);
   const KB = M(S.kb, HANDS_HIP);
-  const SHUTO_END = { oL: 1, oR: 1, hL: [0.16, -0.01, 0.36], pL: [0.6, 0, 0.7], fL: [0, 1, 0.35], hR: [0.02, -0.2, 0.15], pR: [0, 1, 0], fR: [0.6, 0, 0.6] };
+  // Shuto-uke: vordere Hand vor der vorderen Schulter Richtung Gegner, Fingerspitzen etwa auf Schulterhöhe,
+  // Handfläche schräg nach vorn-außen, Ellbogen nach unten; hintere Hand offen, Handfläche oben, vor dem Solarplexus
+  const SHUTO_END = { oL: 1, oR: 1, hL: [0.43, -0.14, 0.16], pL: [0.98, 0, -0.09], fL: [0.54, 0.8, 0.25], eL: [0.15, -1, 0.35], hR: [0.02, -0.2, 0.15], pR: [0, 1, 0], fR: [0.6, 0, 0.6] };
   const KK_SHUTO = M(S.kk, SHUTO_END);
   const YOI = S.hachiji;
 
