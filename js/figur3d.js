@@ -68,7 +68,7 @@
     const fc = norm(cross(lc, up));
     const chest = add(pel, mul(up, 0.5));
     const J = { pel, chest, up, lc, fc, lp, fp };
-    J.head = add(add(chest, mul(up, 0.225)), mul(fc, 0.005));
+    J.head = add(add(chest, mul(up, 0.2)), mul(fc, 0.005));
     // Blickrichtung des Kopfes (Welt): meist zum Gegner, unabhängig von der Hüfte
     J.hf = fwdOf(P.look);
     J.hl = leftOf(P.look);
@@ -158,13 +158,15 @@
       return 100 + ((ti * 256 + pi) * 16 + fi) * 16 + ki;
     };
     const { pel, chest, up, lc, lp, fp } = J;
+    // Oberkörper als V: breite Brust, schmale Taille
     [1, -1].forEach((s) => {
-      cone(add(add(pel, mul(lp, 0.062 * s)), mul(up, 0.03)), add(add(chest, mul(lc, 0.078 * s)), mul(up, -0.06)), 0.112, 0.12, 5);
+      cone(add(add(pel, mul(lp, 0.045 * s)), mul(up, 0.05)), add(add(chest, mul(lc, 0.07 * s)), mul(up, -0.045)), 0.09, 0.115, 5);
     });
     // Gesäß als durchgehende Form; darüber hängt die Jacke (Shader: jacket)
     const seat = mul(fp, -0.012);
     cone(add(add(J.hipL, seat), mul(up, -0.01)), add(add(J.hipR, seat), mul(up, -0.01)), 0.092, 0.092, 0);
-    cone(J.shL, J.shR, 0.066, 0.066, 0);
+    // Schultern: Nacken fällt zu runden Schultern ab
+    [1, -1].forEach((s) => { const sh = s > 0 ? J.shL : J.shR; cone(add(chest, mul(up, 0.02)), sh, 0.05, 0.055, 5); cone(sh, sh, 0.062, 0.062, 0); });
     // Hals reicht bis in den Kopf und geht weich in ihn über (sonst Kerbe unter dem Kinn)
     cone(add(chest, mul(up, 0.02)), add(add(chest, mul(up, 0.2)), mul(J.hf, -0.012)), 0.05, 0.044, SK(0.03));
     // Kopf als Ei: runder Schädel, weich angesetztes schmaleres Kinn, seitlich etwas schmaler als tief
@@ -175,8 +177,8 @@
     ['L', 'R'].forEach((s) => {
       const e = J['elbow' + s];
       const w = J['wrist' + s];
-      cone(J['sh' + s], e, 0.058, 0.05, 0);
-      cone(e, mix(e, w, 0.7), 0.05, 0.047, 0);
+      cone(J['sh' + s], e, 0.054, 0.044, 0);
+      cone(e, mix(e, w, 0.72), 0.044, 0.038, 0);
       const fd = J['fd' + s];
       const wd = J['wd' + s];
       const th = s === 'R' ? 1 : -1;
@@ -186,7 +188,7 @@
       const pn = norm(cross(wd, hf));
       const at = (f, p, q) => add(add(add(w, mul(hf, f)), mul(pn, p)), mul(wd, q * th));
       // Gliederpuppe: Unterarm endet vor dem Handgelenk, dort eine Gelenkkugel
-      cone(mix(e, w, 0.55), mix(e, w, 0.94), 0.033, 0.028, 1);
+      cone(mix(e, w, 0.55), mix(e, w, 0.94), 0.03, 0.025, 1);
       cone(w, w, 0.02, 0.02, SK(0.003));
       if (open) {
         // offene Hand als flaches Paddel (Shuto, Nukite)
