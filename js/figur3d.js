@@ -48,6 +48,9 @@
     hL: [0.16, -0.38, 0.02], hR: [-0.16, -0.38, 0.02], eL: [0, 0, 0], eR: [0, 0, 0],
     // offene Hand (0 = Faust, 1 = offen), Handflächen-Normale und Fingerrichtung (Brustkoordinaten, 0 = automatisch)
     oL: 0, oR: 0, pL: [0, 0, 0], pR: [0, 0, 0], fL: [0, 0, 0], fR: [0, 0, 0],
+    // Stoß (0 = aus): Faust dreht erst gegen Ende der Streckung von „Faustrücken unten“ in die Endlage;
+    // Wert = Anteil der Drehung (1 = 180°, Faustrücken oben; 0,5 = senkrechte Faust)
+    sL: 0, sR: 0,
     w: [0.5, 0.5],
   };
   function full(p) {
@@ -119,7 +122,11 @@
       // ohne Vorgabe: Handfläche unten, an der Hüfte (Hikite) nach oben – über „zur Mitte“ gedreht wie beim Stoß
       // tief vor dem Körper (Yoi, natürliche Stände): Handfläche zum Körper, Faustrücken nach vorn
       const ky = cl((-0.4 - hv[1]) / 0.08) * cl((hv[2] + 0.05) / 0.1);
-      let palm = len(pv0) > 0.01 ? sub(toW(pv0), chest) : add(add(mul(up, (2 * kh - 1) * (1 - ky)), mul(lc, -sg * Math.sin(Math.PI * kh))), mul(fc, -ky));
+      // beim Stoß: Drehung hängt an der Streckung des Arms (letztes Stück der Bahn), nicht an der Nähe zur Hüfte
+      const st = P['s' + s];
+      const ext = len(sub(target, sh)) / (UARM + FARM);
+      const kq = st > 0.01 ? Math.max(kh, 1 - st * cl((ext - 0.72) / 0.24)) : kh;
+      let palm = len(pv0) > 0.01 ? sub(toW(pv0), chest) : add(add(mul(up, (2 * kq - 1) * (1 - ky)), mul(lc, -sg * Math.sin(Math.PI * kq))), mul(fc, -ky));
       palm = sub(palm, mul(fd, dot(palm, fd)));
       if (len(palm) < 0.05) palm = cross(fd, lc);
       J['fd' + s] = fd;
