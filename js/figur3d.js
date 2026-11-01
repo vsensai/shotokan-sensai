@@ -391,12 +391,12 @@ vec3 baseCol(float m, vec3 p, out float kind){
     if (bt > 0.5) kind = 2.0;
     if (bt > 0.0) return mix(gi, ink, bt);
     // Ausschnitt: kleines V unter dem Hals, darunter kreuzen die Revers
-    float vx = (hh - 0.47) * 0.6;
-    if (ff > 0.0 && hh > 0.47 && abs(uu) < vx) { kind = 1.0; return skin; }
+    float vx = (hh - 0.53) * 0.45;
+    if (ff > 0.0 && hh > 0.53 && abs(uu) < vx) { kind = 1.0; return skin; }
     // Kragen: dunklerer Stoffstreifen entlang des Ausschnitts
-    if (ff > 0.0 && hh > 0.47 - 0.02 && abs(uu) < max(vx, 0.0) + 0.03) { kind = 4.0; return gi * 0.7; }
-    float lu = mix(0.115, -0.004, clamp((hh - 0.12) / (0.47 - 0.12), 0.0, 1.0));
-    if (ff > 0.0 && hh > 0.118 && hh < 0.47) {
+    if (ff > 0.0 && hh > 0.53 - 0.02 && abs(uu) < max(vx, 0.0) + 0.03) { kind = 4.0; return gi * 0.7; }
+    float lu = mix(0.115, -0.004, clamp((hh - 0.12) / (0.53 - 0.12), 0.0, 1.0));
+    if (ff > 0.0 && hh > 0.118 && hh < 0.53) {
       float ln = 1.0 - smoothstep(0.003, 0.0055, abs(uu - lu));
       if (ln > 0.0) { if (ln > 0.5) kind = 4.0; return mix(gi, gi * 0.62, ln); }
       if (uu - lu > 0.0 && uu - lu < 0.03) { return gi * 0.965; }
