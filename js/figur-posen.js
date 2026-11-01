@@ -67,6 +67,14 @@
     const a = ((f.yaw + f.chest) * Math.PI) / 180;
     return [h[0] * Math.cos(a) - h[2] * Math.sin(a), h[1], h[0] * Math.sin(a) + h[2] * Math.cos(a)];
   }
+  // Gestreckter Stoß auf die Mittellinie in Höhe y (Brust): Abstand nach vorn so, dass der Arm (0,56 m) ganz durchgestreckt ist
+  function punch(p, side, y) {
+    const f = E.full(p);
+    const a = ((f.yaw + f.chest) * Math.PI) / 180;
+    const sx = (side === 'L' ? 0.185 : -0.185);
+    const wx = sx * Math.cos(a), wz = -sx * Math.sin(a), dy = y + 0.035;
+    return aim(p, [0, y, wz + Math.sqrt(Math.max(0, 0.556 * 0.556 - wx * wx - dy * dy))]);
+  }
   // Ellbogen-Richtungen (Brustkoordinaten)
   const UP_OUT = [-0.45, 0.3, 0.15];
   const DOWN_FWD = [-0.1, -0.6, 0.3];
@@ -147,18 +155,18 @@
 
   /* ---------- Fauststöße ---------- */
   const ZKS_PUNCH = M(S.zks, { hL: L(H.hip), hR: H.chudan });
-  // Stoß der vorderen Hand aus dem Hanmi: geradeaus auf die Mittellinie (nicht in Brustrichtung schräg zur Seite)
-  const STR_J = [0, 0.03, 0.6];
-  const STR_C = [0, -0.13, 0.6];
+  // Kizami-, Sanbon-, Ren-zuki: jede Stoßfaust startet an der Hüfte und trifft mit gestrecktem Arm geradeaus die Mittellinie
+  const JO = H.jodan[1], CH = H.chudan[1];
+  const ZK_HIP = M(S.zk, HANDS_HIP);
   D['mv:gyaku-zuki'] = T(ZK_G, ZKS_PUNCH, M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   const OI_MID = { pelvis: [0, 0.71, 0.6], yaw: -18, L: { x: 0.12, z: 0.62, yaw: 10 }, R: { x: -0.01, z: 0.58, y: 0.11, yaw: 0 }, hL: L(H.gedan), hR: H.hip, w: [1, 0] };
   const OI_END = { pelvis: [0, 0.7, 1.22], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 32 }, R: { x: -0.13, z: 1.74, yaw: 4 }, hL: L(H.hip), hR: H.chudan, w: [0.3, 0.7] };
   D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.12, p: ZK_G }, { t: 0.5, p: OI_MID }, { t: 0.82, p: OI_END, e: 'kime' }], best: 1, dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
   D['tc:choku-zuki'] = T(M(YOI, { hL: L(H.chudan), hR: H.hip }), M(YOI, { hL: L(H.hip), hR: H.chudan }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
-  D['tc:kizami-zuki'] = T(ZK_KAMAE, M(S.zk, { pelvis: [0, 0.71, 0.16], hL: aim(S.zk, STR_J), hR: H.guardR }), M(hit('fistL', 'Faust'), { eff: 'fistL', view: 'side3' }));
+  D['tc:kizami-zuki'] = T(M(S.zk, { hL: L(H.hip), hR: H.guardR }), M(S.zk, { pelvis: [0, 0.71, 0.16], hL: punch(S.zk, 'L', JO), hR: H.guardR }), M(hit('fistL', 'Faust'), { eff: 'fistL', view: 'side3' }));
   D['tc:tate-zuki'] = T(ZK_G, M(ZKS_PUNCH), M(hit('fistR', 'Faust senkrecht'), { eff: 'fistR', view: 'side3' }));
-  D['tc:sanbon-zuki'] = SEQ([MZK_G, M(MZK, { hL: L(H.hip), hR: aim(MZK, STR_J) }), M(mirror(S.zks), { hL: L(H.chudan), hR: H.hip }), M(MZK, { hL: L(H.hip), hR: aim(MZK, STR_C) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
-  D['tc:ren-zuki'] = SEQ([ZK_KAMAE, M(S.zk, { hL: aim(S.zk, STR_J), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: H.chudan })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
+  D['tc:sanbon-zuki'] = SEQ([mirror(ZK_HIP), M(MZK, { hL: L(H.hip), hR: punch(MZK, 'R', JO) }), M(mirror(S.zks), { hL: punch(mirror(S.zks), 'L', CH), hR: H.hip }), M(MZK, { hL: L(H.hip), hR: punch(MZK, 'R', CH) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
+  D['tc:ren-zuki'] = SEQ([ZK_HIP, M(S.zk, { hL: punch(S.zk, 'L', JO), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: punch(S.zks, 'R', CH) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:morote-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hL: [0.07, -0.13, 0.52], hR: [-0.07, -0.13, 0.52] }), M(hit('fistR', 'Fäuste'), { eff: 'fistR', view: 'side3' }));
   D['tc:kagi-zuki'] = T(KB, M(KB, { hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3], look: 90 }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front' }));
   D['tc:ura-zuki'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.03, -0.26, 0.4], eR: [-0.15, -0.7, 0.05] }), M(hit('fistR', 'Handrücken unten'), { eff: 'fistR', view: 'side3' }));
