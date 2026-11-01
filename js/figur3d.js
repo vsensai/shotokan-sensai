@@ -165,14 +165,13 @@
     const seat = mul(fp, -0.012);
     cone(add(add(J.hipL, seat), mul(up, -0.01)), add(add(J.hipR, seat), mul(up, -0.01)), 0.092, 0.092, 0);
     cone(J.shL, J.shR, 0.066, 0.066, 0);
-    cone(add(chest, mul(up, 0.02)), add(add(chest, mul(up, 0.16)), mul(J.hf, -0.02)), 0.05, 0.046, 1);
-    cone(add(J.head, mul(J.hf, -0.012)), add(J.head, mul(J.hf, 0.008)), 0.1, 0.1, 4);
-    // Kinn und Kiefer: ohne sie wirkt eine Kugel wie ein nach oben blickender Kopf
-    const jaw = add(add(J.head, mul(J.hf, 0.022)), mul(up, -0.05));
-    cone(jaw, add(add(jaw, mul(J.hf, 0.03)), mul(up, -0.012)), 0.07, 0.052, 4);
-    const nose = add(add(J.head, mul(J.hf, 0.097)), mul(up, -0.022));
-    cone(nose, add(nose, mul(up, -0.02)), 0.017, 0.019, 1);
-    [1, -1].forEach((s) => { const e = add(add(J.head, mul(J.hl, 0.1 * s)), mul(J.hf, -0.005)); cone(e, add(e, mul(up, -0.025)), 0.02, 0.016, 1); });
+    // Hals reicht bis in den Kopf und geht weich in ihn über (sonst Kerbe unter dem Kinn)
+    cone(add(chest, mul(up, 0.02)), add(add(chest, mul(up, 0.2)), mul(J.hf, -0.012)), 0.05, 0.044, SK(0.03));
+    // Kopf als Ei: runder Schädel, weich angesetztes schmaleres Kinn, seitlich etwas schmaler als tief
+    const skull = add(add(J.head, mul(up, 0.012)), mul(J.hf, -0.008));
+    const chin = add(add(J.head, mul(up, -0.05)), mul(J.hf, 0.03));
+    cone(skull, skull, 0.088, 0.088, FL(J.hl, 1.12, 0.01));
+    cone(chin, chin, 0.055, 0.055, FL(J.hl, 1.12, 0.0375));
     ['L', 'R'].forEach((s) => {
       const e = J['elbow' + s];
       const w = J['wrist' + s];
@@ -359,7 +358,12 @@ vec3 baseCol(float m, vec3 p, out float kind){
     if (hy > 0.025 + hz * 0.5 && length(q) > 0.088 && uStyle != 2) { kind = 3.0; return vec3(0.07, 0.055, 0.05); }
     kind = 1.0; return skin;
   }
-  if (m > 0.5 && m < 1.5) { kind = 1.0; return skin; }
+  if (m > 0.5 && m < 1.5) {
+    // Augen: zwei dunkle Punkte vorn am Kopf (Gliederpuppe, sonst ohne Gesicht)
+    vec3 q = p - uHead; float hy = dot(q, uUp), hz = dot(q, uHFwd), hx = dot(q, normalize(cross(uUp, uHFwd)));
+    if (hz > 0.04 && length(q) < 0.12 && length(vec2(abs(hx) - 0.028, hy - 0.004)) < 0.0072 && uStyle != 2) { kind = 2.0; return vec3(0.1, 0.08, 0.07); }
+    kind = 1.0; return skin;
+  }
   if (m > 1.5 && m < 2.5) { kind = 2.0; return ink; }
   if (m > 4.5) {
     vec3 q = p - uPel; float hh = dot(q, uUp), uu = dot(q, uLeft), ff = dot(q, uFwd);
