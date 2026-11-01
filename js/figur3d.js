@@ -154,16 +154,8 @@
         const wd = J['wd' + s];
         [1, -1].forEach((k) => cone(add(add(w, mul(fd, 0.03)), mul(wd, 0.016 * k)), add(add(w, mul(fd, 0.17)), mul(wd, 0.013 * k)), 0.021, 0.015, 1));
       } else {
-        // Faust: Handrücken, eingerollte Finger (zwei Reihen quer über die Knöchel) und Daumen
-        const fd = norm(sub(J['fist' + s], w));
-        const wd = J['wd' + s];
-        const pn = norm(cross(wd, fd));
-        const th = s === 'R' ? 1 : -1;
-        const at = (f, p, q) => add(add(add(w, mul(fd, f)), mul(pn, p)), mul(wd, q));
-        // (Material 1.25 = Haut mit fast harter Kante, sonst verschmelzen Finger zu einem Klumpen)
-        cone(at(0.0, 0, 0), at(0.042, -0.004, 0), 0.03, 0.033, 1.25);
-        [-0.027, -0.009, 0.009, 0.027].forEach((q, i) => cone(at(0.072 - 0.004 * Math.abs(i - 1.5), -0.006, q), at(0.058, 0.026, q * 0.9), 0.0125, 0.0115, 1.25));
-        cone(at(0.022, 0.02, 0.036 * th), at(0.062, 0.04, 0.0), 0.0125, 0.011, 1.25);
+        // Faust: runde Kugel mit fast harter Kante (Material 1.25), damit sie sich vom Unterarm abhebt
+        cone(J['fist' + s], J['fist' + s], 0.045, 0.045, 1.25);
       }
       const k = J['knee' + s];
       const a = J['ankle' + s];
