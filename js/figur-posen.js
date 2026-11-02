@@ -229,12 +229,12 @@
 
   /* ---------- Schläge ---------- */
   // Uraken (Yoko-mawashi-uchi): Faust vor der linken Brust, der Ellbogen führt zur Seite, dann schnappt der Unterarm aus –
-  // Treffer auf Schulterhöhe, Ellbogen leicht gebeugt
+  // Treffer auf Schulterhöhe mit durchgestrecktem Arm; schneller Schnapper (kürzere Dauer)
   D['tc:uraken-uchi'] = FLOW([
     M(KB, { look: -90, hR: [0.16, -0.06, 0.2], eR: [-0.6, -0.2, 0.8] }),
     M(KB, { look: -90, hR: [-0.14, 0.0, 0.22], eR: [-1, 0.2, 0.1] }),
-    M(KB, { look: -90, hR: [-0.68, 0.05, 0.12], eR: [-0.2, 0.5, -0.6] }),
-  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front' }));
+    M(KB, { look: -90, hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6] }),
+  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front', dur: 0.95 }));
   // Tettsui (Kentsui Tate-mawashi-uchi) wie in Heian Shodan 4: aus Gedan-barai im Migi Zenkutsu-dachi
   // senkrechter Kreis vor dem Körper hoch über den Kopf und von oben nach vorn, Arm leicht gebeugt
   D['tc:tettsui-uchi'] = FLOW([
@@ -254,7 +254,12 @@
   ], M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front' }));
   const MAE_ENPI = M(S.zks, { hL: L(H.hip), hR: [0.08, -0.13, 0.17], eR: [-0.1, 0.1, 1] });
   D['tc:enpi-uchi'] = T(ZK_G, MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3' }));
-  D['tc:furi-enpi'] = T(M(KB, { look: -90, hR: [0.3, -0.12, 0.3] }), M(KB, { look: -90, hR: [-0.06, -0.08, 0.14], eR: [-1, 0.1, 0.4] }), M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
+  // Furi-enpi: Arm holt vor dem Körper nach links aus (Ellbogen vorn, Unterarm bleibt vor der Brust), dann schwingt der Ellbogen zur Seite
+  D['tc:furi-enpi'] = FLOW([
+    M(KB, { look: -90, hR: [0.3, -0.12, 0.38], eR: [-0.2, -0.3, 1] }),
+    M(KB, { look: -90, hR: [0.12, -0.1, 0.34], eR: [-0.7, -0.1, 1] }),
+    M(KB, { look: -90, hR: [-0.06, -0.08, 0.2], eR: [-1, 0.1, 0.4] }),
+  ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
   // Yoko-enpi: Unterarm waagerecht vor der Brust (Faust vor der linken Seite, Ellbogen vorn), dann stößt der Ellbogen zur Seite
   D['tc:yoko-enpi'] = FLOW([
     M(KB, { look: -90, hR: [0.24, -0.08, 0.34], eR: [-0.4, 0, 1] }),
@@ -267,11 +272,14 @@
     M(S.zks, { chest: -15, hL: L(H.hip), hR: [-0.34, -0.12, 0.02], eR: [-1, 0, -0.4] }),
     M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.12, -0.04, 0.12], eR: [-0.25, 0, 1] }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front3' }));
-  // Age-enpi: aus der Hüfte direkt hochgezogen – der Ellbogen steigt senkrecht, die Faust endet neben dem Ohr
+  // Age-enpi: aus der Hüfte gerade nach oben – Faust steigt dicht vor der rechten Brust hoch, der Ellbogen bleibt vorn
+  // und steigt senkrecht (kein Ausschwenken zur Seite), die Faust endet neben dem Ohr
   D['tc:age-enpi'] = FLOW([
-    M(S.zks, HANDS_HIP),
+    M(S.zks, { hL: L(H.hip), hR: H.hip, eR: [-0.3, -0.5, -1] }),
+    M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.12, 0.3], eR: [0, -1, 0.3], pR: [1, 0, 0] }),
+    M(S.zks, { hL: L(H.hip), hR: [-0.12, 0.04, 0.24], eR: [0, -0.4, 1], pR: [1, 0, 0] }),
     M(S.zks, { hL: L(H.hip), hR: [-0.14, 0.16, 0.05], eR: [-0.1, 1, 0.6], pR: [1, 0, 0] }),
-  ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front3' }));
+  ], M(hit('elbowR', 'Ellbogen'), { eff: 'fistR', view: 'front3' }));
   D['tc:otoshi-enpi'] = T(M(KB, { hR: [-0.15, 0.5, 0.1] }), M(KB, { hR: [-0.12, 0.02, 0.14], eR: [0, -1, 0.35] }), M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
   D['tc:ushiro-enpi'] = T(M(S.zks, { hL: L(H.hip), hR: H.chudan }), M(S.zks, { hL: L(H.guardF), hR: [-0.16, -0.22, 0.06], eR: [-0.3, -0.2, -1] }), M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side' }));
   // Hasami-uchi wie in Bassai Dai 23: beide Fäuste holen hoch über dem Kopf aus, schwingen seitlich in großen Bögen herab
