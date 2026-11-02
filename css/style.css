@@ -926,6 +926,13 @@ figure.gfx svg {
   outline-offset: 2px;
 }
 
+/* Unsichtbare Messkarte: Breite der 3D-Bühne im Lexikon fürs Vorrechnen (js/app.js) */
+.lex-probe {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
 .lex-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));

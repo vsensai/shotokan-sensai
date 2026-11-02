@@ -164,6 +164,15 @@
   let lastScroll = 0;
   let waitTimer = 0;
   window.addEventListener('scroll', () => (lastScroll = performance.now()), { passive: true, capture: true });
+  // Reihenfolge: sichtbare Figuren (nach schnellem Scrollen warten sonst längst vorbeigescrollte davor),
+  // dann alle anderen angeforderten, zuletzt die im Hintergrund vorgerechneten (prefetch).
+  function pick() {
+    const vis = queue.findIndex((j) => j.box && onScreen(j.box));
+    if (vis >= 0) return vis;
+    const asked = queue.findIndex((j) => !j.low);
+    return asked < 0 ? 0 : asked;
+  }
+  const idle = (fn) => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 200));
   function pump() {
     if (busy || !queue.length || waitTimer) return;
     const wait = lastScroll + CALM - performance.now();
@@ -171,11 +180,15 @@
       waitTimer = setTimeout(() => { waitTimer = 0; pump(); }, wait);
       return;
     }
+    // Nur noch Vorrat: nicht rechnen, solange eine Figur gedreht oder abgespielt wird, sonst in Leerlaufzeit
+    const lowOnly = queue.every((j) => j.low);
+    if (lowOnly && live) {
+      waitTimer = setTimeout(() => { waitTimer = 0; pump(); }, 500);
+      return;
+    }
     busy = true;
-    requestAnimationFrame(() => {
-      // Sichtbare Figuren zuerst (nach schnellem Scrollen warten sonst längst vorbeigescrollte davor)
-      const vis = queue.findIndex((j) => j.box && onScreen(j.box));
-      const job = queue.splice(vis < 0 ? 0 : vis, 1)[0];
+    (lowOnly ? idle : requestAnimationFrame)(() => {
+      const job = queue.splice(pick(), 1)[0];
       try {
         const cv = document.createElement('canvas');
         cv.width = job.w;
@@ -200,15 +213,25 @@
     const r = n.getBoundingClientRect();
     return r.bottom > 0 && r.top < window.innerHeight && r.width > 0;
   };
-  function still(key, w, h, plain, box) {
+  function still(key, w, h, plain, box, low) {
     const id = `${key}|${w}x${h}|${plain ? 1 : 0}`;
     if (!stills.has(id)) {
-      const p = new Promise((resolve, reject) => { queue.push({ key, w, h, plain, box, resolve, reject }); pump(); });
+      const p = new Promise((resolve, reject) => { queue.push({ key, w, h, plain, box, low, resolve, reject }); pump(); });
       // Fehlschlag nicht merken: beim nächsten Mal neu versuchen
       p.catch(() => stills.delete(id));
       stills.set(id, p);
+    } else if (!low) {
+      // Schon als Vorrat eingereiht, jetzt aber gebraucht: nach vorn
+      const j = queue.find((x) => x.key === key && x.w === w && x.h === h && !!x.plain === !!plain);
+      if (j) Object.assign(j, { low: false, box: box || j.box });
     }
     return stills.get(id);
+  }
+  // Im Hintergrund vorrechnen (z. B. Lexikon nach dem Start): width = Breite der Bühne, in der die Figur erscheinen wird
+  function prefetch(key, width) {
+    if (!has(key)) return;
+    const [w, h] = sizeW(width, 2);
+    still(key, w, h, false, null, true).catch(() => {});
   }
 
   /* ---------- HTML und Einbinden ---------- */
@@ -221,8 +244,9 @@
     return `<div class="f3d${opt.cls ? ` ${opt.cls}` : ''}" data-f3d="${esc(key)}"${opt.plain ? ' data-plain="1"' : ''}><div class="f3d-stage"><img class="f3d-img" alt="" draggable="false"><span class="f3d-badge" aria-hidden="true">3D ↻ ⤢</span></div>${tools}</div>`;
   }
   const dpr = (cap) => Math.min(window.devicePixelRatio || 1, cap);
-  function sizeOf(stage, cap) {
-    const cw = Math.max(120, Math.round((stage.clientWidth || 260) / 40) * 40);
+  const sizeOf = (stage, cap) => sizeW(stage.clientWidth || 260, cap);
+  function sizeW(width, cap) {
+    const cw = Math.max(120, Math.round(width / 40) * 40);
     const w = Math.round(cw * dpr(cap));
     return [w, Math.round(w * 0.8)];
   }
@@ -593,5 +617,5 @@
     else document.addEventListener('DOMContentLoaded', init);
   }
 
-  SK.fig3d = { ok, has, html, entry, paint, still, openBig };
+  SK.fig3d = { ok, has, html, entry, paint, still, prefetch, openBig };
 })();

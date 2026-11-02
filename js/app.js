@@ -968,6 +968,22 @@
   });
   route();
 
+  // Lexikon-Figuren im Hintergrund vorrechnen, sobald die erste Seite steht und der Browser Ruhe hat –
+  // dann sind sie beim Aufklappen einer Kategorie schon fertig. Nur bei 3D-Figuren (WebGL); die Figuren rechnet
+  // js/figur-app.js nachrangig: was gerade auf dem Bildschirm gebraucht wird, kommt immer zuerst.
+  function prefetchLexikon() {
+    if (!SK.fig3d || !SK.fig3d.ok()) return;
+    // Breite der Bühne messen, wie sie im Lexikon sein wird (gleiche Größe = gleiches Bild im Zwischenspeicher)
+    const stage = el('div', { class: 'f3d-stage' });
+    const probe = el('div', { class: 'lex-probe', 'aria-hidden': 'true' }, el('div', { class: 'lex-grid' }, el('article', { class: 'lex-card' }, el('div', { class: 'lex-img' }, el('div', { class: 'gfx-box' }, el('div', { class: 'f3d' }, stage))))));
+    app.append(probe);
+    const width = stage.clientWidth;
+    probe.remove();
+    if (!width) return;
+    SK.glossaryCats.forEach((c) => SK.glossary.forEach((e) => e.cat === c.id && e.img && SK.fig3d.prefetch(e.img.key, width)));
+  }
+  window.addEventListener('load', () => setTimeout(() => (window.requestIdleCallback ? requestIdleCallback(prefetchLexikon, { timeout: 3000 }) : prefetchLexikon()), 600), { once: true });
+
   // Offline-Speicher (sw.js, v1.41.0) ist abgeschaltet: früher installierten wieder entfernen.
   if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
     navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister())).catch(() => {});
