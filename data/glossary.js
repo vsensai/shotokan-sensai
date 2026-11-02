@@ -89,7 +89,7 @@
     ['Kakiwake-uke', 'Abwehr, bei der beide Arme auseinanderdrücken', 'uke', tc('kakiwake-uke'), PDF(46)],
     ['Nagashi-uke', 'Fließende, ablenkende Abwehr', 'uke', tc('nagashi-uke')],
     ['Osae-uke', 'Drückende Abwehr nach unten', 'uke', tc('osae-uke'), PDF(21)],
-    ['Kake-uke', 'Hakenabwehr mit dem Handgelenk', 'uke', tc('kake-uke'), PDF(59)],
+    ['Kake-uke', 'Hakenabwehr mit dem Handgelenk (z. B. Heian Godan 14, langsam im Kiba-dachi)', 'uke', tc('kake-uke'), PDF(59)],
     ['Sukui-uke', 'Schöpfende Abwehr gegen einen Tritt', 'uke', tc('sukui-uke'), PDF(82)],
     ['Haiwan-uke', 'Abwehr mit der Rückseite des Unterarms', 'uke', tc('haiwan-uke'), PDF(17)],
     ['Tsukami-uke', 'Greifende Abwehr', 'uke', tc('tsukami-uke'), PDF(87)],

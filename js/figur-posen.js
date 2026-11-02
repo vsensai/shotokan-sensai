@@ -316,7 +316,14 @@
   D['tc:te-nagashi-uke'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.02, -0.12, 0.5], oR: 1, pR: [1, 0, 0], fR: [0, 0.4, 1] }), M(S.zk, { chest: 18, hL: L(H.guardF), hR: [0.16, -0.16, 0.36], oR: 1, pR: [1, 0, -0.2], fR: [0.2, 0.3, 1] }), M(hit('wristR', 'Handfläche lenkt ab'), { eff: 'tipR', view: 'side3' }));
   D['tc:gedan-nagashi-uke'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.42, -0.5, 0.18], oR: 1, pR: [1, 0, 0] }), M(S.zk, { hL: L(H.guardF), hR: [0.1, -0.48, 0.33], oR: 1, pR: [1, 0, 0] }), M(hit('wristR', 'Unterarm'), { eff: 'wristR', view: 'front3' }));
   D['tc:osae-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [0.0, -0.1, 0.36], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, -0.36, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' }));
-  D['tc:kake-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [0.1, -0.12, 0.3], oR: 1, pR: [1, 0, 0] }), M(S.kk, { hL: L(H.hip), hR: [-0.12, 0.02, 0.42], oR: 1, pR: [-0.6, 0, 0.6], fR: [0, 1, 0.5] }), M(hit('wristR', 'Handgelenk'), { eff: 'wristR', view: 'front3' }));
+  // Kake-uke wie in Heian Godan 14: aus Kiba-dachi mit rechtem Gedan-barai (Blick nach rechts) wendet sich der Blick nach links;
+  // langsam und kraftvoll wie beim Spannen eines Bogens hakt die linke offene Hand vor der Brust vorbei zur linken Seite
+  // (Chudan, Handgelenk außen, Handfläche nach vorn), die rechte Faust zieht zur Hüfte
+  const KU0 = M(KB, { look: -90, hL: L(H.hip), hR: H.gedan });
+  const KU1 = M(KB, { look: 90, hL: L(H.hip), hR: H.gedan });
+  const KU2 = M(KB, { look: 90, hL: [-0.02, -0.14, 0.34], oL: 1, pL: [0.2, 0, 1], fL: [-0.3, 1, 0.1], eL: [0.4, -1, 0.2], hR: [-0.3, -0.42, 0.14] });
+  const KU3 = M(KB, { look: 90, hL: [0.62, -0.1, 0.22], oL: 1, pL: [0.1, 0, 1], fL: [0.15, 1, 0], eL: [0.2, -1, 0.1], hR: H.hip });
+  D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.1, p: KU0 }, { t: 0.2, p: KU1 }, { t: 0.45, p: KU2, e: 'lin' }, { t: 0.85, p: KU3 }], best: 1, dur: 3.4, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
   D['tc:sukui-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [-0.32, -0.55, 0.2], oR: 1, pR: [0, 1, 0] }), M(S.kk, { hL: L(H.hip), hR: [-0.04, -0.3, 0.42], oR: 1, pR: [0, 1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'side3' }));
   D['tc:haiwan-uke'] = T(M(S.kk, HANDS_HIP), M(S.kk, { hL: L(H.hip), hR: [-0.42, 0.24, 0.16], eR: [-0.6, -0.2, 0.2] }), M(hit('elbowR', 'Unterarm-Rückseite'), { eff: 'fistR', view: 'front3' }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
