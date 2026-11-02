@@ -81,7 +81,9 @@
     setNav('');
     setTitle('');
     app.innerHTML = '';
-    const tile = (href, title, text) => el('a', { class: 'tile', href }, el('h3', { text: title }), el('p', { text }));
+    // Kurzer Text fürs Handy (alles ohne Scrollen), ausführlicher ab 1100 px
+    const tile = (href, title, kurz, lang) =>
+      el('a', { class: 'tile', href }, el('h3', { text: title }), el('p', null, el('span', { class: 'kurz', text: kurz }), el('span', { class: 'lang', text: lang })));
     app.append(
       el(
         'section',
@@ -92,11 +94,11 @@
       el(
         'div',
         { class: 'tiles' },
-        tile('#/lexikon', 'Lexikon', 'Alle Stände, Techniken & Begriffe mit Grafik und 3D-Figur – zum Nachschlagen und Suchen'),
-        tile('#/wissen', 'Lernen', 'Alle Themen zum Durcharbeiten – von den Grundlagen bis zu den Kata'),
-        tile('#/quiz', 'Quiz', 'Jede Lektion als eigenes Quiz oder ein Zufallsmix aus allen Fragen'),
-        tile('#/ansage', 'Kata-Trainer', 'Alle Kata mit Embusen und Schrittfolge – Bewegung für Bewegung auf der Bodenkarte'),
-        tile('#/exam', 'Prüfungen', 'DJKB-Prüfungsprogramm je Gürtel: Kihon, Kata und Kumite')
+        tile('#/lexikon', 'Lexikon', 'Alle Stände, Techniken & Begriffe zum Nachschlagen', 'Alle Stände, Techniken & Begriffe mit Grafik und 3D-Figur – zum Nachschlagen und Suchen'),
+        tile('#/wissen', 'Lernen', 'Alle Inhalte zum Durcharbeiten', 'Alle Themen zum Durcharbeiten – von den Grundlagen bis zu den Kata'),
+        tile('#/quiz', 'Quiz', 'Alle Lektionen als Quiz, Zufallsmix aus allen Fragen', 'Jede Lektion als eigenes Quiz oder ein Zufallsmix aus allen Fragen'),
+        tile('#/ansage', 'Kata-Trainer', 'Alle Kata – Embusen und Schrittfolgen', 'Alle Kata mit Embusen und Schrittfolge – Bewegung für Bewegung auf der Bodenkarte'),
+        tile('#/exam', 'Prüfungen', 'DJKB-Prüfungsprogramm: Kihon, Kata, Kumite', 'DJKB-Prüfungsprogramm je Gürtel: Kihon, Kata und Kumite')
       ),
       versionLine()
     );
