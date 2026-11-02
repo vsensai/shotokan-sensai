@@ -134,6 +134,12 @@
     for (let i = 1; i < n; i++) keys.push({ t: 0.15 + (0.65 * i) / (n - 1), p: poses[i], e: 'kime' });
     return M({ keys, best: 1, dur: 1.2 + 0.5 * n }, o);
   };
+  // Eine fließende Bewegung über Zwischenstellungen: dort nicht abbremsen, erst am Ende Kime
+  const FLOW = (poses, o) => {
+    const d = SEQ(poses, o);
+    d.keys = d.keys.map((k, i) => (i >= 2 && i < d.keys.length - 1 ? Object.assign({}, k, { e: 'in' }) : k));
+    return d;
+  };
   // Fußtritt: ausholen, treffen, zurück
   const K = (base, chamber, ext, o) => M({ keys: [{ t: 0, p: base }, { t: 0.1, p: base }, { t: 0.34, p: chamber }, { t: 0.5, p: ext, e: 'kime' }, { t: 0.66, p: chamber }, { t: 0.9, p: base }], best: 0.5, dur: 2 }, o);
   const STILL = (pose, o) => M({ keys: [{ t: 0, p: pose }], best: 0, still: true }, o);
@@ -175,11 +181,12 @@
   D['tc:kagi-zuki'] = T(KB, M(KB, { hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3], look: 90 }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front' }));
   // Ura-zuki: Faust steigt aus der Hüfte schräg (etwa 45°) nach oben vorn, Faustrücken bleibt unten (keine Drehung)
   D['tc:ura-zuki'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.03, -0.14, 0.42], eR: [-0.1, -1, 0.3], pR: [0, 1, 0] }), M(hit('fistR', 'Handrücken unten'), { eff: 'fistR', view: 'side3' }));
-  D['tc:age-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.06, -0.3, 0.35] }), M(S.zks, { hL: L(H.hip), hR: [0.0, 0.22, 0.62] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
-  D['tc:yama-zuki'] = T(M(S.zk, HANDS_HIP, { hL: [0.28, -0.42, 0.05], hR: [-0.18, -0.4, -0.05] }), M(S.zk, { lean: 20, hR: [-0.02, 0.46, 0.4], hL: [0.08, -0.44, 0.44], eL: [0.4, -0.6, 0.1], pL: [0, 1, 0] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
+  D['tc:age-zuki'] = FLOW([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.06, -0.3, 0.35] }), M(S.zks, { hL: L(H.hip), hR: [0.0, 0.22, 0.62] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
+  // Yama-zuki: Fäuste senkrecht übereinander, obere auf Kopfhöhe, untere vor dem Bauch (Faustrücken unten), beide Arme leicht gebeugt, Oberkörper vorgeneigt
+  D['tc:yama-zuki'] = T(M(S.zk, HANDS_HIP, { hL: [0.28, -0.42, 0.05], hR: [-0.18, -0.4, -0.05] }), M(S.zk, { lean: 26, hR: [0.0, 0.22, 0.4], eR: [-0.6, 0.3, -0.2], hL: [0.0, -0.3, 0.47], eL: [0.3, -1, -0.2], pL: [0, 1, 0] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
   D['tc:awase-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hR: punch(S.zks, 'R', 0.04), hL: [0.04, -0.26, 0.38], eL: [0.25, -0.7, 0.05] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
   D['tc:otoshi-zuki'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.25, 0.35, 0.15] }), M(S.zks, { lean: 8, hL: L(H.hip), hR: [-0.05, -0.42, 0.45] }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
-  D['tc:mawashi-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.45, -0.1, 0.22], eR: [-1, 0, 0] }), M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.06, 0.0, 0.4], eR: [-0.8, 0.1, 0.2] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
+  D['tc:mawashi-zuki'] = FLOW([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.45, -0.1, 0.22], eR: [-1, 0, 0] }), M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.06, 0.0, 0.4], eR: [-0.8, 0.1, 0.2] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   // Drehung der Faust beim geraden Stoß (Faustrücken unten an der Hüfte → oben im Ziel)
   [['mv:gyaku-zuki', 'R'], ['mv:oi-zuki', 'R'], ['tc:choku-zuki', 'LR'], ['tc:kizami-zuki', 'L'], ['tc:sanbon-zuki', 'LR'], ['tc:ren-zuki', 'LR'], ['tc:morote-zuki', 'LR'], ['tc:awase-zuki', 'R']].forEach(([id, s]) => (D[id] = TWIST(D[id], s)));
   D['tc:tate-zuki'] = TWIST(D['tc:tate-zuki'], 'R', 0.5);
