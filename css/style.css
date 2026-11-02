@@ -1868,9 +1868,61 @@ main:fullscreen {
     padding-right: 2rem;
   }
 
-  /* Startseite: alle fünf Kacheln in einer Reihe */
+  /* Startseite: große Kacheln – oben zwei breite, darunter drei */
   .hero ~ .tiles {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 1.2rem;
+    margin-top: 1.5rem;
+  }
+
+  .hero ~ .tiles .tile {
+    grid-column: span 2;
+    min-height: 170px;
+    padding: 1.6rem 1.8rem;
+  }
+
+  .hero ~ .tiles .tile:nth-child(-n + 2) {
+    grid-column: span 3;
+  }
+
+  .hero ~ .tiles .tile h3 {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero ~ .tiles .tile p {
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+
+  .hero ~ .tiles .tile:hover {
+    border-color: var(--red);
+  }
+
+  /* Lexikon: weniger, dafür größere Karten */
+  .lex-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .lex-card {
+    padding: 1rem 1.2rem;
+  }
+
+  .lex-card h4 {
+    font-size: 1.3rem;
+  }
+
+  .lex-card p {
+    font-size: 1rem;
+  }
+
+  .lex-img svg {
+    max-height: 280px;
+  }
+
+  .lex-img svg.duo {
+    max-height: 520px;
   }
 
   /* Themenlisten (Lernen, Quiz) zweispaltig */

@@ -92,11 +92,11 @@
       el(
         'div',
         { class: 'tiles' },
-        tile('#/lexikon', 'Lexikon', 'Alle Stände, Techniken & Begriffe zum Nachschlagen'),
-        tile('#/wissen', 'Lernen', 'Alle Inhalte zum Durcharbeiten'),
-        tile('#/quiz', 'Quiz', 'Alle Lektionen als Quiz, Zufallsmix aus allen Fragen'),
-        tile('#/ansage', 'Kata-Trainer', 'Alle Kata – Embusen und Schrittfolgen'),
-        tile('#/exam', 'Prüfungen', 'DJKB-Prüfungsprogramm: Kihon, Kata, Kumite')
+        tile('#/lexikon', 'Lexikon', 'Alle Stände, Techniken & Begriffe mit Grafik und 3D-Figur – zum Nachschlagen und Suchen'),
+        tile('#/wissen', 'Lernen', 'Alle Themen zum Durcharbeiten – von den Grundlagen bis zu den Kata'),
+        tile('#/quiz', 'Quiz', 'Jede Lektion als eigenes Quiz oder ein Zufallsmix aus allen Fragen'),
+        tile('#/ansage', 'Kata-Trainer', 'Alle Kata mit Embusen und Schrittfolge – Bewegung für Bewegung auf der Bodenkarte'),
+        tile('#/exam', 'Prüfungen', 'DJKB-Prüfungsprogramm je Gürtel: Kihon, Kata und Kumite')
       ),
       versionLine()
     );
