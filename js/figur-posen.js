@@ -171,16 +171,18 @@
   D['tc:ren-zuki'] = SEQ([ZK_HIP, M(S.zk, { hL: punch(S.zk, 'L', JO), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: punch(S.zks, 'R', CH) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:morote-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hL: punch(S.zks, 'L', -0.13, 0.07), hR: punch(S.zks, 'R', -0.13, -0.07) }), M(hit('fistR', 'Fäuste'), { eff: 'fistR', view: 'side3' }));
   D['tc:kagi-zuki'] = T(KB, M(KB, { hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3], look: 90 }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front' }));
-  D['tc:ura-zuki'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.03, -0.26, 0.4], eR: [-0.15, -0.7, 0.05] }), M(hit('fistR', 'Handrücken unten'), { eff: 'fistR', view: 'side3' }));
-  D['tc:age-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.06, -0.3, 0.35] }), M(S.zks, { hL: L(H.hip), hR: [0.0, 0.07, 0.45] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
-  D['tc:yama-zuki'] = T(M(S.zk, HANDS_HIP, { hL: [0.28, -0.42, 0.05], hR: [-0.18, -0.4, -0.05] }), M(S.zk, { lean: 14, hR: [0.0, 0.08, 0.5], hL: [0.04, -0.34, 0.42], eL: [0.4, -0.6, 0.1] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
+  // Ura-zuki: Faust steigt aus der Hüfte schräg (etwa 45°) nach oben vorn, Faustrücken bleibt unten (keine Drehung)
+  D['tc:ura-zuki'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.03, -0.14, 0.42], eR: [-0.1, -1, 0.3], pR: [0, 1, 0] }), M(hit('fistR', 'Handrücken unten'), { eff: 'fistR', view: 'side3' }));
+  D['tc:age-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.06, -0.3, 0.35] }), M(S.zks, { hL: L(H.hip), hR: [0.0, 0.22, 0.62] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
+  D['tc:yama-zuki'] = T(M(S.zk, HANDS_HIP, { hL: [0.28, -0.42, 0.05], hR: [-0.18, -0.4, -0.05] }), M(S.zk, { lean: 20, hR: [-0.02, 0.46, 0.4], hL: [0.08, -0.44, 0.44], eL: [0.4, -0.6, 0.1], pL: [0, 1, 0] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
   D['tc:awase-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hR: punch(S.zks, 'R', 0.04), hL: [0.04, -0.26, 0.38], eL: [0.25, -0.7, 0.05] }), M(hit('fistR', 'Jodan'), { eff: 'fistR', view: 'side3' }));
   D['tc:otoshi-zuki'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.25, 0.35, 0.15] }), M(S.zks, { lean: 8, hL: L(H.hip), hR: [-0.05, -0.42, 0.45] }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:mawashi-zuki'] = SEQ([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.45, -0.1, 0.22], eR: [-1, 0, 0] }), M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.06, 0.0, 0.4], eR: [-0.8, 0.1, 0.2] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   // Drehung der Faust beim geraden Stoß (Faustrücken unten an der Hüfte → oben im Ziel)
   [['mv:gyaku-zuki', 'R'], ['mv:oi-zuki', 'R'], ['tc:choku-zuki', 'LR'], ['tc:kizami-zuki', 'L'], ['tc:sanbon-zuki', 'LR'], ['tc:ren-zuki', 'LR'], ['tc:morote-zuki', 'LR'], ['tc:awase-zuki', 'R']].forEach(([id, s]) => (D[id] = TWIST(D[id], s)));
   D['tc:tate-zuki'] = TWIST(D['tc:tate-zuki'], 'R', 0.5);
-  D['tc:nukite'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [0.0, -0.13, 0.48], oR: 1, pR: [1, 0, 0] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
+  // Nukite wie in Heian Nidan (Kiai): Arm ganz gestreckt, die andere offene Hand liegt flach unter dem Ellbogen (Osae-uke)
+  D['tc:nukite'] = T(ZK_G, M(S.zks, { hR: [0.0, -0.13, 0.62], oR: 1, pR: [1, 0, 0], hL: [-0.07, -0.19, 0.27], oL: 1, pL: [0, -1, 0], fL: [-1, 0, 0.1] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
 
   /* ---------- Schläge ---------- */
   D['tc:uraken-uchi'] = T(M(KB, { look: -90, hR: [0.14, -0.02, 0.14] }), M(KB, { look: -90, hR: [-0.7, 0.04, 0.12], eR: [-0.3, 0.4, -0.3] }), M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front' }));
