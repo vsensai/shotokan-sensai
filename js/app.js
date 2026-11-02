@@ -211,10 +211,17 @@
     const cats = SK.glossaryCats.map((c) => {
       const items = SK.glossary.filter((e) => e.cat === c.id);
       const body = el('div', { class: 'lex-cat-body' });
+      // „Stände (Dachi)“ → deutscher Name groß, japanischer klein darunter
+      const [, de, jp] = c.title.match(/^(.*?)\s*(?:\((.*)\))?$/);
       const det = el(
         'details',
         { class: 'lex-cat', name: 'lexikon', 'data-cat': c.id },
-        el('summary', {}, el('span', { text: c.title }), el('span', { class: 'lex-cat-n', text: String(items.length) })),
+        el(
+          'summary',
+          {},
+          el('span', { class: 'lex-cat-t' }, el('span', { class: 'lex-cat-de', text: de }), jp ? el('span', { class: 'lex-cat-jp', lang: 'ja-Latn', text: jp }) : ''),
+          el('span', { class: 'lex-cat-n', text: String(items.length) })
+        ),
         body
       );
       det.addEventListener('toggle', () => {
