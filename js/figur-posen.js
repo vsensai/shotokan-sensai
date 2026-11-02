@@ -139,7 +139,7 @@
 
   const D = {};
 
-  /* ---------- Stände: vom natürlichen Stand in den Stand ---------- */
+  /* ---------- Stände: Standbild der Endstellung ---------- */
   const STAND_HANDS = {
     musubi: { hL: L(H.yoi), hR: H.yoi, oL: 0, oR: 0 }, heisoku: { hL: L(H.yoi), hR: H.yoi, oL: 0, oR: 0 }, hachiji: {},
     zenkutsu: { hL: L(H.gedan), hR: H.hip }, ashizenkutsu: { hL: L(H.guardF), hR: H.guardR }, hizakutsu: { hL: L(H.gedan), hR: H.hip },
@@ -151,8 +151,8 @@
   const FRONT_STANDS = ['musubi', 'heisoku', 'hachiji', 'kiba', 'sanchin', 'hangetsu', 'kosa'];
   Object.keys(STAND_BASE).forEach((k) => {
     const pose = M(S[STAND_BASE[k]], STAND_HANDS[k], { w: W(k) });
-    const start = k === 'hachiji' ? M(S.heisoku, STAND_HANDS.heisoku) : YOI;
-    D[`st:${k}`] = { keys: [{ t: 0, p: start }, { t: 0.15, p: start }, { t: 0.85, p: pose }], best: 1, dur: 2.2, view: FRONT_STANDS.includes(k) ? 'front3' : 'stand', labels: true };
+    // Stände ohne Bewegung: nur die Endstellung (v1.x: früher aus Yoi heraus animiert – bei Ständen unnötig)
+    D[`st:${k}`] = { keys: [{ t: 0, p: pose }], best: 0, still: true, view: FRONT_STANDS.includes(k) ? 'front3' : 'stand', labels: true };
   });
 
   /* ---------- Fauststöße ---------- */

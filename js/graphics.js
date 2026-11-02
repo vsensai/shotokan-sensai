@@ -421,14 +421,15 @@
   function box(key, svg) {
     if (!key) return svg;
     const [kind, k, m] = key.split(':');
-    // 3D-Figur, wo es sie gibt (Stände: als zweite Ansicht neben dem Fußbild)
+    // 3D-Figur, wo es sie gibt (Stände: 3D-Figur zuerst, Fußbild als zweite Ansicht)
     const f3 = SK.fig3d && SK.fig3d.has(key);
     if (f3 && kind !== 'st') return `<div class="gfx-box" data-gfx="${esc(key)}">${SK.fig3d.html(key)}</div>`;
-    const side = kind === 'st' ? (f3 ? SK.fig3d.html(key) : stanceDuoSvg(k, m === 'm') || stanceSideSvg(k, m === 'm')) : '';
+    const btn = (act, t) => `<button type="button" class="gfx-btn" data-act="${act}" data-label="${t}" aria-pressed="false">${t}</button>`;
+    if (f3) return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${SK.fig3d.html(key)}</div><div class="gfx-view" hidden>${svg}</div><div class="gfx-tools">${btn('side', 'Fußbild')}</div></div>`;
+    const side = kind === 'st' ? stanceDuoSvg(k, m === 'm') || stanceSideSvg(k, m === 'm') : '';
     const anim = hasAnim(key);
     if (!side && !anim) return svg;
-    const btn = (act, t) => `<button type="button" class="gfx-btn" data-act="${act}" data-label="${t}" aria-pressed="false">${t}</button>`;
-    return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${svg}</div>${side ? `<div class="gfx-view" hidden>${side}</div>` : ''}${anim ? '<div class="gfx-view gfx-anim" hidden></div>' : ''}<div class="gfx-tools">${side ? btn('side', f3 ? '3D-Figur' : side.includes('class="duo"') ? 'Figur & Fußbild' : STANCE_FRONT[k] ? 'Vorderansicht' : 'Seitenansicht') : ''}${anim ? btn('anim', '▶ Bewegung') : ''}</div></div>`;
+    return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${svg}</div>${side ? `<div class="gfx-view" hidden>${side}</div>` : ''}${anim ? '<div class="gfx-view gfx-anim" hidden></div>' : ''}<div class="gfx-tools">${side ? btn('side', side.includes('class="duo"') ? 'Figur & Fußbild' : STANCE_FRONT[k] ? 'Vorderansicht' : 'Seitenansicht') : ''}${anim ? btn('anim', '▶ Bewegung') : ''}</div></div>`;
   }
 
   function figure(svg, caption, note, key) {

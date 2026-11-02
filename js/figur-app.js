@@ -227,9 +227,13 @@
     return [w, Math.round(w * 0.8)];
   }
   // Großansicht: die Bühne füllt das Fenster, das Bild folgt ihrem Seitenverhältnis
-  function sizeBig(stage, cap) {
-    const r = dpr(cap);
-    return [Math.max(120, Math.round(stage.clientWidth * r)), Math.max(120, Math.round(stage.clientHeight * r))];
+  // budget: höchstens so viele Bildpunkte (beim Abspielen und Drehen, damit jedes Bild schnell fertig ist)
+  function sizeBig(stage, cap, budget) {
+    let r = dpr(cap);
+    const cw = stage.clientWidth || 1;
+    const ch = stage.clientHeight || 1;
+    if (budget) r = Math.min(r, Math.sqrt(budget / (cw * ch)));
+    return [Math.max(120, Math.round(cw * r)), Math.max(120, Math.round(ch * r))];
   }
   // Die Kamera skaliert mit der Bildhöhe (fester senkrechter Blickwinkel). Ist die Bühne höher als 5:4 (Handy hochkant),
   // den Blickwinkel weiten, damit die Figur in die Breite passt. Eine einzelne Figur ist schmaler als das Bild: sie darf
@@ -315,7 +319,8 @@
       raf = 0;
       if (!live) return;
       if (!document.contains(live.cv)) { live = null; return; }
-      const dt = Math.min(0.05, (now - last) / 1000);
+      // Echtzeit: auch wenn ein Bild länger dauert (Großansicht), läuft die Bewegung in ihrer Dauer ab – nur mit weniger Bildern
+      const dt = Math.min(0.25, (now - last) / 1000);
       last = now;
       const L = live;
       if (L.st.playing) {
@@ -328,7 +333,7 @@
         L.dirty = false;
         const stage = L.cv.parentElement;
         const big = L.box.classList.contains('f3d-big');
-        const [w, h] = big ? sizeBig(stage, L.st.playing || L.drag ? 1.25 : 2) : sizeOf(stage, L.st.playing || L.drag ? 1.75 : 2.5);
+        const [w, h] = big ? (L.st.playing || L.drag ? sizeBig(stage, 1.25, 260000) : sizeBig(stage, 2)) : sizeOf(stage, L.st.playing || L.drag ? 1.75 : 2.5);
         if (big) L.st.cam.fov = fovFor(w, h, L.e.partner ? 0.9 : 1.12);
         if (L.cv.width !== w || L.cv.height !== h) { L.cv.width = w; L.cv.height = h; }
         const st = Object.assign({}, L.st, { t: Math.min(L.st.t, L.e.t1) });

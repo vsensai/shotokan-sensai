@@ -955,7 +955,7 @@
     if (btn.dataset.act === 'side') {
       views[0].hidden = on;
       views[1].hidden = !on;
-      btn.textContent = on ? 'Fußbild' : btn.dataset.label;
+      btn.textContent = on ? (btn.dataset.label === 'Fußbild' ? '3D-Figur' : 'Fußbild') : btn.dataset.label;
     } else if (btn.dataset.act === 'anim') {
       const anim = box.querySelector(':scope > .gfx-anim');
       anim.innerHTML = on ? SK.gfx.animSvg(box.dataset.gfx) : '';
