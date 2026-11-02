@@ -135,23 +135,41 @@
     return M({ keys, best: 1, dur: 1.2 + 0.5 * n }, o);
   };
   // Eine fließende Bewegung über Zwischenstellungen: dort nicht abbremsen, erst am Ende Kime
-  // Zeiten so verteilt, dass die Geschwindigkeit an den Zwischenstellungen gleich bleibt (Weg des Körperpunkts o.eff)
+  // Die Bahn wird nach ihrer echten Länge (Weg des Körperpunkts o.eff) neu getaktet: schnell anlaufen,
+  // ohne Stocken durch die Zwischenstellungen, erst am Ende hart abbremsen (Kime)
   const FLOW = (poses, o) => {
     const d = SEQ(poses, o);
+    const eff = d.eff || 'fistR';
+    const T0 = 0.15;
+    const T1 = 0.8;
     const n = poses.length;
-    const pt = (p) => E.solve(E.full(p))[d.eff || 'fistR'];
-    const dist = [];
-    for (let i = 1; i < n; i++) { const a = pt(poses[i - 1]); const b = pt(poses[i]); dist.push(Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]) || 0.01); }
-    // Anlauf „in“ (Endgeschwindigkeit 2·Weg/Zeit), dazwischen gleichförmig, Kime am Ende (Anfangsgeschwindigkeit 3,2·Weg/Zeit):
-    // gleiche Geschwindigkeit v → Zeit je Abschnitt = Faktor·Weg
-    const f = dist.map((_, i) => (i === dist.length - 1 ? 3.2 : i === 0 ? 2 : 1));
-    const w = dist.map((x, i) => x * f[i]);
-    const sum = w.reduce((a, b) => a + b, 0);
-    let t = 0.15;
-    d.keys = d.keys.slice(0, 2).concat(poses.slice(1).map((p, i) => {
-      t += (0.65 * w[i]) / sum;
-      return { t: i === n - 2 ? 0.8 : t, p, e: i === n - 2 ? 'kime' : i === 0 ? 'in' : 'lin' };
-    }));
+    const tl = E.timeline([{ t: 0, p: poses[0] }].concat(poses.map((p, i) => ({ t: T0 + ((T1 - T0) * i) / (n - 1), p, e: 'lin' }))));
+    const N = 240;
+    const ts = [];
+    const sl = [0];
+    let prev = null;
+    for (let i = 0; i <= N; i++) {
+      const t = T0 + ((T1 - T0) * i) / N;
+      const q = E.solve(tl(t))[eff];
+      if (prev) sl.push(sl[sl.length - 1] + Math.hypot(q[0] - prev[0], q[1] - prev[1], q[2] - prev[2]));
+      ts.push(t);
+      prev = q;
+    }
+    // Geschwindigkeitsverlauf ∝ u·(1−u)^2,2: weich an, Spitze bei knapp einem Drittel, hartes Abbremsen
+    const G = [0];
+    for (let i = 1; i <= N; i++) { const u = (i - 0.5) / N; G.push(G[i - 1] + u * Math.pow(1 - u, 2.2)); }
+    const S = sl[N];
+    const M_ = 32;
+    const keys = [{ t: 0, p: poses[0] }, { t: T0, p: poses[0] }];
+    let k = 0;
+    for (let j = 1; j <= M_; j++) {
+      const goal = (G[Math.round((N * j) / M_)] / G[N]) * S;
+      while (k < N && sl[k + 1] < goal) k++;
+      const f = k < N ? (goal - sl[k]) / ((sl[k + 1] - sl[k]) || 1) : 0;
+      const t = k < N ? ts[k] + f * (ts[k + 1] - ts[k]) : T1;
+      keys.push({ t: T0 + ((T1 - T0) * j) / M_, p: j === M_ ? poses[n - 1] : tl(t), e: 'lin' });
+    }
+    d.keys = keys;
     return d;
   };
   // Fußtritt: ausholen, treffen, zurück
