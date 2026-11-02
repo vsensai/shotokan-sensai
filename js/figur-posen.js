@@ -170,6 +170,8 @@
       keys.push({ t: T0 + ((T1 - T0) * j) / M_, p: j === M_ ? poses[n - 1] : tl(t), e: 'lin' });
     }
     d.keys = keys;
+    // Dauer wie bei einfachen Techniken (T: 1,4 s), je weiterer Zwischenstellung etwas länger
+    if (!(o && o.dur)) d.dur = 1.3 + 0.15 * (n - 2);
     return d;
   };
   // Fußtritt: ausholen, treffen, zurück
@@ -265,10 +267,9 @@
     M(S.zks, { chest: -15, hL: L(H.hip), hR: [-0.34, -0.12, 0.02], eR: [-1, 0, -0.4] }),
     M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.12, -0.04, 0.12], eR: [-0.25, 0, 1] }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front3' }));
-  // Age-enpi: der Ellbogen steigt vor dem Körper senkrecht hoch, die Faust endet neben dem Ohr (Handfläche zum Kopf)
+  // Age-enpi: aus der Hüfte direkt hochgezogen – der Ellbogen steigt senkrecht, die Faust endet neben dem Ohr
   D['tc:age-enpi'] = FLOW([
     M(S.zks, HANDS_HIP),
-    M(S.zks, { hL: L(H.hip), hR: [-0.16, -0.12, 0.2], eR: [-0.2, -0.3, 1] }),
     M(S.zks, { hL: L(H.hip), hR: [-0.14, 0.16, 0.05], eR: [-0.1, 1, 0.6], pR: [1, 0, 0] }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front3' }));
   D['tc:otoshi-enpi'] = T(M(KB, { hR: [-0.15, 0.5, 0.1] }), M(KB, { hR: [-0.12, 0.02, 0.14], eR: [0, -1, 0.35] }), M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
