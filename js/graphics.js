@@ -122,7 +122,7 @@
     return `<g transform="${t}" fill="${fill}"><path d="${SOLE}"/>${TOES}</g>`;
   }
 
-  // Grundform: linker Fuß ist der namensgebende/vordere; Migi wird gespiegelt. Fuß = [x, y, Drehung, Gewicht, Seite, nur Ballen]
+  // Grundform: linker Fuß ist der namensgebende/vordere; Migi wird gespiegelt (Ausnahme Kosa-dachi: rechts Standbein). Fuß = [x, y, Drehung, Gewicht, Seite, nur Ballen]
   const STANCES = {
     musubi: { name: 'Musubi-dachi', feet: [[92, 116, -25, 0.5, 'L'], [108, 116, 25, 0.5, 'R']], note: 'Fersen zusammen, Fußspitzen V-förmig geöffnet', mass: ['Fersen zusammen,', 'Spitzen etwa eine Faust weit offen'] },
     heisoku: { name: 'Heisoku-dachi', feet: [[89.5, 116, 0, 0.5, 'L'], [110.5, 116, 0, 0.5, 'R']], note: 'Füße geschlossen und parallel', mass: ['Füße ganz geschlossen,', 'Innenkanten berühren sich'] },
@@ -131,7 +131,7 @@
     ashizenkutsu: { name: 'Ashi-zenkutsu', feet: [[80, 80, 0, 0.7, 'L'], [120, 146, 20, 0.3, 'R']], note: 'Kürzer und schmaler als Zenkutsu-dachi (z. B. in Gyaku-hanmi)', mass: ['kürzer und schmaler', 'als Zenkutsu-dachi'] },
     kokutsu: { name: 'Kokutsu-dachi', feet: [[100, 64, 0, 0.3, 'L'], [118, 158, 90, 0.7, 'R']], note: 'Gewicht überwiegend hinten, hinterer Fuß quer, vorderer Fuß berührt leicht den Boden', mass: ['Länge etwa 1½ Schulterbreiten,', 'Fersen etwa auf einer Linie'] },
     kiba: { name: 'Kiba-dachi', feet: [[46, 116, 0, 0.5, 'L'], [154, 116, 0, 0.5, 'R']], note: 'Reiterstand: breit, Füße parallel, Gewicht gleich verteilt', mass: ['Breite etwa 2 Schulterbreiten,', 'Füße parallel'] },
-    kosa: { name: 'Kosa-dachi', feet: [[106, 84, 0, 0.9, 'L'], [88, 136, 10, 0.1, 'R', true]], note: 'Kreuzstand: hinterer Fuß kreuzt hinter die Ferse des vorderen und steht nur auf dem Ballen', mass: ['Füße dicht gekreuzt,', 'hinterer Fuß nur auf dem Ballen'] },
+    kosa: { name: 'Kosa-dachi', feet: [[94, 84, 0, 0.9, 'R'], [112, 136, -10, 0.1, 'L', true]], note: 'Kreuzstand: rechts Standbein, der linke Fuß kreuzt hinter die Ferse des rechten und steht nur auf dem Ballen', mass: ['Füße dicht gekreuzt,', 'hinterer Fuß nur auf dem Ballen'] },
     ashidachi: { name: 'Ashi-dachi (Einbeinstand)', feet: [[92, 112, 0, 1, 'L'], [114, 96, 10, 0, 'R']], note: 'Stand auf einem Bein, das andere Bein ist angehoben (gestrichelt)', mass: ['ganzes Gewicht auf einem Bein'] },
     hizakutsu: { name: 'Hizakutsu', feet: [[72, 70, -35, 0.7, 'L'], [128, 152, -15, 0.3, 'R']], note: 'Knie gebeugt, beide Fußspitzen schräg zur Seite – Technik in andere Richtung als der Zenkutsu-dachi', mass: ['Knie gebeugt, Fußspitzen', 'schräg zur Seite'] },
     renoji: { name: 'Renoji-dachi', feet: [[100, 82, 0, 0.4, 'L'], [118, 148, 90, 0.6, 'R']], note: 'L-förmiger Stand', mass: ['etwa eine Fußlänge,', 'Füße bilden ein L'] },
@@ -368,7 +368,8 @@
       [/Ashi-zenkutsu/, 'ashizenkutsu', 'front'],
       [/Zenkutsu-dachi/, 'zenkutsu', 'front'],
       [/Kokutsu-dachi/, 'kokutsu', 'back'],
-      [/Kosa/, 'kosa', 'front'],
+      // Grundform Kosa-dachi: rechts Standbein (Migi Ashi-mae) – gespiegelt nur bei Hidari
+      [/Kosa/, 'kosa', 'back'],
       [/Renoji/, 'renoji', 'front'],
       [/Fudo-dachi/, 'fudo', 'front'],
       [/Hizakutsu/, 'hizakutsu', 'front'],
@@ -380,7 +381,7 @@
     ];
     for (const [re, key, how] of rules) {
       if (!re.test(name)) continue;
-      // Grundform: linker Fuß vorne. Kokutsu ist nach dem hinteren Bein benannt, Orishiki nach dem knienden (rechten) Bein.
+      // Grundform: linker Fuß vorne. Kokutsu ist nach dem hinteren Bein benannt, Orishiki nach dem knienden (rechten) Bein; Kosa-dachi hat rechts als Standbein.
       let mirrored = false;
       if (how === 'front') mirrored = side === 'R';
       if (how === 'back') mirrored = side === 'L';

@@ -105,7 +105,9 @@
     sanchin: { pelvis: [0, 0.85, 0.03], yaw: 0, L: { x: 0.12, z: 0.18, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.12, z: -0.12, yaw: 18, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
     renoji: { pelvis: [0, 0.905, -0.02], yaw: -30, L: { x: 0.03, z: 0.3, yaw: 0 }, R: { x: -0.04, z: -0.04, yaw: -90 }, w: [0.4, 0.6] },
     teiji: { pelvis: [0, 0.902, 0], yaw: -30, L: { x: 0.0, z: 0.32, yaw: 0 }, R: { x: 0.06, z: -0.02, yaw: -90 }, w: [0.5, 0.5] },
-    kosa: { pelvis: [0.02, 0.62, 0.14], yaw: -20, L: { x: 0.08, z: 0.32, yaw: 0, kp: [0, 0.2, 1] }, R: { x: 0.17, z: 0.02, y: 0.12, yaw: -10, pitch: -35, kp: [0.3, 0, 1] }, w: [0.9, 0.1] },
+    // Kosa-dachi: rechts Standbein; Knie nebeneinander, erst unterhalb des Knies kreuzt das linke Bein hinter der rechten Wade,
+    // linker Fuß (Ballen) steht rechts neben dem rechten, schräg dahinter
+    kosa: { pelvis: [0.0, 0.64, 0.2], yaw: 10, R: { x: -0.07, z: 0.32, yaw: 0, kp: [0, 0.2, 1] }, L: { x: -0.17, z: 0.14, y: 0.1, yaw: 10, pitch: -35, kp: [0.6, 0.2, 1] }, w: [0.1, 0.9] },
     ashidachi: { pelvis: [0, 0.9, 0], yaw: -20, L: { x: 0.08, z: 0, yaw: 0 }, R: { x: -0.06, z: 0.08, y: 0.44, yaw: -10, pitch: -40, kp: [0, 0.5, 1] }, w: [1, 0] },
     hizakutsu: { pelvis: [0, 0.72, 0.08], yaw: -60, L: { x: 0.14, z: 0.56, yaw: -35 }, R: { x: -0.13, z: -0.46, yaw: -15 }, w: [0.7, 0.3] },
     orishiki: { pelvis: [0, 0.5, -0.02], yaw: 0, L: { x: 0.13, z: 0.36, yaw: 0, kp: [0, 0.3, 1] }, R: { x: -0.12, z: -0.42, y: 0.065, yaw: 180, kp: [0, -1, 0.3] }, w: [0.5, 0.5] },
