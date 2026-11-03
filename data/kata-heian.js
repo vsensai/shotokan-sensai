@@ -367,7 +367,7 @@
         <li>Bewegung 11: <b>Hidari Hizakutsu</b> – Shuto-Abwehr und Shuto-Schlag Jodan gleichzeitig.</li>
         <li>Bewegung 13: Sprung von etwa <b>anderthalb Schritten</b> nach vorne in Kosa-dachi (nach Best Karate).</li>
         <li>14 und 18: Kakiwake-uke langsam, kraftvoll, mit dynamischer Spannung – rechte Faust beim Kreuzen oben.</li>
-        <li>16+17 und 20+21: <b>Ren-zuki</b> (schnelle Folge zweier Fauststöße).</li>
+        <li>16+17 und 20+21: zwei Fauststöße schnell hintereinander.</li>
         <li>Bewegung 25: Hände greifen den Hinterkopf des Gegners; direkt aus Kokutsu-dachi, ohne Zenkutsu-dachi und ohne Pause.</li>
       </ul>`,
     facts(L) {
@@ -383,7 +383,6 @@
       L.mc('Heian Yondan, Bewegungen 14 und 18 (Kakiwake-uke): Wie sollen sie ausgeführt werden?', ['Langsam und kraftvoll mit dynamischer Spannung', 'Schnell und locker', 'Mit Kiai', 'Mit offenen Händen'], '', P(46));
       L.mc('Heian Yondan, Kakiwake-uke: Welche Faust liegt beim Überkreuzen oben (nach Karate-Do Kyohan)?', ['Die rechte Faust', 'Die linke Faust', 'Die Arme werden nicht gekreuzt', 'Wechselnd je Seite'], '', P(46));
       L.mc('Heian Yondan, Mae-geri nach Kakiwake-uke: Wohin wird getreten?', ['Jodan, zwischen den Fäusten hindurch', 'Gedan auf das Knie', 'Chudan seitlich', 'Hinter den Körper'], '', P(46));
-      L.mc('Wie nennt man die schnelle Folge der Fauststöße 16 und 17 in Heian Yondan?', ['Ren-zuki', 'Sanbon-zuki', 'Kizami-zuki', 'Morote-zuki'], '', P(47));
       L.mc('Heian Yondan, Bewegung 25 (Hiza-tsuchi): Was stellen die Fäuste dar?', ['Das Greifen des Hinterkopfes des Gegners', 'Das Blocken eines Tritts', 'Einen Doppelfauststoß', 'Das Greifen des Fußes'], '', P(51));
       L.mc('Heian Yondan, Bewegung 25: Was soll man beim Übergang aus Bewegung 24 vermeiden?', ['Zenkutsu-dachi zu bilden und beim Anheben der Hände zu pausieren', 'Das Knie anzuheben', 'Kiai zu rufen', 'Die Hände zu öffnen'], '', P(51));
     },

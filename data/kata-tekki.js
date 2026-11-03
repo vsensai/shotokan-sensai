@@ -110,7 +110,6 @@
       L.mc('Tekki Shodan, Bewegung 9: Worauf zielt der Uraken?', ['Jinchu (Bereich über der Oberlippe)', 'Den Solarplexus', 'Die Schläfe', 'Das Knie'], '', P(69));
       L.mc('Was beschreibt NAMIGAESHI in Tekki Shodan?', ['Fuß federnd bis vor den Unterbauch heben, Sohle nach oben – fegender Block gegen einen Tritt', 'Ein Stampfer auf den Fuß des Gegners', 'Ein Sprung', 'Ein Mae-geri Jodan'], '', P(70));
       L.mc('Wie sollen die Blickwechsel (Kao Hidari-muki / Kao Migi-muki) in Tekki Shodan ausgeführt werden?', ['Scharf und schnell', 'Langsam', 'Mit geschlossenen Augen', 'Mit Kiai'], '', P(70));
-      L.mc('Tekki Shodan, Bewegung 15: Was stellt die Technik laut Karate-Do Kyohan dar?', ['Eine der Doppelfaust-Techniken (Morote-zuki)', 'Einen Wurf', 'Einen Fußfeger', 'Einen Hebel'], '', P(72));
       L.mc('Wie hieß Tekki früher?', ['Naihanchi', 'Pin An', 'Wanshu', 'Kushanku'], '', P(77));
       L.mc('Wofür ist Tekki laut Karate-Do Kyohan besonders charakteristisch?', ['Für den Stand – Innenseite der Oberschenkel anspannen wie beim Reiten auf einem Pferd', 'Für viele Sprünge', 'Für viele Fußtritte', 'Für langsame Atembewegungen'], '', P(77));
       L.mc('In welchem Stand wird fast die gesamte Tekki Shodan ausgeführt?', ['Kiba-dachi', 'Zenkutsu-dachi', 'Kokutsu-dachi', 'Neko-ashi-dachi'], '', P(67));

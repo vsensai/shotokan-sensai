@@ -589,7 +589,7 @@
         <li>Gedan-zuki (7): Ziel ist der Bereich unter dem Bauchnabel (<b>Tanden</b>).</li>
         <li>Hizakutsu mit Gedan-barai (8): sich aus dem Griff am Handgelenk befreien.</li>
         <li>14: linke Hand und linker Fuß bewegen sich langsam und groß gemeinsam; 15: rechtes Handgelenk schlägt in die linke Handfläche (Kiai).</li>
-        <li>17+18: <b>Ren-zuki</b>.</li>
+        <li>17+18: zwei Fauststöße schnell hintereinander.</li>
         <li>30–33: <b>Teisho</b>-Techniken (Oshiage-/Oshisage-uke) langsam und kraftvoll.</li>
         <li>35: <b>Fudo-dachi</b>; der Raum zwischen Daumen und Zeigefinger heißt „Tigermaul“ (<b>Koko</b>).</li>
         <li>36: Drehsprung wie im Schneidersitz in der Luft, Kiai während des Sprungs – Gegner auf die Schultern heben und werfen.</li>

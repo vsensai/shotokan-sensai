@@ -237,7 +237,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
   - 13 (Scan 45): linke Hand greift und zieht zur Hüfte; nach Best Karate anderthalb Sprungschritte nach vorne.
   - 14 und 18 (Scan 46, 48): langsam, kraftvoll, mit dynamischer Spannung; die Arme kreuzen (rechts oben) und ziehen
     sofort auseinander.
-  - 16–17 und 20–21 (Scan 47, 49): schnelle Doppelfauststöße (Ren-zuki).
+  - 16–17 und 20–21 (Scan 47, 49): zwei Fauststöße schnell hintereinander.
   - 25 (Scan 51): vom Kokutsu-dachi in 24 direkt zum Herunterziehen des Kopfes – nicht im Zenkutsu-dachi anhalten, wenn
     die Hände vor das Gesicht gehen; die Fäuste greifen den Hinterkopf des Gegners.
 
@@ -338,7 +338,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
   - 10, 12, 24, 26: Kopf scharf drehen.
   - Namigaeshi 11, 13, 25, 27 (Scan 70–76): Fuß federnd hoch Richtung Unterbauch, Sohle nach oben, als würde ein Tritt
     weggefegt; danach auf den Fuß des Gegners stampfen und zugleich abwehren.
-  - 15 (Scan 72, nach Kyohan): eine Form des Morote-zuki – die linke Faust wehrt ab und trifft zugleich Chudan, die rechte
+  - 15 (Scan 72): die linke Faust wehrt ab und trifft zugleich Chudan, die rechte
     schützt die Brust und ist schlagbereit.
   - 16 (Scan 72): Kake-uke hakt einen Angriff von links ab; nach Funakoshis Unterricht auch langsam mit offener,
     ausdrehender Hand ausgeführt.
@@ -474,7 +474,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
   - 26–28 und 29–31 (Scan 113–114): schnell und fließend; Ellbogen in die Handfläche.
   - 38 (Scan 118): Faust greift und zieht zur Hüfte; nach Best Karate anderthalb Sprungschritte. 39: Ellbogen bleibt,
     Faust unter dem linken Ellbogen hindurch zum Uchi-uke.
-  - 40–41 und 49–50 (Scan 119, 122): Ren-zuki.
+  - 40–41 und 49–50 (Scan 119, 122): zwei Fauststöße schnell hintereinander.
   - 42 (Scan 119): Ellbogen und Knie möglichst nah beieinander; Variante: Abwehr und Griff links, Kniestoß und Ura-zuki
     gegen das Kinn.
   - 43 (Scan 120): linkes Bein gestreckt, Ferse am Boden, Blick etwa vier Meter voraus; plötzliches Absinken als
@@ -649,7 +649,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
   - Name (Scan 159, nach Kyohan): früher Wanshu; Enpi = „fliegende Schwalbe“ wegen der schnellen Richtungswechsel in
     6–8, die sich in der Kata wiederholen.
   - 14 und 16 (Scan 162–163): langsam und dynamisch; in 16 die linke Hand unter den rechten Arm wie einen Kimonoärmel.
-  - 17–18 (Scan 163–164): Ren-zuki; Ablauf 14–18 nach dem Buch: herausfordern, Öffnung schaffen, Angriff abwehren,
+  - 17–18 (Scan 163–164): zwei Fauststöße schnell hintereinander; Ablauf 14–18 nach dem Buch: herausfordern, Öffnung schaffen, Angriff abwehren,
     kontern.
   - 30 (Scan 168): langsam und kraftvoll. 31–33 (Scan 169–170): Hände und Füße gemeinsam, langsam und kraftvoll.
   - 34 (Scan 170): das linke Handgelenk wird gegriffen – mit dem rechten Handgelenk schlagen und frei ziehen; Arme

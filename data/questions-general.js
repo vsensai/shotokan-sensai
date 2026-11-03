@@ -212,8 +212,8 @@
   L.mc('Was ist „Choku-zuki“?', ['Gerader Fauststoß im Stand', 'Fauststoß mit Schritt', 'Aufwärtsstoß', 'Hakenstoß'], '', S.po);
   L.mc('Wie wird Sanbon-zuki in der DJKB-Prüfung ausgeführt?', ['Jodan / Chudan / Chudan', 'Chudan / Chudan / Chudan', 'Jodan / Jodan / Chudan', 'Gedan / Chudan / Jodan'], '', S.po);
   L.mc('Auf welcher Höhe werden laut DJKB-Prüfungsordnung Fauststöße generell ausgeführt?', ['Chudan', 'Jodan', 'Gedan', 'Frei wählbar'], 'Ausnahmen sind im Programm angegeben.', S.po);
-  L.mc('Was ist „Ren-zuki“?', ['Schnelle Folge mehrerer Fauststöße', 'Fauststoß im Sprung', 'Stoß mit dem Ellbogen', 'Doppelter Fußtritt'], '', S.pdf);
-  L.mc('Was ist „Morote-zuki“?', ['Doppelfauststoß mit beiden Fäusten', 'Stoß mit der vorderen Hand', 'Hakenstoß', 'Rückwärtsstoß'], '', S.pdf);
+  L.mc('Was ist „Ren-zuki“?', ['Schnelle Folge mehrerer Fauststöße', 'Fauststoß im Sprung', 'Stoß mit dem Ellbogen', 'Doppelter Fußtritt'], '', S.allg);
+  L.mc('Was ist „Morote-zuki“?', ['Doppelfauststoß mit beiden Fäusten', 'Stoß mit der vorderen Hand', 'Hakenstoß', 'Rückwärtsstoß'], '', S.kompakt);
   L.mc('Was ist „Kagi-zuki“?', ['Hakenstoß', 'Aufwärtsstoß', 'Bergfauststoß', 'Gerader Stoß'], '', S.pdf);
   L.mc('Welcher Begriff der Theorie zum 5. Kyu bezeichnet drei Fauststöße hintereinander?', ['Sanbon-zuki', 'Ren-geri', 'Gohon-kumite', 'Kizami-zuki'], '', S.po);
   L.mc('Was ist „Tate-zuki“?', ['Fauststoß mit senkrechter Faust auf dem kürzesten Weg', 'Fauststoß im Bogen', 'Doppelfauststoß', 'Fauststoß nach unten'], '', S.kompakt);
