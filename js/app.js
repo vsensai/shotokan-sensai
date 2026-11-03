@@ -208,8 +208,19 @@
     const norm = (s) => s.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
     const index = SK.glossary.map((e) => {
       const words = norm(`${e.t} ${SK.glossaryAlt(e)} ${e.erst ? e.erst.buch : ''} ${e.de}`);
-      return { e, words, compact: words.replace(/ /g, '') };
+      return { e, words };
     });
+    // Eingabe ohne Leerzeichen („maegeri“) auch über Wortgrenzen finden – aber nur, wenn der Treffer an einem
+    // Wortanfang beginnt oder an einem Wortende aufhört: „kosa“ soll nicht in „yo(ko sa)shi“ landen.
+    const spans = (words, q) => {
+      const re = new RegExp(q.split('').join(' ?'), 'y');
+      for (let i = 0; i < words.length; i++) {
+        re.lastIndex = i;
+        const m = re.exec(words);
+        if (m && (i === 0 || words[i - 1] === ' ' || re.lastIndex === words.length || words[re.lastIndex] === ' ')) return true;
+      }
+      return false;
+    };
     const cats = SK.glossaryCats.map((c) => {
       const items = SK.glossary.filter((e) => e.cat === c.id);
       const body = el('div', { class: 'lex-cat-body' });
@@ -256,7 +267,7 @@
         results.innerHTML = '';
         return;
       }
-      const hits = index.filter((x) => x.compact.includes(tokens.join('')) || tokens.every((t) => x.words.includes(t))).map((x) => x.e);
+      const hits = index.filter((x) => spans(x.words, tokens.join('')) || tokens.every((t) => x.words.includes(t))).map((x) => x.e);
       count.textContent = hits.length === 1 ? '1 Eintrag' : `${hits.length} Einträge`;
       results.innerHTML = hits.length ? SK.glossaryHtml(hits) : '';
     }
