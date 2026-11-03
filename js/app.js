@@ -270,6 +270,15 @@
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       if (!count.hidden) count.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+    // Link aus einer Karte (z. B. „Zuerst in: …“): vorher die Karte in die Adresse schreiben,
+    // damit „Zurück“ wieder bei ihr landet statt bei zugeklappten Kategorien.
+    const remember = (ev) => {
+      const a = ev.target.closest('.lex-card a[href^="#/"]');
+      const h4 = a && a.closest('.lex-card').querySelector('h4');
+      if (h4) history.replaceState(history.state, '', `#/lexikon/${encodeURIComponent(h4.textContent.split(' / ')[0])}`);
+    };
+    catList.addEventListener('click', remember);
+    results.addEventListener('click', remember);
     app.append(
       el('h1', { text: 'Lexikon' }),
       el('p', { class: 'small' }, el('a', { href: '#/kompakt', text: 'Kompakt-Übersicht (Spickzettel je Gürtel, druckbar) ›' })),
