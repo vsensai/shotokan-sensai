@@ -368,7 +368,12 @@
   // langsame, gleichmäßige Bewegung statt schnellem Kime
   D['tc:kakiwake-uke'].keys[2].e = 'io';
   D['tc:nagashi-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.28, 0.05, 0.32], oR: 1, pR: [1, 0, 0], fR: [0, 1, 0.3] }), M(S.zks, { hL: L(H.hip), hR: [0.08, 0.06, 0.26], oR: 1, pR: [1, 0, 0.3], fR: [0, 1, 0.3] }), M(hit('wristR', 'Handfläche'), { eff: 'tipR', view: 'front3' }));
-  D['tc:te-nagashi-uke'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.02, -0.12, 0.5], oR: 1, pR: [1, 0, 0], fR: [0, 0.4, 1] }), M(S.zk, { chest: 18, hL: L(H.guardF), hR: [0.16, -0.16, 0.36], oR: 1, pR: [1, 0, -0.2], fR: [0.2, 0.3, 1] }), M(hit('wristR', 'Handfläche lenkt ab'), { eff: 'tipR', view: 'side3' }));
+  // Te-nagashi-uke aus dem Chudan-kamae (links vorn): die rechte Hand bleibt locker in der Kamae vor dem Körper,
+  // die linke offene Hand steht auf Jodan-Höhe links seitlich vor dem Kopf und schiebt die Faust, die auf den Kopf zielt,
+  // mit der Innenhandfläche nach rechts zur Seite weg (Handfläche zeigt nach rechts, Finger nach oben)
+  const TNU = M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hR: [-0.02, -0.22, 0.2] });
+  const TNU_HAND = (x, z) => ({ oL: 1, hL: aim(TNU, [x, 0.1, z]), pL: aim(TNU, [-1, 0, 0]), fL: aim(TNU, [0, 1, 0.25]), eL: aim(TNU, [0.3, -1, 0.2]) });
+  D['tc:te-nagashi-uke'] = T(M(TNU, TNU_HAND(0.2, 0.36)), M(TNU, TNU_HAND(-0.2, 0.38)), M(hit('wristL', 'Innenhandfläche schiebt ab'), { eff: 'tipL', view: 'front3' }));
   D['tc:gedan-nagashi-uke'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.42, -0.5, 0.18], oR: 1, pR: [1, 0, 0] }), M(S.zk, { hL: L(H.guardF), hR: [0.1, -0.48, 0.33], oR: 1, pR: [1, 0, 0] }), M(hit('wristR', 'Unterarm'), { eff: 'wristR', view: 'front3' }));
   D['tc:osae-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [0.0, -0.1, 0.36], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, -0.36, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' }));
   // Kake-uke wie in Heian Godan 14: aus Kiba-dachi mit rechtem Gedan-barai (Blick nach rechts) wendet sich der Blick nach links;
