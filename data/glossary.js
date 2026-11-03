@@ -263,6 +263,16 @@
     return `<p class="lex-erst">Zuerst in: ${link ? `<a href="${link}">${txt}</a>` : txt}</p>`;
   }
 
+  // Anderer Name im Buch – nur zeigen, wenn er nicht bloß der eigene Name mit Zusätzen ist
+  // („Shuto Chudan-uke“ zu „Shuto-uke“ nein, „Kosa-uke“ zu „Juji-uke“ ja). „-uchi“ zählt dabei nicht.
+  function altName(e) {
+    const b = e.erst && e.erst.buch;
+    if (!b) return '';
+    const words = (x) => x.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+    const bw = words(b);
+    return words(e.t).filter((w) => w !== 'uchi').every((w) => bw.includes(w)) ? '' : b;
+  }
+
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   SK.buildGlossaryContent = function () {
@@ -303,7 +313,7 @@
     return `<div class="lex-grid">${items
       .map(
         (e) => `<article class="lex-card" data-cat="${e.cat}" data-text="${SK.util.esc(`${e.t} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
-          <h4>${SK.util.esc(e.t)}</h4>${e.erst && e.erst.buch ? `<p class="lex-buch">(im Buch: ${SK.util.esc(e.erst.buch)})</p>` : ''}<p>${SK.util.esc(e.de)}</p>
+          <h4>${SK.util.esc(e.t)}</h4>${altName(e) ? `<p class="lex-buch">(${SK.util.esc(altName(e))})</p>` : ''}<p>${SK.util.esc(e.de)}</p>
           ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${erstHtml(e)}</article>`
       )
       .join('')}</div>`;
