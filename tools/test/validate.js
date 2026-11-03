@@ -66,6 +66,17 @@
     });
   });
 
+  // Begriffe-Trainer: Die Quiz-Bedeutung darf den Namen nicht verraten (kein eigener Namensteil außer Gattungswörtern).
+  {
+    const GATTUNG = new Set(['dachi', 'zuki', 'geri', 'uchi', 'uke', 'kamae', 'barai', 'ashi']);
+    const words = (x) => x.toLowerCase().split(/[^a-zäöüß]+/).filter((w) => w.length >= 3);
+    SK.glossary.forEach((e) => {
+      const dw = words(e.qde);
+      const leak = words(e.t).filter((w) => !GATTUNG.has(w) && dw.some((d) => d.startsWith(w)));
+      if (leak.length) errors.push(`Begriffe-Trainer „${e.t}“: Bedeutung verrät den Namen (${leak.join(', ')}) – Quiz-Text in QUIZ (data/glossary.js) ergänzen`);
+    });
+  }
+
   // Lexikon: erstes Vorkommen in den Kata (SK.glossaryErst) – Bewegung nennt die Technik, keine frühere Bewegung tut es
   {
     const norm = (x) => x.toLowerCase().replace(/-/g, '');

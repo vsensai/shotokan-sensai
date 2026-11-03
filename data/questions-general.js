@@ -72,7 +72,7 @@
   L.mc('Was soll man laut Niju-Kun über die Hände und Füße des Gegners denken?', ['Dass sie wie Schwerter sind', 'Dass sie harmlos sind', 'Dass sie langsam sind', 'Dass man sie ignorieren kann'], '');
   L.mc('Was gilt laut Niju-Kun für Kamae?', ['Kamae ist für Anfänger, später steht man in Shizentai', 'Man soll niemals Kamae einnehmen', 'Kamae nur im Wettkampf', 'Kamae nur in der Kata'], '');
   L.mc('Was soll man laut Niju-Kun beim Kampf denken?', ['Nicht ans Gewinnen, sondern daran, nicht zu verlieren', 'Nur ans Gewinnen', 'An die Zuschauer', 'An die Technik des Gegners'], '');
-  L.mc('Was kommt laut Niju-Kun vor der Kunst der Technik?', ['Die Kunst des Geistes', 'Die Kraft', 'Die Schnelligkeit', 'Die Ausdauer'], '');
+  L.mc('Was kommt laut Niju-Kun vor der Kunst der Technik?', ['Die Kunst des Geistes', 'Die Kunst der Abwehr', 'Die Kunst der Atmung', 'Die Kunst des Kampfes'], '');
   L.mc('Was erwartet dich laut Niju-Kun, wenn du das Tor (dein Haus) verlässt?', ['Millionen Feinde', 'Deine Schüler', 'Dein Lehrer', 'Ein neuer Weg'], '');
   L.multi('Welche drei Gegensatzpaare soll man laut 19. Leitsatz nicht vergessen?', ['Stärke und Schwäche der Kraft', 'Dehnen und Zusammenziehen des Körpers', 'Langsamkeit und Schnelligkeit der Technik'], ['Laut und leise des Kiai', 'Hoch und tief des Blicks'], '');
 
@@ -128,7 +128,7 @@
   L.mc('Was bedeutet „Hanmi“?', ['Halbseitliche Körperhaltung (ca. 45°)', 'Frontale Haltung', 'Rückwärtsstellung', 'Kniende Haltung'], 'Theorie zum 7. Kyu.');
   L.mc('Was bedeutet „Shizentai“?', ['Natürliche, normale Körperhaltung', 'Kampfhaltung mit Fäusten', 'Kniende Haltung', 'Reiterstellung'], 'Theorie zum 7. Kyu. Im Kihon-Ippon-Kumite steht der Abwehrende zunächst in Shizentai.');
   L.mc('Was bedeutet „Chudan-Kamae“?', ['Kampfhaltung mit den Händen auf mittlerer Höhe', 'Kampfhaltung mit den Händen unten', 'Kampfhaltung mit offenen Händen', 'Grußhaltung'], 'Theorie zum 7. Kyu.');
-  L.mc('Was bedeutet „Gedan-Kamae“?', ['Kampfhaltung mit der vorderen Hand in Gedan-Barai-Position', 'Kampfhaltung mit Händen auf Kopfhöhe', 'Kniende Haltung', 'Haltung mit gekreuzten Armen'], 'Theorie zum 7. Kyu.');
+  L.mc('Was bedeutet „Gedan-Kamae“?', ['Kampfhaltung mit der vorderen Hand unten, wie nach einer fegenden Abwehr nach unten', 'Kampfhaltung mit den Händen auf Kopfhöhe', 'Kampfhaltung mit beiden Fäusten an der Hüfte', 'Kampfhaltung mit gekreuzten Armen vor der Brust'], 'Die vordere Hand steht in Gedan-barai-Position. Theorie zum 7. Kyu.');
   L.mc('Was bedeutet „Kime“?', ['Konzentration aller Kraft im Moment des Treffens', 'Kampfschrei', 'Ausweichen', 'Distanz'], 'Theorie zum 4. Kyu.');
   L.mc('Was bedeutet „Kime-Waza“?', ['Entscheidende, abschließende Technik', 'Wurftechnik', 'Fußfegetechnik', 'Atemtechnik'], 'Theorie zum 4. Kyu.');
   L.mc('Was bedeutet „Kogeki“?', ['Angriff', 'Abwehr', 'Gruß', 'Stellung'], 'Theorie zum 6. Kyu.');
@@ -143,7 +143,7 @@
   L.mc('Was bedeutet „Ashi-barai“?', ['Fußfeger', 'Fußtritt nach hinten', 'Stampfen', 'Fußballen'], 'Theorie zum 1. Dan.');
   L.mc('Was bedeutet „Bunkai“?', ['Anwendung bzw. Analyse der Kata-Techniken', 'Grußformel', 'Freikampf', 'Meditation'], 'Kata-Bunkai ist Teil der Dan-Prüfungen.');
   L.mc('Was bedeutet „Yori-ashi“?', ['Beide Füße gleiten gemeinsam in eine Richtung, der Stand bleibt erhalten', 'Kreuzschritt', 'Sprung', 'Halbkreisschritt'], '', S.pdf);
-  L.mc('Wo beginnt nach dem Grundprinzip „Kraft aus dem Boden“ eine Handtechnik?', ['Am Boden – der hintere Fuß drückt aktiv gegen den Boden', 'In der Faust', 'Im Ellbogen', 'Im Kiai'], 'Über Bein, Körpermitte und Hüfte läuft die Kraft zum Ziel.', S.kompakt);
+  L.mc('Wo beginnt nach den Grundprinzipien die Kraft einer Handtechnik?', ['Am Boden – der hintere Fuß drückt aktiv gegen den Boden', 'In der Hüfte – sie dreht vor allem anderen', 'In der Schulter – sie schiebt den Arm nach vorn', 'In der Faust – sie spannt sich zuerst an'], 'Über Bein, Körpermitte und Hüfte läuft die Kraft zum Ziel.', S.kompakt);
   L.mc('Womit vergleicht man die Stände, um ihre Bedeutung zu zeigen?', ['Mit dem Fundament eines Gebäudes', 'Mit dem Dach eines Hauses', 'Mit einer Brücke', 'Mit einem Fluss'], '', S.kompakt);
 
   // ---------- Stände ----------
@@ -172,7 +172,7 @@
   L.mc('Was ist „Kosa-dachi“?', ['Kreuzstand', 'Katzenfußstand', 'Reiterstand', 'Halbmondstand'], 'Theoriebegriff zum 1. Dan.', S.po);
   L.mc('Was ist „Neko-ashi-dachi“?', ['Katzenfußstand – Gewicht fast vollständig hinten', 'Kreuzstand', 'Reiterstand', 'Unbeweglicher Stand'], '');
   L.mc('Was bedeutet „Fudo-dachi“?', ['Unbeweglicher Stand', 'Katzenfußstand', 'Halbmondstand', 'Sanduhrstand'], '');
-  L.mc('Aus welcher Kata stammt der Name „Hangetsu-dachi“?', ['Hangetsu', 'Heian Shodan', 'Tekki Shodan', 'Jion'], '');
+  L.mc('Was bedeutet „Hangetsu“ im Namen „Hangetsu-dachi“?', ['Halbmond', 'Sanduhr', 'Kreuz', 'Katzenfuß'], 'Der Stand ist nach der Kata Hangetsu benannt.');
   L.mc('Welche Form hat „Renoji-dachi“?', ['L-Form', 'T-Form', 'V-Form', 'X-Form'], '');
   L.mc('Was ist „Sanchin-dachi“?', ['Sanduhrstand mit nach innen gespannten Knien', 'Reiterstand', 'Kreuzstand', 'Vorwärtsstand'], '');
   L.mc('Welcher Stand ist um etwa eine Fußlänge kürzer als Zenkutsu-dachi?', ['Hangetsu-dachi', 'Kiba-dachi', 'Kokutsu-dachi', 'Heisoku-dachi'], 'Die Füße stehen dabei etwa schulterbreit.', S.kompakt);
@@ -262,8 +262,8 @@
   L.mc('In welche Richtung(en) sind seitliche Fußtritte in der DJKB-Prüfung auszuführen?', ['In beide Richtungen', 'Nur nach rechts', 'Nur nach links', 'Nach Wahl des Prüflings'], '', S.po);
   L.mc('Was ist „Mikazuki-geri“?', ['Sicheltritt', 'Stampftritt', 'Fußtritt nach hinten', 'Knietritt'], '', S.pdf);
   L.mc('Was ist „Fumikomi“?', ['Stampftritt / Aufstampfen', 'Sprungtritt', 'Sicheltritt', 'Fegetritt'], '', S.pdf);
-  L.mc('Was ist „Ura-mawashi-geri“?', ['Halbkreistritt gegenläufig zum Mawashi-geri', 'Fußtritt nach vorne', 'Stampftritt', 'Kniestoß'], 'Er trifft mit der Sohle oder der Ferse.', S.kompakt);
-  L.mc('Wie entsteht Ushiro-mawashi-geri?', ['Wie Ura-mawashi-geri, aber aus einer Körperdrehung wie beim Ushiro-geri', 'Aus einem Sprung nach vorne', 'Aus Seiza', 'Wie Mae-geri, nur seitlich'], '', S.kompakt);
+  L.mc('Was ist „Ura-mawashi-geri“?', ['Halbkreistritt gegenläufig zum Mawashi-geri', 'Mawashi-geri mit dem vorderen Bein', 'Mawashi-geri aus dem Sprung', 'Mawashi-geri mit dem Knie statt mit dem Fuß'], 'Er trifft mit der Sohle oder der Ferse.', S.kompakt);
+  L.mc('Wie entsteht Ushiro-mawashi-geri?', ['Wie Ura-mawashi-geri, aber aus einer Körperdrehung wie beim Ushiro-geri', 'Wie Ura-mawashi-geri, aber mit dem vorderen Bein ohne Körperdrehung', 'Wie Ushiro-geri, aber gerade mit der Ferse nach hinten gestoßen', 'Wie Mawashi-geri, aber mit dem hinteren Bein aus einem Sprung'], '', S.kompakt);
   L.mc('Womit trifft Mae-geri-kekomi?', ['Mit der Ferse oder dem Fußballen', 'Mit dem Spann', 'Mit der Fußkante', 'Mit dem Knie'], '', S.kompakt);
   L.mc('Was gilt beim Kniestoß (Hiza-geri) für Fuß und Zehen?', ['Sie werden zum Schienbein angezogen', 'Sie werden gestreckt', 'Sie zeigen zur Seite', 'Sie berühren den Boden'], '', S.kompakt);
 
@@ -272,7 +272,7 @@
   L.mc('Was ist „Gohon-Kumite“?', ['Fünfschritt-Kumite', 'Dreischritt-Kumite', 'Einschritt-Kumite', 'Freikampf'], 'Theoriebegriff zum 8. Kyu.');
   L.mc('Was ist „Kihon-Ippon-Kumite“?', ['Einschritt-Grundkumite mit angesagtem Angriff', 'Fünfschritt-Kumite', 'Freikampf', 'Kumite gegen mehrere Gegner'], 'Theoriebegriff zum 8. Kyu.');
   L.mc('Was ist „Jiyu-Ippon-Kumite“?', ['Freies Einschritt-Kumite aus Chudan-Kamae', 'Fünfschritt-Kumite', 'Freikampf ohne Regeln', 'Kumite im Sitzen'], 'Theoriebegriff zum 2. Kyu.');
-  L.mc('Was ist „Okuri-Jiyu-Ippon-Kumite“?', ['Jiyu-Ippon-Kumite mit einem Folgeangriff', 'Kumite mit Waffen', 'Freikampf gegen zwei Gegner', 'Gohon-Kumite rückwärts'], 'Theoriebegriff zum 1. Kyu.');
+  L.mc('Was ist „Okuri-Jiyu-Ippon-Kumite“?', ['Jiyu-Ippon-Kumite mit einem Folgeangriff', 'Jiyu-Ippon-Kumite ohne Ansage des Angriffsziels', 'Jiyu-Ippon-Kumite gegen zwei Angreifer', 'Jiyu-Ippon-Kumite nur mit Fußtechniken'], 'Theoriebegriff zum 1. Kyu.');
   L.mc('Was ist „Happo-Kumite“?', ['Kumite in acht Richtungen (gegen mehrere Angreifer)', 'Kumite mit fünf Angriffen', 'Kumite im Kniestand', 'Kumite mit verbundenen Augen'], 'Theoriebegriff zum 2. Dan.');
   L.mc('Was ist „Jiyu-Kumite“?', ['Freikampf', 'Einschritt-Kumite', 'Fünfschritt-Kumite', 'Kata-Anwendung'], '');
   L.order('Ordne die Kumite-Formen nach ihrem ersten Auftreten in der DJKB-Prüfungsordnung (früheste zuerst):', ['Kihon-Ippon-Kumite (9. Kyu)', 'Gohon-Kumite (8. Kyu)', 'Jiyu-Ippon-Kumite (2. Kyu)', 'Jiyu-Kumite (2. Dan)'], '');

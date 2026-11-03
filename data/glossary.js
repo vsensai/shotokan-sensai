@@ -245,8 +245,26 @@
     'Hiza-geri': ['heian-yondan', 25, 'Hiza-tsuchi'],
   };
 
+  // Quiz-Fassung der Bedeutung, wo die Lexikon-Bedeutung den Namen (oder ein Namensteil) verrät –
+  // „Wie heißt: …?“ und die Antworten zu „Was ist …?“ nutzen diesen Text. validate.js prüft das.
+  const QUIZ = {
+    'Ashi-zenkutsu': 'Kleine Vorwärtsstellung (kürzer und schmaler), z. B. in Gyaku-hanmi',
+    'Nukite': 'Speerhand-Stoß mit den Fingerspitzen',
+    'Tettsui-uchi': 'Hammerfaustschlag',
+    'Yoko-enpi': 'Ellbogenstoß zur Seite, meist in Kiba-dachi',
+    'Age-enpi': 'Ellbogenschlag senkrecht nach oben, dicht am Körper',
+    'Gedan-nagashi-uke': 'Ablenkende Abwehr im unteren Bereich, entgegen der Richtung der fegenden Abwehr nach unten',
+    'Ura-mawashi-geri': 'Halbkreistritt gegenläufig zum gewöhnlichen Halbkreistritt, trifft mit Sohle oder Ferse',
+    'Ushiro-mawashi-geri': 'Gegenläufiger Halbkreistritt aus einer Körperdrehung wie beim Fußtritt nach hinten',
+    'Ayumi-ashi auf einer Linie': 'Schritt bei Ständen, in denen die Füße genau hintereinander stehen (z. B. Kokutsu-dachi): der hintere Fuß geht gerade, ohne Bogen',
+    'Shaho-sashi-ashi': 'Übersetzschritt wie beim seitlichen Übersetzschritt, nur diagonal – zum Richtungswechsel in höheren Kata',
+    'Gedan-kamae': 'Kampfhaltung mit der vorderen Hand unten, wie nach einer fegenden Abwehr nach unten',
+    'Shuto-kamae': 'Kampfhaltung mit offenen Händen, Handkanten nach vorn (wie bei der Handkantenabwehr)',
+    'Koshi-kamae': 'Beide Fäuste an der Hüfte übereinander',
+  };
+
   SK.glossary = E.map(([t, de, cat, img, src]) => {
-    const e = { t, de, cat, img: img || null, src: src || ALLG };
+    const e = { t, de, qde: QUIZ[t] || de, cat, img: img || null, src: src || ALLG };
     const z = ERST[t];
     if (z) e.erst = { kata: z[0], n: z[1], buch: z[2] || '', zusatz: z[3] || '', wort: z[4] || '' };
     return e;
@@ -300,9 +318,9 @@
         const base = { lesson: lid, grp: id, type: 'mc', answer: 0, src: e.src };
         const own = !!e.img && !others.some((o) => o.img && o.img.key === e.img.key);
         const anim = e.img && /^(mv|tc|as):/.test(e.img.key) ? { gfx: e.img.key } : {};
-        SK.questions.push(Object.assign({ id: `${id}-a`, q: `Was ist „${e.t}“?`, options: [e.de].concat(pick('de')), explain: '' }, base));
+        SK.questions.push(Object.assign({ id: `${id}-a`, q: `Was ist „${e.t}“?`, options: [e.qde].concat(pick('qde')), explain: e.qde !== e.de ? e.de : '' }, base));
         // Bild nur hier, wenn es keine eigene Bildfrage gibt – sonst wären -b und -c fast gleich.
-        const qb = Object.assign({ id: `${id}-b`, q: `Wie heißt: ${e.de}?`, options: [e.t].concat(pick('t')), explain: '' }, base, e.img && !own ? anim : {});
+        const qb = Object.assign({ id: `${id}-b`, q: `Wie heißt: ${e.qde}?`, options: [e.t].concat(pick('t')), explain: e.qde !== e.de ? e.de : '' }, base, e.img && !own ? anim : {});
         if (e.img && !own) SK.util.lazy(qb, 'img', uri(e));
         SK.questions.push(qb);
         if (own) {
