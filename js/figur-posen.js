@@ -326,7 +326,9 @@
   const KU3 = M(KB, { look: 90, hL: [0.705, -0.1, 0.18], oL: 1, pL: [0.1, 0, 1], fL: [0.15, 1, 0], hR: H.hip });
   D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.1, p: KU0 }, { t: 0.2, p: KU1 }, { t: 0.38, p: KU2 }, { t: 0.45, p: KU2 }, { t: 0.88, p: KU3 }], best: 1, dur: 3.6, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
   D['tc:sukui-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [-0.32, -0.55, 0.2], oR: 1, pR: [0, 1, 0] }), M(S.kk, { hL: L(H.hip), hR: [-0.04, -0.3, 0.42], oR: 1, pR: [0, 1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'side3' }));
-  D['tc:haiwan-uke'] = T(M(S.kk, HANDS_HIP), M(S.kk, { hL: L(H.hip), hR: [-0.42, 0.24, 0.16], eR: [-0.6, -0.2, 0.2] }), M(hit('elbowR', 'Unterarm-Rückseite'), { eff: 'fistR', view: 'front3' }));
+  // wie Heian Nidan 1: der vordere (linke) Arm schwingt seitlich hoch, Unterarm senkrecht, Faust auf Kopfhöhe,
+  // die Rückseite des Unterarms zeigt zum Angriff; die rechte Faust bleibt knapp vor der Hüfte
+  D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [-0.2, -0.3, 0.06] }), M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front3' }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
   D['tc:tate-shuto-uke'] = T(M(S.kk, { hL: [-0.15, 0.02, 0.23], eL: [0.1, -0.5, 0.8], hR: H.hip }), M(S.kk, { hR: H.hip, hL: [0.07, -0.02, 0.5], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] }), M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'side3' }));
   D['tc:teisho-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.38, -0.15, 0.32], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.5] }), M(S.zks, { hL: L(H.hip), hR: [0.05, -0.15, 0.36], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.6] }), M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front3' }));
