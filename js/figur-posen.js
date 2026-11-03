@@ -375,9 +375,9 @@
   const TNU_HAND = (x, z) => ({ oL: 1, hL: aim(TNU, [x, 0.1, z]), pL: aim(TNU, [-1, 0, 0]), fL: aim(TNU, [0, 1, 0.25]), eL: aim(TNU, [0.3, -1, 0.2]) });
   D['tc:te-nagashi-uke'] = T(M(TNU, TNU_HAND(0.2, 0.36)), M(TNU, TNU_HAND(-0.2, 0.38)), M(hit('wristL', 'Innenhandfläche schiebt ab'), { eff: 'tipL', view: 'front3' }));
   // Gedan-nagashi-uke aus dem Chudan-kamae wie Te-nagashi-uke, nur unten: der linke Arm, nur ganz leicht gebeugt,
-  // wischt mit offener Hand vor dem linken Knie einen Angriff von links nach rechts weg
-  const GNU_HAND = (x, z) => ({ lean: 6, oL: 1, hL: aim(TNU, [x, -0.58, z]), pL: aim(TNU, [-1, 0, 0.2]), fL: aim(TNU, [0, -0.6, 1]), eL: aim(TNU, [0.4, -0.3, -0.2]) });
-  D['tc:gedan-nagashi-uke'] = T(M(TNU, GNU_HAND(0.3, 0.4)), M(TNU, GNU_HAND(-0.06, 0.44)), M(hit('wristL', 'Unterarm und Hand wischen ab'), { eff: 'tipL', view: 'front3' }));
+  // wischt mit geschlossener Faust vor dem linken Knie einen Angriff von links nach rechts weg
+  const GNU_HAND = (x, z) => ({ lean: 6, hL: aim(TNU, [x, -0.58, z]), pL: aim(TNU, [-1, 0, 0.2]), eL: aim(TNU, [0.4, -0.3, -0.2]) });
+  D['tc:gedan-nagashi-uke'] = T(M(TNU, GNU_HAND(0.3, 0.4)), M(TNU, GNU_HAND(-0.06, 0.44)), M(hit('wristL', 'Faust und Unterarm wischen ab'), { eff: 'tipL', view: 'front3' }));
   D['tc:osae-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [0.0, -0.1, 0.36], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, -0.36, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' }));
   // Kake-uke wie in Heian Godan 14: aus Kiba-dachi mit rechtem Gedan-barai (Blick nach rechts) wendet sich der Blick nach links;
   // beide Arme holen zusammen aus und liegen vor der Brust übereinander (linke offene Hand oben, rechte Faust darunter),
