@@ -103,10 +103,9 @@
     fudo: { pelvis: [0, 0.66, 0.08], yaw: -45, L: { x: 0.12, z: 0.6, yaw: 0 }, R: { x: -0.16, z: -0.45, yaw: -45, kp: [-0.6, 0, 0.6] }, w: [0.5, 0.5] },
     hangetsu: { pelvis: [0, 0.78, 0.03], yaw: 0, L: { x: 0.16, z: 0.36, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.16, z: -0.32, yaw: 22, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
     sanchin: { pelvis: [0, 0.85, 0.03], yaw: 0, L: { x: 0.12, z: 0.18, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.12, z: -0.12, yaw: 18, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
-    // Renoji-dachi: Beine durchgestreckt, Hüfte hoch zwischen den Füßen
+    // Renoji- und Teiji-dachi: Beine durchgestreckt, Hüfte hoch zwischen den Füßen
     renoji: { pelvis: [0, 0.935, 0.13], yaw: -30, L: { x: 0.03, z: 0.3, yaw: 0 }, R: { x: -0.04, z: -0.04, yaw: -90 }, w: [0.4, 0.6] },
-    // Teiji-dachi: Knie deutlich gebeugt (über den Zehen), Stand tief
-    teiji: { pelvis: [0, 0.82, 0.01], yaw: -30, L: { x: 0.0, z: 0.32, yaw: 0 }, R: { x: 0.06, z: -0.02, yaw: -90 }, w: [0.5, 0.5] },
+    teiji: { pelvis: [0, 0.93, 0.124], yaw: -30, L: { x: 0.0, z: 0.32, yaw: 0 }, R: { x: 0.06, z: -0.02, yaw: -90 }, w: [0.5, 0.5] },
     // Kosa-dachi: rechts Standbein; Knie nebeneinander, erst unterhalb des Knies kreuzt das linke Bein hinter der rechten Wade,
     // linker Fuß (Ballen) steht rechts neben dem rechten, schräg dahinter
     kosa: { pelvis: [0.0, 0.64, 0.2], yaw: 10, R: { x: -0.07, z: 0.32, yaw: 0, kp: [0, 0.2, 1] }, L: { x: -0.17, z: 0.14, y: 0.1, yaw: 10, pitch: -35, kp: [0.6, 0.2, 1] }, w: [0.1, 0.9] },
