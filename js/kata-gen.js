@@ -4,6 +4,8 @@
   const { util } = SK;
   const P = (n) => SK.bookSrc(n);
   const CHUNK = 8;
+  // Lektion mit dem Bewegungsblock, in dem Bewegung n steht (für Verweise, z. B. aus dem Lexikon)
+  SK.kataMoveLesson = (id, n) => `${id}-b${Math.floor((n - 1) / CHUNK) * CHUNK + 1}`;
 
   const GLOBAL_STANCES = [
     'Hidari Zenkutsu-dachi', 'Migi Zenkutsu-dachi', 'Hidari Kokutsu-dachi', 'Migi Kokutsu-dachi', 'Kiba-dachi',

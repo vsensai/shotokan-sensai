@@ -182,7 +182,88 @@
     ['Bunkai', 'Anwendung / Analyse der Kata-Techniken', 'begriff', tc('bunkai')],
   ];
 
-  SK.glossary = E.map(([t, de, cat, img, src]) => ({ t, de, cat, img: img || null, src: src || ALLG }));
+  // Erstes Vorkommen in den 10 Kata des Buches (Reihenfolge SK.kataOrder), nur wo das Buch die Technik beim Namen nennt.
+  // [Kata, Bewegung, Name im Buch (falls anders), Zusatz, Prüfwort] – validate.js prüft, dass die Bewegung den Namen
+  // enthält und keine frühere Bewegung ihn schon hat (außer mit eigenem Prüfwort).
+  const ERST = {
+    'Heisoku-dachi': ['heian-sandan', 2],
+    'Hachiji-dachi': ['bassai-dai', 8],
+    'Zenkutsu-dachi': ['heian-shodan', 1],
+    'Kokutsu-dachi': ['heian-shodan', 18],
+    'Kiba-dachi': ['heian-sandan', 9],
+    'Kosa-dachi': ['heian-yondan', 13],
+    'Fudo-dachi': ['enpi', 35],
+    'Renoji-dachi': ['heian-godan', 18],
+    'Ashi-zenkutsu': ['heian-nidan', 16],
+    'Hizakutsu': ['heian-yondan', 11],
+    'Ashi-dachi': ['heian-nidan', 7],
+    'Orishiki': ['enpi', 1],
+
+    'Oi-zuki': ['heian-shodan', 2],
+    'Gyaku-zuki': ['heian-godan', 2],
+    'Ren-zuki': ['heian-yondan', 16, '', 'mit 17', 'Chudan-zuki'],
+    'Morote-zuki': ['tekki-shodan', 15, '', '', 'Kagi-zuki'],
+    'Kagi-zuki': ['tekki-shodan', 6],
+    'Ura-zuki': ['kanku-dai', 42],
+    'Age-zuki': ['enpi', 6],
+    'Yama-zuki': ['bassai-dai', 33],
+    'Otoshi-zuki': ['kanku-dai', 61],
+    'Nukite': ['heian-nidan', 11, 'Shihon-nukite'],
+
+    'Uraken-uchi': ['heian-nidan', 7, 'Uraken Yoko-mawashi-uchi'],
+    'Tettsui-uchi': ['heian-shodan', 4, 'Kentsui Tate-mawashi-uchi'],
+    'Shuto-uchi': ['heian-yondan', 11, 'Shuto Soto-mawashi-uchi'],
+    'Enpi-uchi': ['heian-sandan', 12, 'Furi-enpi'],
+    'Furi-enpi': ['heian-sandan', 12],
+    'Ushiro-enpi': ['heian-sandan', 19],
+    'Mae-enpi': ['heian-yondan', 7],
+    'Hasami-uchi': ['bassai-dai', 23],
+
+    'Gedan-barai': ['heian-shodan', 1],
+    'Age-uke': ['heian-shodan', 7],
+    'Soto-uke': ['bassai-dai', 4],
+    'Uchi-uke': ['heian-nidan', 16],
+    'Shuto-uke': ['heian-shodan', 18, 'Shuto Chudan-uke'],
+    'Morote-uke': ['heian-nidan', 22],
+    'Juji-uke': ['heian-yondan', 3, 'Kosa-uke'],
+    'Kakiwake-uke': ['heian-yondan', 14],
+    'Nagashi-uke': ['heian-nidan', 2, 'Soto-nagashi-uke'],
+    'Osae-uke': ['heian-nidan', 11],
+    'Kake-uke': ['heian-godan', 14],
+    'Sukui-uke': ['bassai-dai', 6, '', 'als Zwischentechnik davor'],
+    'Haiwan-uke': ['heian-nidan', 1, 'Haiwan Yoko-uke'],
+    'Tsukami-uke': ['bassai-dai', 18],
+    'Tate-shuto-uke': ['bassai-dai', 9, 'Tate-shuto Chudan-uke'],
+    'Teisho-uke': ['jion', 23, 'Teisho Yoko-uke'],
+    'Uchiotoshi': ['jion', 43],
+
+    'Mae-geri': ['heian-nidan', 17, 'Mae-geri-keage'],
+    'Yoko-geri-keage': ['heian-nidan', 7],
+    'Yoko-geri-kekomi': ['bassai-dai', 19, 'Sokuto Gedan-kekomi'],
+    'Mikazuki-geri': ['heian-godan', 15],
+    'Fumikomi': ['heian-sandan', 12],
+    'Namigaeshi': ['tekki-shodan', 11],
+    'Nidan-geri': ['kanku-dai', 65],
+    'Hiza-geri': ['heian-yondan', 25, 'Hiza-tsuchi'],
+  };
+
+  SK.glossary = E.map(([t, de, cat, img, src]) => {
+    const e = { t, de, cat, img: img || null, src: src || ALLG };
+    const z = ERST[t];
+    if (z) e.erst = { kata: z[0], n: z[1], buch: z[2] || '', zusatz: z[3] || '', wort: z[4] || '' };
+    return e;
+  });
+  SK.glossaryErst = ERST;
+
+  // Hinweis unten auf der Karte: erste Bewegung mit Link zum passenden Bewegungsblock der Kata
+  function erstHtml(e) {
+    const z = e.erst, k = z && SK.kata[z.kata];
+    const r = k && k.seq[z.n - 1];
+    if (!r) return '';
+    const link = SK.kataMoveLesson ? `#/wissen/${SK.kataMoveLesson(z.kata, z.n)}` : '';
+    const txt = `${SK.util.esc(k.name)}, Bewegung ${z.n}${z.zusatz ? ` (${SK.util.esc(z.zusatz)})` : ''}`;
+    return `<p class="lex-erst">Zuerst in: ${link ? `<a href="${link}">${txt}</a>` : txt} · ${SK.bookPages(r[3])}</p>`;
+  }
 
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
@@ -223,9 +304,9 @@
   SK.glossaryHtml = function (items) {
     return `<div class="lex-grid">${items
       .map(
-        (e) => `<article class="lex-card" data-cat="${e.cat}" data-text="${SK.util.esc(`${e.t} ${e.de}`.toLowerCase())}">
-          <h4>${SK.util.esc(e.t)}</h4><p>${SK.util.esc(e.de)}</p>
-          ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}</article>`
+        (e) => `<article class="lex-card" data-cat="${e.cat}" data-text="${SK.util.esc(`${e.t} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
+          <h4>${SK.util.esc(e.t)}</h4>${e.erst && e.erst.buch ? `<p class="lex-buch">(im Buch: ${SK.util.esc(e.erst.buch)})</p>` : ''}<p>${SK.util.esc(e.de)}</p>
+          ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${erstHtml(e)}</article>`
       )
       .join('')}</div>`;
   };

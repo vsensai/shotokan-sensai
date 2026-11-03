@@ -207,7 +207,7 @@
     // Bindestriche, Leerzeichen, Groß-/Kleinschreibung und Umlaute ignorieren: „mae geri“ findet „Mae-geri“.
     const norm = (s) => s.toLowerCase().replace(/ß/g, 'ss').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
     const index = SK.glossary.map((e) => {
-      const words = norm(`${e.t} ${e.de}`);
+      const words = norm(`${e.t} ${e.erst ? e.erst.buch : ''} ${e.de}`);
       return { e, words, compact: words.replace(/ /g, '') };
     });
     const cats = SK.glossaryCats.map((c) => {

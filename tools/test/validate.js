@@ -65,6 +65,33 @@
       });
     });
   });
+
+  // Lexikon: erstes Vorkommen in den Kata (SK.glossaryErst) – Bewegung nennt die Technik, keine frühere Bewegung tut es
+  {
+    const norm = (x) => x.toLowerCase().replace(/-/g, '');
+    const has = (txt, name) => norm(name).split(/\s+/).every((w) => norm(txt).split(/[^a-z]+/).some((t) => t.includes(w)));
+    const text = (e, r) => (e.cat === 'stand' ? r[1] : `${r[2]} ${r[4] || ''}`);
+    const names = new Set(SK.glossary.map((e) => e.t));
+    Object.keys(SK.glossaryErst).forEach((t) => { if (!names.has(t)) errors.push(`Lexikon-Erstvorkommen: „${t}“ gibt es im Lexikon nicht`); });
+    SK.glossary.filter((e) => e.erst).forEach((e) => {
+      const z = e.erst, k = SK.kata[z.kata];
+      const r = k && k.seq[z.n - 1];
+      if (!r) return errors.push(`Lexikon „${e.t}“: ${z.kata} ${z.n} gibt es nicht`);
+      if (!lessons.has(SK.kataMoveLesson(z.kata, z.n))) errors.push(`Lexikon „${e.t}“: Lektion ${SK.kataMoveLesson(z.kata, z.n)} fehlt`);
+      const name = z.wort || z.buch || e.t;
+      if (!has(text(e, r), name)) errors.push(`Lexikon „${e.t}“: ${k.name} ${z.n} enthält „${name}“ nicht`);
+      if (z.wort) return;
+      for (const id of SK.kataOrder) {
+        if (id === z.kata) {
+          const fr = SK.kata[id].seq.find((x) => x[0] < z.n && has(text(e, x), name));
+          if (fr) errors.push(`Lexikon „${e.t}“: kommt schon in ${SK.kata[id].name} ${fr[0]} vor`);
+          break;
+        }
+        const fr = SK.kata[id].seq.find((x) => has(text(e, x), name));
+        if (fr) { errors.push(`Lexikon „${e.t}“: kommt schon in ${SK.kata[id].name} ${fr[0]} vor`); break; }
+      }
+    });
+  }
   for (let n = 1; n <= 65; n++) {
     const c = SK.ansageCount(n);
     if (!c.kana || !c.kan || /undefined/.test(Object.values(c).join())) errors.push(`Zählwort ${n} fehlerhaft`);
