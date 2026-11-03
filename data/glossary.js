@@ -260,7 +260,7 @@
     if (!r) return '';
     const link = SK.kataMoveLesson ? `#/wissen/${SK.kataMoveLesson(z.kata, z.n)}` : '';
     const txt = `${SK.util.esc(k.name)}, Bewegung ${z.n}${z.zusatz ? ` (${SK.util.esc(z.zusatz)})` : ''}`;
-    return `<p class="lex-erst">Zuerst in: ${link ? `<a href="${link}">${txt}</a>` : txt} · ${SK.bookPages(r[3])}</p>`;
+    return `<p class="lex-erst">Zuerst in: ${link ? `<a href="${link}">${txt}</a>` : txt}</p>`;
   }
 
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
