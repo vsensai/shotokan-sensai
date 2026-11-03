@@ -99,10 +99,7 @@
       const body = el('div', { class: 'quiz-body' });
       card.append(body);
 
-      // Leiste mit Prüfen/Weiter bleibt am unteren Rand, direkt über der Navigationsleiste
       const footer = el('div', { class: 'quiz-footer' });
-      const bottombar = document.querySelector('.bottombar');
-      footer.style.setProperty('--bottombar-h', `${bottombar ? bottombar.offsetHeight : 0}px`);
       const checkBtn = el('button', {
         class: 'btn primary',
         text: opts.mode === 'exam' ? 'Antwort abgeben' : 'Prüfen',
@@ -195,27 +192,17 @@
         });
         body.querySelectorAll('.chip').forEach((b) => (b.disabled = true));
 
-        // Kurzes Ergebnis in der Leiste; Erklärung und Quelle aufklappbar
-        const more =
-          q.explain || q.src
-            ? el(
-                'details',
-                { class: 'fb-more' },
-                el('summary', { text: q.explain ? 'Erklärung' : 'Quelle' }),
-                q.explain ? el('p', { text: q.explain }) : null,
-                q.src ? el('p', { class: 'src', text: `Quelle: ${q.src}` }) : null
-              )
-            : null;
         const fb = el(
           'div',
           { class: `feedback ${ok ? 'ok' : 'bad'}`, role: 'status' },
           el('strong', { text: ok ? 'Richtig!' : 'Leider falsch.' }),
-          !ok ? el('p', {}, el('span', { class: 'muted', text: 'Richtig ist: ' }), correctText(q)) : null,
-          more
+          !ok ? el('p', {}, el('span', { class: 'muted', text: 'Richtige Antwort: ' }), correctText(q)) : null,
+          q.explain ? el('p', { text: q.explain }) : null,
+          q.src ? el('p', { class: 'src', text: `Quelle: ${q.src}` }) : null
         );
         footer.innerHTML = '';
         footer.append(fb, el('button', { class: 'btn primary', text: idx + 1 < questions.length ? 'Weiter' : 'Auswertung', onclick: next }));
-        footer.querySelector('.btn').focus({ preventScroll: true });
+        footer.querySelector('.btn').focus();
       }
 
       function next() {
