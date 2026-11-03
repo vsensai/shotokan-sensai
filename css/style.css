@@ -2127,8 +2127,10 @@ main:fullscreen {
   border: 0;
   padding: 0;
   cursor: pointer;
-  text-decoration: underline dotted;
-  text-underline-offset: 0.2em;
+  text-decoration: underline solid var(--red);
+  text-decoration-thickness: 2px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 0.18em;
 }
 
 .ans-lex:hover,

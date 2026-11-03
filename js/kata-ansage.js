@@ -678,7 +678,14 @@
           if (ok) { hit = { from: i, to: i + n - 1, e: t.e }; break; }
         }
       }
-      if (hit) { hits.push(hit); i = hit.to + 1; } else i++;
+      if (hit) {
+        // ganzes Bindestrich-Wort antippbar und unterstrichen, nicht nur den Teil mit dem Begriff („Mae-geri-keage“, „Soto-nagashi-uke“)
+        const min = hits.length ? hits[hits.length - 1].to + 1 : 0;
+        while (hit.from > min && text.slice(words[hit.from - 1].end, words[hit.from].at) === '-') hit.from--;
+        while (hit.to + 1 < words.length && text.slice(words[hit.to].end, words[hit.to + 1].at) === '-') hit.to++;
+        hits.push(hit);
+        i = hit.to + 1;
+      } else i++;
     }
     const parts = [];
     let pos = 0;
