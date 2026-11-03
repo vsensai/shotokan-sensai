@@ -48,6 +48,8 @@
     hL: [0.16, -0.38, 0.02], hR: [-0.16, -0.38, 0.02], eL: [0, 0, 0], eR: [0, 0, 0],
     // offene Hand (0 = Faust, 1 = offen), Handflächen-Normale und Fingerrichtung (Brustkoordinaten, 0 = automatisch)
     oL: 0, oR: 0, pL: [0, 0, 0], pR: [0, 0, 0], fL: [0, 0, 0], fR: [0, 0, 0],
+    // Faustrichtung bei abgeknicktem Handgelenk (Brustkoordinaten, 0 = in Unterarmrichtung), z. B. Uraken
+    qL: [0, 0, 0], qR: [0, 0, 0],
     // Stoß (0 = aus): Faust dreht erst gegen Ende der Streckung von „Faustrücken unten“ in die Endlage;
     // Wert = Anteil der Drehung (1 = 180°, Faustrücken oben; 0,5 = senkrechte Faust)
     sL: 0, sR: 0,
@@ -121,11 +123,13 @@
       J['elbow' + s] = elbow;
       J['wrist' + s] = wrist;
       const fa = norm(sub(wrist, elbow));
-      J['fist' + s] = add(wrist, mul(fa, 0.045));
+      const q0 = P['q' + s];
+      const qd = len(q0) > 0.01 ? norm(sub(toW(q0), chest)) : fa;
+      J['fist' + s] = add(wrist, mul(qd, 0.045));
       // offene Hand: Finger in Unterarmrichtung oder vorgegeben, Handfläche quer dazu
       J['open' + s] = P['o' + s] > 0.5;
       const fd0 = P['f' + s];
-      const fd = len(fd0) > 0.01 ? norm(sub(toW(fd0), chest)) : fa;
+      const fd = len(fd0) > 0.01 ? norm(sub(toW(fd0), chest)) : qd;
       const pv0 = P['p' + s];
       // ohne Vorgabe: Handfläche unten, an der Hüfte (Hikite) nach oben – über „zur Mitte“ gedreht wie beim Stoß
       // tief vor dem Körper (Yoi, natürliche Stände): Handfläche zum Körper, Faustrücken nach vorn

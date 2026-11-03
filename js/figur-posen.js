@@ -27,7 +27,7 @@
     return {
       pelvis: mx(f.pelvis), yaw: -f.yaw, chest: -f.chest, lean: f.lean, roll: -f.roll, look: -f.look,
       L: ft(f.R), R: ft(f.L), hL: mx(f.hR), hR: mx(f.hL), eL: mx(f.eR), eR: mx(f.eL),
-      oL: f.oR, oR: f.oL, pL: mx(f.pR), pR: mx(f.pL), fL: mx(f.fR), fR: mx(f.fL), w: [f.w[1], f.w[0]],
+      oL: f.oR, oR: f.oL, pL: mx(f.pR), pR: mx(f.pL), fL: mx(f.fR), fR: mx(f.fL), qL: mx(f.qR), qR: mx(f.qL), w: [f.w[1], f.w[0]],
     };
   }
   // Ganze Stellung um die senkrechte Achse durch c drehen (Grad, wie yaw)
@@ -282,13 +282,14 @@
 
   /* ---------- Schläge ---------- */
   // Uraken (Yoko-mawashi-uchi): Faust vor der linken Brust, der Ellbogen führt zur Seite, dann schnappt der Unterarm
-  // waagerecht aus dem Ellbogen nach außen. Die Faust steht dabei senkrecht (Daumen oben), der Faustrücken geht voran
-  // und trifft schräg vorn seitlich, kurz bevor der Arm ganz gestreckt ist; schneller Schnapper (kürzere Dauer)
+  // aus – Treffer genau zur Seite auf Schulterhöhe mit gestrecktem Arm. Die Faust steht senkrecht (Daumen oben), das
+  // Handgelenk ist leicht abgeknickt, so dass der Rücken der vorderen Knöchel zum Ziel zeigt; schneller Schnapper
   D['tc:uraken-uchi'] = FLOW([
-    M(KB, { look: -60, hR: [0.16, -0.06, 0.22], eR: [-0.6, -0.2, 0.8] }),
-    M(KB, { look: -60, hR: [-0.1, 0.0, 0.36], eR: [-1, 0.1, 0.3], pR: [1, 0, 0.1] }),
-    M(KB, { look: -60, hR: [-0.6, 0.02, 0.26], eR: [-1, 0, -0.4], pR: [1, 0, 0.45] }),
-  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front', yaw: -40, dur: 0.95 }));
+    M(KB, { look: -90, hR: [0.16, -0.06, 0.2], eR: [-0.6, -0.2, 0.8], qR: [0.8, 0, 0.3], pR: [0, 0, -1] }),
+    M(KB, { look: -90, hR: [-0.14, 0.0, 0.22], eR: [-1, 0.2, 0.1], qR: [0.7, 0.1, 0.5], pR: [0, 0, -1] }),
+    M(KB, { look: -90, hR: [-0.5, 0.0, 0.18], eR: [-1, 0.25, -0.2], qR: [-0.4, 0, 0.6], pR: [0, 0, -1] }),
+    M(KB, { look: -90, hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6], qR: [-0.77, 0, -0.64], pR: [0, 0, -1] }),
+  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front', yaw: -30, dur: 1.0 }));
   // Tettsui (Kentsui Tate-mawashi-uchi) wie in Heian Shodan 4: aus Gedan-barai im Migi Zenkutsu-dachi
   // senkrechter Kreis vor dem Körper hoch über den Kopf und von oben nach vorn, Arm leicht gebeugt
   D['tc:tettsui-uchi'] = FLOW([

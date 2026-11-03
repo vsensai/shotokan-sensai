@@ -64,8 +64,8 @@
   // c: feste Lage; mv: Abstand vom Ursprung in Richtung der Bewegung (die Seite, die vorangeht – Abwehr, Ellbogen, Knie).
   const FL = {
     seiken: { part: 'hand', o: 'wrist', c: [0.088, -0.012, 0.012], r: 0.063 },
-    // Uraken: die Seite der Faust, die in Schlagrichtung vorangeht
-    uraken: { part: 'hand', o: 'wrist', c0: [0.045, 0.005, 0], mv: 0.045, c: 'motion', r: 0.048 },
+    // Uraken: Rücken der vorderen Knöchel (Kante zwischen Stirnseite und Handrücken)
+    uraken: { part: 'hand', o: 'wrist', c: [0.072, -0.03, 0.006], r: 0.046 },
     tettsui: { part: 'hand', o: 'wrist', c: [0.048, 0.012, -0.04], r: 0.06 },
     // beidseitiger Schlag (Hasami-uchi): die Seite der Faust, die zur anderen Faust zeigt
     innen: { part: 'hand', o: 'wrist', c0: [0.045, 0.01, 0], mv: 0.042, c: 'inside', r: 0.048 },
