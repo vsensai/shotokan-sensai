@@ -276,6 +276,8 @@
     return words(e.t).filter((w) => w !== 'uchi').every((w) => bw.includes(w)) ? '' : b;
   }
 
+  SK.glossaryAlt = altName;
+
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   SK.buildGlossaryContent = function () {
@@ -315,8 +317,8 @@
   SK.glossaryHtml = function (items) {
     return `<div class="lex-grid">${items
       .map(
-        (e) => `<article class="lex-card" data-cat="${e.cat}" data-text="${SK.util.esc(`${e.t} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
-          <h4>${SK.util.esc(e.t)}</h4>${altName(e) ? `<p class="lex-buch">(${SK.util.esc(altName(e))})</p>` : ''}<p>${SK.util.esc(e.de)}</p>
+        (e) => `<article class="lex-card" data-cat="${e.cat}" data-text="${SK.util.esc(`${e.t} ${altName(e)} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
+          <h4>${SK.util.esc(e.t)}${altName(e) ? ` <span class="lex-alt">(${SK.util.esc(altName(e))})</span>` : ''}</h4><p>${SK.util.esc(e.de)}</p>
           ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${erstHtml(e)}</article>`
       )
       .join('')}</div>`;
