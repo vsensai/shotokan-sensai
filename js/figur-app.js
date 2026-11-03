@@ -46,8 +46,8 @@
     const cam = {
       target: [(Math.max(...xs) + Math.min(...xs)) / 2, Math.max(0.42, 0.1 + 0.82 * ay), (Math.max(...zs) + Math.min(...zs)) / 2 + (partner ? 0 : 0.12)],
       dist: (ay < 0.6 ? 3.1 : 3.95) + 0.8 * Math.max(spanZ, spanX * 0.8) + (d.view === 'side' || d.view === 'front' ? 0.15 : 0),
-      // d.yaw: Kamera gegenüber der Grundansicht etwas weiter gedreht (positiv = von rechts vorn)
-      yaw: v.yaw + (d.yaw || 0), pitch: v.pitch, fov: 30,
+      // d.yaw: Kamera gegenüber der Grundansicht etwas weiter gedreht (positiv = von rechts vorn), d.pitch: steiler von oben
+      yaw: v.yaw + (d.yaw || 0), pitch: v.pitch + (d.pitch || 0), fov: 30,
     };
     const t0 = d.keys[0].t;
     const t1 = d.keys[d.keys.length - 1].t;
