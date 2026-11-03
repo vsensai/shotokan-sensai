@@ -289,7 +289,7 @@
     M(KB, { look: -90, hR: [-0.14, 0.0, 0.22], eR: [-1, 0.2, 0.1], pR: [0.5, 0, -0.87] }),
     M(KB, { look: -90, hR: [-0.5, 0.0, 0.18], eR: [-1, 0.25, -0.2], pR: [0.8, 0, 0.5] }),
     M(KB, { look: -90, hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6], pR: [0, 0, 1] }),
-  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'side', yaw: -8, dur: 1.0 }));
+  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front', dur: 1.0 }));
   // Tettsui (Kentsui Tate-mawashi-uchi) wie in Heian Shodan 4: aus Gedan-barai im Migi Zenkutsu-dachi
   // senkrechter Kreis vor dem Körper hoch über den Kopf und von oben nach vorn, Arm leicht gebeugt
   D['tc:tettsui-uchi'] = FLOW([
