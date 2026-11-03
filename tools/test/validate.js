@@ -145,6 +145,13 @@
     (html.match(/data-gfx="[^"]+"/g) || []).map((m) => m.slice(10, -1)).forEach((key) => !hasPic(key) && errors.push(`${l.id}: weder 3D-Figur noch Grafik (${key})`));
   }));
 
+  // Keine SVG-Grafik als Rückfall: wo es eine 3D-Figur gibt, gibt es kein SVG (ohne WebGL 2 bleibt das Bild leer).
+  // Ausnahmen, weil das SVG etwas anderes zeigt: Fußbilder der Stände (st:) und Körperwaffen, die das Quiz als SVG zeigt.
+  const SVG_NEBEN_3D = /^(st:|wp:(hiji|hiza|zenwan)$)/;
+  Object.keys(SK.fig3dDefs || {}).forEach((key) => {
+    if (!SVG_NEBEN_3D.test(key) && SK.gfx.byKey(key)) errors.push(`${key}: SVG-Grafik neben der 3D-Figur – Rückfall-SVGs gibt es nicht mehr (CLAUDE.md, 3D-Figuren)`);
+  });
+
   // 3D-Figuren: jede Pose rechenbar, Standfüße erreichen ihren Platz
   const F3 = window.Figur3D;
   Object.entries(SK.fig3dDefs || {}).forEach(([key, d]) => {

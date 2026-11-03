@@ -25,7 +25,7 @@
 - Heft „Karate kompakt“ (Quelle `SK.sources.kompakt`): Wissen steht in `docs/karate-kompakt.md`. Keine Scans, Bilder oder wörtlichen Texte des Heftes ins Repo – nur Fakten in eigenen Worten; Grafiken selbst zeichnen. Für Kata-Inhalte gilt weiter nur das JKA-Buch.
 
 ## 3D-Figuren
-- Bilder mit ganzer Figur kommen aus `js/figur-posen.js` (Schlüssel wie `tc:age-zuki`). Neue Technik mit Figur: nur die Pose dort ergänzen – keine SVG-Grafik als Rückfall (ohne WebGL 2 bleibt das Bild leer, die Startseite zeigt einen Hinweis). SVG-Grafiken nur, wo keine Figur passt (Fußbilder, Körperwaffen, Fußbewegungen, Schemabilder, Bodenkarte).
+- Bilder mit ganzer Figur kommen aus `js/figur-posen.js` (Schlüssel wie `tc:age-zuki`). Neue Technik mit Figur: nur die Pose dort ergänzen – keine SVG-Grafik als Rückfall (ohne WebGL 2 bleibt das Bild leer, die Startseite zeigt einen Hinweis). SVG-Grafiken nur, wo keine Figur passt (Fußbilder, Körperwaffen, Fußbewegungen, Schemabilder, Bodenkarte). `validate.html` meldet ein SVG neben einer 3D-Figur als Fehler.
 - Nach Änderungen an Posen `tools/test/gfx3d.html` mit WebGL (Playwright: `--use-angle=swiftshader`) ansehen; `validate.html` prüft, dass alle Posen rechenbar sind und Standfüße ihren Platz erreichen.
 
 ## Buchwissen (ohne PDF)
