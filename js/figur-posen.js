@@ -281,13 +281,14 @@
   D['tc:nukite'] = T(ZK_G, M(S.zks, { hR: [0.0, -0.13, 0.62], oR: 1, pR: [1, 0, 0], hL: [-0.07, -0.19, 0.27], oL: 1, pL: [0, -1, 0], fL: [-1, 0, 0.1] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
 
   /* ---------- Schläge ---------- */
-  // Uraken (Yoko-mawashi-uchi): Faust vor der linken Brust, der Ellbogen führt zur Seite, dann schnappt der Unterarm aus –
-  // Treffer auf Schulterhöhe mit durchgestrecktem Arm; schneller Schnapper (kürzere Dauer)
+  // Uraken (Yoko-mawashi-uchi): Faust vor der linken Brust, der Ellbogen führt zur Seite, dann schnappt der Unterarm
+  // waagerecht aus dem Ellbogen nach außen. Die Faust steht dabei senkrecht (Daumen oben), der Faustrücken geht voran
+  // und trifft schräg vorn seitlich, kurz bevor der Arm ganz gestreckt ist; schneller Schnapper (kürzere Dauer)
   D['tc:uraken-uchi'] = FLOW([
-    M(KB, { look: -90, hR: [0.16, -0.06, 0.2], eR: [-0.6, -0.2, 0.8] }),
-    M(KB, { look: -90, hR: [-0.14, 0.0, 0.22], eR: [-1, 0.2, 0.1] }),
-    M(KB, { look: -90, hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6] }),
-  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front', yaw: -30, dur: 0.95 }));
+    M(KB, { look: -60, hR: [0.16, -0.06, 0.22], eR: [-0.6, -0.2, 0.8] }),
+    M(KB, { look: -60, hR: [-0.1, 0.0, 0.36], eR: [-1, 0.1, 0.3], pR: [1, 0, 0.1] }),
+    M(KB, { look: -60, hR: [-0.6, 0.02, 0.26], eR: [-1, 0, -0.4], pR: [1, 0, 0.45] }),
+  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front', yaw: -40, dur: 0.95 }));
   // Tettsui (Kentsui Tate-mawashi-uchi) wie in Heian Shodan 4: aus Gedan-barai im Migi Zenkutsu-dachi
   // senkrechter Kreis vor dem Körper hoch über den Kopf und von oben nach vorn, Arm leicht gebeugt
   D['tc:tettsui-uchi'] = FLOW([
