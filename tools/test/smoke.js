@@ -102,6 +102,8 @@
       log.push(`FEHLER: ${e.message}\n${e.stack}`);
     }
     document.getElementById('log').textContent = log.join('\n');
+    // Fertig-Markierung für tools/test/run.js
+    document.documentElement.dataset.ergebnis = log[log.length - 1] === 'OK' ? 'ok' : 'fehler';
     localStorage.removeItem('shotokan-sensai-v1');
   }
   if (!window.SMOKE_LOCAL) {

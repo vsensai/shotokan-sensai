@@ -187,4 +187,6 @@
   out.push('');
   out.push(errors.length ? `FEHLER (${errors.length}):\n${errors.join('\n')}` : 'OK – keine Fehler');
   document.getElementById('out').textContent = out.join('\n');
+  // Fertig-Markierung für tools/test/run.js
+  document.documentElement.dataset.ergebnis = errors.length ? 'fehler' : 'ok';
 })();

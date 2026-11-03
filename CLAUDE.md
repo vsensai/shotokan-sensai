@@ -6,8 +6,9 @@
 - Vor dem Push `git fetch origin main` und auf den aktuellen Stand bringen.
 
 ## Vor jedem Commit
-- `tools/test/validate.html` im Browser (Playwright) laufen lassen – muss „OK“ melden.
-- `tools/test/smoke.html` nur direkt vor dem Push laufen lassen, nicht nach jeder Änderung – muss „OK“ melden.
+- `node tools/test/run.js validate` laufen lassen (prüft `tools/test/validate.html` im Browser per Playwright) – muss „OK“ melden.
+- `node tools/test/run.js smoke` (`tools/test/smoke.html`) nur direkt vor dem Push laufen lassen, nicht nach jeder Änderung – muss „OK“ melden.
+- Tests immer über `tools/test/run.js` starten, kein eigenes Playwright-Skript: Es wartet auf die Fertig-Markierung `data-ergebnis`, bricht bei JavaScript-Fehlern sofort ab und hat ein festes Zeitlimit. Normal dauern validate unter 1 s und smoke etwa 15 s.
 - Bei jeder veröffentlichten Änderung die Version mit `node tools/version.js patch|minor|major` hochzählen (setzt Version, Datum, Uhrzeit und `?v=` in `index.html`). Die Version steht im Commit-Titel, z. B. „… (v1.11.1)“.
 - Neue Skripte in `index.html`, `tools/test/validate.html` und `tools/test/smoke.html` gleichermaßen eintragen.
 - Die Startseite steht zusätzlich fest in `index.html` (für schnelles Laden): Änderungen an `viewStart()` in `js/app.js` dort mitziehen. Grafiken und Lektionstexte nicht beim Start erzeugen, sondern erst bei Bedarf (`learn: () => …`, `SK.util.lazy`).
