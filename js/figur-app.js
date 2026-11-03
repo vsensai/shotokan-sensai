@@ -64,8 +64,8 @@
   // c: feste Lage; mv: Abstand vom Ursprung in Richtung der Bewegung (die Seite, die vorangeht – Abwehr, Ellbogen, Knie).
   const FL = {
     seiken: { part: 'hand', o: 'wrist', c: [0.088, -0.012, 0.012], r: 0.063 },
-    // Uraken: Rücken der beiden vorderen Knöchel (Handrücken-Seite), nicht die Stirnseite der Faust
-    uraken: { part: 'hand', o: 'wrist', c: [0.076, -0.04, 0.012], r: 0.05 },
+    // Uraken: die Seite der Faust, die in Schlagrichtung vorangeht
+    uraken: { part: 'hand', o: 'wrist', c0: [0.045, 0.005, 0], mv: 0.045, c: 'motion', r: 0.048 },
     tettsui: { part: 'hand', o: 'wrist', c: [0.048, 0.012, -0.04], r: 0.06 },
     // beidseitiger Schlag (Hasami-uchi): die Seite der Faust, die zur anderen Faust zeigt
     innen: { part: 'hand', o: 'wrist', c0: [0.045, 0.01, 0], mv: 0.042, c: 'inside', r: 0.048 },
@@ -117,7 +117,15 @@
       h.sides.split('').forEach((s) => {
         const F = frame(J1, d.part, d.o, s);
         let c = d.c;
-        if (c === 'inside') {
+        if (c === 'motion') {
+          // Seite der Faust, die in Schlagrichtung vorangeht (Weg der Faust kurz vor dem Treffer)
+          let m = null;
+          for (let t = tb - 0.005; t >= 0; t -= 0.005) {
+            const v = E.v.sub(J1['fist' + s], E.solve(e.pose(t))['fist' + s]);
+            if (E.v.len(v) > 0.04) { m = v; break; }
+          }
+          c = E.v.add(d.c0, E.v.mul(m ? toL(F, E.v.norm(m)) : [1, 0, 0], d.mv));
+        } else if (c === 'inside') {
           const o = s === 'L' ? 'R' : 'L';
           c = E.v.add(d.c0, E.v.mul(toL(F, E.v.norm(E.v.sub(J1['fist' + o], J1['fist' + s]))), d.mv));
         } else if (d.mv) {
