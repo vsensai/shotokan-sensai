@@ -770,6 +770,16 @@ figure.gfx svg {
   margin: 1rem 0;
 }
 
+/* Startseite ohne WebGL 2 */
+.hint-3d {
+  margin: 0 0 1rem;
+  padding: 0.6rem 0.8rem;
+  border-left: 4px solid var(--red);
+  border-radius: 8px;
+  background: var(--bad-bg);
+  font-size: 0.85rem;
+}
+
 .tile {
   display: block;
   padding: 0.9rem 1rem;
@@ -980,11 +990,6 @@ figure.gfx svg {
   width: 100%;
   height: auto;
   max-height: 180px;
-}
-
-/* Doppelansicht (Figur über Fußbild) ist höher */
-.lex-img svg.duo {
-  max-height: 340px;
 }
 
 .quiz-img {
@@ -1997,10 +2002,6 @@ main:fullscreen {
     max-height: 280px;
   }
 
-  .lex-img svg.duo {
-    max-height: 520px;
-  }
-
   /* Themenlisten (Lernen, Quiz) zweispaltig */
   .unit-section {
     display: grid;
@@ -2322,16 +2323,9 @@ main:fullscreen {
   opacity: 0;
 }
 
+/* Ohne WebGL 2 (oder wenn das Bild nicht gerechnet werden kann): leere Bildfläche */
 .f3d-stage.f3d-fallback {
-  aspect-ratio: auto;
-  background: none;
   cursor: default;
-}
-
-.f3d-stage.f3d-fallback svg {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 .f3d-tools {
@@ -2349,6 +2343,11 @@ main:fullscreen {
 .quiz-f3d {
   max-width: 320px;
   margin: 0.4rem auto 0.8rem;
+}
+
+.quiz-f3d.small-img {
+  max-width: 160px;
+  margin: 0.3rem 0;
 }
 
 .k-img .f3d-stage {

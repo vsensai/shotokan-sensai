@@ -192,16 +192,6 @@
       color: var(--muted);
     }
 
-    details .old {
-      max-width: 260px;
-      margin-top: 6px;
-    }
-
-    details .old svg {
-      width: 100%;
-      height: auto;
-    }
-
     .fallback {
       padding: 30px 16px;
       text-align: center;
@@ -269,28 +259,25 @@
           keys: [{ t: 0, p: YOI }, { t: 0.15, p: YOI }, { t: 0.85, p: ZK, e: 'io' }],
           dur: 2.2, start: 1, eff: (J) => J.ankleL, ghost: [],
           cam: { target: [0, 0.68, 0.06], dist: 4.3, yaw: -62, pitch: 20 },
-          labels: true, old: () => SK.gfx.stanceSideSvg('zenkutsu'),
+          labels: true,
         },
         {
           kind: 'Handtechnik', title: 'Gyaku-zuki', text: 'Die Hüfte dreht von halbseitlich (Hanmi) nach vorne, die hintere Faust stößt, die vordere zieht zur Hüfte (Hikite). In 3D sieht man die Hüftdrehung, die eine flache Skizze nicht zeigen kann.',
           keys: [{ t: 0, p: ZK }, { t: 0.25, p: ZK }, { t: 0.6, p: ZK_GZ, e: 'kime' }],
           dur: 1.5, start: 1, eff: (J) => J.fistR, ghost: [0],
           cam: { target: [0, 0.78, 0.2], dist: 4.0, yaw: -52, pitch: 16 },
-          old: () => SK.gfx.MOVES['gyaku-zuki'](),
         },
         {
           kind: 'Fußtritt', title: 'Mae-geri', text: 'Knie hoch, Unterschenkel schnappt nach vorne, sofort zurück. Das Phasenbild zeigt Ausholen, Treffen und Zurückziehen in einem Bild.',
           keys: [{ t: 0, p: ZK }, { t: 0.12, p: ZK }, { t: 0.36, p: CHAMBER }, { t: 0.5, p: KICK, e: 'kime' }, { t: 0.64, p: CHAMBER }, { t: 0.9, p: ZK }],
           dur: 2.0, start: 0.5, eff: (J) => J.toeR, ghost: [0.36],
           cam: { target: [0, 0.8, 0.42], dist: 4.3, yaw: -90, pitch: 6 },
-          old: () => SK.gfx.MOVES['mae-geri'](),
         },
         {
           kind: 'Schritt', title: 'Oi-zuki', text: 'Schritt nach vorne: der hintere Fuß kommt in der Mitte zum Standbein und geht im Bogen nach vorne, am Ende stößt die Faust auf der Seite des vorderen Beins. Der blasse Abdruck zeigt, wo der Fuß gestartet ist.',
           keys: [{ t: 0, p: ZK }, { t: 0.12, p: ZK }, { t: 0.5, p: OI_MID }, { t: 0.82, p: OI_END, e: 'kime' }],
           dur: 2.0, start: 1, eff: (J) => J.ankleR, ghostR: true, ghost: [0],
           cam: { target: [0, 0.72, 0.62], dist: 4.8, yaw: -74, pitch: 16 },
-          old: () => SK.gfx.MOVES['oi-zuki'](),
         },
       ];
 
@@ -320,8 +307,7 @@
             <button data-v="vorne" aria-pressed="false">Vorne</button>
             <button data-v="oben" aria-pressed="false">Oben</button>
             <input type="range" min="0" max="1000" value="${Math.round(ex.start * 1000)}" aria-label="Zeitpunkt">
-          </div>
-          <details><summary>Zum Vergleich: bisherige Grafik</summary><div class="old"></div></details>`;
+          </div>`;
         root.append(card);
         const cv = card.querySelector('canvas');
         const v = {
@@ -378,7 +364,6 @@
         stage.addEventListener('pointerup', up);
         stage.addEventListener('pointercancel', up);
         stage.addEventListener('dblclick', () => { Object.assign(v.cam, v.home); v.dirty = true; });
-        if (window.SK && SK.gfx && ex.old) card.querySelector('.old').innerHTML = ex.old();
       });
 
       document.querySelectorAll('[data-style]').forEach((b) => (b.onclick = () => {

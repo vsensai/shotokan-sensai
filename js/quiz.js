@@ -82,15 +82,15 @@
 
       const typeHint =
         q.type === 'multi' ? 'Mehrere Antworten sind richtig' : q.type === 'order' ? 'Tippe die Elemente in der richtigen Reihenfolge an' : '';
-      // 3D-Figur statt SVG, wo es eine gibt
-      const f3 = !!(q.gfx && SK.fig3d && SK.fig3d.has(q.gfx));
+      // Frage mit 3D-Figur (ohne SVG-Bild; ohne WebGL bleibt die Fläche leer), sonst SVG-Bild
+      const f3 = !q.img && !!(q.gfx && SK.fig3d && SK.fig3d.known(q.gfx));
       const card = el(
         'section',
         { class: 'quiz-card' },
         opts.title ? el('div', { class: 'quiz-title', text: opts.title }) : null,
         q.ctx && SK.kataContext ? SK.kataContext(q) : null,
         el('h2', { class: 'quiz-q', text: q.q }),
-        q.img && f3 ? el('div', { class: 'quiz-f3d', html: SK.fig3d.html(q.gfx, { plain: true }) }) : null,
+        f3 ? el('div', { class: 'quiz-f3d', html: SK.fig3d.html(q.gfx, { plain: true }) }) : null,
         q.img && !f3 ? el('img', { class: 'quiz-img', src: q.img, alt: '' }) : null,
         q.img && !f3 && q.gfx && SK.gfx.hasAnim(q.gfx) ? animButton(q) : null,
         typeHint ? el('p', { class: 'type-hint', text: typeHint }) : null

@@ -61,19 +61,15 @@
     const anim = new URLSearchParams(location.search).get('anim');
     const A = (key, fn) => (anim ? G.animSvg(key) || fn() : fn());
     if (!only || only === 'st') sec('Stände', Object.keys(G.STANCES).map((k) => G.figure(G.stanceSvg(k), k)));
-    if (!only || only === 'side') sec('Stände seitlich', Object.keys(G.STANCES).map((k) => G.figure(G.stanceSideSvg(k), k)));
-    if (!only || only === 'duo') sec('Stände Doppelansicht', Object.keys(G.STANCES).map((k) => G.figure(G.stanceDuoSvg(k) || '<svg></svg>', k)).concat([G.figure(G.stanceDuoSvg('zenkutsu', true), 'zenkutsu migi'), G.figure(G.stanceDuoSvg('kosa', true), 'kosa migi')]));
     if (!only || only === 'st') parts.push(`<div class="mini">${Object.keys(G.STANCES).map((k) => G.stanceSvg(k, false, { mini: true })).join('')}</div>`);
     if (!only || only === 'wp') sec('Waffen', Object.keys(G.WEAPONS).map((k) => G.figure(G.WEAPONS[k](), k)));
-    if (!only || only === 'mv') sec('Bewegungen', Object.keys(G.MOVES).map((k) => G.figure(A(`mv:${k}`, G.MOVES[k]), k)));
     if (!only || only === 'as') sec('Fußbewegungen', Object.keys(G.ASHI).map((k) => G.figure(A(`as:${k}`, G.ASHI[k]), k + (G.hasAnim(`as:${k}`) ? ' ▶' : ''))));
-    if (!only || only === 'fig') sec('Figuren', [G.figure(G.levels(), 'Stufen'), G.figure(G.targets(), 'Ziele')]);
     if (!only || only === 'te') sec('Techniken', Object.keys(G.TECH).map((k) => G.figure(A(`tc:${k}`, G.TECH[k]), k + (G.hasAnim(`tc:${k}`) ? ' ▶' : ''))));
     document.getElementById('out').innerHTML = parts.join('');
     if (only === 'img') {
       const all = Object.keys(G.STANCES).map((k) => [k, G.stanceSvg(k)])
-        .concat(Object.keys(G.WEAPONS).map((k) => [k, G.WEAPONS[k]()]), Object.keys(G.MOVES).map((k) => [k, G.MOVES[k]()]), Object.keys(G.TECH).map((k) => [k, G.TECH[k]()]), [['levels', G.levels()], ['targets', G.targets()]])
-        .concat(Object.keys(G.STANCES).map((k) => [`side-${k}`, G.stanceSideSvg(k)]), Object.keys(G.MOVES).map((k) => [`anim-${k}`, G.animSvg(`mv:${k}`)]), Object.keys(G.TECH).map((k) => [`anim-${k}`, G.animSvg(`tc:${k}`)]), Object.keys(G.TECH).map((k) => [`plain-${k}`, G.plainSvg(G.TECH[k])]), Object.keys(G.ASHI).map((k) => [`as-${k}`, G.ASHI[k]()]), Object.keys(G.ASHI).map((k) => [`anim-as-${k}`, G.animSvg(`as:${k}`)]), Object.keys(G.STANCES).map((k) => [`duo-${k}`, G.stanceDuoSvg(k)]))
+        .concat(Object.keys(G.WEAPONS).map((k) => [k, G.WEAPONS[k]()]), Object.keys(G.TECH).map((k) => [k, G.TECH[k]()]))
+        .concat(Object.keys(G.TECH).map((k) => [`anim-${k}`, G.animSvg(`tc:${k}`)]), Object.keys(G.TECH).map((k) => [`plain-${k}`, G.plainSvg(G.TECH[k])]), Object.keys(G.ASHI).map((k) => [`as-${k}`, G.ASHI[k]()]), Object.keys(G.ASHI).map((k) => [`anim-as-${k}`, G.animSvg(`as:${k}`)]))
         .filter(([, svg]) => svg);
       let bad = [], left = all.length;
       const done = () => { if (--left === 0) document.getElementById('out').textContent = `Bilder: ${all.length}, fehlerhaft: ${bad.length ? bad.join(', ') : 'keine'}`; };

@@ -137,11 +137,17 @@
 
   SK.idCollisions.forEach((id) => errors.push(`${id}: gleiche Frage mit gleicher Lösung mehrfach in der Lektion`));
 
-  // 3D-Figuren: jede Pose rechenbar, Standfüße erreichen ihren Platz, Grafik-Schlüssel existieren
+  // Jede Grafik im Lexikon und in den Lektionen hat ein Bild: 3D-Figur oder SVG-Grafik
+  const hasPic = (key) => SK.fig3d.known(key) || !!SK.gfx.byKey(key);
+  SK.glossary.forEach((e) => e.img && !hasPic(e.img.key) && errors.push(`Lexikon ${e.t}: weder 3D-Figur noch Grafik (${e.img.key})`));
+  units.forEach((u) => u.lessons.forEach((l) => {
+    const html = String(l.learn || '');
+    (html.match(/data-gfx="[^"]+"/g) || []).map((m) => m.slice(10, -1)).forEach((key) => !hasPic(key) && errors.push(`${l.id}: weder 3D-Figur noch Grafik (${key})`));
+  }));
+
+  // 3D-Figuren: jede Pose rechenbar, Standfüße erreichen ihren Platz
   const F3 = window.Figur3D;
-  const known = (key) => !!SK.gfx.byKey(key);
   Object.entries(SK.fig3dDefs || {}).forEach(([key, d]) => {
-    if (!known(key)) errors.push(`3D ${key}: keine passende SVG-Grafik als Rückfall`);
     const tl = F3.timeline(d.keys);
     for (let i = 0; i <= 10; i++) {
       const P = tl(i / 10);

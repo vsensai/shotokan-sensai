@@ -1,5 +1,6 @@
 /* 3D-Figuren in der App: ruhende Kernbilder (einmal gerechnet, dann zwischengespeichert),
-   per Finger drehbar, ▶ Bewegung (einmal abspielen, Endstellung halten). Ohne WebGL 2 bleiben die bisherigen SVG-Grafiken. */
+   per Finger drehbar, ▶ Bewegung (einmal abspielen, Endstellung halten). Ohne WebGL 2 (oder mit ?svg) bleibt die Bildfläche leer,
+   die Startseite zeigt dann einen Hinweis. */
 (function () {
   'use strict';
   const E = window.Figur3D;
@@ -21,7 +22,9 @@
     const [kind, k, m] = String(key).split(':');
     return { id: `${kind}:${k}`, mirrored: m === 'm' };
   };
-  const has = (key) => !!key && !!D[split(key).id] && ok();
+  // known: es gibt eine 3D-Figur zum Schlüssel (dann keine SVG-Grafik); has: sie lässt sich auch zeigen
+  const known = (key) => !!key && !!D[split(key).id];
+  const has = (key) => known(key) && ok();
 
   /* ---------- Einträge vorbereiten: Ablauf, Kamera ---------- */
   const VIEWS = {
@@ -341,6 +344,7 @@
     const opt = o || {};
     const e = D[split(key).id];
     const anim = e && !e.still;
+    if (!ok()) return `<div class="f3d f3d-off${opt.cls ? ` ${opt.cls}` : ''}" data-f3d="${esc(key)}"><div class="f3d-stage f3d-fallback"></div></div>`;
     const tools = opt.tools === false ? '' : `<div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-home" hidden>↺ Kernbild</button></div>`;
     return `<div class="f3d${opt.cls ? ` ${opt.cls}` : ''}" data-f3d="${esc(key)}"${opt.plain ? ' data-plain="1"' : ''}><div class="f3d-stage"><img class="f3d-img" alt="" draggable="false"><span class="f3d-badge" aria-hidden="true">3D ↻ ⤢</span></div>${tools}</div>`;
   }
@@ -371,11 +375,10 @@
     const f = (1 / Math.tan((FOV * Math.PI) / 360)) * (scale / h);
     return (Math.atan(1 / f) * 360) / Math.PI;
   }
+  // Bild ließ sich nicht rechnen: Bildfläche bleibt leer
   function fallback(box) {
     const stage = box.querySelector('.f3d-stage');
-    const key = box.dataset.f3d;
-    // Quiz (data-plain): ohne Beschriftungen, die die Antwort verraten würden
-    stage.innerHTML = box.dataset.plain === '1' ? SK.gfx.plainSvg(() => SK.gfx.byKey(key)) : SK.gfx.byKey(key);
+    stage.innerHTML = '';
     stage.classList.add('f3d-fallback');
     box.querySelectorAll('.f3d-tools [data-act]').forEach((b) => (b.hidden = true));
   }
@@ -718,5 +721,5 @@
     else document.addEventListener('DOMContentLoaded', init);
   }
 
-  SK.fig3d = { ok, has, html, entry, paint, still, prefetch, openBig, spots }; // spots: Trefferflächen (auch für validate.js)
+  SK.fig3d = { ok, known, has, html, entry, paint, still, prefetch, openBig, spots }; // spots: Trefferflächen (auch für validate.js)
 })();

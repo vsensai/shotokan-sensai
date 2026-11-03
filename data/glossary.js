@@ -22,10 +22,12 @@
 
   const keyed = (key, fn) => Object.assign(fn, { key });
   const st = (key, mirrored) => keyed(`st:${key}${mirrored ? ':m' : ''}`, () => G.stanceSvg(key, mirrored));
-  const mv = (key) => keyed(`mv:${key}`, () => G.MOVES[key]());
-  const wp = (key) => keyed(`wp:${key}`, () => G.WEAPONS[key]());
-  const tc = (key) => keyed(`tc:${key}`, () => G.TECH[key]());
-  const as = (key) => keyed(`as:${key}`, () => G.ASHI[key]());
+  // Mit 3D-Figur gibt es keine SVG-Grafik: G.byKey liefert dann ''
+  const byKey = (key) => keyed(key, () => G.byKey(key));
+  const mv = (key) => byKey(`mv:${key}`);
+  const wp = (key) => byKey(`wp:${key}`);
+  const tc = (key) => byKey(`tc:${key}`);
+  const as = (key) => byKey(`as:${key}`);
 
   // [Begriff, Bedeutung, Kategorie, Grafik?, Quelle?]
   const E = [
@@ -304,7 +306,8 @@
       const items = SK.glossary.filter((e) => e.cat === c.id);
       const lid = `gl-${c.id}`;
       unit.lessons.push(SK.util.lazy({ id: lid, title: c.title }, 'learn', () => SK.glossaryHtml(items)));
-      // Quizbilder ohne Beschriftung (würde die Antwort verraten); Animation per Knopf (q.gfx).
+      // Quizbilder ohne Beschriftung (würde die Antwort verraten). Mit 3D-Figur zeigt die Frage sie (q.gfx, kein q.img),
+      // sonst das SVG-Bild (q.img), bei Bewegungen mit Animation per Knopf (q.gfx).
       // Bilder erst erzeugen, wenn eine Frage sie zeigt – gleicher Grafik-Schlüssel = gleiches Bild.
       const uris = new Map();
       const uri = (e) => () => {
@@ -317,15 +320,18 @@
         const id = `gl-${slug(e.t)}`;
         const base = { lesson: lid, grp: id, type: 'mc', answer: 0, src: e.src };
         const own = !!e.img && !others.some((o) => o.img && o.img.key === e.img.key);
-        const anim = e.img && /^(mv|tc|as):/.test(e.img.key) ? { gfx: e.img.key } : {};
+        // Stände und Körperwaffen zeigt das Quiz weiter als SVG (Fußbild bzw. markierte Fläche)
+        const f3 = !!e.img && /^(mv|tc):/.test(e.img.key) && SK.fig3d.known(e.img.key);
+        const anim = e.img && (f3 || /^(tc|as):/.test(e.img.key)) ? { gfx: e.img.key } : {};
+        const pic = (q) => (f3 ? q : SK.util.lazy(q, 'img', uri(e)));
         SK.questions.push(Object.assign({ id: `${id}-a`, q: `Was ist „${e.t}“?`, options: [e.qde].concat(pick('qde')), explain: e.qde !== e.de ? e.de : '' }, base));
         // Bild nur hier, wenn es keine eigene Bildfrage gibt – sonst wären -b und -c fast gleich.
         const qb = Object.assign({ id: `${id}-b`, q: `Wie heißt: ${e.qde}?`, options: [e.t].concat(pick('t')), explain: e.qde !== e.de ? e.de : '' }, base, e.img && !own ? anim : {});
-        if (e.img && !own) SK.util.lazy(qb, 'img', uri(e));
+        if (e.img && !own) pic(qb);
         SK.questions.push(qb);
         if (own) {
           const qc = Object.assign({ id: `${id}-c`, q: c.ask, options: [e.t].concat(pick('t')), explain: e.de }, base, anim);
-          SK.questions.push(SK.util.lazy(qc, 'img', uri(e)));
+          SK.questions.push(pic(qc));
         }
       });
     });

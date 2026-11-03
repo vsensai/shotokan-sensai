@@ -10,8 +10,8 @@ In der App gekennzeichnet als Quelle `SK.sources.kompakt`.
 
 | Idee im Heft | Umsetzung in der App |
 |---|---|
-| Stand doppelt: Figur oben, Fußabdrücke von oben darunter, gestrichelte Bezugslinien, Kreis für die Körpermitte | „Figur & Fußbild“ (`stanceDuoSvg` in `js/graphics.js`): Figur, darunter die Füße von oben in gleicher Blickrichtung, Bezugslinien, Schwerpunkt nach Gewicht, ungefähre Maße |
-| Technik als ruhige Skizze mit einem roten, gestrichelten Bahnpfeil | Bahnpfeile in den Technik-Grafiken (`js/graphics-tech.js`); fehlende ergänzt (Morote-, Yama-zuki, Juji-, Morote-, Tate-shuto-uke) |
+| Stand doppelt: Figur oben, Fußabdrücke von oben darunter, gestrichelte Bezugslinien, Kreis für die Körpermitte | Früher „Figur & Fußbild“ (SVG); heute 3D-Figur, als zweite Ansicht „Fußbild“: Füße von oben mit Gewichtsverteilung und ungefähren Maßen (`stanceSvg` in `js/graphics.js`) |
+| Technik als ruhige Skizze mit einem roten, gestrichelten Bahnpfeil | Früher Bahnpfeile in den SVG-Technikgrafiken; heute zeigen die 3D-Figuren die Bahn (`eff` in `js/figur-posen.js`) |
 | Fußbewegungen als Fußspuren mit Bahn und nummerierten Schritten | Neue Draufsicht-Grafiken mit Animation (`js/graphics-ashi.js`, Schlüssel `as:`) |
 | Eine Technik pro Seite, ein Satz Erklärung | „Kompakt-Übersicht“ (`#/kompakt`): eine Karte je Lexikon-Eintrag, filterbar nach Gürtel, druckbar |
 

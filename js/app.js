@@ -103,6 +103,17 @@
       versionLine()
     );
     finishView();
+    hint3d();
+  }
+
+  // Ohne WebGL 2 keine 3D-Figuren: die Bilder bleiben leer, die Startseite sagt warum.
+  // Erst nach dem Zeichnen prüfen, damit der Start schnell bleibt (nicht in index.html, weil abhängig vom Gerät).
+  function hint3d() {
+    setTimeout(() => {
+      const tiles = app.querySelector(':scope > .tiles');
+      if (!tiles || !SK.fig3d || SK.fig3d.ok() || app.querySelector(':scope > .hint-3d')) return;
+      tiles.after(el('p', { class: 'hint-3d', role: 'note', text: 'Dein Browser kann keine 3D-Grafik (WebGL 2) anzeigen – die Bilder der Techniken bleiben leer. Ein aktueller Browser oder eingeschaltete Hardwarebeschleunigung hilft.' }));
+    }, 0);
   }
 
   function versionLine() {
@@ -357,7 +368,8 @@
         if (!items.length) return '';
         const cards = items.map((e) => {
           const g = tg[e.t];
-          const pic = !e.img ? '' : SK.fig3d && SK.fig3d.has(e.img.key) && !/^st:/.test(e.img.key) ? SK.fig3d.html(e.img.key, { tools: false }) : SK.gfx.plainSvg(e.img);
+          // 3D-Figur, wo es eine gibt (ohne WebGL leer); Stände als Fußbild
+          const pic = !e.img ? '' : SK.fig3d && SK.fig3d.known(e.img.key) && !/^st:/.test(e.img.key) ? SK.fig3d.html(e.img.key, { tools: false }) : SK.gfx.plainSvg(e.img);
           return `<article class="k-card">${pic ? `<div class="k-img">${pic}</div>` : ''}<h4>${util.esc(e.t)}</h4><p>${util.esc(e.de)}</p>${g ? `<span class="badge">ab ${util.esc(gradeName(g))}</span>` : ''}</article>`;
         });
         return `<section class="k-sec"><h2>${util.esc(c.title)} <span class="muted small">(${items.length})</span></h2><div class="k-grid">${cards.join('')}</div></section>`;
@@ -584,7 +596,7 @@
             'li',
             {},
             el('p', { class: 'q', text: r.q.q }),
-            r.q.img ? el('img', { class: 'quiz-img small-img', src: r.q.img, alt: '' }) : '',
+            r.q.img ? el('img', { class: 'quiz-img small-img', src: r.q.img, alt: '' }) : r.q.gfx && SK.fig3d.known(r.q.gfx) ? el('div', { class: 'quiz-f3d small-img', html: SK.fig3d.html(r.q.gfx, { plain: true, tools: false }) }) : '',
             el('p', {}, el('span', { class: 'muted', text: 'Richtig: ' }), SK.quizUtil.correctText(r.q)),
             r.q.explain ? el('p', { class: 'small', text: r.q.explain }) : '',
             el('p', { class: 'src', text: `Quelle: ${r.q.src}` })
@@ -965,7 +977,7 @@
     return viewNotFound();
   }
   window.addEventListener('hashchange', route);
-  // Grafik-Knöpfe in Lektionen und Lexikon: Fußbild ↔ Seitenansicht, Standbild ↔ Animation
+  // Grafik-Knöpfe in Lektionen und Lexikon: 3D-Figur ↔ Fußbild, Standbild ↔ Animation
   document.addEventListener('click', (ev) => {
     const btn = ev.target.closest('.gfx-box .gfx-btn');
     // 3D-Knöpfe (data-act="f3d-…") bedient js/figur-app.js
@@ -977,7 +989,7 @@
     if (btn.dataset.act === 'side') {
       views[0].hidden = on;
       views[1].hidden = !on;
-      btn.textContent = on ? (btn.dataset.label === 'Fußbild' ? '3D-Figur' : 'Fußbild') : btn.dataset.label;
+      btn.textContent = on ? '3D-Figur' : btn.dataset.label;
     } else if (btn.dataset.act === 'anim') {
       const anim = box.querySelector(':scope > .gfx-anim');
       anim.innerHTML = on ? SK.gfx.animSvg(box.dataset.gfx) : '';

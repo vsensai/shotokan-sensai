@@ -53,20 +53,20 @@
           <div class="gfx-grid">${[
             SK.gfx.figure(SK.gfx.TECH['tsuki-uchi'](), 'Tsuki und Uchi'),
             SK.gfx.figure(SK.gfx.TECH['keage-kekomi'](), 'Kekomi und Keage'),
-            SK.gfx.figure(SK.gfx.MOVES['oi-zuki'](), 'Oi-zuki', '', 'mv:oi-zuki'),
-            SK.gfx.figure(SK.gfx.MOVES['gyaku-zuki'](), 'Gyaku-zuki', '', 'mv:gyaku-zuki'),
-            SK.gfx.figure(SK.gfx.MOVES['uchi-uke'](), 'Uchi-uke', '', 'mv:uchi-uke'),
-            SK.gfx.figure(SK.gfx.MOVES['soto-uke'](), 'Soto-uke', '', 'mv:soto-uke'),
+            SK.gfx.figure(null, 'Oi-zuki', '', 'mv:oi-zuki'),
+            SK.gfx.figure(null, 'Gyaku-zuki', '', 'mv:gyaku-zuki'),
+            SK.gfx.figure(null, 'Uchi-uke', '', 'mv:uchi-uke'),
+            SK.gfx.figure(null, 'Soto-uke', '', 'mv:soto-uke'),
             SK.gfx.stanceFigure('ashizenkutsu'),
             SK.gfx.stanceFigure('hizakutsu'),
-            SK.gfx.figure(SK.gfx.levels(), 'Jodan, Chudan, Gedan', null, 'fig:levels'),
+            SK.gfx.figure(null, 'Jodan, Chudan, Gedan', null, 'fig:levels'),
           ].join('')}</div>`,
       },
       {
         id: 'kb-ziele',
         title: 'Trefferzonen (Anhang)',
         learn: () => `
-          <div class="gfx-grid">${SK.gfx.figure(SK.gfx.targets(), 'Trefferzonen', 'Auswahl nach dem Anhang des Buchs', 'fig:targets')}</div>
+          <div class="gfx-grid">${SK.gfx.figure(null, 'Trefferzonen', 'Auswahl nach dem Anhang des Buchs', 'fig:targets')}</div>
           <ul>
             <li><b>Kasumi / Komekami</b> – Schläfe</li>
             <li><b>Jinchu / Bika</b> – zwischen Oberlippe und Nasenansatz</li>

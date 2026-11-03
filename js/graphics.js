@@ -9,8 +9,6 @@
   const INK = '#37474f';
   const SKIN_D = '#cdb6a4';
   const GHOST = '#90a4ae';
-  const GH_LINE = '#78909c';
-  const BG = '#fafafa';
   const ARR = '#8e1b1b';
   // Figuren im Skizzen-Stil: weiße, schattierte Formen mit Bleistift-Kontur
   const PEN = '#2b2b2b';
@@ -22,78 +20,10 @@
   const FONT = 'font-family="system-ui, Segoe UI, Roboto, sans-serif"';
   const CAP = 'fill="none" stroke-linecap="round" stroke-linejoin="round"';
 
-  // ANIM: SMIL-Animation statt Ausgangsstellung (tl = Zeitleiste der zuletzt gezeichneten Figur)
-  const mode = { anim: false, tl: null };
+  // anim: Animation statt Standbild (nur noch für die Fußbewegungen, js/graphics-ashi.js)
+  const mode = { anim: false };
   const r1 = (v) => Math.round(v * 10) / 10;
   const lerp = (a, b, t) => [r1(a[0] + (b[0] - a[0]) * t), r1(a[1] + (b[1] - a[1]) * t)];
-  // Zwischenwerte: Zahlen, Zahlenlisten und Zeichenketten gleichen Aufbaus (Zahlen werden einzeln überblendet)
-  const NUM = /-?\d+(?:\.\d+)?/g;
-  function mix(a, b, u) {
-    if (typeof a === 'number') return r1(a + (b - a) * u);
-    if (Array.isArray(a)) return a.map((v, i) => mix(v, b[i], u));
-    if (typeof a === 'string') {
-      const nb = b.match(NUM) || [];
-      if (a.replace(NUM, '#') !== b.replace(NUM, '#')) return u < 0.5 ? a : b;
-      let i = 0;
-      return a.replace(NUM, (m) => String(r1(+m + (+nb[i++] - +m) * u)));
-    }
-    return u < 0.5 ? a : b;
-  }
-  // Bewegungskurve wie cubic-bezier(.45, 0, .2, 1): anlaufen, zügig bewegen, weich abbremsen
-  function ease(t) {
-    const bz = (q, p1, p2) => 3 * (1 - q) * (1 - q) * q * p1 + 3 * (1 - q) * q * q * p2 + q * q * q;
-    let lo = 0;
-    let hi = 1;
-    for (let i = 0; i < 20; i++) {
-      const m = (lo + hi) / 2;
-      if (bz(m, 0.45, 0.2) < t) lo = m;
-      else hi = m;
-    }
-    return bz((lo + hi) / 2, 0, 1);
-  }
-  // Zeitleiste für K Schlüsselbilder: kurz halten, zügig bewegen, Endstellung halten.
-  // Jeder Übergang wird in SUB Zwischenbilder zerlegt, damit Glieder sich um die Gelenke drehen
-  // (Längen bleiben gleich) statt die Gelenkpunkte geradlinig zu verschieben.
-  const SUB = 6;
-  function timeline(K, impact) {
-    const st = Math.min(0.24, 0.6 / Math.max(1, K - 1));
-    const kt = [0, 0.2];
-    for (let i = 1; i < K; i++) kt.push(r1((0.2 + i * st) * 1000) / 1000);
-    kt.push(1);
-    const times = [0, kt[1]];
-    const seg = [[0, 0, 0], [0, 0, 0]];
-    for (let i = 1; i < K; i++) {
-      for (let j = 1; j < SUB; j++) {
-        times.push(Math.round((kt[i] + ((kt[i + 1] - kt[i]) * j) / SUB) * 10000) / 10000);
-        seg.push([i - 1, i, ease(j / SUB)]);
-      }
-      times.push(kt[i + 1]);
-      seg.push([i, i, 0]);
-    }
-    times.push(1);
-    seg.push([K - 1, K - 1, 0]);
-    const dur = K > 3 ? 3.2 : 2.6;
-    return {
-      K,
-      dur,
-      impact: kt[1 + (impact == null ? K - 1 : impact)],
-      attr: `dur="${dur}s" fill="freeze" keyTimes="${times.join(';')}" calcMode="linear"`,
-      // Schlüsselbilder → Werte je Zeitpunkt; fn = eigene Überblendung (z. B. Gelenkwinkel)
-      expand: (fr, fn) => {
-        const f = fr.slice();
-        while (f.length < K) f.push(f[f.length - 1]);
-        return seg.map(([x, y, u]) => (u === 0 ? f[x] : (fn || mix)(f[x], f[y], u)));
-      },
-    };
-  }
-  const animEl = (attr, vals, tl) => `<animate attributeName="${attr}" values="${vals.join(';')}" ${tl.attr}/>`;
-  const animTf = (type, vals, tl) => `<animateTransform attributeName="transform" type="${type}" values="${vals.join(';')}" ${tl.attr}/>`;
-  const fadeLoop = (tl) => `<animate attributeName="opacity" values="0;1" keyTimes="0;.04" dur="${tl.dur}s" fill="freeze"/>`;
-  function flash(x, y, tl) {
-    const t = tl.impact;
-    const kt = [0, Math.max(0.01, t - 0.01), t, Math.min(0.97, t + 0.1), Math.min(0.98, t + 0.15), 1].map((v) => r1(v * 1000) / 1000);
-    return `<circle cx="${x}" cy="${y}" r="7" fill="${HL}" stroke="#fff" stroke-width="2" opacity="0"><animate attributeName="opacity" values="0;0;1;1;0;0" keyTimes="${kt.join(';')}" dur="${tl.dur}s" fill="freeze"/></circle>`;
-  }
   function withMode(m, fn) {
     const prev = mode.anim;
     mode.anim = m.anim;
@@ -188,174 +118,6 @@
       ${legend}${body}${dims}${pct}</svg>`;
   }
 
-  /* Seitenansicht je Stand (Blick nach rechts): Knöchel und Zehen je Bein, d = Absenken der Hüfte; Knie ergibt sich aus der Beinlänge.
-     Grundform wie im Fußbild: links = vorderes/namensgebendes Bein, seitlich hinten (far). */
-  const STANCE_SIDE = {
-    musubi: { d: 0, L: [[112, 228], [126, 232]], R: [[106, 228], [120, 232]] },
-    heisoku: { d: 0, L: [[110, 228], [128, 232]], R: [[108, 228], [126, 232]] },
-    hachiji: { d: 0, L: [[114, 228], [130, 232]], R: [[104, 228], [120, 232]] },
-    zenkutsu: { d: 34, L: [[146, 228], [166, 232]], R: [[24, 228], [42, 232]] },
-    ashizenkutsu: { d: 8, L: [[138, 228], [158, 232]], R: [[64, 226], [82, 232]] },
-    kokutsu: { d: 30, L: [[184, 228], [200, 232]], R: [[102, 228], [110, 233], [122, 186]], arms: 'shuto', plumb: true },
-    kiba: { d: 24, L: [[112, 228], [130, 232]], R: [[116, 228], [134, 232]] },
-    ashidachi: { d: 4, L: [[112, 228], [130, 232]], R: [[132, 190], [150, 194]] },
-    hizakutsu: { d: 14, L: [[150, 228], [170, 232]], R: [[42, 226], [60, 232]] },
-    fudo: { d: 32, L: [[150, 228], [168, 232]], R: [[34, 228], [52, 232]] },
-    neko: { d: 32, L: [[144, 222], [158, 232]], R: [[106, 228], [118, 233], [136, 192]] },
-    orishiki: { d: 50, L: [[146, 228], [164, 232]], R: [[52, 228], [40, 232]] },
-  };
-  // Knie aus Hüfte und Knöchel (Oberschenkel 60, Schienbein 56), immer nach vorne gebeugt
-  function knee(h, a) {
-    const T = 60;
-    const S = 56;
-    const dx = a[0] - h[0];
-    const dy = a[1] - h[1];
-    const D = Math.hypot(dx, dy);
-    if (D >= T + S) return lerp(h, a, T / (T + S));
-    const ang = Math.acos((T * T + D * D - S * S) / (2 * T * D));
-    const base = Math.atan2(dy, dx);
-    const c = [base - ang, base + ang].map((t) => [r1(h[0] + Math.cos(t) * T), r1(h[1] + Math.sin(t) * T)]);
-    return c[0][0] > c[1][0] ? c[0] : c[1];
-  }
-  // Natürliche Stände zeigen statt der Seitenansicht eine Vorderansicht (rechtes Bein im Bild links)
-  // toward = Fuß zeigt zum Betrachter: kurz und zur Sohle hin breiter statt spitz nach unten
-  const frontLeg = (p, foot, toward) => ({ p, foot, w: 15, under: true, toward });
-  const STANCE_FRONT = {
-    musubi: { hands: 'open', legs: [frontLeg([[102, 118], [102, 176], [103, 228]], [92, 236]), frontLeg([[118, 118], [118, 176], [117, 228]], [128, 236])] },
-    heisoku: { hands: 'open', legs: [frontLeg([[102, 118], [102, 176], [103, 226]], [102, 231], true), frontLeg([[118, 118], [118, 176], [117, 226]], [118, 231], true)] },
-    hachiji: { hands: 'yoi', legs: [frontLeg([[102, 118], [94, 176], [88, 228]], [80, 236]), frontLeg([[118, 118], [126, 176], [132, 228]], [140, 236])] },
-    kiba: { d: 36, hands: 'hips', legs: [frontLeg([[100, 154], [60, 186], [58, 226]], [58, 231], true), frontLeg([[120, 154], [160, 186], [162, 226]], [162, 231], true)] },
-    // Grundform linker Fuß vorne (im Bild rechts); das rechte Bein kreuzt dahinter, Knie in der Kniekehle, Fuß außen nur auf dem Ballen
-    // Grundform linker Fuß vorne (im Bild rechts), Fußspitzen und Knie nach innen gedrückt; hinteres Bein grau und höher (weiter weg).
-    // Sanchin: hüftbreit, kurz und hoch. Hangetsu: deutlich breiter, länger (hinterer Fuß höher) und tiefer.
-    sanchin: { d: 10, hands: 'hips', legs: [Object.assign(frontLeg([[102, 128], [104, 179], [91, 225]], [98, 233]), { far: true }), frontLeg([[118, 128], [115, 181], [129, 228]], [122, 236])] },
-    hangetsu: { d: 26, hands: 'hips', legs: [Object.assign(frontLeg([[102, 144], [96, 186], [78, 220]], [87, 228]), { far: true }), frontLeg([[118, 144], [127, 190], [147, 228]], [137, 236])] },
-    // Renoji/Teiji: vorderer Fuß zeigt zum Betrachter, hinterer (grau, weiter weg) quer nach außen.
-    // Renoji: hinterer Fuß ragt nur zu einer Seite heraus (Ferse hinter dem vorderen Fuß = L), Teiji: zu beiden Seiten (Mitte dahinter = T)
-    renoji: { d: 4, hands: 'open', sideFoot: [106, 229], legs: [Object.assign(frontLeg([[102, 122], [104, 172], [106, 214]], [105, 218]), { far: true }), frontLeg([[118, 122], [115, 176], [108, 228]], [108, 233], true)] },
-    teiji: { d: 4, hands: 'open', sideFoot: [117, 229], legs: [Object.assign(frontLeg([[102, 122], [108, 172], [114, 214]], [113, 218]), { far: true }), frontLeg([[118, 122], [112, 176], [100, 228]], [100, 233], true)] },
-    kosa: { d: 42, hands: 'hips', legs: [Object.assign(frontLeg([[102, 160], [128, 204], [149, 214]], [151, 231]), { far: true }), frontLeg([[118, 160], [136, 194], [123, 226]], [122, 231], true)] },
-  };
-  // Figur von vorne als Gruppe; fx = Mitte des Fußes [namensgebender/vorderer, anderer] in Bildkoordinaten
-  function frontFig(key, mirrored) {
-    const f = STANCE_FRONT[key];
-    const d = f.d || 0;
-    const dn = (pts) => pts.map(([x, y]) => [x, y + d]);
-    const mx = ([x, y]) => [220 - x, y];
-    const legs = mirrored ? f.legs.map((l) => Object.assign({}, l, { p: l.p.map(mx), foot: mx(l.foot) })) : f.legs;
-    const arms = {
-      open: [arm([[93, 62], [88, 96], [90, 128]], 'open'), arm([[127, 62], [132, 96], [130, 128]], 'open')],
-      yoi: [arm([[93, 62], [90, 96], [100, 124]]), arm([[127, 62], [130, 96], [120, 124]])],
-      hips: [arm(dn([[93, 62], [84, 94], [92, 110]])), arm(dn([[127, 62], [136, 94], [128, 110]]))],
-    }[f.hands];
-    const spec = { head: [110, 32 + d], view: 'front', torso: dn(FRONT.torso), belt: dn(FRONT.belt), parts: legs.concat(arms) };
-    // quer gestellter hinterer Fuß im Profil (Zehen nach außen), sideFoot = Ferse am Boden; Hosenbein überdeckt den Knöchel
-    let sf = '';
-    if (f.sideFoot) {
-      const [ax, ay] = mirrored ? mx(f.sideFoot) : f.sideFoot;
-      sf = `<path d="M5,-15 C7,-6 7,0 2,0 L-27,0 C-32,0 -33,-5 -29,-6.5 C-21,-8 -13,-11 -6,-16 Z" transform="translate(${ax} ${ay}) scale(${mirrored ? -1.25 : 1.25} 1.25)" fill="${F_FAR_SKIN}" stroke="${PEN}" stroke-width="1.9" stroke-linejoin="round"/>`;
-    }
-    const X = (x) => r1(16 + 0.84 * x);
-    return { view: 'front', ground: r1(-2 + 0.84 * 238), fx: [X(legs[1].foot[0]), X(legs[0].foot[0])], inner: `<g transform="translate(16 -2) scale(.84)"><path d="M20 238 H200" stroke="#cfd8dc" stroke-width="2"/>${sf}${person(spec)}</g>` };
-  }
-  function stanceFrontSvg(key, title, mirrored) {
-    return `<svg viewBox="0 0 200 224" role="img" aria-label="${esc(title)} – von vorne" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="198" height="222" rx="12" fill="#fafafa" stroke="#ddd"/>
-      ${frontFig(key, mirrored).inner}
-      <text x="100" y="217" font-size="9.5" text-anchor="middle" fill="#78909c" ${FONT}>von vorne</text></svg>`;
-  }
-  function sideFig(key, mirrored) {
-    const g = STANCE_SIDE[key];
-    const d = g.d;
-    // optional drittes Element: Knie fest vorgegeben (z. B. nach außen zeigend, seitlich verkürzt)
-    const lg = ([ankle, toe, kn], isFar) => {
-      const h = [isFar ? 106 : 110, 116 + d];
-      return { p: [h, kn || knee(h, ankle), ankle], foot: toe, w: 15, far: isFar };
-    };
-    // Shuto-uke: vordere Hand (Seite des vorderen Beins) als Handkante vorne, hintere vor dem Solarplexus
-    const arms = g.arms === 'shuto'
-      ? [Object.assign(arm([[112, 62 + d], [142, 70 + d], [164, 52 + d]], 'open'), { far: !mirrored }), Object.assign(arm([[112, 62 + d], [122, 94 + d], [142, 90 + d]], 'open'), { far: !!mirrored })]
-      : [Object.assign(arm([[112, 62 + d], [100, 92 + d], [110, 104 + d]]), { far: true }), arm([[112, 62 + d], [102, 92 + d], [114, 104 + d]])];
-    const spec = {
-      head: [114, 30 + d], view: 'side', trunk: [[112, 52 + d], [108, 116 + d]],
-      parts: arms.concat([lg(g.L, !mirrored), lg(g.R, !!mirrored)]),
-    };
-    const plumb = g.plumb ? `<path d="M106 ${120 + d} V232" stroke="${HL}" stroke-width="2.5" stroke-dasharray="5 4" opacity=".8"/><circle cx="106" cy="${116 + d}" r="4" fill="${HL}"/>` : '';
-    const X = (x) => r1(14 + 0.86 * x);
-    const mid = (l) => (l[0][1] < 220 ? l[0][0] : (l[0][0] + l[1][0]) / 2);
-    return { view: 'side', ground: r1(4 + 0.86 * 232), fx: [X(mid(g.L)), X(mid(g.R))], inner: `<g transform="translate(14 4) scale(.86)"><path d="M20 232 H215" stroke="#cfd8dc" stroke-width="2"/>${person(spec)}${plumb}</g>` };
-  }
-  function stanceSideSvg(key, mirrored, opts) {
-    const title = (opts && opts.title) || (STANCES[key] && STANCES[key].name);
-    if (STANCE_FRONT[key]) return stanceFrontSvg(key, title, mirrored);
-    if (!STANCE_SIDE[key]) return '';
-    return `<svg viewBox="0 0 200 224" role="img" aria-label="${esc(title)} – seitlich" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="198" height="222" rx="12" fill="#fafafa" stroke="#ddd"/>
-      <text x="190" y="18" font-size="10" text-anchor="end" fill="#78909c" ${FONT}>vorne →</text>
-      ${sideFig(key, mirrored).inner}
-      <text x="100" y="216" font-size="9.5" text-anchor="middle" fill="#78909c" ${FONT}>seitlich</text></svg>`;
-  }
-
-  /* Doppelansicht wie in Zeichenvorlagen: oben die Figur, darunter dieselben Füße von oben,
-     so gedreht, dass „vorne“ in beiden Bildern gleich liegt. Gestrichelte Bezugslinien verbinden
-     jeden Fuß mit seinem Abdruck; der Kreis zeigt, wo der Schwerpunkt über dem Boden liegt. */
-  function stanceDuoSvg(key, mirrored, opts) {
-    const s = STANCES[key];
-    const fig = STANCE_FRONT[key] ? frontFig(key, mirrored) : STANCE_SIDE[key] && !s.knee ? sideFig(key, mirrored) : null;
-    if (!s || !fig) return '';
-    const title = (opts && opts.title) || s.name;
-    const feet = s.feet.map(([x, y, r, w, side, ball]) => (mirrored ? [200 - x, y, -r, w, side === 'L' ? 'R' : 'L', ball] : [x, y, r, w, side, ball]));
-    const side = fig.view === 'side';
-    // Achse in der Figur: seitlich = nach vorne (−y), von vorne = quer (Person links = Bild rechts)
-    const along = (f) => (side ? -f[1] : 100 - f[0]);
-    const across = (f) => (side ? f[0] - 100 : 116 - f[1]);
-    const [a0, a1] = feet.map(along);
-    let k = Math.abs(a0 - a1) > 12 ? (fig.fx[0] - fig.fx[1]) / (a0 - a1) : 0.75;
-    if (!(k > 0)) k = 0.75;
-    k = Math.min(1.05, Math.max(0.5, k));
-    const off = (fig.fx[0] + fig.fx[1]) / 2 - (k * (a0 + a1)) / 2;
-    const CY = 298;
-    const pos = feet.map((f) => [r1(off + k * along(f)), r1(CY + k * across(f))]);
-    // Tiefe von vorne: vorne (kleines y) liegt näher am Betrachter, also weiter unten
-    if (!side) {
-      const ym = (feet[0][1] + feet[1][1]) / 2;
-      feet.forEach((f, i) => { pos[i][1] = r1(CY + k * (f[1] < ym ? 1 : -1) * Math.abs(f[1] - ym)); });
-    }
-    const rot = (r) => r + (side ? 90 : 180);
-    const prints = feet.map((f, i) => foot(pos[i][0], pos[i][1], rot(f[2]), f[3], { side: f[4], ball: f[5], scale: r1(FS * k * 100) / 100 })).join('');
-    const guide = feet
-      .map((f, i) => `<path d="M${fig.fx[i]} ${fig.ground + 2} L${pos[i][0]} ${pos[i][1]}" stroke="${HL}" stroke-width="1.3" stroke-dasharray="4 3" opacity=".75"/>`)
-      .join('');
-    // Schwerpunkt über dem Boden: nach Gewicht gemittelt
-    const wsum = feet.reduce((t, f) => t + f[3], 0) || 1;
-    const cg = [0, 1].map((j) => r1(feet.reduce((t, f, i) => t + pos[i][j] * f[3], 0) / wsum));
-    const centre = `<circle cx="${cg[0]}" cy="${cg[1]}" r="9" fill="${HL}" fill-opacity=".12" stroke="${HL}" stroke-width="1.4"/><path d="M${cg[0] - 13} ${cg[1]} H${cg[0] + 13} M${cg[0]} ${cg[1] - 13} V${cg[1] + 13}" stroke="${HL}" stroke-width="1"/>`;
-    const sc = FS * k;
-    const pct = feet
-      .map((f, i) => {
-        const [x, y] = pos[i];
-        // Prozentzahl neben die Ferse (seitlich) bzw. nach außen (von vorne)
-        const right = !side && x >= cg[0];
-        let tx = side ? x - 28 * sc - 3 : right ? x + 16 * sc + 3 : x - 16 * sc - 3;
-        let ty = y + 4;
-        // am linken Rand: über bzw. unter den Fuß ausweichen
-        if (side && tx < 36) [tx, ty] = [x + 4, y < CY ? y - 14 : y + 24];
-        return `<text x="${r1(tx)}" y="${ty}" font-size="10" font-weight="700" text-anchor="${side && tx === x + 4 ? 'middle' : right ? 'start' : 'end'}" fill="${f[3] >= 0.6 ? RED : f[3] ? MID : GHOST}" ${FONT}>${f[3] ? `${Math.round(f[3] * 100)} %` : 'angehoben'}</text>`;
-      })
-      .join('');
-    const lines = (s.mass || []).map((t, i) => `<text x="100" y="${364 + i * 12}" font-size="9.5" text-anchor="middle" fill="#455a64" ${FONT}>${esc(t)}</text>`).join('');
-    const vorne = side ? `<text x="190" y="18" font-size="10" text-anchor="end" fill="#78909c" ${FONT}>vorne →</text>` : '';
-    return `<svg class="duo" viewBox="0 0 200 390" role="img" aria-label="${esc(title)} – Figur und Fußbild" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="198" height="388" rx="12" fill="#fafafa" stroke="#ddd"/>
-      ${vorne}${fig.inner}
-      <path d="M14 ${r1(fig.ground + 26)} H186" stroke="#e0e0e0"/>
-      <text x="10" y="${r1(fig.ground + 38)}" font-size="9" fill="#78909c" ${FONT}>von oben</text>
-      ${guide}${prints}${centre}${pct}
-      <text x="190" y="${r1(fig.ground + 38)}" font-size="9" text-anchor="end" fill="${HL}" ${FONT}>⊕ Schwerpunkt</text>
-      ${side ? '' : `<text x="10" y="${CY + 44}" font-size="9" fill="#78909c" ${FONT}>↓ vorne</text>`}
-      ${lines}</svg>`;
-  }
-
   /* Ordnet einen Standnamen (wie im Kata-Buch) einer Grafik zu. */
   function stanceKey(name) {
     const side = /^Migi\b/.test(name) ? 'R' : /^Hidari\b/.test(name) ? 'L' : null;
@@ -396,21 +158,20 @@
     return k ? stanceSvg(k.key, k.mirrored, Object.assign({ title: name }, opts)) : '';
   }
 
-  // key: 'st:<stand>[:m]', 'mv:<bewegung>', 'tc:<technik>', 'wp:<waffe>', 'as:<fußbewegung>'
+  // key: 'st:<stand>[:m]', 'tc:<technik>', 'wp:<waffe>', 'as:<fußbewegung>'.
+  // Mit 3D-Figur (alle 'mv:' und 'fig:', die meisten 'tc:') gibt es keine SVG-Grafik mehr – dann ''.
   function byKey(key) {
     const [kind, k, m] = key.split(':');
     if (kind === 'st') return stanceSvg(k, m === 'm');
-    if (kind === 'mv') return MOVES[k]();
-    if (kind === 'tc') return SK.gfx.TECH[k]();
+    if (kind === 'tc') return SK.gfx.TECH[k] ? SK.gfx.TECH[k]() : '';
     if (kind === 'wp') return WEAPONS[k]();
     if (kind === 'as') return SK.gfx.ASHI[k]();
-    if (kind === 'fig') return k === 'levels' ? levels() : k === 'targets' ? targets() : '';
     return '';
   }
   const animCache = new Map();
   function animSvg(key) {
     if (!animCache.has(key)) {
-      const svg = /^(mv|tc|as):/.test(key) ? withMode({ anim: true }, () => byKey(key)) : '';
+      const svg = /^(tc|as):/.test(key) ? withMode({ anim: true }, () => byKey(key)) : '';
       animCache.set(key, svg.includes('<animate') ? stripTags(svg) : null);
     }
     return animCache.get(key);
@@ -418,19 +179,22 @@
   const hasAnim = (key) => !!key && !!animSvg(key);
   // Quizbild: ohne Beschriftungen, die die Antwort verraten könnten
   const plainSvg = (fn) => stripTags(fn());
-  // Grafik mit Knöpfen: Stände Fußbild ↔ Seitenansicht, Bewegungen ▶ Animation
+  // Grafik mit Knöpfen. Gibt es eine 3D-Figur, wird nur sie gezeigt (ohne WebGL bleibt die Fläche leer);
+  // bei Ständen ist das Fußbild die zweite Ansicht. svg darf eine Funktion sein (wird nur bei Bedarf erzeugt).
   function box(key, svg) {
-    if (!key) return svg;
-    const [kind, k, m] = key.split(':');
-    // 3D-Figur, wo es sie gibt (Stände: 3D-Figur zuerst, Fußbild als zweite Ansicht)
-    const f3 = SK.fig3d && SK.fig3d.has(key);
-    if (f3 && kind !== 'st') return `<div class="gfx-box" data-gfx="${esc(key)}">${SK.fig3d.html(key)}</div>`;
+    const make = () => (typeof svg === 'function' ? svg() : svg || '');
+    if (!key) return make();
+    const [kind] = key.split(':');
     const btn = (act, t) => `<button type="button" class="gfx-btn" data-act="${act}" data-label="${t}" aria-pressed="false">${t}</button>`;
-    if (f3) return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${SK.fig3d.html(key)}</div><div class="gfx-view" hidden>${svg}</div><div class="gfx-tools">${btn('side', 'Fußbild')}</div></div>`;
-    const side = kind === 'st' ? stanceDuoSvg(k, m === 'm') || stanceSideSvg(k, m === 'm') : '';
-    const anim = hasAnim(key);
-    if (!side && !anim) return svg;
-    return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${svg}</div>${side ? `<div class="gfx-view" hidden>${side}</div>` : ''}${anim ? '<div class="gfx-view gfx-anim" hidden></div>' : ''}<div class="gfx-tools">${side ? btn('side', side.includes('class="duo"') ? 'Figur & Fußbild' : STANCE_FRONT[k] ? 'Vorderansicht' : 'Seitenansicht') : ''}${anim ? btn('anim', '▶ Bewegung') : ''}</div></div>`;
+    if (SK.fig3d && SK.fig3d.known(key)) {
+      const f3 = SK.fig3d.html(key);
+      if (kind !== 'st') return `<div class="gfx-box" data-gfx="${esc(key)}">${f3}</div>`;
+      if (!SK.fig3d.ok()) return make();
+      return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${f3}</div><div class="gfx-view" hidden>${make()}</div><div class="gfx-tools">${btn('side', 'Fußbild')}</div></div>`;
+    }
+    const pic = make();
+    if (!hasAnim(key)) return pic;
+    return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${pic}</div><div class="gfx-view gfx-anim" hidden></div><div class="gfx-tools">${btn('anim', '▶ Bewegung')}</div></div>`;
   }
 
   function figure(svg, caption, note, key) {
@@ -445,12 +209,11 @@
 
   /* ---------- Figuren: Karateka im Gi (Gliedmaßen = Punktlisten) ---------- */
   const path = (pts) => 'M' + pts.map((p) => p.join(' ')).join(' L');
-  const same = (a, b) => a[0] === b[0] && a[1] === b[1];
   // Skizzen-Look ohne SVG-Filter (Filter machen das Scrollen langsam):
   // Schlagschatten und zarte Zweitlinie als versetzte Kopien der Kontur,
   // Schattenseite als dunklere Fläche unter einer schmaleren, nach links oben versetzten hellen Fläche
   const SHADE = { [F_GI]: '#dcdcda', [F_SKIN]: '#e3d3c5', [F_FAR]: '#cbcbca', [F_FAR_SKIN]: '#cfc4b9', [F_ACT]: '#a9c6e0' };
-  const under = (ink) => `<g opacity=".1" transform="translate(1.4 1.8)">${ink}</g>` + (mode.tl ? '' : `<g opacity=".3" transform="translate(.9 -.8)">${ink}</g>`);
+  const under = (ink) => `<g opacity=".1" transform="translate(1.4 1.8)">${ink}</g>` + `<g opacity=".3" transform="translate(.9 -.8)">${ink}</g>`;
   const lit = (draw, col) => draw(SHADE[col] || col, 0) + `<g transform="translate(-1 -1)">${draw(col, -3)}</g>`;
   function outlined(d, w, col) {
     const st = (c, ww) => `<path d="${d}" stroke="${c}" stroke-width="${ww}" ${CAP}/>`;
@@ -476,8 +239,7 @@
     const cloth = p.slice(0, n - 1).concat([cuff]);
     return { segs: cloth.slice(1).map((q, i) => [cloth[i], q]), skin: leg ? [cuff, end, ft] : [cuff, end], end, prev: p[n - 2] };
   }
-  // Glied als geschlossene, sich verjüngende Form (ws = Breite je Punkt). Gleicher Befehlsaufbau
-  // für jede Stellung, damit SMIL die Form zwischen Schlüsselbildern überblenden kann.
+  // Glied als geschlossene, sich verjüngende Form (ws = Breite je Punkt)
   function taper(pts, ws) {
     const n = pts.length;
     const dir = (a, b) => {
@@ -528,92 +290,44 @@
     const startCap = `Q${at([pts[0][0] - nb[0] * rf, pts[0][1] - nb[1] * rf], df, -rf)} ${at(pts[0], df, -rf)} Q${at([pts[0][0] + nb[0] * rf, pts[0][1] + nb[1] * rf], df, -rf)} ${at(pts[0], nb, rf)}`;
     return 'M' + L.map((x) => x[0]).join(' ').slice(1) + ' ' + endCap + ' ' + back.filter(Boolean).join(' ') + ' L' + at(pts[0], nb, -rf) + ' ' + startCap + 'Z';
   }
-  const shapeA = (vals, col, extra, tl) => `<path d="${vals[0]}" fill="${col}"${extra || ''}>${vals.length > 1 ? animEl('d', vals, tl) : ''}</path>`;
-  const inkA = (vals, w, col, extra, tl) => `<path d="${vals[0]}" fill="${col}" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"${extra || ''}>${vals.length > 1 ? animEl('d', vals, tl) : ''}</path>`;
-  function handA(geos, kind, c, tl) {
+  const shape = (d, col) => `<path d="${d}" fill="${col}"/>`;
+  const ink = (d, w, col) => `<path d="${d}" fill="${col}" stroke="${col}" stroke-width="${w}" stroke-linejoin="round"/>`;
+  function handEnd(g, kind, skin) {
     const open = kind === 'open' || kind === 'vopen';
-    const pos = geos.map((g) => {
-      const [x, y] = g.end;
-      if (!open) return [x, y, 0];
+    const [x, y] = g.end;
+    const st = ` stroke="${PEN}" stroke-width="1.3"`;
+    if (open) {
       const a = Math.atan2(y - g.prev[1], x - g.prev[0]);
       const off = kind === 'vopen' ? 3 : 6;
-      return [r1(x + Math.cos(a) * off), r1(y + Math.sin(a) * off), r1((a * 180) / Math.PI + (kind === 'vopen' ? 90 : 0))];
-    });
-    // Drehwinkel stetig halten (kein Sprung von 179° auf -179°)
-    const P = pos.map((v) => v.slice());
-    for (let i = 1; i < P.length; i++) {
-      while (P[i][2] - P[i - 1][2] > 180) P[i][2] -= 360;
-      while (P[i][2] - P[i - 1][2] < -180) P[i][2] += 360;
+      const [cx, cy, deg] = [r1(x + Math.cos(a) * off), r1(y + Math.sin(a) * off), r1((a * 180) / Math.PI + (kind === 'vopen' ? 90 : 0))];
+      return `<ellipse cx="${cx}" cy="${cy}" rx="10" ry="5.5" transform="rotate(${deg} ${cx} ${cy})" fill="${skin}"${st}></ellipse>`;
     }
-    const [cx, cy, deg] = P[0];
-    const st = c.ghost ? ` stroke="${c.line}" stroke-width="1.5" stroke-dasharray="3 2"` : ` stroke="${PEN}" stroke-width="1.3"`;
-    const an = P.length > 1 ? animEl('cx', P.map((v) => v[0]), tl) + animEl('cy', P.map((v) => v[1]), tl) : '';
-    let el;
-    if (open) {
-      const rot = P.length > 1 ? animTf('rotate', P.map((v) => `${v[2]} ${v[0]} ${v[1]}`), tl) : '';
-      el = `<ellipse cx="${cx}" cy="${cy}" rx="10" ry="5.5" transform="rotate(${deg} ${cx} ${cy})" fill="${c.skin}"${st}>${an}${rot}</ellipse>`;
-    } else {
-      el = `<circle cx="${cx}" cy="${cy}" r="7" fill="${c.skin}"${st}>${an}</circle>`;
-      // Fingerglieder der Faust (nur im Standbild)
-      if (!c.ghost && P.length === 1) el += `<path d="M${cx - 3.5} ${cy - 3.5} q1.5 3.5 0 7 M${cx} ${cy - 4.5} q1.5 4.5 0 9 M${cx + 3.5} ${cy - 3.5} q1.5 3.5 0 7" stroke="${PEN}" stroke-width=".7" fill="none" opacity=".55"/>`;
-    }
+    let el = `<circle cx="${x}" cy="${y}" r="7" fill="${skin}"${st}></circle>`;
+    // Fingerglieder der Faust
+    el += `<path d="M${x - 3.5} ${y - 3.5} q1.5 3.5 0 7 M${x} ${y - 4.5} q1.5 4.5 0 9 M${x + 3.5} ${y - 3.5} q1.5 3.5 0 7" stroke="${PEN}" stroke-width=".7" fill="none" opacity=".55"/>`;
     return el;
   }
-  // look: 'ghost' = gestrichelter Umriss, 'act' = bewegtes Glied (zartblau)
   // Breiten: Schulter/Hüfte breit, zum Handgelenk/Knöchel schmaler
   function widths(n, a, b) {
     return Array.from({ length: n }, (_, i) => r1(a + ((b - a) * i) / Math.max(1, n - 1)));
   }
-  // Stellung überblenden: Wurzel verschieben, jedes Glied (und der Fuß) dreht um sein Gelenk
-  function pose(a, b, u) {
-    if (a.p.length !== b.p.length) return u < 0.5 ? a : b;
-    const turn = (va, vb) => {
-      const aa = Math.atan2(va[1], va[0]);
-      let d = Math.atan2(vb[1], vb[0]) - aa;
-      while (d > Math.PI) d -= 2 * Math.PI;
-      while (d <= -Math.PI) d += 2 * Math.PI;
-      const ang = aa + d * u;
-      const len = Math.hypot(va[0], va[1]) + (Math.hypot(vb[0], vb[1]) - Math.hypot(va[0], va[1])) * u;
-      return [Math.cos(ang) * len, Math.sin(ang) * len];
-    };
-    const sub = (q, o) => [q[0] - o[0], q[1] - o[1]];
-    const pts = [[a.p[0][0] + (b.p[0][0] - a.p[0][0]) * u, a.p[0][1] + (b.p[0][1] - a.p[0][1]) * u]];
-    for (let i = 1; i < a.p.length; i++) {
-      const v = turn(sub(a.p[i], a.p[i - 1]), sub(b.p[i], b.p[i - 1]));
-      pts.push([pts[i - 1][0] + v[0], pts[i - 1][1] + v[1]]);
-    }
-    const last = pts[pts.length - 1];
-    let ft = a.foot;
-    if (a.foot && b.foot) {
-      const v = turn(sub(a.foot, a.p[a.p.length - 1]), sub(b.foot, b.p[b.p.length - 1]));
-      ft = [r1(last[0] + v[0]), r1(last[1] + v[1])];
-    }
-    return { p: pts.map(([x, y]) => [r1(x), r1(y)]), foot: ft };
-  }
-  function limb(frames, p, tl, look) {
+  // act: hervorgehobenes Glied (zartblau)
+  function limb(p) {
     const leg = !!p.foot;
-    const poses = tl && frames.length > 1 ? tl.expand(frames, pose) : [frames[0]];
-    const geos = poses.map((f) => geo(f.p, f.foot, leg));
-    const nc = geos[0].segs.length + 1;
+    const g = geo(p.p, p.foot, leg);
+    const nc = g.segs.length + 1;
     const wc = leg ? widths(nc, p.w + 5, p.w - 1) : widths(nc, p.w + 5.5, p.w + 1.5);
     const wsk = leg ? (p.toward ? [p.w * 0.66, p.w * 0.66, p.w * 1.1] : [p.w * 0.66, p.w * 0.58, p.w * 0.5]) : [p.w - 1.5, p.w - 3];
-    const cl = (g) => [g.segs[0][0]].concat(g.segs.map((sg) => sg[1]));
-    const vals = (fn) => geos.map(fn);
+    const cl = [g.segs[0][0]].concat(g.segs.map((sg) => sg[1]));
     const shrink = (ws, k) => ws.map((w) => Math.max(1, w + k));
-    const sk = (k) => vals((g) => taper(g.skin, shrink(wsk, k)));
-    const gc = (k) => vals((g) => taper(cl(g), shrink(wc, k)));
-    const ghost = look === 'ghost';
-    const gi = ghost ? BG : look === 'act' ? F_ACT : p.far ? F_FAR : F_GI;
-    const skin = ghost ? BG : p.far ? F_FAR_SKIN : F_SKIN;
-    const hand = p.end ? handA(geos, p.end, { skin, line: GH_LINE, ghost }, tl) : '';
-    if (ghost) {
-      const dash = ` stroke="${GH_LINE}" stroke-width="1.5" stroke-dasharray="5 3"`;
-      return shapeA(sk(0), skin, dash, tl) + shapeA(gc(0), gi, dash, tl) + hand;
-    }
-    const lit2 = (v0, v1, col) => shapeA(v0, SHADE[col] || col, '', tl) + `<g transform="translate(-1 -1)">${shapeA(v1, col, '', tl)}</g>`;
-    const ink = inkA(sk(0), 2.4, PEN, '', tl) + inkA(gc(0), 2.4, PEN, '', tl);
-    const near = !p.far && !tl;
-    return `${under(ink)}${inkA(sk(0), 2.4, PEN, '', tl)}${lit2(sk(0), sk(-3), skin)}${inkA(gc(0), 2.4, PEN, '', tl)}${lit2(gc(0), gc(-3), gi)}${hand}${near ? guides(frames[0].p) : ''}`;
+    const sk = (k) => taper(g.skin, shrink(wsk, k));
+    const gc = (k) => taper(cl, shrink(wc, k));
+    const gi = p.act ? F_ACT : p.far ? F_FAR : F_GI;
+    const skin = p.far ? F_FAR_SKIN : F_SKIN;
+    const hd = p.end ? handEnd(g, p.end, skin) : '';
+    const lit2 = (v0, v1, col) => shape(v0, SHADE[col] || col) + `<g transform="translate(-1 -1)">${shape(v1, col)}</g>`;
+    const line = ink(sk(0), 2.4, PEN) + ink(gc(0), 2.4, PEN);
+    return `${under(line)}${ink(sk(0), 2.4, PEN)}${lit2(sk(0), sk(-3), skin)}${ink(gc(0), 2.4, PEN)}${lit2(gc(0), gc(-3), gi)}${hd}${p.far ? '' : guides(p.p)}`;
   }
   function head([x, y], view) {
     const tilt = view === 'side' ? 12 : 0;
@@ -657,33 +371,10 @@
     }
     return out + (s.head ? head(s.head, s.view) : '') + belt;
   }
-  // Ausgangsstellung (ghost) gehört zum Glied mit gleichem Ansatzpunkt bzw. gleichem k.
-  // Animation: ghost/from → via → Endstellung oder explizite seq [[Punkte, Fuß], …]
+  // Zeichenfolge: hintere Glieder, verdeckte (under), Rumpf und Kopf, vordere Glieder
   function person(s) {
     const ps = s.parts || [];
-    const pairs = new Map();
-    ps.filter((g) => g.ghost).forEach((g) => {
-      const c = ps.filter((p) => !p.ghost && !p.far && !!p.foot === !!g.foot && (g.k ? p.k === g.k : same(p.p[0], g.p[0])));
-      if (c.length) pairs.set(c[c.length - 1], g);
-    });
-    const framesOf = (p) => {
-      const endF = { p: p.p, foot: p.foot };
-      if (!mode.anim) return [endF];
-      if (p.seq) return p.seq.map(([q, f]) => ({ p: q, foot: f }));
-      const g = pairs.get(p);
-      const start = g ? { p: g.p, foot: g.foot } : p.from ? { p: p.from, foot: p.fromFoot || p.foot } : null;
-      if (!start) return [endF];
-      return [start].concat((p.via || []).map(([q, f]) => ({ p: q, foot: f || p.foot })), [endF]);
-    };
-    const live = ps.filter((p) => !p.ghost);
-    const fr = new Map(live.map((p) => [p, framesOf(p)]));
-    const K = Math.max(1, s.shift ? s.shift.length : 1, ...live.map((p) => fr.get(p).length));
-    const imp = live.find((p) => p.impact != null);
-    const tl = mode.anim && K > 1 ? timeline(K, imp ? imp.impact : null) : null;
-    mode.tl = tl;
-        const draw = (p) => limb(fr.get(p), p, tl, pairs.has(p) || p.act ? 'act' : '');
-    const pick = (f) => live.filter(f).map(draw).join('');
-    // Ausgangsstellungen werden nicht als Schattenfigur gezeichnet, sie dienen nur der Animation
+    const pick = (f) => ps.filter(f).map(limb).join('');
     return pick((p) => p.far) + pick((p) => p.under && !p.far) + body(s) + pick((p) => !p.far && !p.under);
   }
 
@@ -709,19 +400,8 @@
     const cap = shown.map((t, i, a) => `<text x="${w / 2}" y="${hh - 10 - (a.length - 1 - i) * 13}" font-size="10.5" text-anchor="middle" fill="#455a64" ${FONT}>${esc(t)}</text>`).join('');
     return `<svg viewBox="0 0 ${w} ${hh}" role="img" aria-label="${esc(label)}" xmlns="http://www.w3.org/2000/svg">${DEFS}<rect x="1" y="1" width="${w - 2}" height="${hh - 2}" rx="12" fill="#fafafa" stroke="#ddd"/>${inner}${cap}</svg>`;
   }
-  function scene(label, w, spec, extra, lines, o) {
-    const opt = o || {};
-    let fig = person(spec);
-    const tl = mode.tl;
-    mode.tl = null;
-    // shift: Verschiebung der ganzen Figur je Schlüsselbild (Schritte); Standbild = letzte Stellung
-    const sh = spec.shift;
-    if (sh) fig = tl ? `<g>${animTf('translate', tl.expand(sh.map((x) => `${x} 0`)), tl)}${fig}</g>` : `<g transform="translate(${sh[sh.length - 1]} 0)">${fig}</g>`;
-    if (tl) fig = `<g>${fadeLoop(tl)}${fig}</g>`;
-    let rest = `${opt.pre || ''}\u0000${extra}`;
-    if (mode.anim) rest = rest.replace(/<circle data-hit="([\d.-]+) ([\d.-]+)"[^>]*\/>/g, (_, x, y) => (tl ? flash(x, y, tl) : '')).replace(/<g data-arrow="1">/g, '<g data-arrow="1" opacity=".25">');
-    const [pre, ex] = rest.split('\u0000');
-    const inner = `<g transform="translate(0 24)">${ground(w, 238)}${pre}${fig}${ex}</g>`;
+  function scene(label, w, spec, extra, lines) {
+    const inner = `<g transform="translate(0 24)">${ground(w, 238)}${person(spec)}${extra}</g>`;
     return frame(w, lines && lines.length > 1 ? 300 : 290, label, inner, lines);
   }
 
@@ -730,20 +410,8 @@
   const LEG_R = { p: [[102, 118], [95, 176], [89, 228]], w: 15, foot: [83, 234], under: true };
   const LEG_L = { p: [[118, 118], [125, 176], [131, 228]], w: 15, foot: [137, 234], under: true };
   const arm = (p, end) => ({ p, w: 10, end: end || 'fist' });
-  const HIKITE_R = arm([[93, 62], [84, 94], [92, 110]]);
   const HIKITE_L = arm([[127, 62], [136, 94], [128, 110]]);
-  const ghost = (p) => Object.assign({}, p, { ghost: true, under: false, far: false });
   const front = (parts) => Object.assign({}, FRONT, { parts: [LEG_R, LEG_L].concat(parts) });
-
-  /* ---------- Stufen Jodan / Chudan / Gedan ---------- */
-  function levels() {
-    const fig = person(front([arm([[93, 62], [86, 96], [94, 128]]), arm([[127, 62], [134, 96], [126, 128]])]));
-    const band = (y1, y2, col, t, sub) =>
-      `<rect x="44" y="${y1}" width="132" height="${y2 - y1}" fill="${col}" opacity=".55"/><text x="184" y="${(y1 + y2) / 2}" font-size="13" font-weight="700" fill="#333" ${FONT}>${t}</text><text x="184" y="${(y1 + y2) / 2 + 13}" font-size="9.5" fill="#555" ${FONT}>${sub}</text>`;
-    return `<svg viewBox="0 0 250 270" role="img" aria-label="Jodan, Chudan, Gedan" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="1" width="248" height="268" rx="12" fill="#fafafa" stroke="#ddd"/>
-      <g transform="translate(0 16)">${band(8, 56, '#ef9a9a', 'Jodan', 'Gesicht')}${band(56, 112, '#ffcc80', 'Chudan', 'Brust')}${band(112, 160, '#a5d6a7', 'Gedan', 'Unterbauch')}${fig}</g></svg>`;
-  }
 
   /* ---------- Körperwaffen ---------- */
   const HLF = `fill="${HL}" opacity=".85"`;
@@ -854,9 +522,8 @@
     </svg>`;
   }
   function bentLimb(kind) {
-    const o = { ghost: false };
     if (kind === 'zenwan') {
-      return scene('Arm', 220, front([HIKITE_L, arm([[93, 62], [86, 102], [76, 60]])]), `<path d="M86 96 L78 66" stroke-width="13" ${HLS}/>` + tag(76, 80, 'Unterarm', 14, 40, 'start'), ['von vorne'], o);
+      return scene('Arm', 220, front([HIKITE_L, arm([[93, 62], [86, 102], [76, 60]])]), `<path d="M86 96 L78 66" stroke-width="13" ${HLS}/>` + tag(76, 80, 'Unterarm', 14, 40, 'start'), ['von vorne']);
     }
     if (kind === 'hiji') {
       return scene('Arm', 240, Object.assign({}, SIDE, {
@@ -866,7 +533,7 @@
           { p: [[110, 116], [142, 168], [138, 228]], w: 15, foot: [158, 232] },
           arm([[112, 62], [152, 72], [120, 80]]),
         ]
-      }), `<circle cx="161" cy="72" r="10" ${HLF}/>` + tag(166, 64, 'Ellbogen', 226, 38, 'end'), ['seitlich: Schlag nach vorne'], o);
+      }), `<circle cx="161" cy="72" r="10" ${HLF}/>` + tag(166, 64, 'Ellbogen', 226, 38, 'end'), ['seitlich: Schlag nach vorne']);
     }
     return scene('Bein', 240, Object.assign({}, SIDE, {
       parts: [
@@ -875,8 +542,10 @@
         arm([[112, 62], [138, 80], [150, 96]]),
         { p: [[108, 116], [152, 94], [126, 146]], w: 15, foot: [118, 160] },
       ]
-    }), `<circle cx="161" cy="90" r="11" ${HLF}/>` + tag(168, 82, 'Knie', 222, 52, 'end'), ['seitlich: Sto\u00df nach oben'], o);
+    }), `<circle cx="161" cy="90" r="11" ${HLF}/>` + tag(168, 82, 'Knie', 222, 52, 'end'), ['seitlich: Sto\u00df nach oben']);
   }
+  // Seitenansicht (Blick nach rechts): rechte Körperseite vorne (near), linke hinten (far)
+  const SIDE = { head: [114, 30], view: 'side', trunk: [[112, 52], [108, 116]] };
   const WEAPONS = {
     seiken: () => fist('seiken'), uraken: () => fist('uraken'), tettsui: () => fist('tettsui'),
     shuto: () => hand('shuto'), haito: () => hand('haito'), nukite: () => hand('nukite'), teisho: () => hand('teisho'), haishu: () => hand('haishu'),
@@ -884,150 +553,12 @@
     hiji: () => bentLimb('hiji'), hiza: () => bentLimb('hiza'), zenwan: () => bentLimb('zenwan'),
   };
 
-  /* ---------- Bewegungen: Endstellung + gestrichelte Ausgangsstellung + Pfeil ---------- */
-  const FRONT_CAP = ['von vorne · rechter Arm (im Bild links)'];
-  // from = Startstellung der Gegenhand (nur für die Animation)
-  const block = (label, end, start, d, hikiteFrom) => () => scene(label, 220, front([Object.assign({}, HIKITE_L, { from: hikiteFrom }), arm(end), ghost(arm(start))]), arrow(d), FRONT_CAP);
-  const SIDE = { head: [114, 30], view: 'side', trunk: [[112, 52], [108, 116]] };
-  const kick = (stand, chamber, ext) => ({ p: ext[0], foot: ext[1], w: 15, seq: [stand, chamber, ext, chamber, stand], impact: 2 });
-  // Seitenansicht (Blick nach rechts): rechte Körperseite vorne (near), linke hinten (far)
-  const SL = {
-    nearFront: [[[110, 116], [142, 168], [138, 228]], [158, 232]],
-    nearBack: [[[110, 116], [74, 172], [40, 226]], [58, 232]],
-    farFront: [[[106, 116], [140, 168], [136, 228]], [156, 232]],
-    farBack: [[[106, 116], [72, 172], [38, 226]], [56, 232]],
-  };
-  const SA = {
-    hipNear: [[112, 62], [102, 92], [114, 104]],
-    hipFar: [[112, 62], [100, 92], [110, 104]],
-    punch: [[112, 62], [146, 66], [182, 68]],
-    guardNear: [[112, 62], [132, 86], [150, 76]],
-    guardFar: [[112, 62], [118, 92], [134, 88]],
-  };
-  const sLeg = (k, o) => Object.assign({ p: SL[k][0], foot: SL[k][1], w: 15 }, o);
-  const seqOf = (ks) => ks.map((k) => (typeof k === 'string' ? SL[k] || [SA[k]] : k));
-  // Schritt nach vorne (Oi-zuki, Suri-ashi): das vordere (linke) Bein bleibt am Boden stehen,
-  // das hintere (rechte) Bein schreitet nah am Standbein vorbei nach vorne, der Körper wandert mit.
-  const STEP_SHIFT = [-24, 27, 78];
-  function stepLegs(mid) {
-    return [
-      sLeg('farBack', { far: true, seq: seqOf(['farFront', [[[106, 116], [100, 172], [87, 228]], [107, 232]], 'farBack']) }),
-      sLeg('nearFront', { act: true, seq: seqOf(['nearBack', mid, 'nearFront']) }),
-    ];
-  }
-  function oiZuki() {
-    const spec = Object.assign({}, SIDE, {
-      shift: STEP_SHIFT,
-      parts: [
-        Object.assign(arm(SA.hipFar), { far: true, seq: seqOf(['punch', 'punch', 'hipFar']) }),
-        ...stepLegs([[[110, 116], [126, 166], [112, 218]], [130, 224]]),
-        Object.assign(arm(SA.punch), { act: true, seq: seqOf(['hipNear', 'hipNear', 'punch']), impact: 2 }),
-      ],
-    });
-    return scene('Oi-zuki', 300, spec, hit(267, 68, 'Faust', 292, 30, 'end'), ['seitlich: Schritt nach vorne –', 'Faust auf der Seite des vorderen Beins'], { ghost: false });
-  }
-  // Gyaku-zuki: linkes Bein vorne, die rechte (hintere) Faust stößt, die Hüfte dreht nach vorne
-  function gyakuZuki() {
-    const spec = Object.assign({}, SIDE, {
-      parts: [
-        Object.assign(arm(SA.hipFar), { far: true, from: SA.punch }),
-        sLeg('farFront', { far: true }),
-        sLeg('nearBack'),
-        Object.assign(arm(SA.punch), { impact: 1 }),
-        ghost(arm(SA.hipNear)),
-      ],
-    });
-    return scene('Gyaku-zuki', 240, spec, arrow('M124 98 C140 80 156 72 170 70') + hit(189, 68, 'Faust', 226, 34, 'end'), ['seitlich: linkes Bein vorne, die rechte Faust', 'stößt – die Hüfte dreht kräftig nach vorne']);
-  }
-  const MOVES = {
-    'age-uke': block('Age-uke', [[93, 62], [74, 26], [126, 6]], [[93, 62], [84, 94], [92, 110]], 'M100 104 C104 76 110 44 120 20', [[127, 62], [122, 40], [100, 30]]),
-    'gedan-barai': block('Gedan-barai', [[93, 62], [80, 100], [70, 138]], [[93, 62], [108, 86], [128, 48]], 'M130 58 C124 100 96 130 64 150', [[127, 62], [124, 96], [110, 126]]),
-    'soto-uke': block('Soto-uke', [[93, 62], [98, 102], [104, 58]], [[93, 62], [64, 70], [62, 34]], 'M56 46 C60 80 86 86 102 74', [[127, 62], [118, 86], [110, 92]]),
-    'uchi-uke': block('Uchi-uke', [[93, 62], [86, 102], [76, 60]], [[93, 62], [108, 98], [128, 108]], 'M126 100 C106 120 80 108 74 74', [[127, 62], [118, 86], [110, 92]]),
-    'mae-geri': () =>
-      scene('Mae-geri', 240, Object.assign({}, SIDE, {
-        parts: [
-          Object.assign(arm([[112, 62], [128, 90], [142, 80]]), { far: true }),
-          { p: [[108, 116], [104, 176], [100, 228]], w: 15, foot: [118, 232], far: true },
-          arm([[112, 62], [104, 96], [118, 106]]),
-          kick([[[108, 116], [112, 176], [114, 228]], [132, 232]], [[[108, 116], [146, 100], [136, 152]], [150, 158]], [[[108, 116], [152, 116], [194, 112]], [199, 96]]),
-          ghost({ p: [[108, 116], [146, 100], [136, 152]], w: 15, foot: [150, 158] }),
-        ]
-      }), arrow('M152 166 C176 160 192 140 196 122') + hit(201, 100, 'Fußballen', 222, 66, 'end'), ['seitlich: Knie hochziehen, Unterschenkel', 'nach vorne schnappen – Fußballen trifft']),
-    'yoko-geri': () =>
-      scene('Yoko-geri', 240, {
-        head: [96, 40], view: 'front', torso: [[80, 62], [114, 56], [121, 118], [97, 122]], belt: [[97, 115], [121, 112]], parts: [
-          { p: [[101, 120], [95, 178], [91, 228]], w: 15, foot: [85, 234], under: true },
-          arm([[82, 66], [66, 96], [84, 100]]),
-          arm([[112, 62], [134, 84], [118, 96]]),
-          kick([[[117, 118], [124, 176], [129, 228]], [135, 234]], [[[117, 118], [150, 102], [128, 150]], [122, 158]], [[[117, 118], [162, 114], [206, 108]], [208, 122]]),
-          ghost({ p: [[117, 118], [150, 102], [128, 150]], w: 15, foot: [122, 158] }),
-        ]
-      }, arrow('M126 164 C162 162 190 144 202 128') + hit(215, 115, 'Fußkante', 226, 84, 'end'), ['von vorne: Knie hochziehen, Bein zur Seite', 'strecken – Fußkante trifft']),
-    'mawashi-geri': () => {
-      const stand = [[[110, 116], [112, 176], [114, 228]], [132, 232]];
-      const knee = [[[110, 116], [168, 104], [114, 98]], [100, 100]];
-      const ext = [[[110, 116], [168, 104], [220, 100]], [232, 104]];
-      return scene('Mawashi-geri', 240, Object.assign({}, SIDE, {
-        parts: [
-          Object.assign(arm(SA.guardFar), { far: true }),
-          { p: [[106, 116], [100, 174], [96, 228]], w: 15, foot: [114, 232], far: true },
-          arm([[112, 62], [104, 96], [118, 106]]),
-          { p: ext[0], foot: ext[1], w: 15, seq: [stand, knee, [[[110, 116], [168, 104], [150, 136]], [154, 148]], [[[110, 116], [168, 104], [178, 116]], [182, 126]], ext, knee, stand], impact: 4 },
-          ghost({ p: knee[0], w: 15, foot: knee[1] }),
-        ],
-      }), arrow('M96 112 C120 148 196 130 222 112') + hit(234, 100, 'Fußballen', 226, 60, 'end'), ['seitlich: Knie seitlich hochziehen, der', 'Unterschenkel schnappt im Halbkreis zum Ziel']);
-    },
-    'ushiro-geri': () =>
-      scene('Ushiro-geri', 240, {
-        head: [150, 50], view: 'side', trunk: [[142, 70], [114, 118]], parts: [
-          Object.assign(arm([[140, 76], [160, 98], [170, 82]]), { far: true }),
-          { p: [[116, 118], [126, 176], [120, 228]], w: 15, foot: [138, 232], far: true },
-          arm([[140, 76], [150, 106], [162, 96]]),
-          kick([[[112, 118], [120, 176], [116, 228]], [134, 232]], [[[112, 118], [134, 148], [108, 166]], [100, 176]], [[[112, 118], [72, 116], [30, 112]], [32, 128]]),
-          ghost({ p: [[112, 118], [134, 148], [108, 166]], w: 15, foot: [100, 176] }),
-        ]
-      }, arrow('M100 186 C70 186 46 162 36 138') + hit(24, 112, 'Ferse', 18, 80, 'start'), ['seitlich: Knie anziehen, Ferse stößt', 'in gerader Linie nach hinten']),
-    'mikazuki-geri': () =>
-      scene('Mikazuki-geri', 220, Object.assign({}, FRONT, {
-        parts: [
-          { p: [[118, 118], [124, 176], [129, 228]], w: 15, foot: [135, 234], under: true },
-          HIKITE_R,
-          arm([[127, 62], [156, 74], [176, 80]], 'open'),
-          { p: [[102, 118], [142, 112], [166, 94]], w: 15, foot: [170, 80], via: [[[[102, 118], [72, 150], [80, 190]], [70, 196]], [[[102, 118], [110, 120], [130, 104]], [130, 90]]] },
-          ghost(LEG_R),
-        ]
-      }), arrow('M78 222 C36 176 46 104 100 90 C124 84 142 84 156 90') + hit(177, 86, 'Fußsohle', 206, 52, 'end'), ['von vorne (wie Heian Godan 15): Fuß schwingt', 'im Bogen von außen nach innen in die Hand']),
-    'oi-zuki': oiZuki,
-    'gyaku-zuki': gyakuZuki,
-  };
-
-  /* ---------- Trefferzonen (nach Anhang des JKA-Kata-Buchs) ---------- */
-  function targets() {
-    const fig = person(front([arm([[93, 62], [80, 98], [76, 134]]), arm([[127, 62], [140, 98], [144, 134]])]));
-    const pts = [
-      [100, 28, 'Kasumi (Schläfe)', 'l'], [110, 38, 'Jinchu', 'r'], [110, 44, 'Mikazuki (Kinn)', 'l'],
-      [110, 78, 'Suigetsu', 'r'], [120, 92, 'Denko', 'r'], [100, 102, 'Inazuma', 'l'],
-      [110, 129, 'Myojo', 'r'], [97, 156, 'Daitai', 'l'], [125, 176, 'Hiza', 'r'],
-    ];
-    const marks = pts
-      .map(([x, y, t, side]) => {
-        const tx = side === 'r' ? 166 : 54;
-        const anchor = side === 'r' ? 'start' : 'end';
-        return `<path d="M${x} ${y} L${side === 'r' ? tx - 4 : tx + 4} ${y}" stroke="#90a4ae"/><circle cx="${x}" cy="${y}" r="4.5" fill="${HL}" stroke="#fff" stroke-width="1.5"/><text x="${tx}" y="${y + 4}" font-size="11" text-anchor="${anchor}" ${FONT} fill="#333">${esc(t)}</text>`;
-      })
-      .join('');
-    return `<svg viewBox="-44 0 300 270" role="img" aria-label="Trefferzonen" xmlns="http://www.w3.org/2000/svg">
-      <rect x="-43" y="1" width="298" height="268" rx="12" fill="#fafafa" stroke="#ddd"/>
-      <g transform="translate(0 16)">${fig}${marks}</g></svg>`;
-  }
-
   function dataUri(svg) {
     const s = svg.includes('xmlns=') ? svg : svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
     return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(s)}`;
   }
 
-  SK.gfx = { STANCES, STANCE_SIDE, foot, stanceSvg, stanceSideSvg, stanceDuoSvg, stanceFor, stanceKey, stanceFigure, figure, box, byKey, animSvg, hasAnim, plainSvg, levels, WEAPONS, MOVES, targets, dataUri };
-  // Bausatz für weitere Technik-Grafiken (js/graphics-tech.js)
-  SK.gfx.kit = { person, scene, frame, arm, ghost, front, FRONT, SIDE, SL, SA, sLeg, seqOf, stepLegs, STEP_SHIFT, LEG_R, LEG_L, HIKITE_R, HIKITE_L, arrow, hit, tag, foot, timeline, animEl, animTf, fadeLoop, mode, path, FONT, HL, HLF, HLS, INK, GHOST, ARR };
+  SK.gfx = { STANCES, foot, stanceSvg, stanceFor, stanceKey, stanceFigure, figure, box, byKey, animSvg, hasAnim, plainSvg, WEAPONS, dataUri };
+  // Bausatz für die Schemabilder (js/graphics-tech.js) und Fußbewegungen (js/graphics-ashi.js)
+  SK.gfx.kit = { frame, arrow, foot, mode, FONT, HL, INK, ARR };
 })();

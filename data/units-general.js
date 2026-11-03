@@ -27,10 +27,12 @@
     orishiki: () => G.stanceFigure('orishiki', false, 'Migi Ashi Orishiki Hidari Hiza-tate'),
   };
   Object.keys(S).forEach((k) => SK.util.lazy(S, k, S[k]));
-  const W = (key, caption, note) => G.figure(G.WEAPONS[key](), caption, note, `wp:${key}`);
-  const M = (key, caption, note) => G.figure(G.MOVES[key](), caption, note, `mv:${key}`);
-  const T = (key, caption, note) => G.figure(G.TECH[key](), caption, note, `tc:${key}`);
-  const A = (key, caption, note) => G.figure(G.ASHI[key](), caption, note, `as:${key}`);
+  // Grafik erst bei Bedarf: mit 3D-Figur gibt es keine SVG (G.byKey liefert dann '')
+  const fig = (kind) => (key, caption, note) => G.figure(() => G.byKey(`${kind}:${key}`), caption, note, `${kind}:${key}`);
+  const W = fig('wp');
+  const M = fig('mv');
+  const T = fig('tc');
+  const A = fig('as');
 
   SK.generalUnits = [
     {
@@ -141,7 +143,7 @@
               <li>Graduierungen: <b>Kyu</b> = Schülergrad (zählt abwärts bis 1. Kyu), <b>Dan</b> = Meistergrad (Shodan = 1. Dan, Nidan = 2. Dan, Sandan = 3. Dan)</li>
               <li>Kata-Namen: <b>Shodan, Nidan, Sandan, Yondan, Godan</b> = 1. bis 5. Stufe</li>
             </ul>
-            ${grid(G.figure(G.levels(), 'Die drei Stufen', 'Jodan = Gesicht, Chudan = Brust, Gedan = Unterbauch (Definition im JKA-Kata-Buch)', 'fig:levels'))}`,
+            ${grid(G.figure(null, 'Die drei Stufen', 'Jodan = Gesicht, Chudan = Brust, Gedan = Unterbauch (Definition im JKA-Kata-Buch)', 'fig:levels'))}`,
         },
         {
           id: 'te-koerper', title: 'Körperwaffen', minGrade: '8kyu',
@@ -203,7 +205,7 @@
       lessons: [
         {
           id: 'da-grund', title: 'Grund- & Natürliche Stände', minGrade: '9kyu',
-          learn: () => `<p>Stabile Stände sind das <b>Fundament</b> jeder Technik: Steht der Körper nicht sicher, verpufft die Kraft von Armen und Beinen. Jede Grafik zeigt die Füße von oben mit der Gewichtsverteilung; „Figur &amp; Fußbild“ zeigt darüber die Figur – gestrichelte Linien verbinden jeden Fuß mit seinem Abdruck, das Fadenkreuz markiert den Schwerpunkt, darunter stehen ungefähre Maße.</p>
+          learn: () => `<p>Stabile Stände sind das <b>Fundament</b> jeder Technik: Steht der Körper nicht sicher, verpufft die Kraft von Armen und Beinen. Jede Grafik zeigt den Stand als 3D-Figur; „Fußbild“ zeigt die Füße von oben mit der Gewichtsverteilung und ungefähren Maßen.</p>
             ${grid(S.musubi, S.heisoku, S.hachiji)}
             <ul>
               <li><b>Musubi-dachi</b>: Grußstellung – Fersen zusammen, Fußspitzen geöffnet; im Shotokan der Stand für den Gruß im Stehen (Ritsu-rei).</li>
@@ -214,7 +216,7 @@
         {
           id: 'da-kampf', title: 'Zenkutsu, Kokutsu, Kiba', minGrade: '9kyu',
           learn: () => `${grid(S.zenkutsu, S.zenkutsuR, S.kokutsu, S.kokutsuL, S.kiba)}
-            <p class="muted small">Die Prozentzahlen zeigen, wie das Gewicht verteilt ist. „Figur & Fußbild“ zeigt die Figur und darunter dieselben Füße von oben – gestrichelte Linien verbinden jeden Fuß mit seinem Abdruck, das Fadenkreuz markiert den Schwerpunkt. Im JKA-Kata-Buch heißt Zenkutsu-dachi nach dem <b>vorderen</b> Bein, Kokutsu-dachi nach dem <b>hinteren</b> (belasteten) Bein – z. B. „Migi Kokutsu-dachi, Hidari Shuto-uke“: rechtes Bein hinten, linkes vorne.</p>
+            <p class="muted small">Die Prozentzahlen im „Fußbild“ zeigen, wie das Gewicht verteilt ist. Im JKA-Kata-Buch heißt Zenkutsu-dachi nach dem <b>vorderen</b> Bein, Kokutsu-dachi nach dem <b>hinteren</b> (belasteten) Bein – z. B. „Migi Kokutsu-dachi, Hidari Shuto-uke“: rechtes Bein hinten, linkes vorne.</p>
             <ul>
               <li><b>Zenkutsu-dachi (Zk)</b> – Vorwärtsstellung: vorderes Knie gebeugt (über dem Fuß), hinteres Bein gestreckt, Gewicht überwiegend vorne. Der am häufigsten genutzte Stand im Shotokan.</li>
               <li><b>Kokutsu-dachi (Kk)</b> – Rückwärtsstellung: Gewicht überwiegend hinten, hinterer Fuß quer, vorderer Fuß zeigt nach vorne. Meist für Abwehrtechniken, in manchen Kata auch mit Angriffen verbunden.</li>
