@@ -3,7 +3,7 @@
    Hände in Brustkoordinaten (x links, y oben, z vorne, Ursprung Brustmitte; Schulter bei x ±0,185).
    Jeder Eintrag: keys (Schlüsselbilder mit Zeit 0…1), best (Zeit des Kernbilds),
    view (Blickwinkel des Kernbilds), eff (Körperpunkt für die Bahn),
-   hit (Trefferpunkt; fl = Trefferfläche, die rot markiert wird, siehe figur-app.js), marks (Zusatzzeichen), partner (zweite Figur). */
+   hit (Trefferpunkt; fl = Trefferfläche, rot markiert, siehe FLAECHE unten), marks (Zusatzzeichen), partner (zweite Figur). */
 (function () {
   'use strict';
   const E = window.Figur3D;
@@ -177,7 +177,7 @@
   // Fußtritt: ausholen, treffen, zurück
   const K = (base, chamber, ext, o) => M({ keys: [{ t: 0, p: base }, { t: 0.1, p: base }, { t: 0.34, p: chamber }, { t: 0.5, p: ext, e: 'kime' }, { t: 0.66, p: chamber }, { t: 0.9, p: base }], best: 0.5, dur: 2 }, o);
   const STILL = (pose, o) => M({ keys: [{ t: 0, p: pose }], best: 0, still: true }, o);
-  const hit = (at, text, fl) => ({ hit: fl ? { at, text, fl } : { at, text } });
+  const hit = (at, text) => ({ hit: { at, text } });
 
   const D = {};
 
@@ -202,7 +202,7 @@
   // Kizami-, Sanbon-, Ren-zuki: jede Stoßfaust startet an der Hüfte und trifft mit gestrecktem Arm geradeaus die Mittellinie
   const JO = H.jodan[1], CH = H.chudan[1];
   const ZK_HIP = M(S.zk, HANDS_HIP);
-  D['mv:gyaku-zuki'] = T(ZK_G, ZKS_PUNCH, M(hit('fistR', 'Faust', 'seiken'), { eff: 'fistR', view: 'front3' }));
+  D['mv:gyaku-zuki'] = T(ZK_G, ZKS_PUNCH, M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   const OI_MID = { pelvis: [0, 0.71, 0.6], yaw: -18, L: { x: 0.12, z: 0.62, yaw: 10 }, R: { x: -0.01, z: 0.58, y: 0.11, yaw: 0 }, hL: L(H.gedan), hR: H.hip, w: [1, 0] };
   const OI_END = { pelvis: [0, 0.7, 1.22], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 32 }, R: { x: -0.13, z: 1.74, yaw: 4 }, hL: L(H.hip), hR: H.chudan, w: [0.3, 0.7] };
   D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.12, p: ZK_G }, { t: 0.5, p: OI_MID }, { t: 0.82, p: OI_END, e: 'kime' }], best: 1, dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
@@ -427,6 +427,35 @@
       KOSHI[id].split('').forEach((s) => { if (f[s].y > 0.15) up[s] = { tu: 1 }; });
       return Object.keys(up).length ? M(k, { p: M(k.p, up) }) : k;
     });
+  });
+
+  /* ---------- Trefferflächen (rot markiert) ---------- */
+  // Fläche je Figur, „:LR“ = beide Seiten, sonst die Seite des Trefferpunkts. Lage der Flächen: figur-app.js (FL).
+  const FLAECHE = {
+    'mv:gyaku-zuki': 'seiken', 'mv:oi-zuki': 'seiken', 'tc:choku-zuki': 'seiken', 'tc:kizami-zuki': 'seiken', 'tc:tate-zuki': 'seiken',
+    'tc:sanbon-zuki': 'seiken', 'tc:ren-zuki': 'seiken', 'tc:morote-zuki': 'seiken:LR', 'tc:kagi-zuki': 'seiken', 'tc:ura-zuki': 'seiken',
+    'tc:age-zuki': 'seiken', 'tc:yama-zuki': 'seiken:LR', 'tc:awase-zuki': 'seiken:LR', 'tc:otoshi-zuki': 'seiken', 'tc:mawashi-zuki': 'seiken',
+    'tc:nukite': 'fingerspitzen', 'tc:kogeki': 'seiken', 'tc:deai': 'seiken',
+    'tc:uraken-uchi': 'uraken', 'tc:tettsui-uchi': 'tettsui', 'tc:shuto-uchi': 'shuto', 'tc:haito-uchi': 'haito', 'tc:teisho-uchi': 'teisho',
+    'tc:enpi-uchi': 'ellbogen', 'tc:furi-enpi': 'ellbogen', 'tc:yoko-enpi': 'ellbogen', 'tc:mawashi-enpi': 'ellbogen', 'tc:age-enpi': 'ellbogen',
+    'tc:otoshi-enpi': 'ellbogen', 'tc:ushiro-enpi': 'ellbogen', 'tc:hasami-uchi': 'tettsui:LR',
+    'mv:age-uke': 'unterarm', 'mv:gedan-barai': 'unterarm', 'mv:soto-uke': 'unterarm', 'mv:uchi-uke': 'unterarm', 'tc:bunkai': 'unterarm',
+    'tc:shuto-uke': 'shuto', 'tc:morote-uke': 'unterarm:L', 'tc:juji-uke': 'handgelenk:LR', 'tc:kakiwake-uke': 'unterarm:LR',
+    'tc:nagashi-uke': 'handflaeche', 'tc:te-nagashi-uke': 'handflaeche', 'tc:gedan-nagashi-uke': 'unterarm', 'tc:osae-uke': 'handflaeche',
+    'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'handflaeche', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',
+    'tc:tate-shuto-uke': 'shuto', 'tc:teisho-uke': 'teisho', 'tc:uchiotoshi': 'unterarm', 'tc:manji-uke': 'unterarm:LR',
+    'mv:mae-geri': 'koshi', 'tc:mae-geri-kekomi': 'kakato', 'tc:sonoba-geri': 'koshi', 'tc:kizami-geri': 'koshi', 'tc:ren-geri': 'koshi',
+    'mv:yoko-geri': 'sokuto', 'tc:yoko-geri-keage': 'sokuto', 'mv:mawashi-geri': 'koshi', 'mv:ushiro-geri': 'kakato',
+    'mv:mikazuki-geri': 'teisoku', 'tc:ura-mawashi-geri': 'teisoku', 'tc:ushiro-mawashi-geri': 'teisoku', 'tc:hiza-geri': 'hiza',
+    'tc:mawashi-hiza-geri': 'hiza', 'tc:fumikomi': 'sokuto', 'tc:namigaeshi': 'teisoku', 'tc:nidan-geri': 'koshi',
+    'tc:teisoku-barai': 'teisoku', 'tc:haisoku-barai': 'haisoku', 'tc:komura-barai': 'wade',
+    'wp:hiji': 'ellbogen', 'wp:hiza': 'hiza', 'wp:zenwan': 'unterarm',
+  };
+  Object.keys(FLAECHE).forEach((id) => {
+    const h = D[id] && D[id].hit;
+    if (!h) throw new Error(`Trefferfläche ohne Trefferpunkt: ${id}`);
+    const [fl, sides] = FLAECHE[id].split(':');
+    D[id].hit = M(h, { fl, sides: sides || h.at.slice(-1) });
   });
 
   SK.fig3dDefs = D;

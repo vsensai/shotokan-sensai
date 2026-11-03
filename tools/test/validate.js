@@ -143,6 +143,14 @@
     }
     if (d.eff && !(d.eff in F3.solve(tl(0)))) errors.push(`3D ${key}: unbekannter Bahnpunkt ${d.eff}`);
     if (d.hit && !(d.hit.at in F3.solve(tl(0)))) errors.push(`3D ${key}: unbekannter Trefferpunkt ${d.hit.at}`);
+    // Trefferfläche: bekannt und in jedem Bild als Punkt auf der richtigen Seite rechenbar
+    if (d.hit && d.hit.fl) {
+      const e = SK.fig3d.entry(key);
+      for (let i = 0; i <= 10; i++) {
+        const sp = SK.fig3d.spots(e, F3.solve(tl(i / 10)));
+        if (!sp || sp.length !== d.hit.sides.length || /null|NaN/.test(JSON.stringify(sp))) { errors.push(`3D ${key}: Trefferfläche ${d.hit.fl} nicht rechenbar`); break; }
+      }
+    }
   });
   out.push(`3D-Figuren: ${Object.keys(SK.fig3dDefs || {}).length}`);
 

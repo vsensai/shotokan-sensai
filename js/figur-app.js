@@ -56,23 +56,89 @@
   }
 
   /* ---------- Zeichnen ---------- */
-  // Trefferfläche (hit.fl) als kleine Kugel: wo sie die Haut schneidet, färbt der Shader rot.
-  // Handachsen wie in figur3d.js: f nach vorn (Faust), p zur Handfläche, q zur Daumenseite.
+  // Trefferfläche (hit.fl) als kleine Kugeln: wo sie die Figur schneiden, färbt der Shader rot.
+  // Jede Fläche liegt in einem Körperteil-Rahmen [x, y, z]:
+  //   hand: x Finger/Faust nach vorn, y zur Handfläche, z zur Daumenseite (wie in figur3d.js)
+  //   arm:  x Unterarm (Ellbogen → Handgelenk), fuss: x Zehen, y zur Sohle, z zur Innenseite, bein: x Unterschenkel (Knie → Knöchel)
+  // c: feste Lage; mv: Abstand vom Ursprung in Richtung der Bewegung (die Seite, die vorangeht – Abwehr, Ellbogen, Knie).
   const FL = {
-    // Seiken: Knöchel von Zeige- und Mittelfinger – vorn an der Faust, zur Daumen- und Handrückenseite hin
-    seiken: { part: 'hand', f: 0.088, p: -0.012, q: 0.012, r: 0.033 },
+    seiken: { part: 'hand', o: 'wrist', c: [0.088, -0.012, 0.012], r: 0.063 },
+    uraken: { part: 'hand', o: 'wrist', c: [0.07, -0.02, 0.008], r: 0.06 },
+    tettsui: { part: 'hand', o: 'wrist', c: [0.048, 0.012, -0.04], r: 0.06 },
+    shuto: { part: 'hand', o: 'wrist', c: [0.065, 0, -0.03], r: 0.06 },
+    haito: { part: 'hand', o: 'wrist', c: [0.06, 0, 0.03], r: 0.06 },
+    teisho: { part: 'hand', o: 'wrist', c: [0.022, 0.016, 0], r: 0.054 },
+    fingerspitzen: { part: 'hand', o: 'wrist', c: [0.124, 0, 0], r: 0.054 },
+    handflaeche: { part: 'hand', o: 'wrist', c: [0.06, 0.016, 0], r: 0.063 },
+    handgelenk: { part: 'arm', o: 'wrist', mv: 0.03, c: [0, -1, 0], r: 0.054 },
+    unterarm: { part: 'arm', o: 'forearm', mv: 0.095, c: [0, 1, 0], r: 0.11 },
+    ellbogen: { part: 'arm', o: 'elbow', mv: 0.085, c: 'tip', r: 0.095 },
+    koshi: { part: 'fuss', o: 'ankle', c: [0.115, 0.07, 0], r: 0.066 },
+    kakato: { part: 'fuss', o: 'ankle', c: [-0.05, 0.06, 0], r: 0.066 },
+    sokuto: { part: 'fuss', o: 'ankle', c: [0.03, 0.055, -0.032], r: 0.069 },
+    teisoku: { part: 'fuss', o: 'ankle', c: [0.04, 0.07, 0], r: 0.072 },
+    haisoku: { part: 'fuss', o: 'ankle', c: [0.07, 0.015, 0], r: 0.066 },
+    hiza: { part: 'bein', o: 'knee', mv: 0.115, c: 'knee', r: 0.11 },
+    wade: { part: 'bein', o: 'calf', mv: 0.115, c: [0, -1, 0], r: 0.12 },
   };
-  function spot(J, hit) {
-    const d = hit && FL[hit.fl];
+  const ortho = (v, x) => E.v.norm(E.v.sub(v, E.v.mul(x, v[0] * x[0] + v[1] * x[1] + v[2] * x[2])));
+  const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  // Ursprung und Achsen eines Körperteils
+  function frame(J, part, o, s) {
+    const { sub, mix, norm } = E.v;
+    const O = { wrist: J['wrist' + s], elbow: J['elbow' + s], forearm: mix(J['elbow' + s], J['wrist' + s], 0.8), ankle: J['ankle' + s], knee: J['knee' + s], calf: mix(J['knee' + s], J['ankle' + s], 0.38) }[o];
+    let x, z;
+    if (part === 'hand') {
+      x = J['open' + s] ? J['fd' + s] : norm(sub(J['fist' + s], J['wrist' + s]));
+      const wd = J['wd' + s];
+      return { o: O, x, y: norm(crs(wd, x)), z: E.v.mul(wd, s === 'R' ? 1 : -1) };
+    }
+    if (part === 'arm') { x = norm(sub(J['wrist' + s], J['elbow' + s])); z = ortho(J['wd' + s], x); }
+    if (part === 'fuss') { x = J['dir' + s]; const y = J['sole' + s]; return { o: O, x, y, z: E.v.mul(norm(crs(y, x)), s === 'L' ? 1 : -1) }; }
+    if (part === 'bein') { x = norm(sub(J['ankle' + s], J['knee' + s])); z = ortho(J['dir' + s], x); }
+    return { o: O, x, y: crs(z, x), z };
+  }
+  const toW = (F, c) => E.v.add(E.v.add(E.v.mul(F.x, c[0]), E.v.mul(F.y, c[1])), E.v.mul(F.z, c[2]));
+  const toL = (F, v) => [F.x, F.y, F.z].map((a) => a[0] * v[0] + a[1] * v[1] + a[2] * v[2]);
+  // Richtung der Bewegungsflächen: einmal im Kernbild bestimmt (Weg in das Kernbild hinein), dann im Körperteil-Rahmen
+  // festgehalten – so bleibt der Fleck beim Abspielen an derselben Stelle des Arms oder Beins.
+  function spotDirs(e) {
+    if (e.spotDirs) return e.spotDirs;
+    const h = e.d.hit;
+    const d = h && FL[h.fl];
+    const out = [];
+    if (d) {
+      const tb = e.d.best == null ? 1 : e.d.best;
+      const J1 = E.solve(e.pose(tb));
+      h.sides.split('').forEach((s) => {
+        const F = frame(J1, d.part, d.o, s);
+        let c = d.c;
+        if (d.mv) {
+          let m = null;
+          for (let t = tb - 0.01; t >= 0; t -= 0.01) {
+            const v = E.v.sub(F.o, frame(E.solve(e.pose(t)), d.part, d.o, s).o);
+            if (E.v.len(v) > 0.05) { m = v; break; }
+          }
+          // Unterarm, Wade, Handgelenk: nur quer zur Achse; Ellbogen und Knie: auch an der Spitze
+          if (m && d.o !== 'elbow' && d.o !== 'knee') m = E.v.sub(m, E.v.mul(F.x, toL(F, m)[0]));
+          if (m && E.v.len(m) > 0.01) c = toL(F, E.v.norm(m));
+          else if (c === 'tip') c = toL(F, E.v.norm(E.v.add(E.v.norm(E.v.sub(J1['elbow' + s], J1['sh' + s])), E.v.mul(F.x, -1))));
+          else if (c === 'knee') c = toL(F, E.v.norm(E.v.sub(J1['knee' + s], E.v.mix(J1['hip' + s], J1['ankle' + s], 0.5))));
+          c = E.v.mul(c, d.mv);
+        }
+        out.push({ s, c });
+      });
+    }
+    e.spotDirs = out;
+    return out;
+  }
+  function spots(e, J) {
+    const d = e.d.hit && FL[e.d.hit.fl];
     if (!d) return null;
-    const { add, sub, mul, norm } = E.v;
-    const s = hit.at.slice(-1);
-    const w = J['wrist' + s];
-    const hf = norm(sub(J['fist' + s], w));
-    const wd = J['wd' + s];
-    const pn = norm([wd[1] * hf[2] - wd[2] * hf[1], wd[2] * hf[0] - wd[0] * hf[2], wd[0] * hf[1] - wd[1] * hf[0]]);
-    const th = s === 'R' ? 1 : -1;
-    return { p: add(add(add(w, mul(hf, d.f)), mul(pn, d.p)), mul(wd, d.q * th)), r: d.r };
+    return spotDirs(e).map(({ s, c }) => {
+      const F = frame(J, d.part, d.o, s);
+      return { p: E.v.add(F.o, toW(F, c)), r: d.r };
+    });
   }
   function paint(ctx, w, h, e, st) {
     const t = st.t;
@@ -87,7 +153,7 @@
     }
     const PP = e.partner ? e.partner(t) : null;
     let C;
-    const hs = spot(J, e.d.hit);
+    const hs = spots(e, J);
     if (!PP) C = E.draw(ctx, w, h, P, cam, { mode: 0, hit: hs });
     else {
       C = E.draw(ctx, w, h, P, cam, { mode: 1 });
@@ -636,5 +702,5 @@
     else document.addEventListener('DOMContentLoaded', init);
   }
 
-  SK.fig3d = { ok, has, html, entry, paint, still, prefetch, openBig };
+  SK.fig3d = { ok, has, html, entry, paint, still, prefetch, openBig, spots }; // spots: Trefferflächen (auch für validate.js)
 })();

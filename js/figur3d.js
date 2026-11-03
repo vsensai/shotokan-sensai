@@ -274,7 +274,7 @@ uniform vec3 uPel, uUp, uFwd, uLeft, uHead, uHFwd, uPFwd, uPLeft;
 uniform vec4 uBound;
 uniform vec2 uBase;
 uniform vec4 uDec[6], uDecP[6];
-uniform vec4 uHit; // Trefferfläche: Mittelpunkt (Welt) und Radius, Radius 0 = keine
+uniform vec4 uHit[2]; // Trefferflächen: Mittelpunkt (Welt) und Radius, Radius 0 = keine
 const vec3 LIG = normalize(vec3(-0.55, 0.95, 0.45));
 const vec3 FIL = normalize(vec3(0.7, 0.45, -0.6));
 
@@ -434,7 +434,7 @@ vec3 shadeFig(vec3 p, vec3 rd, float m){
   vec3 n = nrm(p);
   float kind; vec3 c = baseCol(m, p, kind);
   // Trefferfläche klein rot auf der Haut (weicher Rand)
-  if (uHit.w > 0.0 && uTint == 0) c = mix(c, vec3(0.86, 0.1, 0.08), 1.0 - smoothstep(uHit.w * 0.7, uHit.w, length(p - uHit.xyz)));
+  for (int i = 0; i < 2; i++) if (uHit[i].w > 0.0 && uTint == 0) c = mix(c, vec3(0.86, 0.1, 0.08), 1.0 - smoothstep(uHit[i].w * 0.72, uHit[i].w, length(p - uHit[i].xyz)));
   float dif = clamp(dot(n, LIG), 0.0, 1.0);
   float sh = shadow(p + n * 0.004, LIG);
   float ao = occl(p, n);
@@ -657,7 +657,9 @@ void main(){
     (opt.decals || []).slice(0, 6).forEach((d, i) => { dec.set([d.heel[0], d.heel[2], d.toe[0], d.toe[2]], i * 4); decp.set([d.w, d.a, d.side === 'R' ? 1 : 0, 1], i * 4); });
     gl.uniform4fv(U.uDec, dec);
     gl.uniform4fv(U.uDecP, decp);
-    gl.uniform4fv(U.uHit, opt.hit ? [...opt.hit.p, opt.hit.r] : [0, 0, 0, 0]);
+    const hit = new Float32Array(8);
+    (opt.hit || []).slice(0, 2).forEach((x, i) => hit.set([...x.p, x.r], i * 4));
+    gl.uniform4fv(U.uHit, hit);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (gl.isContextLost()) return false;
     ctx.drawImage(cv, 0, 0);
