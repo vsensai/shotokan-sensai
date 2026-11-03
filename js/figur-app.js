@@ -56,6 +56,24 @@
   }
 
   /* ---------- Zeichnen ---------- */
+  // Trefferfläche (hit.fl) als kleine Kugel: wo sie die Haut schneidet, färbt der Shader rot.
+  // Handachsen wie in figur3d.js: f nach vorn (Faust), p zur Handfläche, q zur Daumenseite.
+  const FL = {
+    // Seiken: Knöchel von Zeige- und Mittelfinger – vorn an der Faust, zur Daumen- und Handrückenseite hin
+    seiken: { part: 'hand', f: 0.088, p: -0.012, q: 0.012, r: 0.033 },
+  };
+  function spot(J, hit) {
+    const d = hit && FL[hit.fl];
+    if (!d) return null;
+    const { add, sub, mul, norm } = E.v;
+    const s = hit.at.slice(-1);
+    const w = J['wrist' + s];
+    const hf = norm(sub(J['fist' + s], w));
+    const wd = J['wd' + s];
+    const pn = norm([wd[1] * hf[2] - wd[2] * hf[1], wd[2] * hf[0] - wd[0] * hf[2], wd[0] * hf[1] - wd[1] * hf[0]]);
+    const th = s === 'R' ? 1 : -1;
+    return { p: add(add(add(w, mul(hf, d.f)), mul(pn, d.p)), mul(wd, d.q * th)), r: d.r };
+  }
   function paint(ctx, w, h, e, st) {
     const t = st.t;
     const P = e.pose(t);
@@ -69,13 +87,14 @@
     }
     const PP = e.partner ? e.partner(t) : null;
     let C;
-    if (!PP) C = E.draw(ctx, w, h, P, cam, { mode: 0 });
+    const hs = spot(J, e.d.hit);
+    if (!PP) C = E.draw(ctx, w, h, P, cam, { mode: 0, hit: hs });
     else {
       C = E.draw(ctx, w, h, P, cam, { mode: 1 });
       const figs = [{ P, tint: false, z: P.pelvis }, { P: PP, tint: true, z: PP.pelvis }];
       const camPos = C.ro;
       figs.sort((a, b) => Math.hypot(b.z[0] - camPos[0], b.z[2] - camPos[2]) - Math.hypot(a.z[0] - camPos[0], a.z[2] - camPos[2]));
-      figs.forEach((f) => E.draw(ctx, w, h, f.P, cam, { mode: 2, tint: f.tint }));
+      figs.forEach((f) => E.draw(ctx, w, h, f.P, cam, { mode: 2, tint: f.tint, hit: f.tint ? null : hs }));
     }
     ctx.restore();
     if (!C) return false;

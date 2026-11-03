@@ -3,7 +3,7 @@
    Hände in Brustkoordinaten (x links, y oben, z vorne, Ursprung Brustmitte; Schulter bei x ±0,185).
    Jeder Eintrag: keys (Schlüsselbilder mit Zeit 0…1), best (Zeit des Kernbilds),
    view (Blickwinkel des Kernbilds), eff (Körperpunkt für die Bahn),
-   hit (Trefferpunkt), marks (Zusatzzeichen), partner (zweite Figur). */
+   hit (Trefferpunkt; fl = Trefferfläche, die rot markiert wird, siehe figur-app.js), marks (Zusatzzeichen), partner (zweite Figur). */
 (function () {
   'use strict';
   const E = window.Figur3D;
@@ -177,7 +177,7 @@
   // Fußtritt: ausholen, treffen, zurück
   const K = (base, chamber, ext, o) => M({ keys: [{ t: 0, p: base }, { t: 0.1, p: base }, { t: 0.34, p: chamber }, { t: 0.5, p: ext, e: 'kime' }, { t: 0.66, p: chamber }, { t: 0.9, p: base }], best: 0.5, dur: 2 }, o);
   const STILL = (pose, o) => M({ keys: [{ t: 0, p: pose }], best: 0, still: true }, o);
-  const hit = (at, text) => ({ hit: { at, text } });
+  const hit = (at, text, fl) => ({ hit: fl ? { at, text, fl } : { at, text } });
 
   const D = {};
 
@@ -202,7 +202,7 @@
   // Kizami-, Sanbon-, Ren-zuki: jede Stoßfaust startet an der Hüfte und trifft mit gestrecktem Arm geradeaus die Mittellinie
   const JO = H.jodan[1], CH = H.chudan[1];
   const ZK_HIP = M(S.zk, HANDS_HIP);
-  D['mv:gyaku-zuki'] = T(ZK_G, ZKS_PUNCH, M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
+  D['mv:gyaku-zuki'] = T(ZK_G, ZKS_PUNCH, M(hit('fistR', 'Faust', 'seiken'), { eff: 'fistR', view: 'front3' }));
   const OI_MID = { pelvis: [0, 0.71, 0.6], yaw: -18, L: { x: 0.12, z: 0.62, yaw: 10 }, R: { x: -0.01, z: 0.58, y: 0.11, yaw: 0 }, hL: L(H.gedan), hR: H.hip, w: [1, 0] };
   const OI_END = { pelvis: [0, 0.7, 1.22], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 32 }, R: { x: -0.13, z: 1.74, yaw: 4 }, hL: L(H.hip), hR: H.chudan, w: [0.3, 0.7] };
   D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.12, p: ZK_G }, { t: 0.5, p: OI_MID }, { t: 0.82, p: OI_END, e: 'kime' }], best: 1, dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
