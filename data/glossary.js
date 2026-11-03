@@ -265,7 +265,10 @@
 
   // Anderer Name im Buch – nur zeigen, wenn er nicht bloß der eigene Name mit Zusätzen ist
   // („Shuto Chudan-uke“ zu „Shuto-uke“ nein, „Kosa-uke“ zu „Juji-uke“ ja). „-uchi“ zählt dabei nicht.
+  // Abweichende Anzeige: kürzerer anderer Name oder gar keiner ('')
+  const ANDERS = { 'Tettsui-uchi': 'Kentsui-uchi', 'Yoko-geri-kekomi': '' };
   function altName(e) {
+    if (e.t in ANDERS) return ANDERS[e.t];
     const b = e.erst && e.erst.buch;
     if (!b) return '';
     const words = (x) => x.toLowerCase().split(/[^a-z]+/).filter(Boolean);
