@@ -201,8 +201,6 @@
 
     'Oi-zuki': ['heian-shodan', 2],
     'Gyaku-zuki': ['heian-godan', 2],
-    'Ren-zuki': ['heian-yondan', 16, '', 'mit 17', 'Chudan-zuki'],
-    'Morote-zuki': ['tekki-shodan', 15, '', '', 'Kagi-zuki'],
     'Kagi-zuki': ['tekki-shodan', 6],
     'Ura-zuki': ['kanku-dai', 42],
     'Age-zuki': ['enpi', 6],
