@@ -25,7 +25,7 @@
     const f = E.full(p);
     const ft = (F) => M(F, { x: -F.x, yaw: -F.yaw, kp: mx(F.kp), sole: mx(F.sole) });
     return {
-      pelvis: mx(f.pelvis), yaw: -f.yaw, chest: -f.chest, lean: f.lean, look: -f.look,
+      pelvis: mx(f.pelvis), yaw: -f.yaw, chest: -f.chest, lean: f.lean, roll: -f.roll, look: -f.look,
       L: ft(f.R), R: ft(f.L), hL: mx(f.hR), hR: mx(f.hL), eL: mx(f.eR), eR: mx(f.eL),
       oL: f.oR, oR: f.oL, pL: mx(f.pR), pR: mx(f.pL), fL: mx(f.fR), fR: mx(f.fL), w: [f.w[1], f.w[0]],
     };
@@ -103,8 +103,9 @@
     fudo: { pelvis: [0, 0.66, 0.08], yaw: -45, L: { x: 0.12, z: 0.6, yaw: 0 }, R: { x: -0.16, z: -0.45, yaw: -45, kp: [-0.6, 0, 0.6] }, w: [0.5, 0.5] },
     hangetsu: { pelvis: [0, 0.78, 0.03], yaw: 0, L: { x: 0.16, z: 0.36, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.16, z: -0.32, yaw: 22, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
     sanchin: { pelvis: [0, 0.85, 0.03], yaw: 0, L: { x: 0.12, z: 0.18, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.12, z: -0.12, yaw: 18, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
-    renoji: { pelvis: [0, 0.905, -0.02], yaw: -30, L: { x: 0.03, z: 0.3, yaw: 0 }, R: { x: -0.04, z: -0.04, yaw: -90 }, w: [0.4, 0.6] },
-    teiji: { pelvis: [0, 0.902, 0], yaw: -30, L: { x: 0.0, z: 0.32, yaw: 0 }, R: { x: 0.06, z: -0.02, yaw: -90 }, w: [0.5, 0.5] },
+    // Renoji- und Teiji-dachi: Knie deutlich gebeugt (über den Zehen), Stand tief
+    renoji: { pelvis: [0, 0.82, -0.01], yaw: -30, L: { x: 0.03, z: 0.3, yaw: 0 }, R: { x: -0.04, z: -0.04, yaw: -90 }, w: [0.4, 0.6] },
+    teiji: { pelvis: [0, 0.82, 0.01], yaw: -30, L: { x: 0.0, z: 0.32, yaw: 0 }, R: { x: 0.06, z: -0.02, yaw: -90 }, w: [0.5, 0.5] },
     // Kosa-dachi: rechts Standbein; Knie nebeneinander, erst unterhalb des Knies kreuzt das linke Bein hinter der rechten Wade,
     // linker Fuß (Ballen) steht rechts neben dem rechten, schräg dahinter
     kosa: { pelvis: [0.0, 0.64, 0.2], yaw: 10, R: { x: -0.07, z: 0.32, yaw: 0, kp: [0, 0.2, 1] }, L: { x: -0.17, z: 0.14, y: 0.1, yaw: 10, pitch: -35, kp: [0.6, 0.2, 1] }, w: [0.1, 0.9] },
@@ -179,6 +180,58 @@
   const STILL = (pose, o) => M({ keys: [{ t: 0, p: pose }], best: 0, still: true }, o);
   const hit = (at, text) => ({ hit: { at, text } });
 
+  /* ---------- Werkzeuge für Tritte ---------- */
+  const V = E.v;
+  // Grober Körperschwerpunkt (Rumpf, Kopf, Beine, Arme mit üblichen Massenanteilen)
+  function cog(J) {
+    const m = [[V.mix(J.pel, J.chest, 0.45), 0.43], [J.head, 0.08]];
+    ['L', 'R'].forEach((s) => {
+      m.push([V.mix(J['hip' + s], J['knee' + s], 0.45), 0.1], [V.mix(J['knee' + s], J['ankle' + s], 0.45), 0.06], [J['ankle' + s], 0.015],
+        [V.mix(J['sh' + s], J['elbow' + s], 0.5), 0.028], [V.mix(J['elbow' + s], J['wrist' + s], 0.5), 0.022]);
+    });
+    let c = [0, 0, 0];
+    let w = 0;
+    m.forEach(([q, k]) => { c = V.add(c, V.mul(q, k)); w += k; });
+    return V.mul(c, 1 / w);
+  }
+  // Gleichgewicht auf einem Bein: Körper samt Trittbein so verschieben, dass der Schwerpunkt über der Mitte des Standfußes liegt
+  // (dz: kleine Abweichung nach vorn/hinten in Weltrichtung, z. B. Hüfte etwas vor)
+  function BAL(p, side, dz = 0) {
+    let f = E.full(p);
+    const o = side === 'L' ? 'R' : 'L';
+    for (let i = 0; i < 4; i++) {
+      const J = E.solve(f);
+      const c = cog(J);
+      const ft = V.mix(J['heel' + side], J['toe' + side], 0.45);
+      const dx = ft[0] - c[0];
+      const dd = ft[2] + dz - c[2];
+      f = M(f, { pelvis: [f.pelvis[0] + dx, f.pelvis[1], f.pelvis[2] + dd], [o]: { x: f[o].x + dx, z: f[o].z + dd } });
+    }
+    return f;
+  }
+  // Punkt bzw. Richtung in der Welt → Brustkoordinaten der Stellung p (für Hände an einer festen Stelle im Raum)
+  function chestAt(p, w, dir) {
+    const J = E.solve(E.full(p));
+    const q = dir ? w : V.sub(w, J.chest);
+    return [J.lc, J.up, J.fc].map((a) => a[0] * q[0] + a[1] * q[1] + a[2] * q[2]);
+  }
+  // Bein von der Hüfte aus in Weltrichtung dir fast ganz gestreckt (Anteil k der Beinlänge)
+  function REACH(p, side, dir, k = 0.96) {
+    const f = E.full(p);
+    const hp = E.solve(f)['hip' + side];
+    const a = V.add(hp, V.mul(V.norm(dir), 0.88 * k));
+    return M(f, { [side]: { x: a[0], y: a[1], z: a[2] } });
+  }
+  // Fuß gestreckt in Richtung des Unterschenkels (Spann durchgedrückt); bend hebt die Fußspitze um so viele Grad an
+  function POINT(p, side, bend = 0) {
+    const f = E.full(p);
+    const J = E.solve(f);
+    const sd = V.norm(V.sub(J['ankle' + side], J['knee' + side]));
+    const yaw = (Math.atan2(sd[0], sd[2]) * 180) / Math.PI;
+    const pitch = (Math.asin(Math.max(-1, Math.min(1, sd[1]))) * 180) / Math.PI + bend;
+    return M(f, { [side]: { yaw, pitch } });
+  }
+
   const D = {};
 
   /* ---------- Stände: Standbild der Endstellung ---------- */
@@ -212,7 +265,7 @@
   D['tc:sanbon-zuki'] = SEQ([mirror(ZK_HIP), M(MZK, { hL: L(H.hip), hR: punch(MZK, 'R', JO) }), M(mirror(S.zks), { hL: punch(mirror(S.zks), 'L', CH), hR: H.hip }), M(MZK, { hL: L(H.hip), hR: punch(MZK, 'R', CH) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:ren-zuki'] = SEQ([ZK_HIP, M(S.zk, { hL: punch(S.zk, 'L', JO), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: punch(S.zks, 'R', CH) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:morote-zuki'] = T(M(S.zks, HANDS_HIP), M(S.zks, { hL: punch(S.zks, 'L', -0.13, 0.07), hR: punch(S.zks, 'R', -0.13, -0.07) }), M(hit('fistR', 'Fäuste'), { eff: 'fistR', view: 'side3' }));
-  D['tc:kagi-zuki'] = T(KB, M(KB, { hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3], look: 90 }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front' }));
+  D['tc:kagi-zuki'] = T(KB, M(KB, { hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3], look: 90 }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front', yaw: 25 }));
   // Ura-zuki: Faust steigt aus der Hüfte schräg (etwa 45°) nach oben vorn, Faustrücken bleibt unten (keine Drehung)
   D['tc:ura-zuki'] = T(ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.03, -0.14, 0.42], eR: [-0.1, -1, 0.3], pR: [0, 1, 0] }), M(hit('fistR', 'Handrücken unten'), { eff: 'fistR', view: 'side3' }));
   D['tc:age-zuki'] = FLOW([ZK_G, M(S.zks, { hL: L(H.hip), hR: [-0.06, -0.3, 0.35] }), M(S.zks, { hL: L(H.hip), hR: [0.0, 0.22, 0.62] })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
@@ -253,13 +306,13 @@
     M(KB, { look: -90, hR: [-0.66, -0.08, 0.12], oR: 1, pR: [-1, 0, 0], fR: [0, 1, 0] }),
   ], M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front' }));
   const MAE_ENPI = M(S.zks, { hL: L(H.hip), hR: [0.08, -0.13, 0.17], eR: [-0.1, 0.1, 1] });
-  D['tc:enpi-uchi'] = T(ZK_G, MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3' }));
+  D['tc:enpi-uchi'] = T(ZK_G, MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3', yaw: 15 }));
   // Furi-enpi: Arm holt vor dem Körper nach links aus (Ellbogen vorn, Unterarm bleibt vor der Brust), dann schwingt der Ellbogen zur Seite
   D['tc:furi-enpi'] = FLOW([
     M(KB, { look: -90, hR: [0.3, -0.12, 0.38], eR: [-0.2, -0.3, 1] }),
     M(KB, { look: -90, hR: [0.12, -0.1, 0.34], eR: [-0.7, -0.1, 1] }),
     M(KB, { look: -90, hR: [-0.06, -0.08, 0.2], eR: [-1, 0.1, 0.4] }),
-  ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
+  ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front', yaw: -12 }));
   // Yoko-enpi: Unterarm waagerecht vor der Brust (Faust vor der linken Seite, Ellbogen vorn), dann stößt der Ellbogen zur Seite
   D['tc:yoko-enpi'] = FLOW([
     M(KB, { look: -90, hR: [0.24, -0.08, 0.34], eR: [-0.4, 0, 1] }),
@@ -325,7 +378,15 @@
   const KU2 = M(KB, { look: 90, hL: [-0.13, -0.06, 0.3], oL: 1, pL: [0, 0, -1], fL: [-0.3, 1, 0], eL: [0.3, -1, 0.3], hR: [0.13, -0.17, 0.27], eR: [-0.4, -1, 0.3] });
   const KU3 = M(KB, { look: 90, hL: [0.705, -0.1, 0.18], oL: 1, pL: [0.1, 0, 1], fL: [0.15, 1, 0], hR: H.hip });
   D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.1, p: KU0 }, { t: 0.2, p: KU1 }, { t: 0.38, p: KU2 }, { t: 0.45, p: KU2 }, { t: 0.88, p: KU3 }], best: 1, dur: 3.6, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
-  D['tc:sukui-uke'] = T(M(S.kk, { hL: L(H.hip), hR: [-0.32, -0.55, 0.2], oR: 1, pR: [0, 1, 0] }), M(S.kk, { hL: L(H.hip), hR: [-0.04, -0.3, 0.42], oR: 1, pR: [0, 1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'side3' }));
+  // Sukui-uke wie in Bassai Dai 6: aus Migi Zenkutsu-dachi gleitet der rechte Fuß im Halbkreis am linken vorbei nach rechts,
+  // Hüfte bleibt auf gleicher Höhe; Fuß und Faust gehen zusammen: die rechte Faust sinkt vor dem Körper nach links unten
+  // und schöpft in einem Bogen tief nach rechts und etwas hoch – die Faust nie höher als der Ellbogen
+  const SU_C = [0.13, -0.5];
+  const SU0 = M(MZK, { hL: L(H.hip), hR: [0.14, -0.1, 0.3], eR: [-0.3, -0.7, 0.4] });
+  const SU1 = M(rotate(MZK, -35, SU_C), { pelvis: [0.06, 0.7, -0.22], R: { x: 0.0, z: -0.3, y: 0.12, pitch: 0 }, hL: L(H.hip), hR: [0.14, -0.5, 0.3], eR: [-0.4, -0.3, 0.2], w: [1, 0] });
+  const SU2 = M(rotate(MZK, -70, SU_C), { hL: L(H.hip), hR: [-0.1, -0.52, 0.4], eR: [-0.6, -0.3, 0.1] });
+  const SU3 = M(rotate(MZK, -90, SU_C), { hL: L(H.hip), hR: [-0.22, -0.3, 0.42], pR: [0.3, 1, 0], eR: [-0.5, -0.6, 0.1] });
+  D['tc:sukui-uke'] = FLOW([SU0, SU1, SU2, SU3], M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3', dur: 1.9 }));
   // wie Heian Nidan 1: der vordere (linke) Arm schwingt seitlich hoch, Unterarm senkrecht, Faust auf Kopfhöhe,
   // die Rückseite des Unterarms zeigt zum Angriff; die rechte Faust bleibt knapp vor der Hüfte
   D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [-0.2, -0.3, 0.06] }), M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front3' }));
@@ -333,32 +394,78 @@
   D['tc:tate-shuto-uke'] = T(M(S.kk, { hL: [-0.15, 0.02, 0.23], eL: [0.1, -0.5, 0.8], hR: H.hip }), M(S.kk, { hR: H.hip, hL: [0.07, -0.02, 0.5], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] }), M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'side3' }));
   D['tc:teisho-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.38, -0.15, 0.32], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.5] }), M(S.zks, { hL: L(H.hip), hR: [0.05, -0.15, 0.36], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0.6] }), M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front3' }));
   D['tc:uchiotoshi'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.15, 0.35, 0.15] }), M(S.zks, { hL: L(H.hip), hR: [-0.02, -0.25, 0.36], eR: [-0.8, -0.2, 0.3] }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
-  D['tc:manji-uke'] = T(M(S.kk, HANDS_HIP), M(S.kk, { hL: [0.42, -0.52, 0.18], hR: [-0.34, 0.24, 0.02], eR: [-0.7, 0.2, -0.2] }), M(hit('fistL', 'unten und oben'), { eff: 'fistL', view: 'front3' }));
+  // Manji-uke: Ausholen wie beim Shuto-uke – die untere (linke) Faust holt am rechten Ohr aus, der rechte Arm ist nach vorn
+  // unten gestreckt, die Arme kreuzen vor der Brust; dann schlägt links Gedan-barai, rechts schwingt der Arm nach oben hinten
+  D['tc:manji-uke'] = T(M(S.kk, { hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], hR: [0.1, -0.22, 0.46], eR: [-0.2, -0.6, 0.4] }), M(S.kk, { hL: [0.42, -0.52, 0.18], hR: [-0.34, 0.24, 0.02], eR: [-0.7, 0.2, -0.2] }), M(hit('fistL', 'unten und oben'), { eff: 'fistL', view: 'front3' }));
 
   /* ---------- Fußtritte (rechtes Bein, aus Hidari Zenkutsu-dachi) ---------- */
   const KAMAE_K = M(ZK_G, {});
-  const CHAMBER = { pelvis: [0, 0.8, 0.3], yaw: -12, lean: -4, L: { x: 0.12, z: 0.62, yaw: 4 }, R: { x: -0.08, z: 0.26, y: 0.5, yaw: 0, pitch: -55, kp: [0, 0.5, 1] }, hL: L(H.gedan), hR: H.hip, w: [1, 0] };
-  D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, M(CHAMBER, { lean: -9, R: { x: -0.08, z: 1.12, y: 0.93, pitch: 8, kp: [0, 1, 0.3] } }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
-  D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, M(CHAMBER, { lean: -12, R: { x: -0.08, z: 1.13, y: 0.95, pitch: 62, kp: [0, 1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
+  // Mae-geri: das Standbein trägt, die Hüfte kommt mit nach vorn über den Standfuß (Schwerpunkt über dem Fuß, BAL);
+  // Knie hoch vor den Körper, Unterschenkel locker darunter, dann stößt der Fuß mit der Hüfte nach vorn, Oberkörper aufrecht
+  const CHAMBER = BAL({ pelvis: [0, 0.8, 0.55], yaw: -14, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.09, z: 0.86, y: 0.46, yaw: 0, pitch: -45, kp: [0, 0.7, 1] }, hL: L(H.gedan), hR: H.hip, w: [1, 0] }, 'L', 0.02);
+  const MG_EXT = (y, z, bend, o) => POINT(BAL(M(CHAMBER, { yaw: -20, lean: -3, R: { x: -0.09, z, y, kp: [0, 1, 0.3] } }, o), 'L', 0.03), 'R', bend);
+  D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.45, 10), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
+  // Kekomi: Ferse stößt, Fußspitze weit hochgezogen, die Hüfte schiebt kräftig nach
+  D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.42, 70, { yaw: -26 }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   D['tc:sonoba-geri'] = K(YOI, M(YOI, { pelvis: [0, 0.86, 0.02], L: { x: 0.16, z: 0 }, R: { x: -0.1, z: 0.3, y: 0.5, yaw: 0, pitch: -55, kp: [0, 0.5, 1] }, w: [1, 0] }), M(YOI, { lean: -8, pelvis: [0, 0.86, 0.02], R: { x: -0.1, z: 0.92, y: 0.88, yaw: 0, pitch: 8, kp: [0, 1, 0.3] }, w: [1, 0] }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   D['tc:kizami-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.82, 0.0], L: { x: 0.1, z: 0.36, y: 0.5, pitch: -55, kp: [0, 0.5, 1] }, R: { z: -0.4 }, w: [0, 1] }), M(ZK_KAMAE, { pelvis: [0, 0.82, -0.02], lean: -10, L: { x: 0.1, z: 0.88, y: 0.95, pitch: 8, kp: [0, 1, 0.3] }, R: { z: -0.4 }, w: [0, 1] }), M(hit('toeL', 'Fußballen'), { eff: 'toeL', view: 'side' }));
-  D['tc:ren-geri'] = M(D['mv:mae-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.08, p: KAMAE_K }, { t: 0.24, p: CHAMBER }, { t: 0.36, p: M(CHAMBER, { R: { z: 1.0, y: 0.6, pitch: 0, kp: [0, 1, 0.3] } }), e: 'kime' }, { t: 0.5, p: CHAMBER }, { t: 0.64, p: M(CHAMBER, { lean: -10, R: { z: 1.0, y: 1.08, pitch: 15, kp: [0, 1, 0.3] } }), e: 'kime' }, { t: 0.78, p: CHAMBER }, { t: 0.95, p: KAMAE_K }], best: 0.64 });
+  // Ren-geri: zweimal Mae-geri hintereinander (Gedan, dann Jodan), Fuß jeweils durchgestreckt
+  D['tc:ren-geri'] = M(D['mv:mae-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.08, p: KAMAE_K }, { t: 0.24, p: CHAMBER }, { t: 0.36, p: MG_EXT(0.55, 1.4, 8), e: 'kime' }, { t: 0.5, p: CHAMBER }, { t: 0.64, p: MG_EXT(1.2, 1.36, 8), e: 'kime' }, { t: 0.78, p: CHAMBER }, { t: 0.95, p: KAMAE_K }], best: 0.64 });
   // Seitwärts aus Kiba-dachi: Fußkante nach rechts, Blick zur Seite
   const KB_K = M(KB, { look: -90 });
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
-  D['mv:yoko-geri'] = K(KB_K, Y_CH, M(Y_CH, { pelvis: [0.18, 0.84, 0], R: { x: -0.82, z: 0.04, y: 0.86, yaw: 0, pitch: -15, sole: [-1, 0, 0], kp: [-0.2, 1, 0.3] } }), M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
-  D['tc:yoko-geri-keage'] = K(KB_K, Y_CH, M(Y_CH, { pelvis: [0.16, 0.84, 0], R: { x: -0.66, z: 0.1, y: 1.12, yaw: 0, pitch: 20, sole: [-1, 0.3, 0], kp: [-0.4, 1, 0.4] } }), M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
-  const MW_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.24], yaw: 30, chest: -20, L: { yaw: 40 }, R: { x: -0.42, z: 0.12, y: 0.66, yaw: 70, pitch: 0, kp: [-0.4, 1, 0.7] }, hL: L(H.guardF), hR: H.guardR, w: [1, 0] });
-  D['mv:mawashi-geri'] = K(KAMAE_K, MW_CH, M(MW_CH, { yaw: 55, R: { x: 0.12, z: 1.0, y: 1.05, yaw: 75, pitch: 5, kp: [-0.2, 1, 0.5] } }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'front3' }));
+  // Yoko-geri kekomi: Knie hoch vor den Körper, Fuß dicht am Standbein; dann stößt das Bein gerade zur Seite und die Hüfte
+  // dreht kräftig ein (das Gesäß wendet sich zum Ziel, als wollte man es ansehen), Oberkörper neigt sich zur Gegenseite,
+  // Standfuß dreht mit, Ferse und Fußkante führen
+  const YK_CH = BAL(M(KB_K, { pelvis: [0.3, 0.78, 0], yaw: 25, L: { yaw: 25, kp: [0.8, 0.2, 1] }, R: { x: 0.2, z: 0.18, y: 0.62, yaw: -10, pitch: -5, sole: [-1, -0.2, 0], kp: [-0.5, 0.6, 1] }, w: [1, 0] }), 'L');
+  const YK_EXT = BAL(M(KB_K, { pelvis: [0.36, 0.8, 0], yaw: 62, chest: -32, roll: 24, L: { yaw: 70, kp: [0.5, 0.2, 1] }, R: { x: -0.55, z: 0.02, y: 0.98, yaw: 0, pitch: -18, sole: [-1, 0, 0], kp: [0, -0.2, 1] }, w: [1, 0] }), 'L');
+  D['mv:yoko-geri'] = K(KB_K, YK_CH, YK_EXT, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
+  // Yoko-geri keage: Knie hoch, Knie zeigt zum Ziel; der Unterschenkel schnappt im Bogen seitlich nach oben (Jodan),
+  // die Hüfte schnappt dabei mit hoch (rechte Hüfte steigt, Oberkörper kippt etwas zur Gegenseite) und sofort zurück
+  const YA_CH = BAL(M(KB_K, { pelvis: [0.3, 0.78, 0], yaw: 12, L: { yaw: 15, kp: [0.8, 0.2, 1] }, R: { x: 0.12, z: 0.18, y: 0.5, yaw: -40, pitch: -20, sole: [-0.6, -0.8, 0], kp: [-1, 0.6, 0.5] }, w: [1, 0] }), 'L');
+  const YA_MID = BAL(M(YA_CH, { pelvis: [0.3, 0.8, 0], roll: 8, R: { x: -0.2, z: 0.18, y: 0.82, yaw: -10, pitch: 10, kp: [-1, 0.8, 0.3] } }), 'L');
+  const YA_EXT = BAL(M(YA_CH, { pelvis: [0.3, 0.84, 0], yaw: 18, roll: 22, R: { x: -0.48, z: 0.12, y: 1.32, yaw: 0, pitch: 18, sole: [-0.7, -0.7, 0], kp: [-0.3, 1, 0.5] } }), 'L');
+  D['tc:yoko-geri-keage'] = M({ keys: [{ t: 0, p: KB_K }, { t: 0.1, p: KB_K }, { t: 0.32, p: YA_CH }, { t: 0.42, p: YA_MID, e: 'in' }, { t: 0.5, p: YA_EXT, e: 'kime' }, { t: 0.6, p: YA_MID }, { t: 0.68, p: YA_CH }, { t: 0.9, p: KB_K }], best: 0.5, dur: 2 }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
+  // Mawashi-geri: Knie seitlich hoch (Oberschenkel waagerecht, Unterschenkel dicht angelegt, Spann gestreckt), Standfuß dreht
+  // auf dem Ballen weit auf, die Hüfte dreht ein und kippt (Oberkörper neigt sich vom Ziel weg); dann schnappt der Unterschenkel
+  // waagerecht im Bogen nach vorn, Treffer mit dem Fußballen (Zehen hochgezogen)
+  const MW_CH = BAL(M(KAMAE_K, { pelvis: [0.1, 0.8, 0.5], yaw: 50, chest: -40, roll: 12, look: 0, L: { yaw: 70, kp: [0.5, 0.2, 1] }, R: { x: -0.3, z: 0.42, y: 0.82, yaw: 205, pitch: 0, sole: [-0.3, 1, -0.2], kp: [-0.6, 0.1, 1] }, hL: L(H.guardF), hR: H.guardR, w: [1, 0] }), 'L');
+  const MW_MID = BAL(M(MW_CH, { yaw: 68, chest: -55, roll: 18, R: { x: -0.36, z: 0.98, y: 0.95, yaw: 140, pitch: 0, sole: [-0.6, 0.2, -0.8], kp: [-0.3, 0.8, 1] } }), 'L');
+  const MW_EXT = BAL(REACH(M(MW_CH, { yaw: 82, chest: -62, roll: 22, L: { yaw: 105 }, R: { yaw: 0, pitch: 4, sole: [-0.55, -0.83, 0], kp: [-0.2, 1, 0.1] } }), 'R', [0, 0.2, 1]), 'L');
+  D['mv:mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.34, p: MW_CH }, { t: 0.44, p: MW_MID, e: 'in' }, { t: 0.5, p: MW_EXT, e: 'kime' }, { t: 0.6, p: MW_MID }, { t: 0.68, p: MW_CH }, { t: 0.9, p: KAMAE_K }], best: 0.5, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side3' }));
   const US_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.2], lean: 22, look: 160, R: { x: -0.08, z: 0.32, y: 0.45, yaw: 0, pitch: -70, kp: [0, 0.4, 1] }, w: [1, 0] });
   D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 180, pitch: -70, kp: [0, -1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
-  D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: M(S.zk, { hL: [0.05, -0.05, 0.45], oL: 1, pL: [0, 0, -1], hR: H.hip }) }, { t: 0.15, p: M(S.zk, { hL: [0.05, -0.05, 0.45], oL: 1, pL: [0, 0, -1], hR: H.hip }) }, { t: 0.42, p: M(S.zk, { pelvis: [0, 0.82, 0.25], hL: [0.05, -0.05, 0.45], oL: 1, pL: [-1, 0, 0], hR: H.hip, R: { x: -0.5, z: 0.5, y: 0.72, yaw: 10, pitch: 10, kp: [-0.5, 1, 0.5] }, w: [1, 0] }) }, { t: 0.62, p: M(S.zk, { pelvis: [0, 0.82, 0.25], hL: [0.05, -0.05, 0.45], oL: 1, pL: [-1, 0, 0], hR: H.hip, R: { x: 0.08, z: 0.72, y: 0.95, yaw: 30, pitch: 15, sole: [1, 0, 0], kp: [0, 1, 0.3] }, w: [1, 0] }), e: 'kime' }], best: 1, dur: 1.8, eff: 'toeR', view: 'front3' }, hit('heelR', 'Fußsohle'));
+  // Mikazuki-geri wie in Heian Godan 15: aus Kiba-dachi, die linke offene Hand zur linken Seite gestreckt (Ziel), das linke
+  // Bein trägt, die Hüfte dreht links herum; der rechte Fuß schwingt im Bogen von außen herein und tritt mit der Sohle
+  // in die linke Handfläche
+  const MK_T = [0.92, 1.15, 0.02];
+  const MK_HAND = (p) => M(p, { hL: chestAt(p, V.add(MK_T, [0.025, -0.065, -0.01])), oL: 1, pL: chestAt(p, [-1, 0, -0.15], true), fL: chestAt(p, [0, 1, 0.15], true), hR: H.hip });
+  const MK0 = MK_HAND(M(KB, { look: 90 }));
+  const MK1 = MK_HAND(BAL(M(KB, { pelvis: [0.3, 0.78, 0.02], yaw: 25, look: 80, L: { yaw: 30, kp: [0.8, 0.2, 1] }, R: { x: -0.32, z: 0.12, y: 0.42, yaw: 0, pitch: -10, kp: [-0.6, 0.3, 1] }, w: [1, 0] }), 'L'));
+  const MK2 = MK_HAND(M(KB, { pelvis: [0.33, 0.82, -0.02], yaw: 40, look: 80, roll: 8, L: { yaw: 55, kp: [0.6, 0.2, 1] }, R: { x: MK_T[0] - 0.048, y: MK_T[1] - 0.04, z: MK_T[2] - 0.03, yaw: 0, pitch: 53, sole: [1, 0, 0], kp: [0, 0.3, 1] }, w: [1, 0] }));
+  // Zwischenstellung vorn: der Fuß schwingt im Bogen (nicht auf geradem Weg) zur Hand
+  const MK15 = MK_HAND(M(MK2, { yaw: 25, roll: 4, R: { x: 0.2, y: 0.85, z: 0.5, yaw: 0, pitch: 30, sole: [1, 0, -0.3], kp: [-0.2, 0.4, 1] } }));
+  D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: MK0 }, { t: 0.15, p: MK0 }, { t: 0.36, p: MK1 }, { t: 0.5, p: MK15, e: 'in' }, { t: 0.62, p: MK2, e: 'kime' }], best: 1, dur: 1.8, eff: 'toeR', view: 'front', yaw: 6 }, hit('heelR', 'Fußsohle'));
   D['tc:ura-mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(Y_CH, { look: 0 }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], best: 0.72, dur: 1.8, eff: 'heelR', view: 'front3' }, hit('heelR', 'Sohle / Ferse'));
   D['tc:ushiro-mawashi-geri'] = M(D['tc:ura-mawashi-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.32, p: M(KAMAE_K, { yaw: -150, look: -170, L: { yaw: -140 }, R: { x: -0.4, z: -0.2, y: 0.4, yaw: -150, pitch: -40, kp: [0, 0.3, -1] }, w: [1, 0] }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], marks: ['turn'] });
-  D['tc:hiza-geri'] = K(M(S.zk, { hL: [0.06, 0.02, 0.45], hR: [-0.06, 0.02, 0.45] }), M(S.zk, { pelvis: [0, 0.84, 0.25], hL: [0.06, -0.15, 0.4], hR: [-0.06, -0.15, 0.4], R: { x: -0.08, z: 0.2, y: 0.45, pitch: -70, kp: [0, 0.6, 1] }, w: [1, 0] }), M(S.zk, { pelvis: [0, 0.86, 0.28], lean: 6, hL: [0.08, -0.38, 0.38], hR: [-0.08, -0.38, 0.38], R: { x: -0.08, z: 0.36, y: 0.5, pitch: -70, kp: [0, 1, 0.8] }, w: [1, 0] }), M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'side3' }));
+  // Hiza-geri: beide Hände greifen vorn auf Kopfhöhe und ziehen herab, das Knie stößt zwischen den Händen nach oben
+  const HZ_CH = BAL(M(S.zk, { pelvis: [0, 0.84, 0.5], hL: [0.12, -0.05, 0.42], hR: [-0.12, -0.05, 0.42], R: { x: -0.08, z: 0.35, y: 0.42, pitch: -70, kp: [0, 0.6, 1] }, w: [1, 0] }), 'L');
+  const HZ_E0 = BAL(M(S.zk, { pelvis: [0, 0.86, 0.5], lean: 8, R: { x: -0.07, z: 0.62, y: 0.6, pitch: -65, kp: [0, 1, 0.6] }, w: [1, 0] }), 'L');
+  const HZ_K = E.solve(HZ_E0).kneeR;
+  const HZ_EXT = M(HZ_E0, { hL: chestAt(HZ_E0, V.add(HZ_K, [0.13, 0.1, 0.02])), hR: chestAt(HZ_E0, V.add(HZ_K, [-0.13, 0.1, 0.02])), eL: [0.5, -0.5, 0.3], eR: [-0.5, -0.5, 0.3] });
+  D['tc:hiza-geri'] = K(M(S.zk, { hL: [0.08, 0.06, 0.48], hR: [-0.08, 0.06, 0.48] }), HZ_CH, HZ_EXT, M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'side3' }));
   D['tc:mawashi-hiza-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.84, 0.22], yaw: 10, R: { x: -0.5, z: 0.0, y: 0.5, yaw: -40, pitch: -40, kp: [-1, 0.6, 0] }, w: [1, 0] }), M(ZK_KAMAE, { pelvis: [0, 0.86, 0.26], yaw: 45, R: { x: -0.08, z: 0.22, y: 0.55, yaw: 20, pitch: -50, kp: [0.3, 0.6, 1] }, w: [1, 0] }), M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'front3' }));
-  D['tc:fumikomi'] = K(KAMAE_K, M(CHAMBER, { R: { y: 0.55, z: 0.3 } }), M(CHAMBER, { pelvis: [0, 0.74, 0.32], R: { x: -0.1, z: 0.66, y: 0.1, yaw: -60, pitch: 0, kp: [0, 0.3, 1] } }), M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'side3' }));
-  D['tc:namigaeshi'] = K(KB, M(KB, { pelvis: [0.08, 0.72, 0], R: { x: -0.2, z: 0.12, y: 0.32, yaw: 30, pitch: -20, sole: [1, 0.3, 0], kp: [-1, 0.4, 0.5] }, w: [1, 0] }), M(KB, { pelvis: [0.1, 0.74, 0], R: { x: -0.04, z: 0.18, y: 0.42, yaw: 40, pitch: -10, sole: [1, 0.5, 0], kp: [-1, 0.5, 0.6] }, w: [1, 0] }), M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'front' }));
+  // Fumikomi wie in Heian Sandan 12: Füße geschlossen, das linke Bein trägt, rechtes Knie hoch vor den Körper,
+  // dann stampft der Fuß mit der Fußkante zur rechten Seite, der Körper senkt sich mit in Kiba-dachi (Blick zur Seite)
+  const FU0 = M(KB, { look: -90, pelvis: [0.35, 0.88, 0], L: { x: 0.42, kp: [0.3, 0, 1] }, R: { x: 0.26, z: 0, yaw: -5, kp: [-0.3, 0, 1] } });
+  const FU1 = BAL(M(KB, { look: -90, pelvis: [0.38, 0.84, 0], L: { x: 0.42, kp: [0.4, 0.1, 1] }, R: { x: 0.25, z: 0.2, y: 0.5, yaw: -20, pitch: -30, kp: [-0.3, 0.6, 1] }, w: [1, 0] }), 'L');
+  const FU2 = M(KB, { look: -90, R: { y: 0.09, yaw: -5 }, w: [0.4, 0.6] });
+  D['tc:fumikomi'] = M({ keys: [{ t: 0, p: FU0 }, { t: 0.12, p: FU0 }, { t: 0.4, p: FU1 }, { t: 0.62, p: FU2, e: 'kime' }, { t: 0.8, p: KB_K }], best: 0.62, dur: 1.8 }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
+  // Namigaeshi: der Fuß federt in einem weichen Bogen nach innen hoch Richtung Unterbauch (Sohle nach oben innen)
+  // und setzt gleich wieder ab – fließend, ohne Halt
+  const NG1 = M(KB, { pelvis: [0.08, 0.72, 0], R: { x: -0.18, z: 0.12, y: 0.3, yaw: 30, pitch: -15, sole: [1, 0.3, 0], kp: [-1, 0.4, 0.5] }, w: [1, 0] });
+  const NG2 = M(KB, { pelvis: [0.1, 0.74, 0], R: { x: -0.04, z: 0.18, y: 0.42, yaw: 40, pitch: -10, sole: [1, 0.5, 0], kp: [-1, 0.5, 0.6] }, w: [1, 0] });
+  D['tc:namigaeshi'] = M({ keys: [{ t: 0, p: KB }, { t: 0.1, p: KB }, { t: 0.3, p: NG1, e: 'in' }, { t: 0.45, p: NG2, e: 'io' }, { t: 0.62, p: NG1, e: 'lin' }, { t: 0.85, p: KB, e: 'io' }], best: 0.45, dur: 1.8 }, M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'front' }));
   D['tc:nidan-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(KAMAE_K, { pelvis: [0, 1.15, 0.3], L: { x: 0.1, z: 0.62, y: 0.68, pitch: 10, kp: [0, 1, 0.5] }, R: { x: -0.08, z: 0.1, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, w: [0, 0] }) }, { t: 0.58, p: M(KAMAE_K, { pelvis: [0, 1.2, 0.32], lean: -8, L: { x: 0.1, z: 0.3, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, R: { x: -0.08, z: 1.05, y: 1.45, pitch: 15, kp: [0, 1, 0.3] }, w: [0, 0] }), e: 'kime' }], best: 1, dur: 1.8, eff: 'toeR', view: 'side' }, hit('toeR', 'zweiter Tritt'));
 
   /* ---------- Fußfeger ---------- */
@@ -438,11 +545,11 @@
     'tc:nukite': 'fingerspitzen', 'tc:kogeki': 'seiken', 'tc:deai': 'seiken',
     'tc:uraken-uchi': 'uraken', 'tc:tettsui-uchi': 'tettsui', 'tc:shuto-uchi': 'shuto', 'tc:haito-uchi': 'haito', 'tc:teisho-uchi': 'teisho',
     'tc:enpi-uchi': 'ellbogen', 'tc:furi-enpi': 'ellbogen', 'tc:yoko-enpi': 'ellbogen', 'tc:mawashi-enpi': 'ellbogen', 'tc:age-enpi': 'ellbogen',
-    'tc:otoshi-enpi': 'ellbogen', 'tc:ushiro-enpi': 'ellbogen', 'tc:hasami-uchi': 'tettsui:LR',
+    'tc:otoshi-enpi': 'ellbogen', 'tc:ushiro-enpi': 'ellbogen', 'tc:hasami-uchi': 'innen:LR',
     'mv:age-uke': 'unterarm', 'mv:gedan-barai': 'unterarm', 'mv:soto-uke': 'unterarm', 'mv:uchi-uke': 'unterarm', 'tc:bunkai': 'unterarm',
     'tc:shuto-uke': 'shuto', 'tc:morote-uke': 'unterarm:L', 'tc:juji-uke': 'handgelenk:LR', 'tc:kakiwake-uke': 'unterarm:LR',
     'tc:nagashi-uke': 'handflaeche', 'tc:te-nagashi-uke': 'handflaeche', 'tc:gedan-nagashi-uke': 'unterarm', 'tc:osae-uke': 'handflaeche',
-    'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'handflaeche', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',
+    'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'unterarm', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',
     'tc:tate-shuto-uke': 'shuto', 'tc:teisho-uke': 'teisho', 'tc:uchiotoshi': 'unterarm', 'tc:manji-uke': 'unterarm:LR',
     'mv:mae-geri': 'koshi', 'tc:mae-geri-kekomi': 'kakato', 'tc:sonoba-geri': 'koshi', 'tc:kizami-geri': 'koshi', 'tc:ren-geri': 'koshi',
     'mv:yoko-geri': 'sokuto', 'tc:yoko-geri-keage': 'sokuto', 'mv:mawashi-geri': 'koshi', 'mv:ushiro-geri': 'kakato',

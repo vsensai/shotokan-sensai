@@ -46,7 +46,8 @@
     const cam = {
       target: [(Math.max(...xs) + Math.min(...xs)) / 2, Math.max(0.42, 0.1 + 0.82 * ay), (Math.max(...zs) + Math.min(...zs)) / 2 + (partner ? 0 : 0.12)],
       dist: (ay < 0.6 ? 3.1 : 3.95) + 0.8 * Math.max(spanZ, spanX * 0.8) + (d.view === 'side' || d.view === 'front' ? 0.15 : 0),
-      yaw: v.yaw, pitch: v.pitch, fov: 30,
+      // d.yaw: Kamera gegenüber der Grundansicht etwas weiter gedreht (positiv = von rechts vorn)
+      yaw: v.yaw + (d.yaw || 0), pitch: v.pitch, fov: 30,
     };
     const t0 = d.keys[0].t;
     const t1 = d.keys[d.keys.length - 1].t;
@@ -63,8 +64,11 @@
   // c: feste Lage; mv: Abstand vom Ursprung in Richtung der Bewegung (die Seite, die vorangeht – Abwehr, Ellbogen, Knie).
   const FL = {
     seiken: { part: 'hand', o: 'wrist', c: [0.088, -0.012, 0.012], r: 0.063 },
-    uraken: { part: 'hand', o: 'wrist', c: [0.07, -0.02, 0.008], r: 0.06 },
+    // Uraken: Rücken der beiden vorderen Knöchel (Handrücken-Seite), nicht die Stirnseite der Faust
+    uraken: { part: 'hand', o: 'wrist', c: [0.076, -0.04, 0.012], r: 0.05 },
     tettsui: { part: 'hand', o: 'wrist', c: [0.048, 0.012, -0.04], r: 0.06 },
+    // beidseitiger Schlag (Hasami-uchi): die Seite der Faust, die zur anderen Faust zeigt
+    innen: { part: 'hand', o: 'wrist', c0: [0.045, 0.01, 0], mv: 0.042, c: 'inside', r: 0.048 },
     shuto: { part: 'hand', o: 'wrist', c: [0.065, 0, -0.03], r: 0.06 },
     haito: { part: 'hand', o: 'wrist', c: [0.06, 0, 0.03], r: 0.06 },
     teisho: { part: 'hand', o: 'wrist', c: [0.022, 0.016, 0], r: 0.054 },
@@ -72,7 +76,7 @@
     handflaeche: { part: 'hand', o: 'wrist', c: [0.06, 0.016, 0], r: 0.063 },
     handgelenk: { part: 'arm', o: 'wrist', mv: 0.03, c: [0, -1, 0], r: 0.054 },
     unterarm: { part: 'arm', o: 'forearm', mv: 0.095, c: [0, 1, 0], r: 0.11 },
-    ellbogen: { part: 'arm', o: 'elbow', mv: 0.085, c: 'tip', r: 0.095 },
+    ellbogen: { part: 'arm', o: 'elbow', mv: 0.075, c: 'tip', r: 0.08 },
     koshi: { part: 'fuss', o: 'ankle', c: [0.115, 0.07, 0], r: 0.066 },
     kakato: { part: 'fuss', o: 'ankle', c: [-0.05, 0.06, 0], r: 0.066 },
     sokuto: { part: 'fuss', o: 'ankle', c: [0.03, 0.055, -0.032], r: 0.069 },
@@ -113,9 +117,13 @@
       h.sides.split('').forEach((s) => {
         const F = frame(J1, d.part, d.o, s);
         let c = d.c;
-        if (d.mv) {
+        if (c === 'inside') {
+          const o = s === 'L' ? 'R' : 'L';
+          c = E.v.add(d.c0, E.v.mul(toL(F, E.v.norm(E.v.sub(J1['fist' + o], J1['fist' + s]))), d.mv));
+        } else if (d.mv) {
           let m = null;
-          for (let t = tb - 0.01; t >= 0; t -= 0.01) {
+          // Ellbogen und Knie: immer die Spitze (Knochen am Gelenk), nicht Ober-/Unterarm bzw. -schenkel in Bewegungsrichtung
+          for (let t = tb - 0.01; t >= 0 && c !== 'tip' && c !== 'knee'; t -= 0.01) {
             const v = E.v.sub(F.o, frame(E.solve(e.pose(t)), d.part, d.o, s).o);
             if (E.v.len(v) > 0.05) { m = v; break; }
           }
@@ -137,7 +145,7 @@
     if (!d) return null;
     return spotDirs(e).map(({ s, c }) => {
       const F = frame(J, d.part, d.o, s);
-      return { p: E.v.add(F.o, toW(F, c)), r: d.r };
+      return { p: E.v.add(F.o, toW(F, c)), r: d.r, part: (d.part === 'hand' || d.part === 'arm' ? 'arm' : 'leg') + s };
     });
   }
   function paint(ctx, w, h, e, st) {

@@ -41,7 +41,7 @@
   }
 
   const DEF = {
-    pelvis: [0, 0.9, 0], yaw: 0, chest: 0, lean: 0, look: 0,
+    pelvis: [0, 0.9, 0], yaw: 0, chest: 0, lean: 0, roll: 0, look: 0,
     // tu: Zehen hochgezogen (0 … 1), z. B. Fußballen beim Mae-geri
     L: { x: 0.1, z: 0, y: 0.075, yaw: 8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0], tu: 0 },
     R: { x: -0.1, z: 0, y: 0.075, yaw: -8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0], tu: 0 },
@@ -62,12 +62,16 @@
   // Pose → Gelenke in Weltkoordinaten
   function solve(P) {
     const pel = P.pelvis;
-    const lp = leftOf(P.yaw);
+    // roll: seitliches Kippen von Becken und Oberkörper (Grad, positiv = Oberkörper zur linken Seite, rechte Hüfte hoch)
+    const rl = (P.roll || 0) * D;
+    const lp = norm(sub(mul(leftOf(P.yaw), Math.cos(rl)), mul(UP, Math.sin(rl))));
     const fp = fwdOf(P.yaw);
     const cy = P.yaw + P.chest;
-    const lc = leftOf(cy);
+    const lc0 = leftOf(cy);
     const fc0 = fwdOf(cy);
-    const up = add(mul(UP, Math.cos(P.lean * D)), mul(fc0, Math.sin(P.lean * D)));
+    const up0 = add(mul(UP, Math.cos(P.lean * D)), mul(fc0, Math.sin(P.lean * D)));
+    const up = norm(add(mul(up0, Math.cos(rl)), mul(lc0, Math.sin(rl))));
+    const lc = norm(sub(mul(lc0, Math.cos(rl)), mul(up0, Math.sin(rl))));
     const fc = norm(cross(lc, up));
     const chest = add(pel, mul(up, 0.5));
     const J = { pel, chest, up, lc, fc, lp, fp };
@@ -145,6 +149,8 @@
   // 1.25 Haut mit fast harter Kante, 1.3 … 1.49 Haut mit eigenem Übergang, ab 100 abgeflachte Haut (siehe FL)
   function prims(J) {
     const P = [];
+    // Bereiche der Glieder in der Liste (armL, legR …): die Trefferfläche färbt nur ihr eigenes Glied
+    P.parts = {};
     const cone = (a, b, ra, rb, m) => P.push([a, b, ra, rb, m]);
     // Gruppe (Hand, Fuß): vorweg eine grobe Ersatzform (Material 10 + Anzahl der Teile).
     // Der Shader rechnet die Einzelteile nur nahe der Oberfläche; Schatten und Verdeckung nehmen nur die Ersatzform.
@@ -192,6 +198,7 @@
       const e = J['elbow' + s];
       const w = J['wrist' + s];
       // sehr weiter Gi-Ärmel (wie die Hose), offener Saum kurz vor dem Handgelenk
+      const a0 = P.length;
       cone(J['sh' + s], e, 0.068, 0.064, 0);
       cone(e, mix(e, w, 0.86), 0.064, 0.08, 0.1);
       const fd = J['fd' + s];
@@ -216,6 +223,8 @@
           cone(at(0.036, 0.01, 0), at(0.05, 0.012, 0), 0.037, 0.039, FL(pn, 1.5, 0.008));
         });
       }
+      P.parts['arm' + s] = [a0, P.length];
+      const l0 = P.length;
       const k = J['knee' + s];
       const a = J['ankle' + s];
       // weite Gi-Hose: locker, unten ausgestellt, offener Saum knapp über dem Knöchel
@@ -233,13 +242,17 @@
       const td = add(mul(dir, Math.cos(ta)), mul(sole, -Math.sin(ta)));
       const tdn = add(mul(dir, Math.sin(ta)), mul(sole, Math.cos(ta)));
       // Vorderfuß um den Ballen gedreht (Zehen hochgezogen beim Mae-geri)
-      const B = O(0.1, 0.058, 0.004);
+      const B = O(0.115, 0.055, 0.004);
       const V = (f, d, q) => add(add(add(B, mul(td, f)), mul(tdn, d)), mul(inner, q));
-      group([J['heel' + s], J['toe' + s], 0.06, 0.05], () => {
-        cone(a, a, 0.025, 0.025, SK(0.003));
-        cone(O(-0.03, 0.041, 0.0), O(0.07, 0.046, 0.004), 0.033, 0.028, FL(sole, 1.2, 0.006));
-        cone(V(-0.045, -0.008, 0.0), V(0.035, 0.0, 0.004), 0.04, 0.032, FL(tdn, 2.2, 0.012));
+      // Fuß aus einem Guss: Ferse und Sohle als flacher Keil bis zum Ballen, darüber der Spann vom Knöchel zum Ballen,
+      // hinten die Ferse zum Knöchel – mit weichen Übergängen, damit keine einzelnen Wülste sichtbar sind
+      group([J['heel' + s], J['toe' + s], 0.065, 0.055], () => {
+        cone(a, O(-0.032, 0.04, 0.0), 0.026, 0.027, SK(0.02));
+        cone(O(-0.03, 0.05, 0.0), O(0.1, 0.048, 0.005), 0.031, 0.038, FL(sole, 1.5, 0.02));
+        cone(add(a, mul(dir, 0.01)), O(0.1, 0.03, 0.004), 0.025, 0.024, SK(0.026));
+        cone(V(-0.012, -0.002, 0.003), V(0.048, 0.003, 0.006), 0.032, 0.024, FL(tdn, 1.8, 0.02));
       });
+      P.parts['leg' + s] = [l0, P.length];
     });
     // Gürtel als eigener Ring um die Taille (über der Jacke)
     for (let i = 0; i < 12; i++) {
@@ -275,6 +288,8 @@ uniform vec4 uBound;
 uniform vec2 uBase;
 uniform vec4 uDec[6], uDecP[6];
 uniform vec4 uHit[2]; // Trefferflächen: Mittelpunkt (Welt) und Radius, Radius 0 = keine
+uniform vec4 uHitI[2]; // Glied der Trefferfläche: erster und letzter+1 Index der Körperformen
+float gBi = -1.0; // Index der nächsten Körperform (zuletzt von map gesetzt)
 const vec3 LIG = normalize(vec3(-0.55, 0.95, 0.45));
 const vec3 FIL = normalize(vec3(0.7, 0.45, -0.6));
 
@@ -294,7 +309,7 @@ float jacket(vec3 p){
 }
 // fine = false: Hände und Füße nur als grobe Ersatzform (Verdeckung auf dem Boden – ohne sichtbare Umrisse)
 vec2 mapX(vec3 p, bool fine){
-  float d = 1e9, best = 1e9, m = 0.0;
+  float d = 1e9, best = 1e9, m = 0.0, bi = -1.0;
   int i = 0;
   while (i < uN) {
     float mi = mat(i);
@@ -326,19 +341,20 @@ vec2 mapX(vec3 p, bool fine){
       // Ersatzform einer Gruppe: weit weg (oder grob) genügt sie, die Einzelteile werden übersprungen
       int n = int(mi - 10.0 + 0.5);
       if (!fine || di > 0.06) {
-        if (di < best) { best = di; m = 1.0; }
+        if (di < best) { best = di; m = 1.0; bi = float(i); }
         d = smin(d, di, 0.024);
         i += n + 1;
       } else i += 1;
       continue;
     }
-    if (di < best) { best = di; m = mi; }
+    if (di < best) { best = di; m = mi; bi = float(i); }
     d = smin(d, di, max(k, 0.001));
     i += 1;
   }
   float dj = jacket(p);
-  if (dj < best) m = 6.0;
+  if (dj < best) { m = 6.0; bi = -1.0; }
   d = smin(d, dj, 0.007);
+  gBi = bi;
   return vec2(d, m);
 }
 vec2 map(vec3 p){ return mapX(p, true); }
@@ -430,11 +446,11 @@ vec3 baseCol(float m, vec3 p, out float kind){
   return gi;
 }
 
-vec3 shadeFig(vec3 p, vec3 rd, float m){
+vec3 shadeFig(vec3 p, vec3 rd, float m, float bi){
   vec3 n = nrm(p);
   float kind; vec3 c = baseCol(m, p, kind);
   // Trefferfläche klein rot auf der Haut (weicher Rand)
-  for (int i = 0; i < 2; i++) if (uHit[i].w > 0.0 && uTint == 0) c = mix(c, vec3(0.86, 0.1, 0.08), 1.0 - smoothstep(uHit[i].w * 0.72, uHit[i].w, length(p - uHit[i].xyz)));
+  for (int i = 0; i < 2; i++) if (uHit[i].w > 0.0 && uTint == 0 && bi >= uHitI[i].x - 0.5 && bi < uHitI[i].y - 0.5) c = mix(c, vec3(0.86, 0.1, 0.08), 1.0 - smoothstep(uHit[i].w * 0.72, uHit[i].w, length(p - uHit[i].xyz)));
   float dif = clamp(dot(n, LIG), 0.0, 1.0);
   float sh = shadow(p + n * 0.004, LIG);
   float ao = occl(p, n);
@@ -513,18 +529,18 @@ void main(){
   vec4 res = bg;
   if (uMode != 1) {
     float t0, t1, minA = 1e9, t = 0.0;
-    bool hit = false; vec2 h = vec2(0.0);
+    bool hit = false; vec2 h = vec2(0.0); float bi = -1.0;
     if (sphere(ro, rd, uBound, t0, t1)) {
       t = max(t0, 0.01);
       for (int i = 0; i < 128; i++) {
         h = map(ro + rd * t);
         minA = min(minA, h.x / t);
-        if (h.x < 0.0004 * t) { hit = true; break; }
+        if (h.x < 0.0004 * t) { hit = true; bi = gBi; break; }
         t += h.x * 0.92;
         if (t > t1) break;
       }
     }
-    if (hit) res = vec4(shadeFig(ro + rd * t, rd, h.y), 1.0);
+    if (hit) res = vec4(shadeFig(ro + rd * t, rd, h.y, bi), 1.0);
     else if (minA < pix * 1.5) {
       // Kantenglättung bzw. Tuschekontur am Umriss
       float cov = uStyle == 1 ? 1.0 - smoothstep(pix * 0.6, pix * 1.5, minA) : (1.0 - smoothstep(0.0, pix, minA)) * 0.75;
@@ -578,7 +594,7 @@ void main(){
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const U = {};
-    ['uRes', 'uRo', 'uCw', 'uCu', 'uCv', 'uF', 'uA', 'uB', 'uM', 'uN', 'uMode', 'uStyle', 'uTint', 'uPel', 'uUp', 'uFwd', 'uLeft', 'uHead', 'uHFwd', 'uPFwd', 'uPLeft', 'uBound', 'uBase', 'uDec', 'uDecP', 'uHit'].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
+    ['uRes', 'uRo', 'uCw', 'uCu', 'uCv', 'uF', 'uA', 'uB', 'uM', 'uN', 'uMode', 'uStyle', 'uTint', 'uPel', 'uUp', 'uFwd', 'uLeft', 'uHead', 'uHFwd', 'uPFwd', 'uPLeft', 'uBound', 'uBase', 'uDec', 'uDecP', 'uHit', 'uHitI'].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
     GL = { ok: true, gl, cv, U };
     return GL;
   }
@@ -658,8 +674,13 @@ void main(){
     gl.uniform4fv(U.uDec, dec);
     gl.uniform4fv(U.uDecP, decp);
     const hit = new Float32Array(8);
-    (opt.hit || []).slice(0, 2).forEach((x, i) => hit.set([...x.p, x.r], i * 4));
+    const hitI = new Float32Array(8);
+    (opt.hit || []).slice(0, 2).forEach((x, i) => {
+      hit.set([...x.p, x.r], i * 4);
+      hitI.set((x.part && P.parts[x.part]) || [0, 1e4], i * 4);
+    });
     gl.uniform4fv(U.uHit, hit);
+    gl.uniform4fv(U.uHitI, hitI);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     if (gl.isContextLost()) return false;
     ctx.drawImage(cv, 0, 0);
