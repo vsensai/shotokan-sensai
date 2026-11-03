@@ -433,7 +433,7 @@
   // Fläche je Figur, „:LR“ = beide Seiten, sonst die Seite des Trefferpunkts. Lage der Flächen: figur-app.js (FL).
   const FLAECHE = {
     'mv:gyaku-zuki': 'seiken', 'mv:oi-zuki': 'seiken', 'tc:choku-zuki': 'seiken', 'tc:kizami-zuki': 'seiken', 'tc:tate-zuki': 'seiken',
-    'tc:sanbon-zuki': 'seiken', 'tc:ren-zuki': 'seiken', 'tc:morote-zuki': 'seiken:LR', 'tc:kagi-zuki': 'seiken', 'tc:ura-zuki': 'seiken',
+    'tc:sanbon-zuki': 'seiken:LR', 'tc:ren-zuki': 'seiken:LR', 'tc:morote-zuki': 'seiken:LR', 'tc:kagi-zuki': 'seiken', 'tc:ura-zuki': 'seiken',
     'tc:age-zuki': 'seiken', 'tc:yama-zuki': 'seiken:LR', 'tc:awase-zuki': 'seiken:LR', 'tc:otoshi-zuki': 'seiken', 'tc:mawashi-zuki': 'seiken',
     'tc:nukite': 'fingerspitzen', 'tc:kogeki': 'seiken', 'tc:deai': 'seiken',
     'tc:uraken-uchi': 'uraken', 'tc:tettsui-uchi': 'tettsui', 'tc:shuto-uchi': 'shuto', 'tc:haito-uchi': 'haito', 'tc:teisho-uchi': 'teisho',
