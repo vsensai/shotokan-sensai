@@ -309,12 +309,19 @@
   ], M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front' }));
   const MAE_ENPI = M(S.zks, { hL: L(H.hip), hR: [0.08, -0.13, 0.17], eR: [-0.1, 0.1, 1] });
   D['tc:enpi-uchi'] = T(ZK_G, MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3', yaw: 15 }));
-  // Furi-enpi: Arm holt vor dem Körper nach links aus (Ellbogen vorn, Unterarm bleibt vor der Brust), dann schwingt der Ellbogen zur Seite
-  D['tc:furi-enpi'] = FLOW([
-    M(KB, { look: -90, hR: [0.3, -0.12, 0.38], eR: [-0.2, -0.3, 1] }),
-    M(KB, { look: -90, hR: [0.12, -0.1, 0.34], eR: [-0.7, -0.1, 1] }),
-    M(KB, { look: -90, hR: [-0.06, -0.08, 0.2], eR: [-1, 0.1, 0.4] }),
-  ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front', yaw: -12 }));
+  // Furi-enpi wie in der Kata (Heian Sandan): aus Hidari Zenkutsu-dachi trägt das linke Bein, das rechte Knie kommt hoch,
+  // der Körper dreht sich nach links und der rechte Fuß stampft nach vorn in Kiba-dachi (rechte Seite vorn, Blick nach vorn).
+  // Der Ellbogen holt dabei vor dem Körper aus und schwingt mit dem Aufsetzen nach vorn (zur rechten Körperseite)
+  const FE = (p) => move(rotate(p, 90, [0, 0]), 0.12, 1.04);
+  const FE_KB = M(KB, { look: -90 });
+  const FE_UP = BAL(M({ pelvis: [0.06, 0.86, 0.62], yaw: 45, look: 0, L: { x: 0.12, z: 0.62, yaw: 35, kp: [0.4, 0, 1] },
+    R: { x: 0.0, z: 0.78, y: 0.42, yaw: 70, pitch: -25, kp: [-0.2, 0.6, 1] }, hL: L(H.hip), hR: [0.3, -0.12, 0.38], eR: [-0.2, -0.3, 1], w: [1, 0] }), 'L');
+  D['tc:furi-enpi'] = M({ keys: [
+    { t: 0, p: ZK_G }, { t: 0.12, p: ZK_G },
+    { t: 0.42, p: FE_UP },
+    { t: 0.56, p: FE(M(FE_KB, { R: { y: 0.06 }, hR: [0.12, -0.1, 0.34], eR: [-0.7, -0.1, 1], w: [0.6, 0.4] })) },
+    { t: 0.66, p: FE(M(FE_KB, { hR: [-0.06, -0.08, 0.2], eR: [-1, 0.1, 0.4], w: [0.5, 0.5] })), e: 'kime' },
+  ], best: 1, dur: 2 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3' }));
   // Yoko-enpi: Unterarm waagerecht vor der Brust (Faust vor der linken Seite, Ellbogen vorn), dann stößt der Ellbogen zur Seite
   D['tc:yoko-enpi'] = FLOW([
     M(KB, { look: -90, hR: [0.24, -0.08, 0.34], eR: [-0.4, 0, 1] }),
