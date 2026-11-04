@@ -445,15 +445,17 @@
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
   D['tc:tate-shuto-uke'] = T(M(S.kk, { hL: [-0.15, 0.02, 0.23], eL: [0.1, -0.5, 0.8], hR: H.hip }), M(S.kk, { hR: H.hip, hL: [0.07, -0.02, 0.5], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] }), M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'side3' }));
   // Teisho-uke wie in Jion 23: aus Hidari Zenkutsu-dachi (Gedan-barai) tritt der rechte Fuß vor in Kiba-dachi, die Hüfte dreht
-  // ¼ nach links (rechte Seite vorn, Blick nach vorn). Die offene rechte Hand holt vor der linken Brust aus und wehrt mit der
-  // Hüftdrehung zur rechten Seite ab: Handgelenk stark abgeknickt, Finger oben, der Handballen zeigt nach außen.
-  // Arme und Füße kommen gleichzeitig an; die linke Faust zieht an die Hüfte
+  // ¼ nach links (rechte Seite vorn, Blick nach vorn). Die offene rechte Hand kommt wie beim Teisho-uchi von außen in einem
+  // Bogen, nur mit ganz kleinem Radius: von der Hüfte etwas nach außen, dann im kleinen Bogen in die Abwehr zur rechten Seite –
+  // Handgelenk stark abgeknickt, Finger oben, der Handballen zeigt nach außen. Arme und Füße kommen gleichzeitig an;
+  // die linke Faust zieht an die Hüfte
   const TU_HAND = { oR: 1, fR: [0, 1, 0], pR: [-1, 0, 0] };
   const TU_MID = BAL(M({ pelvis: [0.05, 0.8, 0.62], yaw: 30, look: 0, L: { x: 0.12, z: 0.62, yaw: 30, kp: [0.4, 0, 1] },
-    R: { x: 0.0, z: 0.66, y: 0.14, yaw: 50, pitch: -10, kp: [-0.2, 0.3, 1] }, hL: [0.15, -0.3, 0.2], hR: [0.2, -0.08, 0.26], eR: [-0.3, -0.6, 0.7], ...TU_HAND, w: [1, 0] }), 'L');
+    R: { x: 0.0, z: 0.66, y: 0.14, yaw: 50, pitch: -10, kp: [-0.2, 0.3, 1] }, hL: [0.15, -0.3, 0.2], hR: [-0.25, -0.3, 0.02], eR: [-0.3, -0.5, -1], ...TU_HAND, w: [1, 0] }), 'L');
   D['tc:teisho-uke'] = M({ keys: [
     { t: 0, p: ZK_G }, { t: 0.15, p: ZK_G },
     { t: 0.36, p: TU_MID },
+    { t: 0.42, p: FE(M(FE_KB, { R: { y: 0.05 }, hR: [-0.4, -0.2, -0.02], eR: [-1, -0.4, -0.3], ...TU_HAND, w: [0.6, 0.4] })), e: 'in' },
     { t: 0.48, p: FE(M(FE_KB, { hR: [-0.56, -0.1, 0.2], eR: [-0.6, -0.7, 0.2], ...TU_HAND })), e: 'kime' },
   ], best: 1, dur: 1.8 }, M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'side3', yaw: 130 }));
   D['tc:uchiotoshi'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.15, 0.35, 0.15] }), M(S.zks, { hL: L(H.hip), hR: [-0.02, -0.25, 0.36], eR: [-0.8, -0.2, 0.3] }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
