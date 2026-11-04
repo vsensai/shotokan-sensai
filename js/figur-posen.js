@@ -322,11 +322,12 @@
     { t: 0.56, p: FE(M(FE_KB, { R: { y: 0.06 }, hR: [-0.21, -0.33, 0.03], eR: [-0.6, -0.8, -0.3], w: [0.6, 0.4] })) },
     { t: 0.66, p: FE(M(FE_KB, { hR: [-0.2, -0.3, 0.08], eR: [-1, -0.15, 0.2], w: [0.5, 0.5] })), e: 'kime' },
   ], best: 1, dur: 2 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3' }));
-  // Yoko-enpi: Unterarm waagerecht vor der Brust (Faust vor der linken Seite, Ellbogen vorn), dann stößt der Ellbogen zur Seite
+  // Yoko-enpi: Unterarm waagerecht vor der Brust (Faust vor der linken Seite, Ellbogen vorn), der linke Arm holt gestreckt
+  // unter dem rechten zur rechten Seite aus; dann stößt der Ellbogen zur Seite, die linke Faust zieht als Gegenbewegung an die Hüfte
   D['tc:yoko-enpi'] = FLOW([
-    M(KB, { look: -90, hR: [0.24, -0.08, 0.34], eR: [-0.4, 0, 1] }),
-    M(KB, { look: -90, hR: [0.08, -0.07, 0.26], eR: [-1, 0, 0.6] }),
-    M(KB, { look: -90, hR: [-0.06, -0.06, 0.13], eR: [-1, 0, 0] }),
+    M(KB, { look: -90, hR: [0.24, -0.08, 0.34], eR: [-0.4, 0, 1], hL: [-0.4, -0.24, 0.22], eL: [-0.1, -1, 0.3] }),
+    M(KB, { look: -90, hR: [0.08, -0.07, 0.26], eR: [-1, 0, 0.6], hL: [0.02, -0.26, 0.24] }),
+    M(KB, { look: -90, hR: [-0.06, -0.06, 0.13], eR: [-1, 0, 0], hL: L(H.hip) }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
   // Mawashi-enpi: aus der Hüfte kommt der Ellbogen seitlich hoch und schwingt waagerecht nach vorn, Faust endet vor der Brust
   D['tc:mawashi-enpi'] = FLOW([
