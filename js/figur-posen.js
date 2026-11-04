@@ -306,14 +306,14 @@
     M(KB, { look: -90, hR: [-0.5, 0.0, 0.18], eR: [-1, 0.25, -0.2], pR: [0.8, 0, 0.5] }),
     M(KB, { look: -90, hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6], pR: [0, 0, 1] }),
   ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front' }));
-  // Tettsui (Kentsui Tate-mawashi-uchi) wie in Heian Shodan 4: aus Gedan-barai im Migi Zenkutsu-dachi
-  // senkrechter Kreis vor dem Körper hoch über den Kopf und von oben nach vorn, Arm leicht gebeugt
+  // Tettsui (Kentsui Tate-mawashi-uchi) direkt aus dem Migi Chudan-kamae (rechter Arm gebeugt vorn): die Faust steigt
+  // vor dem Körper im senkrechten Kreis hoch über den Kopf und schlägt von oben nach vorn, Arm leicht gebeugt; etwas ruhiger
   D['tc:tettsui-uchi'] = FLOW([
-    MZK_G,
-    M(MZK, { hL: L(H.hip), hR: [-0.06, 0.08, 0.26], pR: [1, 0, 0] }),
+    M(MZK, { hR: [-0.1, -0.12, 0.42], hL: [0.02, -0.22, 0.2] }),
+    M(MZK, { hL: [0.02, -0.22, 0.2], hR: [-0.1, 0.2, 0.32], pR: [1, 0, 0] }),
     M(MZK, { chest: -12, hL: L(H.hip), hR: [-0.2, 0.42, 0.02], eR: [-0.6, 0.3, -0.3], pR: [1, 0, 0] }),
     M(MZK, { chest: -25, hL: L(H.hip), hR: [-0.03, 0.0, 0.5], pR: [1, 0, 0] }),
-  ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3' }));
+  ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3', dur: 1.3 }));
   D['tc:shuto-uchi'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.28, 0.2, -0.05], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, 0.04, 0.48], oR: 1, pR: [0, 1, 0] }), M(hit('tipR', 'Handkante'), { eff: 'wristR', view: 'front3' }));
   D['tc:haito-uchi'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.45, -0.35, 0.05], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.05, 0.03, 0.46], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Daumenseite'), { eff: 'wristR', view: 'front3' }));
   // Teisho in Kiba-dachi zur Seite (wie Jion 23–25): offene Hand vor der linken Brust, Handballen schlägt zur rechten Seite,
