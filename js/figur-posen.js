@@ -316,7 +316,8 @@
     M(MZK, { chest: -25, hL: L(H.hip), hR: [-0.03, 0.0, 0.5], pR: [1, 0, 0] }),
   ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3', dur: 1.3 }));
   D['tc:shuto-uchi'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.28, 0.2, -0.05], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, 0.04, 0.48], oR: 1, pR: [0, 1, 0] }), M(hit('tipR', 'Handkante'), { eff: 'wristR', view: 'front3' }));
-  D['tc:haito-uchi'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.45, -0.35, 0.05], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.05, 0.03, 0.46], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Daumenseite'), { eff: 'wristR', view: 'front3' }));
+  // Haito-uchi: beim Ausholen ist der linke Arm nach vorn gestreckt und zieht beim Schlag an die Hüfte
+  D['tc:haito-uchi'] = T(M(S.zk, { hL: punch(S.zk, 'L', -0.1), hR: [-0.45, -0.35, 0.05], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.05, 0.03, 0.46], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Daumenseite'), { eff: 'wristR', view: 'front3' }));
   // Teisho in Kiba-dachi zur Seite (wie Jion 23–25): offene Hand vor der linken Brust, Handballen schlägt zur rechten Seite,
   // Finger oben, Arm fast gestreckt
   D['tc:teisho-uchi'] = FLOW([
