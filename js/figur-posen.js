@@ -324,11 +324,13 @@
   ], best: 1, dur: 2 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3' }));
   // Yoko-enpi: Unterarm waagerecht vor der Brust (Faust vor der linken Seite, Ellbogen vorn), der linke Arm holt gestreckt
   // unter dem rechten zur rechten Seite aus; dann stößt der Ellbogen zur Seite, die linke Faust zieht als Gegenbewegung an die Hüfte
-  D['tc:yoko-enpi'] = FLOW([
-    M(KB, { look: -90, hR: [0.24, -0.08, 0.34], eR: [-0.4, 0, 1], hL: [-0.4, -0.24, 0.22], eL: [-0.1, -1, 0.3] }),
-    M(KB, { look: -90, hR: [0.08, -0.07, 0.26], eR: [-1, 0, 0.6], hL: [0.02, -0.26, 0.24] }),
-    M(KB, { look: -90, hR: [-0.06, -0.06, 0.13], eR: [-1, 0, 0], hL: L(H.hip) }),
-  ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
+  // Ausholen ruhig halten, dann kurzer, harter Schlag (Hüfte senkt sich mit ins Kime)
+  const YE0 = M(KB, { pelvis: [0, 0.7, 0], look: -90, hR: [0.24, -0.08, 0.34], eR: [-0.4, 0, 1], hL: [-0.4, -0.24, 0.22], eL: [-0.1, -1, 0.3] });
+  const YE1 = M(KB, { pelvis: [0, 0.69, 0], look: -90, hR: [0.08, -0.07, 0.26], eR: [-1, 0, 0.6], hL: [0.02, -0.26, 0.24] });
+  const YE2 = M(KB, { look: -90, hR: [-0.06, -0.06, 0.13], eR: [-1, 0, 0], hL: L(H.hip) });
+  D['tc:yoko-enpi'] = M({ keys: [
+    { t: 0, p: YE0 }, { t: 0.32, p: YE0 }, { t: 0.37, p: YE1, e: 'in' }, { t: 0.43, p: YE2, e: 'kime' },
+  ], best: 1, dur: 1.6 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
   // Mawashi-enpi: aus der Hüfte kommt der Ellbogen seitlich hoch und schwingt waagerecht nach vorn, Faust endet vor der Brust
   D['tc:mawashi-enpi'] = FLOW([
     ZK_G,
