@@ -447,7 +447,8 @@
   // Teisho-uke wie in Jion 23: aus Hidari Zenkutsu-dachi (Gedan-barai) tritt der rechte Fuß vor in Kiba-dachi, die Hüfte dreht
   // ¼ nach links (rechte Seite vorn, Blick nach vorn). Die offene rechte Hand kommt wie beim Teisho-uchi von außen in einem
   // Bogen, nur mit ganz kleinem Radius: von der Hüfte etwas nach außen, dann im kleinen Bogen in die Abwehr zur rechten Seite –
-  // Handgelenk stark abgeknickt, Finger oben, der Handballen zeigt nach außen. Arme und Füße kommen gleichzeitig an;
+  // Arm fast ganz gestreckt, Handgelenk stark abgeknickt, Finger oben, die Hand 45° nach innen gedreht (Handballen
+  // schräg nach außen vorn). Arme und Füße kommen gleichzeitig an;
   // die linke Faust zieht an die Hüfte
   const TU_HAND = { oR: 1, fR: [0, 1, 0], pR: [-1, 0, 0] };
   const TU_MID = BAL(M({ pelvis: [0.05, 0.8, 0.62], yaw: 30, look: 0, L: { x: 0.12, z: 0.62, yaw: 30, kp: [0.4, 0, 1] },
@@ -456,7 +457,7 @@
     { t: 0, p: ZK_G }, { t: 0.15, p: ZK_G },
     { t: 0.36, p: TU_MID },
     { t: 0.42, p: FE(M(FE_KB, { R: { y: 0.05 }, hR: [-0.4, -0.2, -0.02], eR: [-1, -0.4, -0.3], ...TU_HAND, w: [0.6, 0.4] })), e: 'in' },
-    { t: 0.48, p: FE(M(FE_KB, { hR: [-0.66, -0.1, 0.18], eR: [-0.3, -1, 0.1], ...TU_HAND })), e: 'kime' },
+    { t: 0.48, p: FE(M(FE_KB, { hR: [-0.69, -0.1, 0.16], eR: [-0.3, -1, 0.1], ...TU_HAND, pR: [-1, 0, 1] })), e: 'kime' },
   ], best: 1, dur: 1.8 }, M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'side3', yaw: 130 }));
   D['tc:uchiotoshi'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.15, 0.35, 0.15] }), M(S.zks, { hL: L(H.hip), hR: [-0.02, -0.25, 0.36], eR: [-0.8, -0.2, 0.3] }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
   // Manji-uke: Ausholen wie beim Shuto-uke – die untere (linke) Faust holt am rechten Ohr aus, der rechte Arm ist nach vorn
