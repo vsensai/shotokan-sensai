@@ -343,7 +343,18 @@
     M(S.zks, { hL: L(H.hip), hR: [-0.14, 0.16, 0.05], eR: [-0.1, 1, 0.6], pR: [1, 0, 0] }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'fistR', view: 'front3' }));
   D['tc:otoshi-enpi'] = T(M(KB, { hR: [-0.15, 0.5, 0.1] }), M(KB, { hR: [-0.12, 0.02, 0.14], eR: [0, -1, 0.35] }), M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
-  D['tc:ushiro-enpi'] = T(M(S.zks, { hL: L(H.hip), hR: H.chudan }), M(S.zks, { hL: L(H.guardF), hR: [-0.16, -0.22, 0.06], eR: [-0.3, -0.2, -1] }), M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side' }));
+  // Ushiro-enpi: rechts nach vorn ausholen, die linke offene Hand legt sich auf die rechte Faust; dann schwingt der
+  // rechte Ellbogen kraftvoll nach hinten, die linke Hand bleibt an der Faust und drückt den Arm mit nach hinten.
+  // Der Kopf dreht über die rechte Schulter nach hinten zum Ziel
+  const UE_OPEN = { oL: 1, pL: [0, 0, -1], fL: [-1, 0.2, 0] };
+  const UE0 = M(S.zks, { hL: L(H.hip), hR: H.hip });
+  const UE1 = M(S.zks, { hL: [0.01, -0.09, 0.56], hR: [0.0, -0.13, 0.52], ...UE_OPEN, eR: [-0.2, -0.8, 0.2] });
+  const UE2 = M(S.zks, { look: -90, hL: [-0.05, -0.17, 0.36], hR: [-0.08, -0.2, 0.28], ...UE_OPEN, eR: [-0.7, -0.6, -0.3] });
+  const UE3 = M(S.zks, { look: -140, hL: [-0.1, -0.2, 0.15], hR: [-0.16, -0.22, 0.06], ...UE_OPEN, eR: [-0.3, -0.2, -1] });
+  D['tc:ushiro-enpi'] = M({ keys: [
+    { t: 0, p: UE0 }, { t: 0.1, p: UE0 }, { t: 0.36, p: UE1 }, { t: 0.46, p: UE1 },
+    { t: 0.55, p: UE2, e: 'in' }, { t: 0.64, p: UE3, e: 'kime' },
+  ], best: 1, dur: 1.9 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side' }));
   // Hasami-uchi wie in Bassai Dai 23: beide Fäuste holen hoch über dem Kopf aus, schwingen seitlich in großen Bögen herab
   // und treffen von beiden Seiten – im Ziel sind die Arme gestreckt
   D['tc:hasami-uchi'] = FLOW([
