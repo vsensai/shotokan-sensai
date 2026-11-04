@@ -8,6 +8,7 @@
   'use strict';
   const E = window.Figur3D;
   if (!E) return;
+  const V = E.v;
 
   /* ---------- Werkzeuge ---------- */
   const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
@@ -113,7 +114,14 @@
     hizakutsu: { pelvis: [0, 0.72, 0.08], yaw: -60, L: { x: 0.14, z: 0.56, yaw: -35 }, R: { x: -0.13, z: -0.46, yaw: -15 }, w: [0.7, 0.3] },
     orishiki: { pelvis: [0, 0.5, -0.02], yaw: 0, L: { x: 0.13, z: 0.36, yaw: 0, kp: [0, 0.3, 1] }, R: { x: -0.12, z: -0.42, y: 0.065, yaw: 180, kp: [0, -1, 0.3] }, w: [0.5, 0.5] },
   };
-  const ZK_G = M(S.zk, { hL: L(H.gedan), hR: H.hip });
+  // Gedan-barai-Endstellung im Zenkutsu-dachi: Arm gestreckt, die Faust kurz über dem vorderen Knie (etwas außen);
+  // dafür dreht die Brust etwas weiter ein und der Oberkörper neigt sich leicht vor, damit der Arm hinreicht
+  function GEDAN_L(p) {
+    const q = M(p, { chest: -12, lean: 5 });
+    const J = E.solve(E.full(q));
+    return M(q, { hL: chestAt(q, V.add(J.kneeL, [0.07, 0.16, -0.02])) });
+  }
+  const ZK_G = M(GEDAN_L(S.zk), { hR: H.hip });
   const ZKS_G = M(S.zks, { hL: L(H.gedan), hR: H.hip });
   const ZK_KAMAE = M(S.zk, { hL: aim(S.zk, [0.04, -0.1, 0.42]), hR: H.guardR });
   const MZK_G = mirror(ZK_G);
@@ -190,7 +198,6 @@
   const hit = (at, text) => ({ hit: { at, text } });
 
   /* ---------- Werkzeuge für Tritte ---------- */
-  const V = E.v;
   // Grober Körperschwerpunkt (Rumpf, Kopf, Beine, Arme mit üblichen Massenanteilen)
   function cog(J) {
     const m = [[V.mix(J.pel, J.chest, 0.45), 0.43], [J.head, 0.08]];
@@ -246,7 +253,7 @@
   /* ---------- Stände: Standbild der Endstellung ---------- */
   const STAND_HANDS = {
     musubi: { hL: L(H.yoi), hR: H.yoi, oL: 0, oR: 0 }, heisoku: { hL: L(H.yoi), hR: H.yoi, oL: 0, oR: 0 }, hachiji: {},
-    zenkutsu: { hL: L(H.gedan), hR: H.hip }, ashizenkutsu: { hL: L(H.guardF), hR: H.guardR }, hizakutsu: { hL: L(H.gedan), hR: H.hip },
+    zenkutsu: { hL: GEDAN_L(S.zk).hL, chest: -12, lean: 5, hR: H.hip }, ashizenkutsu: { hL: L(H.guardF), hR: H.guardR }, hizakutsu: { hL: L(H.gedan), hR: H.hip },
     kokutsu: SHUTO_END, kiba: HANDS_HIP, kosa: HANDS_HIP, ashidachi: HANDS_HIP, fudo: { hL: L(H.gedan), hR: H.hip },
     neko: SHUTO_END, sanchin: HANDS_HIP, hangetsu: HANDS_HIP, renoji: { hL: L(H.yoi), hR: H.yoi },
     teiji: { hL: L(H.yoi), hR: H.yoi }, orishiki: { hL: L(H.gedan), hR: H.hip },
