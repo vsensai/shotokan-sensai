@@ -378,11 +378,12 @@
     { t: 0.55, p: UE2, e: 'in' }, { t: 0.64, p: UE3, e: 'kime' },
   ], best: 1, dur: 1.9 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side' }));
   // Hasami-uchi wie in Bassai Dai 23: beide Fäuste holen hoch über dem Kopf aus, schwingen seitlich in großen Bögen herab
-  // und treffen von beiden Seiten – im Ziel sind die Arme gestreckt
+  // und treffen von beiden Seiten – im Ziel sind die Arme gestreckt, die Fäuste um 45° nach außen gekippt
+  // (Daumenseite schräg nach außen oben, Handflächen schräg nach innen oben)
   D['tc:hasami-uchi'] = FLOW([
     M(S.zks, { hL: [0.3, 0.5, 0.0], hR: [-0.3, 0.5, 0.0] }),
     M(S.zks, { hL: [0.62, 0.05, 0.12], hR: [-0.62, 0.05, 0.12] }),
-    M(S.zks, { hL: [0.17, -0.2, 0.6], hR: [-0.17, -0.2, 0.6], pL: [-1, 0, 0], pR: [1, 0, 0] }),
+    M(S.zks, { hL: [0.17, -0.2, 0.6], hR: [-0.17, -0.2, 0.6], pL: [-1, 1, 0], pR: [1, 1, 0] }),
   ], M(hit('fistR', 'Hammerfäuste'), { eff: 'fistR', view: 'front3' }));
 
   /* ---------- Abwehr ---------- */
