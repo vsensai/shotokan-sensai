@@ -119,7 +119,7 @@
   function GEDAN_L(p) {
     const q = M(p, { chest: -12, lean: 5 });
     const J = E.solve(E.full(q));
-    return M(q, { hL: chestAt(q, V.add(J.kneeL, [0.07, 0.16, -0.02])) });
+    return M(q, { hL: chestAt(q, V.add(J.kneeL, [0.09, 0.25, -0.03])) });
   }
   const ZK_G = M(GEDAN_L(S.zk), { hR: H.hip });
   const ZKS_G = M(S.zks, { hL: L(H.gedan), hR: H.hip });
