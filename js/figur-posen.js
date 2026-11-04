@@ -116,10 +116,26 @@
   };
   // Gedan-barai-Endstellung im Zenkutsu-dachi: Arm gestreckt, die Faust kurz über dem vorderen Knie (etwas außen);
   // dafür dreht die Brust etwas weiter ein und der Oberkörper neigt sich leicht vor, damit der Arm hinreicht
+  // Gestreckter Arm mit minimalem Knick: Hand (Brustkoordinaten) auf der Linie von der Schulter so weit hinaus, dass der
+  // Arm zu 99 % gestreckt ist; keepY: Höhe der Hand bleibt, nur der waagerechte Abstand ändert sich
+  const ARM = 0.56;
+  const STRECK = 0.99;
+  function stretch(h, side, keepY) {
+    const sh = [side === 'L' ? 0.185 : -0.185, -0.035, 0];
+    const d = [h[0] - sh[0], h[1] - sh[1], h[2] - sh[2]];
+    const want = STRECK * ARM;
+    if (keepY) {
+      const hz = Math.hypot(d[0], d[2]);
+      const rest = want * want - d[1] * d[1];
+      if (rest > 0 && hz > 0.01) { const f = Math.sqrt(rest) / hz; return [sh[0] + d[0] * f, h[1], sh[2] + d[2] * f]; }
+    }
+    const f = want / Math.hypot(...d);
+    return [sh[0] + d[0] * f, sh[1] + d[1] * f, sh[2] + d[2] * f];
+  }
   function GEDAN_L(p) {
     const q = M(p, { chest: -12, lean: 5 });
     const J = E.solve(E.full(q));
-    return M(q, { hL: chestAt(q, V.add(J.kneeL, [0.09, 0.25, -0.03])) });
+    return M(q, { hL: stretch(chestAt(q, V.add(J.kneeL, [0.09, 0.25, -0.03])), 'L', true) });
   }
   const ZK_G = M(GEDAN_L(S.zk), { hR: H.hip });
   const ZKS_G = M(S.zks, { hL: L(H.gedan), hR: H.hip });
@@ -669,6 +685,24 @@
     'tc:teisoku-barai': 'teisoku', 'tc:haisoku-barai': 'haisoku', 'tc:komura-barai': 'wade',
     'wp:hiji': 'ellbogen', 'wp:hiza': 'hiza', 'wp:zenwan': 'unterarm',
   };
+  /* ---------- Gestreckte Arme am Ende: überall nur ein minimaler Knick im Ellbogen ---------- */
+  // Arme, die am Ende fast gestreckt sind (ab 97 %), und die hier genannten Schlag-/Abwehrarme werden auf 99 % gebracht
+  const GESTRECKT = { 'tc:tettsui-uchi': 'R', 'tc:shuto-uchi': 'R', 'tc:haito-uchi': 'R', 'tc:tate-shuto-uke': 'L', 'tc:teisho-uke': 'R', 'tc:awase-zuki': 'L' };
+  Object.keys(D).forEach((id) => {
+    const d = D[id];
+    if (!d.keys || d.still) return;
+    const last = d.keys[d.keys.length - 1];
+    const f = E.full(last.p);
+    const upd = {};
+    ['L', 'R'].forEach((sd) => {
+      const h = f['h' + sd];
+      const sh = [sd === 'L' ? 0.185 : -0.185, -0.035, 0];
+      const r = Math.hypot(h[0] - sh[0], h[1] - sh[1], h[2] - sh[2]) / ARM;
+      if (r >= 0.97 || (GESTRECKT[id] || '').includes(sd)) upd['h' + sd] = stretch(h, sd);
+    });
+    if (Object.keys(upd).length) last.p = M(last.p, upd);
+  });
+
   Object.keys(FLAECHE).forEach((id) => {
     const h = D[id] && D[id].hit;
     if (!h) throw new Error(`Trefferfläche ohne Trefferpunkt: ${id}`);
