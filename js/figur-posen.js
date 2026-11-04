@@ -102,8 +102,9 @@
     kb: { pelvis: [0, 0.68, 0], yaw: 0, L: { x: 0.42, z: 0, yaw: 5, kp: [1, 0, 0.5] }, R: { x: -0.42, z: 0, yaw: -5, kp: [-1, 0, 0.5] }, w: [0.5, 0.5] },
     neko: { pelvis: [0, 0.72, -0.02], yaw: -35, L: { x: 0.04, z: 0.3, y: 0.11, yaw: 0, pitch: -28 }, R: { x: -0.07, z: -0.08, yaw: -30, kp: [-0.4, 0, 1] }, w: [0.1, 0.9] },
     fudo: { pelvis: [0, 0.66, 0.08], yaw: -45, L: { x: 0.12, z: 0.6, yaw: 0 }, R: { x: -0.16, z: -0.45, yaw: -45, kp: [-0.6, 0, 0.6] }, w: [0.5, 0.5] },
-    hangetsu: { pelvis: [0, 0.78, 0.03], yaw: 0, L: { x: 0.16, z: 0.36, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.16, z: -0.32, yaw: 22, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
-    sanchin: { pelvis: [0, 0.85, 0.03], yaw: 0, L: { x: 0.12, z: 0.18, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.12, z: -0.12, yaw: 18, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
+    // Hangetsu schulterbreit, Sanchin hüftbreit (Füße nicht auf einer Linie)
+    hangetsu: { pelvis: [0, 0.78, 0.03], yaw: 0, L: { x: 0.22, z: 0.36, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.22, z: -0.32, yaw: 22, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
+    sanchin: { pelvis: [0, 0.85, 0.03], yaw: 0, L: { x: 0.17, z: 0.18, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.17, z: -0.12, yaw: 18, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
     // Renoji- und Teiji-dachi: Beine durchgestreckt, Hüfte hoch zwischen den Füßen
     renoji: { pelvis: [0, 0.935, 0.13], yaw: -30, L: { x: 0.03, z: 0.3, yaw: 0 }, R: { x: -0.04, z: -0.04, yaw: -90 }, w: [0.4, 0.6] },
     teiji: { pelvis: [0, 0.93, 0.124], yaw: -30, L: { x: 0.0, z: 0.32, yaw: 0 }, R: { x: 0.06, z: -0.02, yaw: -90 }, w: [0.5, 0.5] },
