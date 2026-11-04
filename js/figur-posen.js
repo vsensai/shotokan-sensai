@@ -126,14 +126,21 @@
   const YOI = S.hachiji;
 
   /* ---------- Bausteine für Abläufe ---------- */
-  // Technik: Ausgangsstellung kurz halten, dann schnell in die Endstellung (Kime)
-  const T = (from, to, o) => M({ keys: [{ t: 0, p: from }, { t: 0.22, p: from }, { t: 0.62, p: to, e: 'kime' }], best: 1, dur: 1.4 }, o);
-  // Mehrere Stellungen nacheinander
+  // Technik: Ausgangsstellung kurz halten (0,4 s), dann in knapp 0,2 s hart in die Endstellung (Kime)
+  const T = (from, to, o) => M({ keys: [{ t: 0, p: from }, { t: 0.25, p: from }, { t: 0.37, p: to, e: 'kime' }], best: 1, dur: 1.6 }, o);
+  // Ruhig ausgeführte Technik (weiche Abwehr, Yoi, Abläufe mit Partner): gleichmäßig in gut einer halben Sekunde
+  const T_RUHIG = (from, to, o) => M({ keys: [{ t: 0, p: from }, { t: 0.22, p: from }, { t: 0.62, p: to, e: 'kime' }], best: 1, dur: 1.4 }, o);
+  // Mehrere Techniken nacheinander: jede schlägt in 0,2 s zu, dazwischen 0,3 s Pause
   const SEQ = (poses, o) => {
     const n = poses.length;
-    const keys = [{ t: 0, p: poses[0] }, { t: 0.15, p: poses[0] }];
-    for (let i = 1; i < n; i++) keys.push({ t: 0.15 + (0.65 * i) / (n - 1), p: poses[i], e: 'kime' });
-    return M({ keys, best: 1, dur: 1.2 + 0.5 * n }, o);
+    const dur = 0.4 + 0.5 * (n - 1);
+    const keys = [{ t: 0, p: poses[0] }, { t: 0.4 / dur, p: poses[0] }];
+    for (let i = 1; i < n; i++) {
+      const t0 = (0.4 + 0.5 * (i - 1)) / dur;
+      if (i > 1) keys.push({ t: t0, p: poses[i - 1] });
+      keys.push({ t: t0 + 0.2 / dur, p: poses[i], e: 'kime' });
+    }
+    return M({ keys, best: 1, dur }, o);
   };
   // Eine fließende Bewegung über Zwischenstellungen: dort nicht abbremsen, erst am Ende Kime
   // Die Bahn wird nach ihrer echten Länge (Weg des Körperpunkts o.eff) neu getaktet: schnell anlaufen,
@@ -141,9 +148,12 @@
   const FLOW = (poses, o) => {
     const d = SEQ(poses, o);
     const eff = d.eff || 'fistR';
-    const T0 = 0.15;
-    const T1 = 0.8;
     const n = poses.length;
+    // Mit fester Dauer (o.dur, ruhige Bewegung) wie bisher; sonst 0,4 s halten, dann schnell durch (0,24 s + 0,07 s je Zwischenstellung)
+    const ruhig = !!(o && o.dur);
+    const dur = ruhig ? o.dur : 0.4 + 0.24 + 0.07 * (n - 2);
+    const T0 = ruhig ? 0.15 : 0.4 / dur;
+    const T1 = ruhig ? 0.8 : 1;
     const tl = E.timeline([{ t: 0, p: poses[0] }].concat(poses.map((p, i) => ({ t: T0 + ((T1 - T0) * i) / (n - 1), p, e: 'lin' }))));
     const N = 240;
     const ts = [];
@@ -171,12 +181,11 @@
       keys.push({ t: T0 + ((T1 - T0) * j) / M_, p: j === M_ ? poses[n - 1] : tl(t), e: 'lin' });
     }
     d.keys = keys;
-    // Dauer wie bei einfachen Techniken (T: 1,4 s), je weiterer Zwischenstellung etwas länger
-    if (!(o && o.dur)) d.dur = 1.3 + 0.15 * (n - 2);
+    d.dur = dur;
     return d;
   };
   // Fußtritt: ausholen, treffen, zurück
-  const K = (base, chamber, ext, o) => M({ keys: [{ t: 0, p: base }, { t: 0.1, p: base }, { t: 0.34, p: chamber }, { t: 0.5, p: ext, e: 'kime' }, { t: 0.66, p: chamber }, { t: 0.9, p: base }], best: 0.5, dur: 2 }, o);
+  const K = (base, chamber, ext, o) => M({ keys: [{ t: 0, p: base }, { t: 0.12, p: base }, { t: 0.27, p: chamber }, { t: 0.35, p: ext, e: 'kime' }, { t: 0.47, p: chamber }, { t: 0.65, p: base }], best: 0.35, dur: 2 }, o);
   const STILL = (pose, o) => M({ keys: [{ t: 0, p: pose }], best: 0, still: true }, o);
   const hit = (at, text) => ({ hit: { at, text } });
 
@@ -258,7 +267,7 @@
   D['mv:gyaku-zuki'] = T(ZK_G, ZKS_PUNCH, M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   const OI_MID = { pelvis: [0, 0.71, 0.6], yaw: -18, L: { x: 0.12, z: 0.62, yaw: 10 }, R: { x: -0.01, z: 0.58, y: 0.11, yaw: 0 }, hL: L(H.gedan), hR: H.hip, w: [1, 0] };
   const OI_END = { pelvis: [0, 0.7, 1.22], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 32 }, R: { x: -0.13, z: 1.74, yaw: 4 }, hL: L(H.hip), hR: H.chudan, w: [0.3, 0.7] };
-  D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.12, p: ZK_G }, { t: 0.5, p: OI_MID }, { t: 0.82, p: OI_END, e: 'kime' }], best: 1, dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
+  D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.15, p: ZK_G }, { t: 0.38, p: OI_MID, e: 'in' }, { t: 0.5, p: OI_END, e: 'kime' }], best: 1, dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
   D['tc:choku-zuki'] = T(M(YOI, { hL: L(H.chudan), hR: H.hip }), M(YOI, { hL: L(H.hip), hR: H.chudan }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
   D['tc:kizami-zuki'] = T(M(S.zk, { hL: L(H.hip), hR: H.guardR }), M(S.zk, { pelvis: [0, 0.71, 0.16], hL: punch(S.zk, 'L', JO), hR: H.guardR }), M(hit('fistL', 'Faust'), { eff: 'fistL', view: 'side3' }));
   D['tc:tate-zuki'] = T(ZK_G, M(ZKS_PUNCH), M(hit('fistR', 'Faust senkrecht'), { eff: 'fistR', view: 'side3' }));
@@ -289,7 +298,7 @@
     M(KB, { look: -90, hR: [-0.14, 0.0, 0.22], eR: [-1, 0.2, 0.1], pR: [0.5, 0, -0.87] }),
     M(KB, { look: -90, hR: [-0.5, 0.0, 0.18], eR: [-1, 0.25, -0.2], pR: [0.8, 0, 0.5] }),
     M(KB, { look: -90, hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6], pR: [0, 0, 1] }),
-  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front', dur: 1.0 }));
+  ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front' }));
   // Tettsui (Kentsui Tate-mawashi-uchi) wie in Heian Shodan 4: aus Gedan-barai im Migi Zenkutsu-dachi
   // senkrechter Kreis vor dem Körper hoch über den Kopf und von oben nach vorn, Arm leicht gebeugt
   D['tc:tettsui-uchi'] = FLOW([
@@ -370,12 +379,12 @@
   // Age-uke: die abwehrende Faust steigt vor der Brust auf (innen), die andere zieht außen vorbei zur Hüfte
   const AU_PREP = M(MZK, { hR: H.hip, hL: [0.06, 0.28, 0.22], eL: L(UP_OUT) });
   const AU_MID = M(MZK, { hR: [-0.06, -0.04, 0.3], eR: [-0.4, -0.6, 0.4], hL: [0.12, 0.04, 0.4], eL: [0.5, -0.6, 0.3] });
-  D['mv:age-uke'] = M({ keys: [{ t: 0, p: AU_PREP }, { t: 0.22, p: AU_PREP }, { t: 0.42, p: AU_MID, e: 'lin' }, { t: 0.62, p: M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), e: 'kime' }], best: 1, dur: 1.4, eff: 'fistR', view: 'front3' }, hit('elbowR', 'Unterarm'));
+  D['mv:age-uke'] = M({ keys: [{ t: 0, p: AU_PREP }, { t: 0.25, p: AU_PREP }, { t: 0.31, p: AU_MID, e: 'in' }, { t: 0.37, p: M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), e: 'kime' }], best: 1, dur: 1.6, eff: 'fistR', view: 'front3' }, hit('elbowR', 'Unterarm'));
   // Gedan-barai: Faust holt an der Gegenschulter (Ohrhöhe) aus, Ellbogen vor dem Körper; die Bahn führt deutlich vor dem
   // Bauch schräg nach unten, damit Arm und Faust nicht in den Oberkörper tauchen
   const GB_PREP = M(S.zk, { hL: [-0.13, 0.1, 0.24], eL: [0.1, -0.5, 0.8], hR: H.chudan });
   const GB_MID = M(S.zk, { hL: [0.08, -0.26, 0.38], hR: [-0.12, -0.28, 0.22] });
-  D['mv:gedan-barai'] = M({ keys: [{ t: 0, p: GB_PREP }, { t: 0.22, p: GB_PREP }, { t: 0.44, p: GB_MID, e: 'lin' }, { t: 0.62, p: ZK_G, e: 'kime' }], best: 1, dur: 1.4, eff: 'fistL', view: 'front3' }, hit('fistL', 'Unterarm'));
+  D['mv:gedan-barai'] = M({ keys: [{ t: 0, p: GB_PREP }, { t: 0.25, p: GB_PREP }, { t: 0.31, p: GB_MID, e: 'in' }, { t: 0.37, p: ZK_G, e: 'kime' }], best: 1, dur: 1.6, eff: 'fistL', view: 'front3' }, hit('fistL', 'Unterarm'));
   D['mv:soto-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [-0.45, 0.06, -0.06] }), M(MZK, { hL: L(H.hip), hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm innen'), { eff: 'fistR', view: 'front3' }));
   D['mv:uchi-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [0.12, -0.2, 0.25], eR: [-0.5, -0.6, 0.5] }), M(MZK, { hL: L(H.hip), hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm außen'), { eff: 'fistR', view: 'front3' }));
   // Shuto-uke: Blockhand holt am gegenüberliegenden Ohr aus, die andere Hand ist nach vorn gestreckt –
@@ -385,20 +394,20 @@
   D['tc:morote-uke'] = T(M(S.kk, { hR: H.hip, hL: [-0.12, -0.2, 0.25], eL: [0.5, -0.6, 0.5] }), M(S.kk, { hL: [0.4, 0.0, 0.26], eL: L(DOWN_FWD), hR: [0.19, -0.21, 0.26], eR: [-0.4, -1, 0.2] }), M(hit('fistR', 'Stütze am Ellbogen'), { eff: 'fistL', view: 'front3' }));
   D['tc:juji-uke'] = T(M(S.zks, HANDS_HIP), M(S.zks, { oL: 1, oR: 1, hL: [-0.025, 0.3, 0.29], hR: [0.025, 0.3, 0.33], eL: [1, -0.6, 0.3], eR: [-1, -0.6, 0.3], pL: [0, 0, 1], pR: [0, 0, 1], fL: [-0.45, 1, 0.2], fR: [0.45, 1, 0.2] }), M(hit('wristR', 'Handgelenke gekreuzt'), { eff: 'wristR', view: 'front3' }));
   // Kakiwake-uke im Zenkutsu-dachi, Hüfte frontal nach vorn, langsam ausgeführt: Handgelenke dicht vor der Brust gekreuzt, dann auseinander und dabei etwas vom Körper weg nach vorn
-  D['tc:kakiwake-uke'] = T(M(S.zks, { hL: [-0.07, -0.14, 0.17], hR: [0.07, -0.12, 0.2], eL: [0.6, -1, 0.2], eR: [-0.6, -1, 0.2] }), M(S.zks, { hL: [0.25, 0.02, 0.4], hR: [-0.25, 0.02, 0.4], eL: L(DOWN_FWD), eR: DOWN_FWD }), M(hit('fistR', 'auseinander'), { eff: 'fistR', view: 'front3', dur: 2.6 }));
+  D['tc:kakiwake-uke'] = T_RUHIG(M(S.zks, { hL: [-0.07, -0.14, 0.17], hR: [0.07, -0.12, 0.2], eL: [0.6, -1, 0.2], eR: [-0.6, -1, 0.2] }), M(S.zks, { hL: [0.25, 0.02, 0.4], hR: [-0.25, 0.02, 0.4], eL: L(DOWN_FWD), eR: DOWN_FWD }), M(hit('fistR', 'auseinander'), { eff: 'fistR', view: 'front3', dur: 2.6 }));
   // langsame, gleichmäßige Bewegung statt schnellem Kime
   D['tc:kakiwake-uke'].keys[2].e = 'io';
-  D['tc:nagashi-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.28, 0.05, 0.32], oR: 1, pR: [1, 0, 0], fR: [0, 1, 0.3] }), M(S.zks, { hL: L(H.hip), hR: [0.08, 0.06, 0.26], oR: 1, pR: [1, 0, 0.3], fR: [0, 1, 0.3] }), M(hit('wristR', 'Handfläche'), { eff: 'tipR', view: 'front3' }));
+  D['tc:nagashi-uke'] = T_RUHIG(M(S.zks, { hL: L(H.hip), hR: [-0.28, 0.05, 0.32], oR: 1, pR: [1, 0, 0], fR: [0, 1, 0.3] }), M(S.zks, { hL: L(H.hip), hR: [0.08, 0.06, 0.26], oR: 1, pR: [1, 0, 0.3], fR: [0, 1, 0.3] }), M(hit('wristR', 'Handfläche'), { eff: 'tipR', view: 'front3' }));
   // Te-nagashi-uke aus dem Chudan-kamae (links vorn): die rechte Hand bleibt locker in der Kamae vor dem Körper,
   // die linke offene Hand steht auf Jodan-Höhe links seitlich vor dem Kopf und schiebt die Faust, die auf den Kopf zielt,
   // mit der Innenhandfläche nach rechts zur Seite weg (Handfläche zeigt nach rechts, Finger nach oben)
   const TNU = M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hR: [-0.02, -0.22, 0.2] });
   const TNU_HAND = (x, z) => ({ oL: 1, hL: aim(TNU, [x, 0.1, z]), pL: aim(TNU, [-1, 0, 0]), fL: aim(TNU, [0, 1, 0.25]), eL: aim(TNU, [0.3, -1, 0.2]) });
-  D['tc:te-nagashi-uke'] = T(M(TNU, TNU_HAND(0.2, 0.36)), M(TNU, TNU_HAND(-0.2, 0.38)), M(hit('wristL', 'Innenhandfläche schiebt ab'), { eff: 'tipL', view: 'front3' }));
+  D['tc:te-nagashi-uke'] = T_RUHIG(M(TNU, TNU_HAND(0.2, 0.36)), M(TNU, TNU_HAND(-0.2, 0.38)), M(hit('wristL', 'Innenhandfläche schiebt ab'), { eff: 'tipL', view: 'front3' }));
   // Gedan-nagashi-uke aus dem Chudan-kamae wie Te-nagashi-uke, nur unten: der linke Arm, nur ganz leicht gebeugt,
   // wischt mit geschlossener Faust vor dem linken Knie einen Angriff von links nach rechts weg
   const GNU_HAND = (x, z) => ({ lean: 6, hL: aim(TNU, [x, -0.58, z]), pL: aim(TNU, [-1, 0, 0.2]), eL: aim(TNU, [0.4, -0.3, -0.2]) });
-  D['tc:gedan-nagashi-uke'] = T(M(TNU, GNU_HAND(0.3, 0.4)), M(TNU, GNU_HAND(-0.06, 0.44)), M(hit('wristL', 'Faust und Unterarm wischen ab'), { eff: 'tipL', view: 'front3' }));
+  D['tc:gedan-nagashi-uke'] = T_RUHIG(M(TNU, GNU_HAND(0.3, 0.4)), M(TNU, GNU_HAND(-0.06, 0.44)), M(hit('wristL', 'Faust und Unterarm wischen ab'), { eff: 'tipL', view: 'front3' }));
   D['tc:osae-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [0.0, -0.1, 0.36], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, -0.36, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' }));
   // Kake-uke wie in Heian Godan 14: aus Kiba-dachi mit rechtem Gedan-barai (Blick nach rechts) wendet sich der Blick nach links;
   // beide Arme holen zusammen aus und liegen vor der Brust übereinander (linke offene Hand oben, rechte Faust darunter),
@@ -491,7 +500,7 @@
   const FU0 = M(KB, { look: -90, pelvis: [0.35, 0.88, 0], L: { x: 0.42, kp: [0.3, 0, 1] }, R: { x: 0.26, z: 0, yaw: -5, kp: [-0.3, 0, 1] } });
   const FU1 = BAL(M(KB, { look: -90, pelvis: [0.38, 0.84, 0], L: { x: 0.42, kp: [0.4, 0.1, 1] }, R: { x: 0.25, z: 0.2, y: 0.5, yaw: -20, pitch: -30, kp: [-0.3, 0.6, 1] }, w: [1, 0] }), 'L');
   const FU2 = M(KB, { look: -90, R: { y: 0.09, yaw: -5 }, w: [0.4, 0.6] });
-  D['tc:fumikomi'] = M({ keys: [{ t: 0, p: FU0 }, { t: 0.12, p: FU0 }, { t: 0.4, p: FU1 }, { t: 0.62, p: FU2, e: 'kime' }, { t: 0.8, p: KB_K }], best: 0.62, dur: 1.8 }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
+  D['tc:fumikomi'] = M({ keys: [{ t: 0, p: FU0 }, { t: 0.15, p: FU0 }, { t: 0.36, p: FU1 }, { t: 0.46, p: FU2, e: 'kime' }, { t: 0.62, p: KB_K }], best: 0.46, dur: 1.8 }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
   // Namigaeshi: der Fuß federt in einem weichen Bogen nach innen hoch Richtung Unterbauch (Sohle nach oben innen)
   // und setzt gleich wieder ab – fließend, ohne Halt
   const NG1 = M(KB, { pelvis: [0.08, 0.72, 0], R: { x: -0.18, z: 0.12, y: 0.3, yaw: 30, pitch: -15, sole: [1, 0.3, 0], kp: [-1, 0.4, 0.5] }, w: [1, 0] });
@@ -514,7 +523,7 @@
   D['tc:hikite'] = T(M(S.zks, { hL: L(H.chudan), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: H.chudan }), M(hit('fistL', 'Hikite'), { eff: 'fistL', view: 'front3' }));
 
   /* ---------- Begriffe ---------- */
-  D['tc:yoi'] = T(S.musubi, S.hachiji, { view: 'front3' });
+  D['tc:yoi'] = T_RUHIG(S.musubi, S.hachiji, { view: 'front3' });
   const REI = M(S.musubi, { lean: 30, look: 0 });
   D['tc:rei'] = M({ keys: [{ t: 0, p: S.musubi }, { t: 0.15, p: S.musubi }, { t: 0.45, p: REI }, { t: 0.65, p: REI }, { t: 0.9, p: S.musubi }], best: 0.5, dur: 2.4, view: 'side' });
   const SEIZA = { pelvis: [0, 0.32, 0], yaw: 0, L: { x: 0.1, z: -0.08, y: 0.06, yaw: 180, sole: [0, 1, 0], kp: [0, -1, 0.6] }, R: { x: -0.1, z: -0.08, y: 0.06, yaw: 180, sole: [0, 1, 0], kp: [0, -1, 0.6] }, hL: [0.1, -0.58, 0.24], hR: [-0.1, -0.58, 0.24], oL: 1, oR: 1, pL: [0, 1, 0], pR: [0, 1, 0], w: [0, 0] };
@@ -578,11 +587,11 @@
     [{ t: 0, p: KO_0 }, { t: 0.08, p: KO_0 }, { t: 0.22, p: KO_1 }, { t: 0.34, p: KO_2 }, { t: 0.52, p: KO_3, e: 'in' }, { t: 0.68, p: KO_4, e: 'kime' }],
     [{ t: 0, p: KO_U0 }, { t: 0.56, p: KO_U0 }, { t: 0.68, p: KO_U1, e: 'kime' }], 0.68), M(hit('kneeR', 'Wade'), { eff: 'ankleR', view: 'side', yaw: -32, pitch: 12 }));
   D['tc:maai'] = STILL(FIGHT, { partner: [{ t: 0, p: OPP(FIGHT, 2.3) }], view: 'side', marks: ['maai'] });
-  D['tc:kogeki'] = M(D['mv:oi-zuki'], { keys: [{ t: 0, p: ZK_G }, { t: 0.12, p: ZK_G }, { t: 0.5, p: OI_MID }, { t: 0.82, p: M(OI_END, { hR: H.jodan }), e: 'kime' }], partner: [{ t: 0, p: OPP(M(S.hachiji), 2.25) }], view: 'side' });
+  D['tc:kogeki'] = M(D['mv:oi-zuki'], { keys: [{ t: 0, p: ZK_G }, { t: 0.15, p: ZK_G }, { t: 0.38, p: OI_MID, e: 'in' }, { t: 0.5, p: M(OI_END, { hR: H.jodan }), e: 'kime' }], partner: [{ t: 0, p: OPP(M(S.hachiji), 2.25) }], view: 'side' });
   D['tc:kogeki'] = TWIST(D['tc:kogeki'], 'R');
-  D['tc:deai'] = M(T(FIGHT, M(S.zks, { pelvis: [0, 0.71, 0.12], hL: L(H.hip), hR: H.chudan })), { partner: [{ t: 0, p: OPP(ZK_G, 2.15) }, { t: 0.22, p: OPP(ZK_G, 2.15) }, { t: 0.62, p: OPP(M(OI_MID, { hR: [-0.05, 0.0, 0.4] }), 2.15) }], eff: 'fistR', view: 'side', hit: { at: 'fistR', text: 'Konter' } });
+  D['tc:deai'] = M(T_RUHIG(FIGHT, M(S.zks, { pelvis: [0, 0.71, 0.12], hL: L(H.hip), hR: H.chudan })), { partner: [{ t: 0, p: OPP(ZK_G, 2.15) }, { t: 0.22, p: OPP(ZK_G, 2.15) }, { t: 0.62, p: OPP(M(OI_MID, { hR: [-0.05, 0.0, 0.4] }), 2.15) }], eff: 'fistR', view: 'side', hit: { at: 'fistR', text: 'Konter' } });
   D['tc:zanshin'] = STILL(M(S.zks, { hL: L(H.guardF), hR: H.guardR, look: 0 }), { partner: [{ t: 0, p: OPP(M(S.hachiji, { lean: -4 }), 1.7) }], view: 'side', marks: ['gaze'] });
-  D['tc:bunkai'] = T(MZK, M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), { partner: [{ t: 0, p: OPP(M(ZK_G, {}), 1.75) }, { t: 0.22, p: OPP(ZK_G, 1.75) }, { t: 0.62, p: OPP(M(OI_MID, { pelvis: [0, 0.71, 0.45], hR: [0.0, 0.05, 0.5], hL: L(H.hip) }), 1.75) }], eff: 'fistR', view: 'side', hit: { at: 'elbowR', text: 'Age-uke' } });
+  D['tc:bunkai'] = T_RUHIG(MZK, M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), { partner: [{ t: 0, p: OPP(M(ZK_G, {}), 1.75) }, { t: 0.22, p: OPP(ZK_G, 1.75) }, { t: 0.62, p: OPP(M(OI_MID, { pelvis: [0, 0.71, 0.45], hR: [0.0, 0.05, 0.5], hL: L(H.hip) }), 1.75) }], eff: 'fistR', view: 'side', hit: { at: 'elbowR', text: 'Age-uke' } });
 
   /* ---------- Körperwaffen mit ganzer Figur ---------- */
   D['wp:hiji'] = STILL(MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { view: 'side3', marks: ['ring:elbowR'] }));
