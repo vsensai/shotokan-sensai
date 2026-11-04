@@ -307,10 +307,11 @@
     M(KB, { look: -90, hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6], pR: [0, 0, 1] }),
   ], M(hit('fistR', 'Faustrücken'), { eff: 'fistR', view: 'front' }));
   // Tettsui (Kentsui Tate-mawashi-uchi) direkt aus dem Migi Chudan-kamae (rechter Arm gebeugt vorn): die Faust steigt
-  // vor dem Körper im senkrechten Kreis hoch über den Kopf und schlägt von oben nach vorn, Arm leicht gebeugt; etwas ruhiger
+  // vor dem Körper im senkrechten Kreis hoch über den Kopf und schlägt von oben nach vorn, Arm leicht gebeugt; etwas ruhiger.
+  // Die linke Faust bleibt die ganze Zeit an der Hüfte
   D['tc:tettsui-uchi'] = FLOW([
-    M(MZK, { hR: [-0.1, -0.12, 0.42], hL: [0.02, -0.22, 0.2] }),
-    M(MZK, { hL: [0.02, -0.22, 0.2], hR: [-0.1, 0.2, 0.32], pR: [1, 0, 0] }),
+    M(MZK, { hR: [-0.1, -0.12, 0.42], hL: L(H.hip) }),
+    M(MZK, { hL: L(H.hip), hR: [-0.1, 0.2, 0.32], pR: [1, 0, 0] }),
     M(MZK, { chest: -12, hL: L(H.hip), hR: [-0.2, 0.42, 0.02], eR: [-0.6, 0.3, -0.3], pR: [1, 0, 0] }),
     M(MZK, { chest: -25, hL: L(H.hip), hR: [-0.03, 0.0, 0.5], pR: [1, 0, 0] }),
   ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3', dur: 1.3 }));
