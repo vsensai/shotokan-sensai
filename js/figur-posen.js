@@ -356,12 +356,13 @@
     M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.12, -0.04, 0.12], eR: [-0.25, 0, 1] }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front3' }));
   // Age-enpi: aus der Hüfte kommt der Ellbogen nach vorn (zeigt geradeaus, Faust vor der rechten Brust), dann steigt er
-  // aus dieser Stellung gerade nach oben – kein Ausschwenken zur Seite – und schlägt hoch über Kopfhöhe, Faust neben dem Kopf
+  // aus dieser Stellung gerade nach oben – kein Ausschwenken zur Seite, der Arm bleibt weit innen vor dem Körper – und
+  // schlägt hoch über Kopfhöhe, Faust vor dem Kopf
   D['tc:age-enpi'] = FLOW([
     M(S.zks, { hL: L(H.hip), hR: H.hip, eR: [-0.3, -0.5, -1] }),
-    M(S.zks, { hL: L(H.hip), hR: [-0.13, -0.14, 0.28], eR: [0, -1, 0.4], pR: [1, 0, 0] }),
-    M(S.zks, { hL: L(H.hip), hR: [-0.13, 0.04, 0.24], eR: [0, -0.3, 1], pR: [1, 0, 0] }),
-    M(S.zks, { hL: L(H.hip), hR: [-0.13, 0.27, 0.05], eR: [0, 1, 0.35], pR: [1, 0, 0] }),
+    M(S.zks, { hL: L(H.hip), hR: [-0.07, -0.14, 0.28], eR: [0.15, -1, 0.4], pR: [1, 0, 0] }),
+    M(S.zks, { hL: L(H.hip), hR: [-0.05, 0.04, 0.24], eR: [0.25, -0.3, 1], pR: [1, 0, 0] }),
+    M(S.zks, { hL: L(H.hip), hR: [0.0, 0.3, -0.03], eR: [0.4, 1, 0.6], pR: [1, 0, 0] }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'fistR', view: 'front3' }));
   D['tc:otoshi-enpi'] = T(M(KB, { hR: [-0.15, 0.5, 0.1] }), M(KB, { hR: [-0.12, 0.02, 0.14], eR: [0, -1, 0.35] }), M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
   // Ushiro-enpi: rechts nach vorn ausholen, die linke offene Hand legt sich auf die rechte Faust; dann schwingt der
