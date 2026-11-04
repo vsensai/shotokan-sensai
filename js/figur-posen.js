@@ -269,7 +269,12 @@
   const OI_END = { pelvis: [0, 0.7, 1.22], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 32 }, R: { x: -0.13, z: 1.74, yaw: 4 }, hL: L(H.hip), hR: H.chudan, w: [0.3, 0.7] };
   D['mv:oi-zuki'] = M({ keys: [{ t: 0, p: ZK_G }, { t: 0.15, p: ZK_G }, { t: 0.38, p: OI_MID, e: 'in' }, { t: 0.5, p: OI_END, e: 'kime' }], best: 1, dur: 2, eff: 'ankleR', view: 'side3' }, hit('fistR', 'Faust'));
   D['tc:choku-zuki'] = T(M(YOI, { hL: L(H.chudan), hR: H.hip }), M(YOI, { hL: L(H.hip), hR: H.chudan }), M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'front3' }));
-  D['tc:kizami-zuki'] = T(M(S.zk, { hL: L(H.hip), hR: H.guardR }), M(S.zk, { pelvis: [0, 0.71, 0.16], hL: punch(S.zk, 'L', JO), hR: H.guardR }), M(hit('fistL', 'Faust'), { eff: 'fistL', view: 'side3' }));
+  // Kizami-zuki aus dem Chudan-kamae (linker Arm gebeugt vorn): der vordere Fuß gleitet etwas vor, die Hüfte dreht weiter
+  // seitlich ein (vordere Schulter zum Gegner) und der linke Arm stößt weit gestreckt Jodan; die rechte Hand bleibt in der Deckung
+  const KZ0 = M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.1, -0.12, 0.42], hR: [-0.02, -0.22, 0.2] });
+  const KZ1B = M(S.zk, { pelvis: [0, 0.71, 0.24], yaw: -62, lean: 4, L: { z: 0.72, yaw: 0 }, R: { z: -0.38, yaw: -60 }, w: [0.6, 0.4] });
+  const KZ1 = M(KZ1B, { hL: punch(KZ1B, 'L', JO), hR: [-0.02, -0.22, 0.2] });
+  D['tc:kizami-zuki'] = T(KZ0, KZ1, M(hit('fistL', 'Faust'), { eff: 'fistL', view: 'side3' }));
   D['tc:tate-zuki'] = T(ZK_G, M(ZKS_PUNCH), M(hit('fistR', 'Faust senkrecht'), { eff: 'fistR', view: 'side3' }));
   D['tc:sanbon-zuki'] = SEQ([mirror(ZK_HIP), M(MZK, { hL: L(H.hip), hR: punch(MZK, 'R', JO) }), M(mirror(S.zks), { hL: punch(mirror(S.zks), 'L', CH), hR: H.hip }), M(MZK, { hL: L(H.hip), hR: punch(MZK, 'R', CH) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
   D['tc:ren-zuki'] = SEQ([ZK_HIP, M(S.zk, { hL: punch(S.zk, 'L', JO), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: punch(S.zks, 'R', CH) })], M(hit('fistR', 'Faust'), { eff: 'fistR', view: 'side3' }));
