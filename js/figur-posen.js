@@ -318,13 +318,14 @@
   D['tc:shuto-uchi'] = T(M(S.zk, { hL: L(H.guardF), hR: [-0.28, 0.2, -0.05], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, 0.04, 0.48], oR: 1, pR: [0, 1, 0] }), M(hit('tipR', 'Handkante'), { eff: 'wristR', view: 'front3' }));
   // Haito-uchi: beim Ausholen ist der linke Arm nach vorn gestreckt und zieht beim Schlag an die Hüfte
   D['tc:haito-uchi'] = T(M(S.zk, { hL: punch(S.zk, 'L', -0.1), hR: [-0.45, -0.35, 0.05], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.05, 0.03, 0.46], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Daumenseite'), { eff: 'wristR', view: 'front3' }));
-  // Teisho in Kiba-dachi zur Seite (wie Jion 23–25): offene Hand vor der linken Brust, Handballen schlägt zur rechten Seite,
-  // Finger oben, Arm fast gestreckt
+  // Teisho-uchi wie ein Mawashi-zuki mit kleinerem Bogen: aus Hidari Zenkutsu-dachi kommt die offene rechte Hand seitlich
+  // von außen und schlägt im flachen Bogen nach vorn zur Mitte; Finger oben, der Handballen zeigt in Schlagrichtung
+  const TS_HAND = { oR: 1, fR: [0, 1, 0] };
   D['tc:teisho-uchi'] = FLOW([
-    M(KB, { look: -90, hR: [0.16, -0.1, 0.24], oR: 1, pR: [-1, 0, 0.3], fR: [0, 1, 0], eR: [-0.5, -0.4, 0.8] }),
-    M(KB, { look: -90, hR: [-0.25, -0.08, 0.3], oR: 1, pR: [-1, 0, 0.2], fR: [0, 1, 0] }),
-    M(KB, { look: -90, hR: [-0.66, -0.08, 0.12], oR: 1, pR: [-1, 0, 0], fR: [0, 1, 0] }),
-  ], M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front' }));
+    ZK_G,
+    M(S.zks, { hL: L(H.hip), hR: [-0.32, -0.08, 0.3], eR: [-1, 0, 0.1], pR: [1, 0, 0.3], ...TS_HAND }),
+    M(S.zks, { chest: 12, hL: L(H.hip), hR: [0.04, -0.02, 0.44], eR: [-0.8, 0.1, 0.2], pR: [1, 0, 0.6], ...TS_HAND }),
+  ], M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front3' }));
   const MAE_ENPI = M(S.zks, { hL: L(H.hip), hR: [0.08, -0.13, 0.17], eR: [-0.1, 0.1, 1] });
   D['tc:enpi-uchi'] = T(ZK_G, MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3', yaw: 15 }));
   // Furi-enpi wie in der Kata (Heian Sandan): aus Hidari Zenkutsu-dachi trägt das linke Bein, das rechte Knie kommt hoch,
