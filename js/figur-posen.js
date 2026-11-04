@@ -495,8 +495,8 @@
   const CHAMBER = BAL({ pelvis: [0, 0.8, 0.55], yaw: -14, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.09, z: 0.86, y: 0.46, yaw: 0, pitch: -45, kp: [0, 0.7, 1] }, hL: L(H.gedan), hR: H.hip, w: [1, 0] }, 'L', 0.02);
   const MG_EXT = (y, z, bend, o) => POINT(BAL(M(CHAMBER, { yaw: -20, lean: -3, R: { x: -0.09, z, y, kp: [0, 1, 0.3] } }, o), 'L', 0.03), 'R', bend);
   D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.45, 10), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
-  // Kekomi: Ferse stößt, Fußspitze weit hochgezogen, die Hüfte schiebt kräftig nach; etwas langsamer als Mae-geri (2,3 s statt 2 s)
-  D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.42, 70, { yaw: -26 }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side', dur: 2.3 }));
+  // Kekomi: Ferse stößt, Fußspitze weit hochgezogen, die Hüfte schiebt kräftig nach
+  D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.42, 70, { yaw: -26 }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   D['tc:sonoba-geri'] = K(YOI, M(YOI, { pelvis: [0, 0.86, 0.02], L: { x: 0.16, z: 0 }, R: { x: -0.1, z: 0.3, y: 0.5, yaw: 0, pitch: -55, kp: [0, 0.5, 1] }, w: [1, 0] }), M(YOI, { lean: -8, pelvis: [0, 0.86, 0.02], R: { x: -0.1, z: 0.92, y: 0.88, yaw: 0, pitch: 8, kp: [0, 1, 0.3] }, w: [1, 0] }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   D['tc:kizami-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.82, 0.0], L: { x: 0.1, z: 0.36, y: 0.5, pitch: -55, kp: [0, 0.5, 1] }, R: { z: -0.4 }, w: [0, 1] }), M(ZK_KAMAE, { pelvis: [0, 0.82, -0.02], lean: -10, L: { x: 0.1, z: 0.88, y: 0.95, pitch: 8, kp: [0, 1, 0.3] }, R: { z: -0.4 }, w: [0, 1] }), M(hit('toeL', 'Fußballen'), { eff: 'toeL', view: 'side' }));
   // Ren-geri: zweimal Mae-geri hintereinander (Gedan, dann Jodan), Fuß jeweils durchgestreckt
@@ -506,10 +506,10 @@
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
   // Yoko-geri kekomi: Knie hoch vor den Körper, Fuß dicht am Standbein; dann stößt das Bein gerade zur Seite und die Hüfte
   // dreht kräftig ein (das Gesäß wendet sich zum Ziel, als wollte man es ansehen), Oberkörper neigt sich zur Gegenseite,
-  // Standfuß dreht mit, Ferse und Fußkante führen
+  // Standfuß dreht mit, Ferse und Fußkante führen; etwas langsamer als die anderen Tritte (2,3 s statt 2 s)
   const YK_CH = BAL(M(KB_K, { pelvis: [0.3, 0.78, 0], yaw: 25, L: { yaw: 25, kp: [0.8, 0.2, 1] }, R: { x: 0.2, z: 0.18, y: 0.62, yaw: -10, pitch: -5, sole: [-1, -0.2, 0], kp: [-0.5, 0.6, 1] }, w: [1, 0] }), 'L');
   const YK_EXT = BAL(M(KB_K, { pelvis: [0.36, 0.8, 0], yaw: 62, chest: -32, roll: 24, L: { yaw: 70, kp: [0.5, 0.2, 1] }, R: { x: -0.55, z: 0.02, y: 0.98, yaw: 0, pitch: -18, sole: [-1, 0, 0], kp: [0, -0.2, 1] }, w: [1, 0] }), 'L');
-  D['mv:yoko-geri'] = K(KB_K, YK_CH, YK_EXT, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
+  D['mv:yoko-geri'] = K(KB_K, YK_CH, YK_EXT, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front', dur: 2.3 }));
   // Yoko-geri keage: Knie hoch, Knie zeigt zum Ziel; der Unterschenkel schnappt im Bogen seitlich nach oben (Jodan),
   // die Hüfte schnappt dabei mit hoch (rechte Hüfte steigt, Oberkörper kippt etwas zur Gegenseite) und sofort zurück
   const YA_CH = BAL(M(KB_K, { pelvis: [0.3, 0.78, 0], yaw: 12, L: { yaw: 15, kp: [0.8, 0.2, 1] }, R: { x: 0.12, z: 0.18, y: 0.5, yaw: -40, pitch: -20, sole: [-0.6, -0.8, 0], kp: [-1, 0.6, 0.5] }, w: [1, 0] }), 'L');
