@@ -456,7 +456,7 @@
     { t: 0, p: ZK_G }, { t: 0.15, p: ZK_G },
     { t: 0.36, p: TU_MID },
     { t: 0.42, p: FE(M(FE_KB, { R: { y: 0.05 }, hR: [-0.4, -0.2, -0.02], eR: [-1, -0.4, -0.3], ...TU_HAND, w: [0.6, 0.4] })), e: 'in' },
-    { t: 0.48, p: FE(M(FE_KB, { hR: [-0.56, -0.1, 0.2], eR: [-0.6, -0.7, 0.2], ...TU_HAND })), e: 'kime' },
+    { t: 0.48, p: FE(M(FE_KB, { hR: [-0.66, -0.1, 0.18], eR: [-0.3, -1, 0.1], ...TU_HAND })), e: 'kime' },
   ], best: 1, dur: 1.8 }, M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'side3', yaw: 130 }));
   D['tc:uchiotoshi'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.15, 0.35, 0.15] }), M(S.zks, { hL: L(H.hip), hR: [-0.02, -0.25, 0.36], eR: [-0.8, -0.2, 0.3] }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
   // Manji-uke: Ausholen wie beim Shuto-uke – die untere (linke) Faust holt am rechten Ohr aus, der rechte Arm ist nach vorn
