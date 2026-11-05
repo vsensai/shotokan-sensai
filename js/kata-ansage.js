@@ -665,7 +665,9 @@
         const own = last && j <= k && byName.has(words.slice(j, k + 1).map((x) => x.w).join('-'));
         // „Tate-shuto Chudan-uke“: Vorsilbe am Bindestrich gehört zur Technik (Tate-shuto-uke)
         const pre = i > 0 && text.slice(words[i - 1].end, words[i].at) === '-' ? words[i - 1].w : '';
-        const e = last && !own && ((pre && byName.get(`${pre}-${w}-${last}`)) || (!pre && byName.get(`${w}-${last}`)));
+        // ganzer zusammengesetzter Begriff („Ryo-teisho Gedan Awase-uke“ → Teisho Awase-uke) geht vor
+        const full = last && j <= k && k - j >= 1 && byName.get([w].concat(words.slice(j, k + 1).map((x) => x.w)).join('-'));
+        const e = full || (last && !own && ((pre && byName.get(`${pre}-${w}-${last}`)) || (!pre && byName.get(`${w}-${last}`))));
         let ok = !!e;
         for (let m = i + 1; m <= k && ok; m++) ok = plain(m);
         if (ok) hit = { from: pre ? i - 1 : i, to: k, e };
