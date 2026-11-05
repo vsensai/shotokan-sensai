@@ -282,6 +282,14 @@
     // Stände ohne Bewegung: nur die Endstellung (v1.x: früher aus Yoi heraus animiert – bei Ständen unnötig)
     D[`st:${k}`] = { keys: [{ t: 0, p: pose }], best: 0, still: true, view: FRONT_STANDS.includes(k) ? 'front3' : 'stand', labels: true };
   });
+  // Hizakutsu wie in Heian Yondan 11: aus Migi Zenkutsu-dachi nach rechts (Bewegung 10) dreht man sich nach vorn (Shomen)
+  // ein – die Füße bleiben am Platz und drehen nur ein (Fußskizze: Zehen links etwa geradeaus, rechts gut 30° nach innen),
+  // der Abstand bleibt so lang wie im Zenkutsu-dachi. Linkes Knie gebeugt, rechtes Bein durchgestreckt, Hüfte und Blick
+  // nach vorn. Hände: linke Handkante Jodan-uke über der Stirn, rechter Shuto Jodan Soto-mawashi-uchi zum Hals, Handfläche oben
+  const HZ = { pelvis: [0.13, 0.72, 0.0], yaw: 0, look: 0, L: { x: 0.53, z: 0.12, yaw: -3, kp: [0.3, 0, 1] }, R: { x: -0.55, z: -0.12, yaw: 35 }, w: [0.6, 0.4],
+    oL: 1, oR: 1, hL: [0.12, 0.3, 0.2], eL: [1, 0.2, 0.2], pL: [0, 0.4, 1], fL: [-1, 0.15, 0],
+    hR: [-0.02, 0.0, 0.53], eR: [-1, -0.3, 0.1], pR: [0, 1, 0], fR: [0.8, 0, 0.6] };
+  D['st:hizakutsu'] = { keys: [{ t: 0, p: HZ }], best: 0, still: true, view: 'front3', labels: true };
 
   /* ---------- Fauststöße ---------- */
   const ZKS_PUNCH = M(S.zks, { hL: L(H.hip), hR: H.chudan });
