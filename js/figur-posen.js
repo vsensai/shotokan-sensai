@@ -433,6 +433,25 @@
   D['tc:kakiwake-uke'] = T_RUHIG(M(S.zks, { hL: [-0.07, -0.14, 0.17], hR: [0.07, -0.12, 0.2], eL: [0.6, -1, 0.2], eR: [-0.6, -1, 0.2] }), M(S.zks, { hL: [0.25, 0.02, 0.4], hR: [-0.25, 0.02, 0.4], eL: L(DOWN_FWD), eR: DOWN_FWD }), M(hit('fistR', 'auseinander'), { eff: 'fistR', view: 'front3', dur: 2.6 }));
   // langsame, gleichmäßige Bewegung statt schnellem Kime
   D['tc:kakiwake-uke'].keys[2].e = 'io';
+  // Hangetsu 9–10 und 41 (Karate-Do Kata Vol. 2), alle langsam und kraftvoll im Hidari Ashi-mae Hangetsu-dachi bzw. Neko-ashi-dachi.
+  // Kaisho Yama-gamae: offene Hände kreuzen vor dem Gesicht (Handrücken zueinander) und ziehen auseinander –
+  // die Unterarme stehen senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe, Handrücken nach außen
+  const HG = M(S.hangetsu, HANDS_HIP);
+  const OPEN2 = { oL: 1, oR: 1 };
+  const YG0 = M(S.hangetsu, OPEN2, { hL: [-0.04, 0.16, 0.3], hR: [0.04, 0.16, 0.32], pL: [-1, 0, 0], pR: [1, 0, 0], fL: [0, 1, 0.1], fR: [0, 1, 0.1], eL: [0.5, -1, 0], eR: [-0.5, -1, 0] });
+  const YG1 = M(S.hangetsu, OPEN2, { hL: [0.4, 0.24, 0.16], hR: [-0.4, 0.24, 0.16], pL: [-1, 0, 0], pR: [1, 0, 0], fL: [0, 1, 0], fR: [0, 1, 0], eL: [1, -0.15, 0.2], eR: [-1, -0.15, 0.2] });
+  D['tc:yama-gamae'] = M({ keys: [{ t: 0, p: HG }, { t: 0.12, p: HG }, { t: 0.4, p: YG0, e: 'io' }, { t: 0.8, p: YG1, e: 'io' }], best: 1, dur: 3.2, eff: 'wristR', view: 'front3' }, hit('elbowR', 'Ellbogen auf Schulterhöhe'));
+  // Gedan-kakiwake (Ryote Ryogawa Gedan-kakiwake): Handgelenke kreuzen vor dem Körper, dann gehen beide offenen Hände
+  // seitlich nach unten neben den Unterbauch, Handrücken nach außen
+  const GK0 = M(S.hangetsu, OPEN2, { hL: [-0.05, -0.12, 0.3], hR: [0.05, -0.1, 0.32], pL: [-0.3, 0, 1], pR: [0.3, 0, 1], fL: [0, 1, 0.2], fR: [0, 1, 0.2], eL: [0.6, -1, 0.2], eR: [-0.6, -1, 0.2] });
+  const GK1 = M(S.hangetsu, OPEN2, { hL: [0.4, -0.48, 0.24], hR: [-0.4, -0.48, 0.24], pL: [-1, 0, 0.2], pR: [1, 0, 0.2], fL: [0.1, -1, 0.4], fR: [-0.1, -1, 0.4] });
+  D['tc:gedan-kakiwake'] = M({ keys: [{ t: 0, p: YG1 }, { t: 0.12, p: YG1 }, { t: 0.4, p: GK0, e: 'io' }, { t: 0.8, p: GK1, e: 'io' }], best: 1, dur: 3.2, eff: 'wristR', view: 'front3' }, hit('wristR', 'beide Hände nach unten außen'));
+  // Awase-uke (Ryo-teisho Gedan Awase-uke) im Hidari Neko-ashi-dachi: die offenen Hände kommen von den Hüften
+  // (Handflächen vorn) nach vorn über das linke Knie, Arme gestreckt, Handballen aneinander, Handgelenke kräftig nach
+  // außen gebeugt – wie um das Schienbein eines Tritts aufzufangen
+  const TA0 = M(S.neko, OPEN2, { hL: [0.24, -0.34, 0.06], hR: [-0.24, -0.34, 0.06], pL: [0, 0, 1], pR: [0, 0, 1], fL: [0, -1, 0], fR: [0, -1, 0] });
+  const TA1 = M(S.neko, OPEN2, { lean: 10, hL: aim(S.neko, [0.08, -0.36, 0.44]), hR: aim(S.neko, [0.0, -0.36, 0.44]), pL: aim(S.neko, [-0.6, 0.3, 0.7]), pR: aim(S.neko, [0.6, 0.3, 0.7]), fL: aim(S.neko, [0.6, 0.5, 0.3]), fR: aim(S.neko, [-0.6, 0.5, 0.3]) });
+  D['tc:awase-uke'] = M({ keys: [{ t: 0, p: TA0 }, { t: 0.15, p: TA0 }, { t: 0.75, p: TA1, e: 'io' }], best: 1, dur: 2.6, eff: 'wristL', view: 'side3' }, hit('wristL', 'beide Handballen'));
   D['tc:nagashi-uke'] = T_RUHIG(M(S.zks, { hL: L(H.hip), hR: [-0.28, 0.05, 0.32], oR: 1, pR: [1, 0, 0], fR: [0, 1, 0.3] }), M(S.zks, { hL: L(H.hip), hR: [0.08, 0.06, 0.26], oR: 1, pR: [1, 0, 0.3], fR: [0, 1, 0.3] }), M(hit('wristR', 'Handfläche'), { eff: 'tipR', view: 'front3' }));
   // Te-nagashi-uke aus dem Chudan-kamae (links vorn): die rechte Hand bleibt locker in der Kamae vor dem Körper,
   // die linke offene Hand steht auf Jodan-Höhe links seitlich vor dem Kopf und schiebt die Faust, die auf den Kopf zielt,
@@ -678,7 +697,7 @@
     'tc:shuto-uke': 'shuto', 'tc:morote-uke': 'unterarm:L', 'tc:juji-uke': 'handgelenk:LR', 'tc:kakiwake-uke': 'unterarm:LR',
     'tc:nagashi-uke': 'handflaeche', 'tc:te-nagashi-uke': 'handflaeche', 'tc:gedan-nagashi-uke': 'unterarm', 'tc:osae-uke': 'handflaeche',
     'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'unterarm', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',
-    'tc:tate-shuto-uke': 'shuto', 'tc:teisho-uke': 'teisho', 'tc:uchiotoshi': 'unterarm', 'tc:manji-uke': 'unterarm:LR',
+    'tc:tate-shuto-uke': 'shuto', 'tc:teisho-uke': 'teisho', 'tc:awase-uke': 'teisho:LR', 'tc:uchiotoshi': 'unterarm', 'tc:manji-uke': 'unterarm:LR',
     'mv:mae-geri': 'koshi', 'tc:mae-geri-kekomi': 'kakato', 'tc:sonoba-geri': 'koshi', 'tc:kizami-geri': 'koshi', 'tc:ren-geri': 'koshi',
     'mv:yoko-geri': 'sokuto', 'tc:yoko-geri-keage': 'sokuto', 'mv:mawashi-geri': 'koshi', 'mv:ushiro-geri': 'kakato',
     'mv:mikazuki-geri': 'teisoku', 'tc:ura-mawashi-geri': 'teisoku', 'tc:ushiro-mawashi-geri': 'teisoku', 'tc:hiza-geri': 'hiza',

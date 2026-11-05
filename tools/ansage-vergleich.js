@@ -9,7 +9,7 @@ const vm = require('vm');
 const { execFileSync } = require('child_process');
 
 const root = path.join(__dirname, '..');
-const FILES = ['js/core.js', 'js/graphics.js', 'js/graphics-tech.js', 'data/kata-intro.js', 'data/kata-heian.js', 'data/kata-tekki.js', 'data/kata-sentei.js', 'js/kata-ansage.js'];
+const FILES = ['js/core.js', 'js/graphics.js', 'js/graphics-tech.js', 'data/kata-intro.js', 'data/kata-heian.js', 'data/kata-tekki.js', 'data/kata-sentei.js', 'data/kata-hangetsu.js', 'js/kata-ansage.js'];
 const ref = process.argv[2] || 'HEAD';
 
 // Lädt die App-Dateien (aus dem Arbeitsverzeichnis oder einem Git-Stand) und liefert je Kata die Stellungen
@@ -29,7 +29,10 @@ function poses(read) {
   return out;
 }
 
-const fromRef = (f) => execFileSync('git', ['show', `${ref}:${f}`], { cwd: root, encoding: 'utf8' });
+// Eine Datei, die es im früheren Stand noch nicht gab (z. B. eine neue Kata), fehlt dort einfach
+const fromRef = (f) => {
+  try { return execFileSync('git', ['show', `${ref}:${f}`], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch (e) { return ''; }
+};
 const before = poses(fromRef);
 const after = poses((f) => fs.readFileSync(path.join(root, f), 'utf8'));
 

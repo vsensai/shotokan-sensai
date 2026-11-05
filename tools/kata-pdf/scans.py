@@ -5,12 +5,16 @@ Großteil der Seite. Die Bilder selbst sind vollständig – deshalb immer über
 """
 from pathlib import Path
 
+import os
+
 import cv2
 import numpy as np
 import pymupdf
 
 ROOT = Path(__file__).resolve().parents[2]
-PDF = ROOT / "Karate-do-kata-volume-1.pdf"
+# Band 2 (nur Hangetsu): KATA_VOL=2 setzen. Dort liegt je Seite genau ein Scan-Bild an der richtigen Stelle.
+VOL = int(os.environ.get("KATA_VOL", "1"))
+PDF = ROOT / f"Karate-do-kata-volume-{VOL}.pdf"
 
 
 def open_pdf():

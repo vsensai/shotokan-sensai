@@ -715,3 +715,56 @@ Erzeugt mit `python3 tools/kata-pdf/einzel_register.py` (braucht das PDF, siehe 
 | Naore | 1 | ein Abdruck 4° | – | – |  |
 | Rei (Ende) | 1 | 331° / 29° | 91° | 1,3 |  |
 <!-- /einzel -->
+
+### Hangetsu (Karate-Do Kata Vol. 2)
+Erzeugt mit `KATA_VOL=2 python3 tools/kata-pdf/einzel_register.py` (Textebene des PDFs statt OCR). Band 2 zeichnet die
+Einzelskizzen größer, die Messung ist darauf eingestellt. Rei am Ende: Die Fersen berühren sich, der Abdruck ist nicht getrennt messbar.
+<!-- einzel:hangetsu -->
+| Nr | Skizzen | Zehen links / rechts | rechter Fuß vom linken aus | Abstand | Laut Text |
+|---|---|---|---|---|---|
+| Rei | keine | – | – | – |  |
+| Yoi | 1 | 337° / 29° | 90° | 2,3 |  |
+| 1 | 1 | 25° / 354° | 150° | 2,4 | rechtes Bein trägt, linker Fuß gleitet vor |
+| 2 | keine | – | – | – | Stand bleibt |
+| 3 | 1 | 2° / 329° | 18° | 2,4 | linkes Bein trägt, rechter Fuß gleitet vor |
+| 4 | keine | – | – | – |  |
+| 5 | 1 | 33° / 0° | 164° | 2,4 | rechtes Bein trägt, linker Fuß gleitet vor |
+| 6 | keine | – | – | – | Stand bleibt |
+| 7 | keine | – | – | – | Stand bleibt |
+| 8 | keine | – | – | – | Stand bleibt |
+| 9 | keine | – | – | – | Stand bleibt |
+| 10 | keine | – | – | – | Stand bleibt |
+| 11 | 1 | 212° / 192° | 339° | 2,7 | linkes Bein trägt, rechter Fuß gleitet vor |
+| 12 | keine | – | – | – |  |
+| 13 | 1 | 180° / 148° | 209° | 2,2 | linkes Bein trägt, rechter Fuß gleitet vor |
+| 14 | keine | – | – | – |  |
+| 15 | 1 | 212° / 179° | 331° | 2,2 | rechtes Bein trägt, linker Fuß gleitet vor |
+| 16 | keine | – | – | – |  |
+| 17 | 1 | 247° / 223° | 273° | 2,5 | linkes Bein trägt, rechter Fuß gleitet nach rechts |
+| 18 | keine | – | – | – | Stand bleibt |
+| 19 | keine | – | – | – |  |
+| 20 | 1 | 127° / 94° | 257° | 3,0 | rechtes Bein trägt, beide Füße gleiten |
+| 21 | keine | – | – | – | Stand bleibt |
+| 22 | keine | – | – | – |  |
+| 23 | 1 | 177° / 132° | 197° | 1,9 | linkes Bein trägt, beide Füße gleiten nach rechts |
+| 24 | keine | – | – | – | Stand bleibt |
+| 25 | keine | – | – | – |  |
+| 26 | 1 | 359° / 88° | 176° | 3,5 | rechter Fuß bleibt |
+| 27 | 1 | 359° / 28° | 5° | 1,0 |  |
+| 28 | 1 | ein Abdruck 28° | – | – |  |
+| 29 | 1 | 38° / 12° | 162° | 2,6 |  |
+| 30 | keine | – | – | – | Stand bleibt |
+| 31 | keine | – | – | – | Stand bleibt |
+| 32 | 1 | 92° / 181° | 185° | 3,6 | linker Fuß bleibt |
+| 33 | 1 | 152° / 181° | 354° | 1,0 |  |
+| 34 | 1 | ein Abdruck 152° | – | – |  |
+| 35 | 1 | 174° / 141° | 199° | 2,6 |  |
+| 36 | keine | – | – | – | Stand bleibt |
+| 37 | keine | – | – | – | Stand bleibt |
+| 38 | 1 | 0° / 88° | 176° | 3,5 | rechter Fuß bleibt |
+| 39 | 1 | ein Abdruck 0° | – | – |  |
+| 40 | 1 | 33° / 0° | 163° | 2,4 | linker Fuß bleibt |
+| 41 | 1 | 41° / 21° | 147° | 1,4 |  |
+| Naore | 1 | 337° / 28° | 90° | 1,8 | rechter Fuß bleibt |
+| Rei (Ende) | keine | – | – | – |  |
+<!-- /einzel -->

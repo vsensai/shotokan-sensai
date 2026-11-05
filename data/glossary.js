@@ -3,6 +3,7 @@
   'use strict';
   const G = SK.gfx;
   const PDF = (n) => SK.bookSrc(n);
+  const PDF2 = (n) => SK.bookSrc2(n); // Vol. 2, nur Hangetsu
   const ALLG = SK.sources.allg;
   const PO = SK.sources.po;
   const KO = SK.sources.kompakt;
@@ -40,7 +41,7 @@
     ['Kosa-dachi', 'Kreuzstand: Beine gekreuzt, hinterer Fuß hinter der vorderen Ferse', 'stand', st('kosa')],
     ['Neko-ashi-dachi', 'Katzenfußstand: fast das gesamte Gewicht auf dem hinteren Bein', 'stand', st('neko')],
     ['Fudo-dachi', 'Unbeweglicher Stand: beide Knie gebeugt, Gewicht ausgeglichen (auch Sochin-dachi)', 'stand', st('fudo')],
-    ['Hangetsu-dachi', 'Halbmondstand: Knie nach innen gespannt, länger als Sanchin-dachi', 'stand', st('hangetsu')],
+    ['Hangetsu-dachi', 'Halbmondstand: etwas kürzer als Zenkutsu-dachi, Knie und Oberschenkelinnenseiten zur Mitte gespannt, länger als Sanchin-dachi', 'stand', st('hangetsu'), PDF2(41)],
     ['Sanchin-dachi', 'Sanduhrstand: kurz, Fußspitzen und Knie nach innen', 'stand', st('sanchin')],
     ['Renoji-dachi', 'L-förmiger Stand', 'stand', st('renoji')],
     ['Teiji-dachi', 'T-förmiger Stand', 'stand', st('teiji')],
@@ -89,6 +90,7 @@
     ['Morote-uke', 'Unterstützte Abwehr – zweite Faust am Ellbogen', 'uke', tc('morote-uke'), PDF(26)],
     ['Juji-uke', 'Gekreuzte Abwehr (auch Kosa-uke)', 'uke', tc('juji-uke'), PDF(41)],
     ['Kakiwake-uke', 'Abwehr, bei der beide Arme auseinanderdrücken', 'uke', tc('kakiwake-uke'), PDF(46)],
+    ['Gedan-kakiwake', 'Beide Hände kreuzen vor dem Körper und gehen dann seitlich nach unten neben den Unterbauch, Handrücken außen (Hangetsu)', 'uke', tc('gedan-kakiwake'), PDF2(45)],
     ['Nagashi-uke', 'Fließende, ablenkende Abwehr', 'uke', tc('nagashi-uke')],
     ['Osae-uke', 'Drückende Abwehr nach unten', 'uke', tc('osae-uke'), PDF(21)],
     ['Kake-uke', 'Hakenabwehr mit dem Handgelenk (z. B. Heian Godan 14, langsam im Kiba-dachi)', 'uke', tc('kake-uke'), PDF(59)],
@@ -97,6 +99,7 @@
     ['Tsukami-uke', 'Greifende Abwehr', 'uke', tc('tsukami-uke'), PDF(87)],
     ['Tate-shuto-uke', 'Abwehr mit senkrechter Handkante, Arm gestreckt', 'uke', tc('tate-shuto-uke'), PDF(83)],
     ['Teisho-uke', 'Abwehr mit dem Handballen', 'uke', tc('teisho-uke'), PDF(142)],
+    ['Awase-uke', 'Abwehr mit beiden Händen zusammen – in Hangetsu mit beiden Handballen (Ryo-teisho), Handgelenke nach außen gebeugt, gegen das Schienbein eines Tritts', 'uke', tc('awase-uke'), PDF2(57)],
     ['Uchiotoshi', 'Unterarm schlägt einen Angriff nach unten (Jion)', 'uke', tc('uchiotoshi'), PDF(150)],
     ['Manji-uke', 'Doppelabwehr: eine Hand wehrt unten ab (Gedan-barai), die andere schützt oben (Jodan-uchi-uke)', 'uke', tc('manji-uke'), KO],
     ['Te-nagashi-uke', 'Die offene Hand lenkt einen Jodan- oder Chudan-Angriff zur Seite ab – vor allem im Kampf', 'uke', tc('te-nagashi-uke'), KO],
@@ -146,6 +149,8 @@
     ['Haito', 'Innere Handkante (Daumenseite)', 'waffe', wp('haito')],
     ['Teisho', 'Handballen', 'waffe', wp('teisho')],
     ['Haishu', 'Handrücken der offenen Hand', 'waffe', wp('haishu'), PDF(67)],
+    ['Jishi-ippon-ken', 'Faust mit vorstehendem Mittelgelenk des Zeigefingers – der halb gebeugte Zeigefinger wird vom Daumen gestützt', 'waffe', wp('jishi-ippon-ken'), PDF2(44)],
+    ['Koko', '„Tigermaul“: Hand in C-Form – mit dem Raum zwischen Daumen und Zeigefinger greifen, z. B. das gegnerische Handgelenk', 'waffe', wp('koko'), PDF2(46)],
     ['Hiji / Enpi', 'Ellbogen', 'waffe', wp('hiji')],
     ['Hiza', 'Knie', 'waffe', wp('hiza')],
     ['Zenwan', 'Unterarm', 'waffe', wp('zenwan')],
@@ -160,6 +165,7 @@
     ['Koshi-kamae', 'Beide Fäuste an der Hüfte übereinander (Ryoken Koshi-kamae)', 'kamae', tc('koshi-kamae'), PDF(19)],
     ['Mizunagare-no-kamae', '„Wasserfluss-Haltung“: Unterarm schräg vor dem Solarplexus, etwa zwei Fäuste entfernt', 'kamae', tc('mizunagare-no-kamae'), PDF(55)],
     ['Hanmi', 'Halbseitliche Körperhaltung', 'kamae', tc('hanmi'), PO],
+    ['Kaisho Yama-gamae', '„Berghaltung“ mit offenen Händen: Unterarme senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe (Hangetsu)', 'kamae', tc('yama-gamae'), PDF2(45)],
     ['Gyaku-hanmi', 'Umgekehrt halbseitliche Körperhaltung', 'kamae', tc('gyaku-hanmi'), PDF(24)],
     ['Shizentai', 'Natürliche Haltung', 'kamae', tc('shizentai'), PO],
     ['Hikite', 'Zurückziehende Hand zur Hüfte', 'kamae', tc('hikite'), PO],
@@ -181,6 +187,7 @@
     ['Kogeki', 'Angriff', 'begriff', tc('kogeki'), PO],
     ['Sun-dome', 'Technik kurz vor dem Ziel abstoppen', 'begriff', tc('sun-dome'), PO],
     ['Enbusen', 'Bewegungslinie einer Kata', 'begriff', tc('enbusen'), PDF(4)],
+    ['Ura-shomen', 'Rückseite – die Richtung entgegengesetzt zur Vorderseite (Shomen), z. B. die Wendung in Hangetsu 11', 'begriff', null, PDF2(45)],
     ['Bunkai', 'Anwendung / Analyse der Kata-Techniken', 'begriff', tc('bunkai')],
   ];
 
@@ -200,6 +207,8 @@
     'Hizakutsu': ['heian-yondan', 11],
     'Ashi-dachi': ['heian-nidan', 7],
     'Orishiki': ['enpi', 1],
+    'Hangetsu-dachi': ['hangetsu', 1],
+    'Neko-ashi-dachi': ['hangetsu', 41],
 
     'Oi-zuki': ['heian-shodan', 2],
     'Gyaku-zuki': ['heian-godan', 2],
@@ -209,6 +218,8 @@
     'Yama-zuki': ['bassai-dai', 33],
     'Otoshi-zuki': ['kanku-dai', 61],
     'Nukite': ['heian-nidan', 11, 'Shihon-nukite'],
+    'Morote-zuki': ['hangetsu', 8, 'Jishi-ippon-ken Morote-zuki'],
+    'Ren-zuki': ['hangetsu', 19, '', 'mit 18'],
 
     'Uraken-uchi': ['heian-nidan', 7, 'Uraken Yoko-mawashi-uchi'],
     'Tettsui-uchi': ['heian-shodan', 4, 'Kentsui Tate-mawashi-uchi'],
@@ -235,6 +246,12 @@
     'Tsukami-uke': ['bassai-dai', 18],
     'Tate-shuto-uke': ['bassai-dai', 9, 'Tate-shuto Chudan-uke'],
     'Teisho-uke': ['jion', 23, 'Teisho Yoko-uke'],
+    'Gedan-kakiwake': ['hangetsu', 10, 'Ryote Ryogawa Gedan-kakiwake'],
+    'Awase-uke': ['hangetsu', 41, 'Ryo-teisho Gedan Awase-uke'],
+    'Jishi-ippon-ken': ['hangetsu', 7],
+    'Koko': ['hangetsu', 12],
+    'Kaisho Yama-gamae': ['hangetsu', 9],
+    'Ura-shomen': ['hangetsu', 11],
     'Uchiotoshi': ['jion', 43],
 
     'Mae-geri': ['heian-nidan', 17, 'Mae-geri-keage'],
@@ -263,6 +280,9 @@
     'Gedan-kamae': 'Kampfhaltung mit der vorderen Hand unten, wie nach einer fegenden Abwehr nach unten',
     'Shuto-kamae': 'Kampfhaltung mit offenen Händen, Handkanten nach vorn (wie bei der Handkantenabwehr)',
     'Koshi-kamae': 'Beide Fäuste an der Hüfte übereinander',
+    'Gedan-kakiwake': 'Beide Hände kreuzen vor dem Körper und gehen dann seitlich nach unten neben den Unterbauch, Handrücken außen',
+    'Ura-shomen': 'Richtung nach hinten, entgegengesetzt zur Vorderseite der Kata',
+    'Kaisho Yama-gamae': 'Haltung mit offenen Händen: Unterarme senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe',
   };
 
   SK.glossary = E.map(([t, de, cat, img, src]) => {

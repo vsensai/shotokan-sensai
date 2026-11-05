@@ -11,18 +11,28 @@
   });
 
   SK.BOOK_SOURCE = 'Karate-Do Kata Vol. 1 (JKA)';
-  // Interne Seitenzahlen = Seiten der Scan-Datei; ab Seite 6 enthält jede eine gedruckte Doppelseite.
-  SK.bookPages = (n) => {
+  // Aus Band 2 nur Hangetsu (Kata-Daten mit vol: 2).
+  SK.BOOK_SOURCE2 = 'Karate-Do Kata Vol. 2 (JKA)';
+  SK.bookName = (vol) => (vol === 2 ? SK.BOOK_SOURCE2 : SK.BOOK_SOURCE);
+  // Interne Seitenzahlen = Seiten der Scan-Datei; Band 1 enthält ab Seite 6 je eine gedruckte Doppelseite,
+  // Band 2 ab Seite 5 (Seite 41 = S. 74–75).
+  SK.bookPages = (n, vol) => {
+    if (vol === 2) {
+      if (n >= 5) return `S. ${2 * (n - 4)}–${2 * (n - 4) + 1}`;
+      if (n === 4) return 'S. ii (Content and Guidance) und S. 1 (Inhaltsverzeichnis)';
+      return 'S. i (Content and Guidance)';
+    }
     if (n >= 6) return `S. ${2 * (n - 5)}–${2 * (n - 5) + 1}`;
     if (n === 5) return 'S. 1 (Inhaltsverzeichnis)';
     if (n === 4) return 'S. ii–iii (Content and Guidance)';
     return 'Vorwort';
   };
-  SK.bookSrc = (n) => `${SK.BOOK_SOURCE}, ${SK.bookPages(n)}`;
+  SK.bookSrc = (n, vol) => `${SK.bookName(vol)}, ${SK.bookPages(n, vol)}`;
+  SK.bookSrc2 = (n) => SK.bookSrc(n, 2);
   // Bei jeder veröffentlichten Änderung hochzählen: node tools/version.js patch|minor|major (setzt auch ?v= in index.html)
-  SK.VERSION = '1.52.4';
-  SK.VERSION_DATE = '04.11.2026';
-  SK.VERSION_TIME = '19:31';
+  SK.VERSION = '1.53.0';
+  SK.VERSION_DATE = '05.11.2026';
+  SK.VERSION_TIME = '08:30';
 
   // Lektionstexte als Funktion (learn: () => `…`) werden erst beim ersten Öffnen erzeugt.
   SK.lazyLearn = (unit) => unit.lessons.forEach((l) => typeof l.learn === 'function' && SK.util.lazy(l, 'learn', l.learn));

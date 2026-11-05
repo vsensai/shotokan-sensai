@@ -11,6 +11,8 @@ etwas verschieden); als Einheit dient die Länge eines Fußabdrucks. Oben in der
 Zuordnung: Die Überschriften (Rei, Yoi, „… MOVEMENT“, Naore) kommen aus der OCR mit Zeilenlage (ocr_boxes.py, vorher
 laufen lassen). Jede Skizze gehört zur letzten Überschrift davor in Lesereihenfolge (linke Buchseite, dann rechte).
 Abdrücke, zwischen denen keine Textzeile liegt, bilden eine Skizze. Die Übersichtsseiten am Ende jeder Kata bleiben außen vor.
+Band 2 (KATA_VOL=2, nur Hangetsu): Zeilen aus der Textebene (ocr_boxes.py schreibt dann ocr_boxes_v2.json),
+Ergebnis nach tools/out/einzelskizzen_v2.json.
 """
 import json
 import math
@@ -22,7 +24,7 @@ import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from scans import ROOT, open_pdf, page_image  # noqa: E402
+from scans import ROOT, VOL, open_pdf, page_image  # noqa: E402
 from embusen import find_cells  # noqa: E402
 
 OUT = ROOT / "tools" / "out"
@@ -31,6 +33,13 @@ FIRST, LAST = 6, 174
 # Kata in Buchreihenfolge mit Zahl der Bewegungen
 KATA = [("heian-shodan", 21), ("heian-nidan", 26), ("heian-sandan", 20), ("heian-yondan", 27), ("heian-godan", 23),
         ("tekki-shodan", 29), ("bassai-dai", 42), ("kanku-dai", 65), ("jion", 47), ("enpi", 37)]
+SUFFIX = ""
+if VOL == 2:  # aus Band 2 nur Hangetsu (Scan-Seiten 41–58)
+    FIRST, LAST = 41, 58
+    KATA = [("hangetsu", 41)]
+    SUFFIX = "_v2"
+# Band 2 druckt die Einzelskizzen größer (Fußabdruck etwa 85 statt 60 Bildpunkte lang)
+BIG = 1.35 if VOL == 2 else 1.0
 
 
 def render(doc, p):
@@ -105,7 +114,7 @@ def filled_feet(gray, skip):
     out = []
     for i in range(1, n):
         x, y, w, h, a = st[i]
-        if a < 120 or max(w, h) > 90 or a > 0.8 * w * h and abs(w - h) <= 8:  # Kästchen der Überschriften
+        if a < 120 or max(w, h) > 90 * BIG or a > 0.8 * w * h and abs(w - h) <= 8:  # Kästchen der Überschriften
             continue
         if x < 40 or x + w > gray.shape[1] - 40 or y < 20 or y + h > gray.shape[0] - 20:
             continue  # Schatten am Seitenrand
@@ -113,7 +122,7 @@ def filled_feet(gray, skip):
             continue
         ys, xs = np.nonzero(lab[y:y + h, x:x + w] == i)
         f = shape_of((xs + x, ys + y))
-        if np.median(gray[ys + y, xs + x]) > 95 or not 20 <= f["len"] <= 80 or f["wid"] > 40:
+        if np.median(gray[ys + y, xs + x]) > 95 or not 20 <= f["len"] <= 80 * BIG or f["wid"] > 40 * BIG:
             continue  # graue Ränder des Scans, keine Fußform
         f.update(area=int(a), box=[int(x), int(y), int(w), int(h)])
         out.append(f)
@@ -133,7 +142,7 @@ def outline_feet(gray, fill_mask, skip):
             continue  # nur Löcher
         a = cv2.contourArea(c)
         x, y, w, h = cv2.boundingRect(c)
-        if not 120 <= a <= 1400 or max(w, h) < 22 or max(w, h) > 75:
+        if not 120 <= a <= 1400 * BIG * BIG or max(w, h) < 22 or max(w, h) > 75 * BIG:
             continue
         if any(c0 <= x + w / 2 <= c1 and r0 <= y + h / 2 <= r1 for c0, r0, c1, r1 in skip):
             continue
@@ -165,7 +174,7 @@ def group(feet, lines, half):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     doc = open_pdf()
-    ocr = json.loads((OUT / "ocr_boxes.json").read_text())  # aus ocr_boxes.py
+    ocr = json.loads((OUT / f"ocr_boxes{SUFFIX}.json").read_text())  # aus ocr_boxes.py
     stream = []  # Überschriften und Skizzen in Lesereihenfolge
     for p in range(FIRST, LAST + 1):
         gray = render(doc, p)
@@ -233,7 +242,7 @@ def main():
         names = ["rei", "yoi"] + [str(i) for i in range(1, n + 1)] + ["naore", "end"]
         print(kid, "fehlt:", [m for m in names if m not in k], "ohne Skizze:", [m for m in names if m in k and not k[m]["sketches"]],
               "mehrere:", [m for m in names if m in k and len(k[m]["sketches"]) > 1])
-    (OUT / "einzelskizzen.json").write_text(json.dumps(res, indent=1))
+    (OUT / f"einzelskizzen{SUFFIX}.json").write_text(json.dumps(res, indent=1))
 
 
 if __name__ == "__main__":

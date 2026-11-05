@@ -18,7 +18,7 @@ import cv2
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from scans import ROOT, open_pdf, page_image  # noqa: E402
+from scans import ROOT, VOL, open_pdf, page_image  # noqa: E402
 
 OUT = ROOT / "tools" / "out"
 WIDTH = 2273  # alle Seiten auf gleiche Breite bringen, die Scans sind unterschiedlich groß
@@ -59,7 +59,9 @@ def find_cells(gray):
             if not 170 <= y2 - y <= 270 or min(x1, u1) - max(x0, u0) < 200:
                 continue
             lo, hi = max(x0, u0) - 10, min(x1, u1) + 10
-            xs = sorted([v[2] for v in verts if lo <= v[2] <= hi and v[0] <= y + 25 and v[1] >= y2 - 25] + [lo + 10, hi - 10])
+            # Band 2: die Mittellinie der Figur reicht fast bis an den Rahmen – nur Linien über die ganze Höhe sind Trennlinien
+            tol = 25 if VOL == 1 else 6
+            xs = sorted([v[2] for v in verts if lo <= v[2] <= hi and v[0] <= y + tol and v[1] >= y2 - tol] + [lo + 10, hi - 10])
             cols = []
             for xx in xs:
                 if not cols or xx - cols[-1] > 40:
@@ -93,8 +95,10 @@ def measure_cell(gray, cell):
     v = cv2.morphologyEx(sub, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, 40)))
     H, W = sub.shape
     # Reste der Rahmenlinien (am Rand, fast so lang wie das Bild) gehören nicht zur Figur
-    hs = [l for l in line_comps(h, True) if 60 <= l[1] - l[0] < 0.85 * W and 12 < l[2] < H - 12]
-    vs = [l for l in line_comps(v, False) if 60 <= l[1] - l[0] < 0.85 * H and 12 < l[2] < W - 12]
+    # Band 2 zeichnet die Figur fast so groß wie den Rahmen
+    big = 0.85 if VOL == 1 else 0.97
+    hs = [l for l in line_comps(h, True) if 60 <= l[1] - l[0] < big * W and 12 < l[2] < H - 12]
+    vs = [l for l in line_comps(v, False) if 60 <= l[1] - l[0] < big * H and 12 < l[2] < W - 12]
     mid = max(vs, key=lambda l: l[1] - l[0]) if vs else None
     if mid:
         cross = [l for l in hs if l[0] - 6 <= mid[2] <= l[1] + 6]

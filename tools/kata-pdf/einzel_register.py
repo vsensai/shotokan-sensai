@@ -3,7 +3,7 @@
 Quelle: tools/out/einzelskizzen.json (einzelskizzen.py) und tools/out/ocr_boxes.json (ocr_boxes.py); die App-Stellungen
 (für die Zuordnung linker/rechter Abdruck und den Vergleich) kommen über Node aus data/kata-*.js.
 Ins Repo kommen nur Messwerte und kurze Angaben in eigenen Worten, keine Bilder und kein Buchtext.
-Aufruf: python3 tools/kata-pdf/einzel_register.py
+Aufruf: python3 tools/kata-pdf/einzel_register.py (Band 2, nur Hangetsu: mit KATA_VOL=2)
 """
 import json
 import math
@@ -26,7 +26,7 @@ const store = {};
 const ctx = { console, localStorage: { getItem: (k) => store[k] || null, setItem: (k, v) => { store[k] = String(v); }, removeItem: (k) => { delete store[k]; } } };
 ctx.window = ctx;
 vm.createContext(ctx);
-['js/core.js', 'js/graphics.js', 'js/graphics-tech.js', 'data/kata-intro.js', 'data/kata-heian.js', 'data/kata-tekki.js', 'data/kata-sentei.js', 'js/kata-ansage.js']
+['js/core.js', 'js/graphics.js', 'js/graphics-tech.js', 'data/kata-intro.js', 'data/kata-heian.js', 'data/kata-tekki.js', 'data/kata-sentei.js', 'data/kata-hangetsu.js', 'js/kata-ansage.js']
   .forEach((f) => vm.runInContext(fs.readFileSync(path.join(root, f), 'utf8'), ctx, { filename: f }));
 const SK = ctx.SK, out = {};
 SK.ansageKata().forEach((id) => {
@@ -77,7 +77,7 @@ def text_facts(t):
 
 def movement_texts():
     """Buchtext je Bewegung (OCR), getrennt an den Überschriften wie in einzelskizzen.py."""
-    ocr = json.loads((E.OUT / "ocr_boxes.json").read_text())
+    ocr = json.loads((E.OUT / f"ocr_boxes{E.SUFFIX}.json").read_text())
     doc = open_pdf()
     out, ki, cur, name = {}, -1, None, None
     for p in range(E.FIRST, E.LAST + 1):
@@ -146,7 +146,7 @@ def table(kid, sk, texts, app):
 
 
 def main():
-    sk = json.loads((E.OUT / "einzelskizzen.json").read_text())
+    sk = json.loads((E.OUT / f"einzelskizzen{E.SUFFIX}.json").read_text())
     app = json.loads(subprocess.run(["node", "-e", NODE, str(ROOT)], capture_output=True, text=True, check=True).stdout)
     texts = movement_texts()
     md = DOC.read_text()

@@ -8,11 +8,12 @@
     po: 'DJKB-Prüfungsordnung, Stand Juli 2013',
     ueb: 'DJKB-Übersicht Prüfungsprogramm (Kihon/Kata/Kumite)',
     pdf: 'Karate-Do Kata Vol. 1 (JKA)',
+    pdf2: 'Karate-Do Kata Vol. 2 (JKA) – daraus nur Hangetsu',
     allg: 'Allgemeines Shotokan-/JKA-Grundwissen (u. a. Wikipedia: Shōtōkan, Gichin Funakoshi, JKA)',
     kompakt: 'Heft „Karate kompakt – Grundlagen im Überblick“ (F. Tartaglia, aus „Die Karate-Essenz“) – Inhalte in eigenen Worten',
   };
 
-  const SENTEI_BOOK = ['bassai-dai', 'kanku-dai', 'jion', 'enpi'];
+  const SENTEI_BOOK = ['bassai-dai', 'kanku-dai', 'jion', 'enpi', 'hangetsu']; // Hangetsu aus Vol. 2
   const ALL_BOOK = ['heian-shodan', 'heian-nidan', 'heian-sandan', 'heian-yondan', 'heian-godan', 'tekki-shodan'].concat(SENTEI_BOOK);
   const SENTEI = 'Bassai-Dai, Kanku-Dai, Jion, Enpi, Hangetsu';
 

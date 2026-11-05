@@ -546,7 +546,44 @@
   }
   // Seitenansicht (Blick nach rechts): rechte Körperseite vorne (near), linke hinten (far)
   const SIDE = { head: [114, 30], view: 'side', trunk: [[112, 52], [108, 116]] };
+  // Jishi-ippon-ken (Hangetsu): rechte Faust von der Daumenseite – das Mittelgelenk des Zeigefingers steht vor,
+  // der Daumen drückt von unten innen dagegen
+  function ipponKen() {
+    return `<svg viewBox="0 0 220 230" role="img" aria-label="Faust mit vorstehendem Zeigefingerknöchel" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="218" height="228" rx="12" fill="#fafafa" stroke="#ddd"/>
+      ${caption(110, 18, 'rechte Faust von der Daumenseite')}
+      ${solid('<path d="M10 78 H52 V160 H10 Z"/>', F_GI)}
+      ${solid('<path d="M50 86 Q64 80 76 80 L76 156 Q62 156 50 152 Z"/>', F_SKIN)}
+      ${solid('<path d="M72 74 Q80 62 104 62 L140 62 Q154 62 156 76 L158 150 Q156 164 140 164 L96 164 Q74 164 72 146 Z"/>', F_SKIN)}
+      ${solid('<path d="M138 64 Q150 58 162 66 L190 98 Q196 108 186 114 L166 126 Q156 130 152 120 L146 106 Z"/>', F_SKIN)}
+      ${solid('<path d="M150 108 Q160 104 170 112 L172 124 Q168 136 156 134 L146 128 Z"/>', F_SKIN)}
+      ${solid('<path d="M84 120 Q100 112 124 116 L158 124 Q170 128 166 138 Q162 146 150 144 L112 140 Q90 140 84 132 Z"/>', F_SKIN)}
+      <path d="M120 150 Q136 150 150 146" stroke="${SKIN_D}" stroke-width="1.5" fill="none"/>
+      <ellipse cx="160" cy="138" rx="5" ry="4" fill="${SKIN_D}"/>
+      <ellipse cx="190" cy="104" rx="11" ry="11" ${HLF}/>
+      ${tag(194, 96, 'Mittelgelenk des Zeigefingers', 210, 46, 'end')}
+      ${tag(130, 136, 'Daumen stützt', 120, 196)}
+      ${caption(110, 220, 'Zeigefinger halb gebeugt, nicht eingerollt')}
+    </svg>`;
+  }
+  // Koko (Hangetsu, Tsukami): rechte Hand von der Seite in C-Form – Daumen unten, Finger oben, dazwischen greift sie
+  function koko() {
+    return `<svg viewBox="0 0 220 230" role="img" aria-label="Hand in C-Form" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="1" width="218" height="228" rx="12" fill="#fafafa" stroke="#ddd"/>
+      ${caption(110, 18, 'rechte Hand seitlich, Handrücken oben')}
+      ${solid('<path d="M8 86 H50 V164 H8 Z"/>', F_GI)}
+      ${solid('<path d="M48 92 Q62 86 76 86 L76 160 Q62 160 48 156 Z"/>', F_SKIN)}
+      ${solid('<path d="M72 80 Q86 66 116 66 Q160 66 182 86 Q198 102 194 122 Q190 132 180 128 Q176 106 160 96 Q140 86 116 90 Q96 94 92 116 L90 150 Q82 160 74 150 Z"/>', F_SKIN)}
+      ${solid('<path d="M78 136 Q96 168 136 170 Q160 170 172 156 Q180 148 172 142 Q160 152 138 152 Q108 150 96 126 Z"/>', F_SKIN)}
+      <path d="M100 72 Q140 66 172 84 M108 80 Q146 76 176 96" stroke="${SKIN_D}" stroke-width="1.5" fill="none"/>
+      <path d="M176 120 Q172 100 152 92 Q122 82 100 102 Q90 124 104 144 Q124 158 160 150" stroke-width="7" ${HLS}/>
+      ${tag(124, 92, 'Innenseite der C-Form', 110, 48)}
+      ${caption(110, 206, 'Daumen und Finger umfassen z. B.')}
+      ${caption(110, 220, 'das Handgelenk des Gegners')}
+    </svg>`;
+  }
   const WEAPONS = {
+    'jishi-ippon-ken': ipponKen, koko,
     seiken: () => fist('seiken'), uraken: () => fist('uraken'), tettsui: () => fist('tettsui'),
     shuto: () => hand('shuto'), haito: () => hand('haito'), nukite: () => hand('nukite'), teisho: () => hand('teisho'), haishu: () => hand('haishu'),
     koshi: () => footSide('koshi'), kakato: () => footSide('kakato'), haisoku: () => footSide('haisoku'), sokuto: () => footSide('sokuto'),

@@ -1,4 +1,4 @@
-# Buch-Register: „Karate-Do Kata Vol. 1“ (JKA)
+# Buch-Register: „Karate-Do Kata Vol. 1“ (JKA) – und Hangetsu aus Vol. 2
 
 Nachschlagewerk zum Buch, damit Fragen ohne das PDF beantwortet werden können. Es enthält **Fakten, Seitenangaben und
 Zusammenfassungen in eigenen Worten**, keine Abschriften: Formulierungen, Fotos und Gestaltung des Buches sind
@@ -697,4 +697,100 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
 | 35 | Migi Ashi-mae Fudo-dachi | Usho Gedan Sasho Jodan Tsukami-uke (Yori-ashi) | Yori-ashi nach vorne – Fudo-dachi | vorne | 171 |
 | 36 | Hidari Kokutsu-dachi | Migi Shuto Chudan-uke (zuvor Hidari Kaiten-tobi (Drehsprung)) – **Kiai** | Drehsprung links herum (Kaiten-tobi) mit Landung etwa einen Schritt weiter hinten, Kokutsu-dachi – Kiai | vorne, ganze Drehung links herum | 171 |
 | 37 | Migi Kokutsu-dachi | Hidari Shuto Chudan-uke | Rechter Fuß gleitet einen Schritt zurück | vorne | 172 |
+<!-- /ablauf -->
+
+## Band 2: Hangetsu („Karate-Do Kata Vol. 2“, JKA)
+
+Aus Band 2 nutzt die App **nur Hangetsu**. Das PDF hat 87 Seiten; ab Scan-Seite 5 zeigt jede eine gedruckte Doppelseite:
+**Scan-Seite n = Buchseiten 2·(n−4) und 2·(n−4)+1** (z. B. Scan 41 = S. 74–75). In der App rechnet das
+`SK.bookPages(n, 2)` um (Quelle `SK.bookSrc2(n)`). Scan 3–4: „Content and Guidance“ (S. i–ii, gleicher Inhalt wie in
+Band 1) und Inhaltsverzeichnis (S. 1). Englische Ausgabe März 2008, Aufsicht Motokuni Sugiura. Anders als in Band 1
+liegen die Scan-Bilder richtig auf der Seite, und es gibt eine Textebene; die Werkzeuge in `tools/kata-pdf/` lesen
+Band 2 mit `KATA_VOL=2` (PDF als `Karate-do-kata-volume-2.pdf` im Hauptordner, nie committen).
+
+| Kapitel | Buchseiten | Scan-Seiten | Fußskizze (Scan) |
+|---|---|---|---|
+| Hangetsu | 74–111 | 41–59 | 58–59 |
+
+### Hangetsu (S. 74–111, Scan 41–59)
+- 41 Bewegungen, Kiai bei 11 und 40. Yoi: Hachiji-dachi, Fäuste vor den Oberschenkeln. Naore: rechter Fuß bleibt,
+  linker geht zurück. Enbusen: Kreuz (Scan 58–59).
+- Hinweise im Buch:
+  - 1 (Scan 41): Halbmondschritt – das rechte Bein trägt, der linke Fuß gleitet im Bogen von innen nach außen vor;
+    Unterarme kreuzen vor dem Bauch, Uchi-uke mit dem Gefühl, die Fäuste auseinanderzudrücken; Hände und Füße enden
+    gleichzeitig, erhöhte dynamische Spannung. Hangetsu-dachi: etwas kürzer als Zenkutsu-dachi, Knie und
+    Oberschenkelinnenseiten zur Mitte gespannt, die Sohlen greifen den Boden.
+  - 2 (Scan 42): Hüftdrehung und Hände im Takt der Atmung – 1 beim Einatmen, 2 beim Ausatmen.
+  - 6 (Scan 44): Die Kata hieß früher Seshan; Hangetsu (Halbmond) wegen der Halbkreise von Händen und Füßen
+    (nach Erinnerungen an Funakoshis Unterricht).
+  - 7–8 (Scan 44): Jishi-ippon-ken (Zeigefinger halb gebeugt, vom Daumen gestützt); langsam unter die Brust zurück
+    (Ryo-chichi-shita), dann Doppelstoß nach vorne. Bedeutung: Befreiung aus einem Griff von hinten (Ellbogen zur Seite
+    bzw. Schlag auf die Handrücken); 8 zielt auf einen Vitalpunkt zwischen 5. und 6. Rippe. Langsam und kraftvoll.
+  - 9 (Scan 45): Kaisho Yama-gamae – Handgelenke kreuzen vor dem Gesicht, Unterarme senkrecht neben dem Gesicht,
+    Ellbogen auf Schulterhöhe; Befreiung, indem die Ellbogen senkrecht hochgehen.
+  - 10 (Scan 45): Ryote Ryogawa Gedan-kakiwake – Hände seitlich nach unten; Bedeutung: Handkante in den Unterbauch oder
+    Haiwan-Abwehr Jodan mit anschließender Chudan-Ablenkung.
+  - 11 (Scan 45–46): schnelle Wendung links herum nach hinten (Ura-shomen) mit Kiai; Zeigefinger gestreckt, die übrigen
+    Finger leicht gebeugt (Kyohan, Best Karate).
+  - 12, 14, 16 (Scan 46–48): Tsukami mit Koko (Hand in C-Form) – Chudan-Angriff mit Uchi-uke abwehren und das
+    Handgelenk greifen; der Ellbogen bleibt in der Körperlinie. Langsam und kraftvoll.
+  - 18–19, 21–22, 24–25 (Scan 48–51): Ren-zuki. 20 (Scan 49): Hidari-e Yori-ashi, links herum.
+  - 23 (Scan 50): beide Füße gleiten etwas nach rechts Richtung Ura-shomen, der rechte führt im Halbmond.
+  - 26, 32, 38 (Scan 51–56): Kokutsu-dachi mit Uraken Tate-mawashi-uchi – Sohle ans Standknie, Knie zur Brust, Faust und
+    Fuß langsam im großen senkrechten Kreis. Kyohan: die Hand des Gegners treffen; Best Karate: das hintere Bein vor
+    einem Kekomi in Sicherheit bringen und beim Aufsetzen Uraken Jodan.
+  - 27, 33 (Scan 52, 54): Kreuzschritt leise und langsam; Kyohan: die Faust ist gegriffen, man folgt dem Zug.
+  - 28, 34 (Scan 52, 54): Mae-geri mit dem Fußballen vor der Faust, die Faust zieht zur anderen Schulter; Kyohan: Tritt
+    gegen die Hand des Gegners, Befreiung des Arms.
+  - 31, 37 (Scan 53, 55): Age-uke in Hanmi, Handgelenk etwa eine Faust vor der Stirn.
+  - 39–40 (Scan 56–57): Mikazuki-geri in die linke Hand (die Hand bleibt), Landung hinten, Chudan-zuki mit Kiai –
+    fließend; Kyohan: der Stoß trifft dort, wo vorher die linke Faust war.
+  - 41 (Scan 57): Neko-ashi-dachi mit Ryo-teisho Gedan Awase-uke – rechter Fuß etwas zurück, linker zieht heran, Hüfte
+    über die rechte Ferse; Handgelenke kräftig nach außen gebeugt, gegen das Schienbein eines Tritts. Langsam und
+    kraftvoll.
+
+<!-- ablauf:hangetsu -->
+| Nr | Stand | Technik | Fußarbeit | Richtung | Scan-S. |
+|---|---|---|---|---|---|
+| 1 | Hidari Ashi-mae Hangetsu-dachi | Hidari Chudan Uchi-uke (Halbmondschritt, Einatmen) | Rechtes Bein trägt und dreht nach innen, linker Fuß gleitet im Halbmond (Bogen von innen nach außen) nach vorne – Einatmen | vorne | 41 |
+| 2 | Hidari Ashi-mae Hangetsu-dachi | Migi Chudan Gyaku-zuki (Ausatmen) | Stand bleibt – Ausatmen | vorne | 42 |
+| 3 | Migi Ashi-mae Hangetsu-dachi | Migi Chudan Uchi-uke (Halbmondschritt) | Linkes Bein trägt und dreht nach innen, rechter Fuß gleitet im Halbmond nach vorne | vorne | 42 |
+| 4 | Migi Ashi-mae Hangetsu-dachi | Hidari Chudan Gyaku-zuki | Stand bleibt | vorne | 43 |
+| 5 | Hidari Ashi-mae Hangetsu-dachi | Hidari Chudan Uchi-uke (Halbmondschritt) | Rechtes Bein trägt und dreht nach innen, linker Fuß gleitet im Halbmond nach vorne | vorne | 43 |
+| 6 | Hidari Ashi-mae Hangetsu-dachi | Migi Chudan Gyaku-zuki | Stand bleibt | vorne | 44 |
+| 7 | Hidari Ashi-mae Hangetsu-dachi | Ryo-jishi-ippon-ken Ryo-chichi-shita (Fäuste unter die Brust zurückziehen) – langsam | Langsam: Stand bleibt | vorne | 44 |
+| 8 | Hidari Ashi-mae Hangetsu-dachi | Ryo-jishi-ippon-ken Chudan Morote-zuki – langsam | Langsam: Stand bleibt | vorne | 44 |
+| 9 | Hidari Ashi-mae Hangetsu-dachi | Kaisho Yama-gamae – langsam | Langsam: Stand bleibt | vorne | 45 |
+| 10 | Hidari Ashi-mae Hangetsu-dachi | Ryote Ryogawa Gedan-kakiwake – langsam | Langsam: Stand bleibt | vorne | 45 |
+| 11 | Hidari Ashi-mae Hangetsu-dachi | Migi Chudan Uchi-uke + Hidari Gedan-uke (Wendung nach hinten (Ura-shomen), Zeigefinger gestreckt) – **Kiai** | Linkes Bein trägt, rechter Fuß gleitet am linken vorbei nach vorne, Wendung links herum nach hinten (Ura-shomen) – Kiai | Start, Wendung ½ links herum | 45 |
+| 12 | Hidari Ashi-mae Hangetsu-dachi | Usho Tsukami (Koko (Hand in C-Form)) – langsam | Langsam: Stand bleibt | Start | 46 |
+| 13 | Migi Ashi-mae Hangetsu-dachi | Hidari Chudan Uchi-uke + Migi Gedan-uke (Halbmondschritt) | Linkes Bein trägt und dreht nach innen, rechter Fuß gleitet im Halbmond nach vorne | Start | 46 |
+| 14 | Migi Ashi-mae Hangetsu-dachi | Sasho Tsukami (Koko (Hand in C-Form)) – langsam | Langsam: Stand bleibt | Start | 47 |
+| 15 | Hidari Ashi-mae Hangetsu-dachi | Migi Chudan Uchi-uke + Hidari Gedan-uke (Halbmondschritt) | Rechtes Bein trägt und dreht nach innen, linker Fuß gleitet im Halbmond nach vorne | Start | 47 |
+| 16 | Hidari Ashi-mae Hangetsu-dachi | Usho Tsukami (Koko (Hand in C-Form)) – langsam | Langsam: Stand bleibt | Start | 48 |
+| 17 | Migi Ashi-mae Hangetsu-dachi | Migi Chudan Uchi-uke (Halbmondschritt nach rechts) | Linkes Bein trägt und dreht, rechter Fuß gleitet im Halbmond nach rechts – Viertelwendung rechts herum | links, Wendung ¼ rechts herum | 48 |
+| 18 | Migi Ashi-mae Hangetsu-dachi | Hidari Chudan Gyaku-zuki – fließend weiter | Stand bleibt | links | 48 |
+| 19 | Migi Ashi-mae Hangetsu-dachi | Uken Chudan-zuki (Saken Hidari Koshi) (Ren-zuki) | Stand bleibt | links | 49 |
+| 20 | Hidari Ashi-mae Hangetsu-dachi | Hidari Chudan Uchi-uke (Hidari-e Yori-ashi) | Hidari-e Yori-ashi: Wendung links herum, beide Füße gleiten nach rechts (in Blickrichtung) | rechts, Wendung ½ links herum | 49 |
+| 21 | Hidari Ashi-mae Hangetsu-dachi | Migi Chudan Gyaku-zuki – fließend weiter | Stand bleibt | rechts | 49 |
+| 22 | Hidari Ashi-mae Hangetsu-dachi | Saken Chudan-zuki (Uken Migi Koshi) (Ren-zuki) | Stand bleibt | rechts | 50 |
+| 23 | Migi Ashi-mae Hangetsu-dachi | Migi Chudan Uchi-uke (Beide Füße gleiten, rechter Fuß im Halbmond Richtung Ura-shomen) | Beide Füße gleiten etwas nach rechts Richtung Ura-shomen, der rechte führt im Halbmond – Viertelwendung rechts herum | Start, Wendung ¼ rechts herum | 50 |
+| 24 | Migi Ashi-mae Hangetsu-dachi | Hidari Chudan Gyaku-zuki – fließend weiter | Stand bleibt | Start | 50 |
+| 25 | Migi Ashi-mae Hangetsu-dachi | Uken Chudan-zuki (Saken Hidari Koshi) (Ren-zuki) | Stand bleibt | Start | 51 |
+| 26 | Migi Kokutsu-dachi | Hidari Uraken Tate-mawashi-uchi (Uken Migi Koshi) (Blick nach vorne (Shomen), Fuß und Faust im großen Kreis) – langsam | Langsam: Rechter Fuß bleibt und dreht, Blick nach vorne (Shomen) – linker Fuß kommt ans rechte Knie und landet im großen Kreis vorne | vorne, Wendung ½ links herum | 51 |
+| 27 | Migi Ashi-mae Kosa | Rechter Fuß kreuzt leise vor dem linken – langsam | Langsam und leise: Linkes Bein trägt, rechter Fuß kreuzt vor dem linken nach vorne | vorne | 52 |
+| 28 | Migi Ashi-dachi | Hidari Chudan Mae-geri-keage (Saken Migi Kata) | Gewicht aufs rechte Bein, linker Fuß tritt Mae-geri und zieht zurück | vorne | 52 |
+| 29 | Hidari Ashi-mae Hangetsu-dachi | Saken Gedan-zuki | Rechtes Bein trägt, linker Fuß setzt nach dem Tritt vorne auf | vorne | 53 |
+| 30 | Hidari Ashi-mae Hangetsu-dachi | Migi Chudan Gyaku-zuki | Stand bleibt | vorne | 53 |
+| 31 | Hidari Ashi-mae Hangetsu-dachi | Hidari Jodan Age-uke (Hanmi) | Stand bleibt – Hüfte in Hanmi | vorne | 53 |
+| 32 | Hidari Kokutsu-dachi | Migi Uraken Tate-mawashi-uchi (Saken Hidari Koshi) (Blick nach hinten (Ura-shomen), Fuß und Faust im großen Kreis) – langsam | Langsam: Linker Fuß bleibt und dreht, Blick nach hinten (Ura-shomen) – rechter Fuß kommt ans linke Knie und landet im großen Kreis hinten | Start, Wendung ½ rechts herum | 53 |
+| 33 | Hidari Ashi-mae Kosa | Linker Fuß kreuzt leise vor dem rechten – langsam | Langsam und leise: Rechtes Bein trägt, linker Fuß kreuzt vor dem rechten nach vorne | Start | 54 |
+| 34 | Hidari Ashi-dachi | Migi Chudan Mae-geri-keage (Uken Hidari Kata) | Gewicht aufs linke Bein, rechter Fuß tritt Mae-geri und zieht zurück | Start | 54 |
+| 35 | Migi Ashi-mae Hangetsu-dachi | Uken Gedan-zuki | Linkes Bein trägt, rechter Fuß setzt nach dem Tritt vorne auf | Start | 55 |
+| 36 | Migi Ashi-mae Hangetsu-dachi | Hidari Chudan Gyaku-zuki | Stand bleibt | Start | 55 |
+| 37 | Migi Ashi-mae Hangetsu-dachi | Migi Jodan Age-uke (Hanmi) | Stand bleibt – Hüfte in Hanmi | Start | 55 |
+| 38 | Migi Kokutsu-dachi | Hidari Uraken Tate-mawashi-uchi (Uken Migi Koshi) (Blick nach vorne (Shomen), Fuß und Faust im großen Kreis) – langsam | Langsam: Rechter Fuß bleibt und dreht, Blick nach vorne (Shomen) – linker Fuß kommt ans rechte Knie und landet im großen Kreis vorne | vorne, Wendung ½ links herum | 56 |
+| 39 | Hidari Ashi-dachi | Sasho-ni Migi Chudan Mikazuki-geri (im Buch: Mikazuki-geri Sasho-ate) – fließend weiter | Gewicht aufs linke Bein, Hüfte dreht links herum, rechter Fuß tritt Mikazuki-geri in die linke Hand | vorne | 56 |
+| 40 | Hidari Ashi-mae Hangetsu-dachi | Uken Chudan-zuki (Saken Hidari Koshi) – **Kiai** | Linker Fuß bleibt, rechter Fuß setzt nach dem Tritt hinten auf – Kiai | vorne | 57 |
+| 41 | Hidari Ashi-mae Neko-ashi-dachi | Ryo-teisho Gedan Awase-uke – langsam | Langsam: Rechter Fuß gleitet etwas zurück, linker Fuß zieht heran – Neko-ashi-dachi | vorne | 57 |
 <!-- /ablauf -->

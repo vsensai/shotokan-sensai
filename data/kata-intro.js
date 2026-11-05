@@ -3,7 +3,7 @@
   'use strict';
   const P = (n) => SK.bookSrc(n);
 
-  SK.kataOrder = ['heian-shodan', 'heian-nidan', 'heian-sandan', 'heian-yondan', 'heian-godan', 'tekki-shodan', 'bassai-dai', 'kanku-dai', 'jion', 'enpi'];
+  SK.kataOrder = ['heian-shodan', 'heian-nidan', 'heian-sandan', 'heian-yondan', 'heian-godan', 'tekki-shodan', 'bassai-dai', 'kanku-dai', 'jion', 'enpi', 'hangetsu'];
 
   SK.kataIntroUnit = {
     id: 'kata-buch',
@@ -22,6 +22,7 @@
             <li>Enthaltene Kata: Heian Shodan–Godan, Tekki Shodan, Bassai Dai, Kanku Dai, Jion, Enpi.</li>
             <li>Verglichene Quellen u. a.: <i>Karate-Do Kyohan</i> (Gichin Funakoshi), <i>Best Karate</i> (Masatoshi Nakayama), <i>Rentan Goshin Karate-Jutsu</i> (Funakoshi, 1925).</li>
             <li>Volume One und Two wurden für Kata-Turniere beim <b>Shoto Cup 2003</b> eingeführt.</li>
+            <li>Die Sentei-Kata <b>Hangetsu</b> steht in <b>Karate-Do Kata Vol. 2</b> (JKA, englische Ausgabe 2008, S. 74–111) – sie ist als einzige Kata dieses Bandes in der App, mit Angabe der Buchseiten aus Band 2.</li>
           </ul>`,
       },
       {
@@ -89,6 +90,7 @@
     L.mc('Wann begannen die JKA-Instruktoren mit der Arbeit am einheitlichen Kata-Modell?', ['April 1993', 'April 1949', 'Mai 1957', 'Januar 2003'], 'Genehmigt vom Shihan-kai im September 1993.', P(3));
     L.mc('Bei welchem Turnier sollten Volume One und Two erstmals international für Kata-Wettkämpfe gelten?', ['Shoto Cup 2003', 'Weltmeisterschaft 1975', 'Olympia 2020', 'Asian Games 1994'], '', P(3));
     L.multi('Welche Kata sind in „Karate-Do Kata Vol. 1“ enthalten?', ['Heian Shodan bis Godan', 'Tekki Shodan', 'Bassai Dai', 'Kanku Dai', 'Jion', 'Enpi'], ['Hangetsu', 'Gankaku'], '', P(5));
+    L.mc('In welchem Band von „Karate-Do Kata“ (JKA) steht die Sentei-Kata Hangetsu?', ['Vol. 2', 'Vol. 1', 'In keinem – nur in Best Karate', 'Vol. 3'], 'Band 2 erschien 2008; die App nutzt daraus nur Hangetsu.', SK.bookSrc2(4));
     L.multi('Welche Werke wurden für das Buch verglichen?', ['Karate-Do Kyohan', 'Best Karate', 'Rentan Goshin Karate-Jutsu'], ['Dynamic Karate', 'Bubishi'], '', P(4));
     L.mc('Wer schrieb „Karate-Do Kyohan“?', ['Gichin Funakoshi', 'Masatoshi Nakayama', 'Motokuni Sugiura', 'Tsutomu Ohshima'], 'Ohshima übersetzte die englische Ausgabe (1973).', P(4));
     L.mc('Wer schrieb „Best Karate“?', ['Masatoshi Nakayama', 'Gichin Funakoshi', 'Hirokazu Kanazawa', 'Motokuni Sugiura'], '', P(4));

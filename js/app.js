@@ -167,7 +167,7 @@
     };
     app.append(
       section('Allgemeines Wissen', SK.generalUnits),
-      section('Kata-Wissen', kataUnits, 'Ausschließlich aus „Karate-Do Kata Vol. 1“ (JKA).')
+      section('Kata-Wissen', kataUnits, 'Ausschließlich aus „Karate-Do Kata Vol. 1“ (JKA), Hangetsu aus „Karate-Do Kata Vol. 2“.')
     );
     finishView();
   }
@@ -714,7 +714,7 @@
         k.focus ? el('p', {}, el('b', { text: 'Besondere Schwerpunkte: ' }), k.focus) : '',
         k.note ? el('p', { class: 'muted', text: k.note }) : '',
         links.length
-          ? el('div', { class: 'prog-links' }, el('span', { class: 'muted small', text: 'Kata-Wissen aus „Karate-Do Kata Vol. 1“:' }), el('div', { class: 'actions' }, links.map((e) => el('a', { class: 'btn', href: `#/wissen/${e.lesson.id}`, text: e.unit.title }))))
+          ? el('div', { class: 'prog-links' }, el('span', { class: 'muted small', text: 'Kata-Wissen aus „Karate-Do Kata“ (JKA):' }), el('div', { class: 'actions' }, links.map((e) => el('a', { class: 'btn', href: `#/wissen/${e.lesson.id}`, text: e.unit.title }))))
           : '',
       ];
     }
@@ -875,7 +875,7 @@
         { class: 'card' },
         el('h3', { text: 'Quellen' }),
         el('ul', {}, Object.values(SK.sources).map((s) => el('li', { text: s }))),
-        el('p', { class: 'muted small', text: 'Kata-Fragen sind sinngemäße deutsche Zusammenfassungen aus „Karate-Do Kata Vol. 1“ (JKA Shihan-kai, 2003) mit Angabe der gedruckten Buchseiten. Prüfungsangaben ohne Gewähr – maßgeblich ist die jeweils gültige DJKB-Prüfungsordnung.' })
+        el('p', { class: 'muted small', text: 'Kata-Fragen sind sinngemäße deutsche Zusammenfassungen aus „Karate-Do Kata Vol. 1“ (JKA Shihan-kai, 2003) und – nur für Hangetsu – „Karate-Do Kata Vol. 2“ (2008) mit Angabe der gedruckten Buchseiten. Prüfungsangaben ohne Gewähr – maßgeblich ist die jeweils gültige DJKB-Prüfungsordnung.' })
       ),
       versionLine()
     );

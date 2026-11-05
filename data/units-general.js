@@ -232,7 +232,7 @@
               <li><b>Kosa-dachi</b> – Kreuzstand (Begriff der Theorie zum 1. Dan); auch für Anwendungen mit Körperdrehung.</li>
               <li><b>Neko-ashi-dachi</b> – Katzenfußstand, fast das ganze Gewicht hinten – wie eine Katze kurz vor dem Sprung.</li>
               <li><b>Fudo-dachi</b> (Sochin-dachi) – „unbeweglicher Stand“: eine feste Basis, aus der eine Technik viel Kraft entfalten kann.</li>
-              <li><b>Hangetsu-dachi</b> – Halbmondstand (aus der Kata Hangetsu): etwa eine Fußlänge kürzer als Zenkutsu-dachi, Füße etwa schulterbreit.</li>
+              <li><b>Hangetsu-dachi</b> – Halbmondstand (aus der Kata Hangetsu): etwa eine Fußlänge kürzer als Zenkutsu-dachi, Füße etwa schulterbreit. Laut JKA-Buch (Vol. 2) sind Knie und Oberschenkelinnenseiten zur Mitte gespannt, die Fußsohlen „greifen“ den Boden; der vordere Fuß kommt im Halbmondschritt (Bogen von innen nach außen).</li>
               <li><b>Renoji-dachi</b> – L-förmiger Stand; <b>Teiji-dachi</b> – T-förmiger Stand.</li>
               <li><b>Sanchin-dachi</b> – Sanduhrstand, Knie nach innen gespannt: sehr kurz, beim Gehen werden die Füße zur Mitte geführt – das ergibt die Form einer Sanduhr.</li>
             </ul>

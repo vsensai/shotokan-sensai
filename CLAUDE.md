@@ -20,10 +20,10 @@
 
 ## Inhalte
 - App, Texte und Commit-Nachrichten auf Deutsch.
-- Kata-Fragen nur aus „Karate-Do Kata Vol. 1“ (JKA) mit gedruckter Buchseite (`SK.bookSrc`).
+- Kata-Fragen nur aus „Karate-Do Kata Vol. 1“ (JKA) mit gedruckter Buchseite (`SK.bookSrc`). Einzige Ausnahme: Hangetsu aus „Karate-Do Kata Vol. 2“ (`SK.bookSrc2`, Kata-Daten mit `vol: 2`) – weitere Kata aus Band 2 nur nach Rückfrage.
 - Fragen-IDs entstehen aus Lektion, Fragetext und richtiger Antwort (`SK.qb`). `data/legacy-ids.js` ist eingefroren und wird nicht bearbeitet.
-- Das Kata-PDF und `tools/out/` niemals committen.
-- Heft „Karate kompakt“ (Quelle `SK.sources.kompakt`): Wissen steht in `docs/karate-kompakt.md`. Keine Scans, Bilder oder wörtlichen Texte des Heftes ins Repo – nur Fakten in eigenen Worten; Grafiken selbst zeichnen. Für Kata-Inhalte gilt weiter nur das JKA-Buch.
+- Die Kata-PDFs (Band 1 und 2) und `tools/out/` niemals committen.
+- Heft „Karate kompakt“ (Quelle `SK.sources.kompakt`): Wissen steht in `docs/karate-kompakt.md`. Keine Scans, Bilder oder wörtlichen Texte des Heftes ins Repo – nur Fakten in eigenen Worten; Grafiken selbst zeichnen. Für Kata-Inhalte gilt weiter nur das JKA-Buch (Band 1, Hangetsu aus Band 2).
 
 ## 3D-Figuren
 - Bilder mit ganzer Figur kommen aus `js/figur-posen.js` (Schlüssel wie `tc:age-zuki`). Neue Technik mit Figur: nur die Pose dort ergänzen – keine SVG-Grafik als Rückfall (ohne WebGL 2 bleibt das Bild leer, die Startseite zeigt einen Hinweis). SVG-Grafiken nur, wo keine Figur passt (Fußbilder, Körperwaffen, Fußbewegungen, Schemabilder, Bodenkarte). `validate.html` meldet ein SVG neben einer 3D-Figur als Fehler.
@@ -32,4 +32,4 @@
 ## Buchwissen (ohne PDF)
 - Bei Fragen zum Buch oder neuen Kata-Inhalten zuerst `docs/buch-register.md` lesen: Seitenzählung, Kapitel, Zusammenfassungen der allgemeinen Kapitel, Hinweise des Buches je Bewegung und Ablauftabellen aller zehn Kata. Nur Fakten und eigene Worte ins Repo, keine Abschriften aus dem Buch.
 - Die Ablauftabellen im Register werden aus den App-Daten erzeugt: nach Änderungen an `seq` oder `ansage` in `data/kata-*.js` `node tools/register-tabellen.js` laufen lassen.
-- Fußstellungen je Bewegung (Kata-Ansage) stehen für alle Kata in `ansage` in `data/kata-*.js`, gewonnen aus den Fußskizzen mit `tools/kata-pdf/` (siehe dortige README). Liegt das PDF wieder vor, immer über `tools/kata-pdf/scans.py` lesen – im PDF sind die Scan-Bilder verschoben und werden beim normalen Rendern abgeschnitten.
+- Fußstellungen je Bewegung (Kata-Ansage) stehen für alle Kata in `ansage` in `data/kata-*.js`, gewonnen aus den Fußskizzen mit `tools/kata-pdf/` (siehe dortige README). Liegt das PDF wieder vor, immer über `tools/kata-pdf/scans.py` lesen – im PDF sind die Scan-Bilder verschoben und werden beim normalen Rendern abgeschnitten. Band 2 (Hangetsu): dieselben Werkzeuge mit `KATA_VOL=2`, Seitenzählung im Register.

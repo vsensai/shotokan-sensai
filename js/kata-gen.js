@@ -41,7 +41,7 @@
 
   // Zerlegt einen Technik-Text in linke Hand, rechte Hand, beide Hände und Bein samt Höhe (J/C/G).
   // Die Höhe steht danach nur im Label; bleibt ohne sie nur „-uke“, „-barai“ … übrig, bleibt der Name ganz.
-  const HAND = { Saken: 'l', Sasho: 'l', Uken: 'r', Usho: 'r', Ryoken: 'b', Ryosho: 'b', Morote: 'b', Kaisho: 'b', Ryote: 'b', 'Ryo-kentsui': 'b' };
+  const HAND = { Saken: 'l', Sasho: 'l', Uken: 'r', Usho: 'r', Ryoken: 'b', Ryosho: 'b', Morote: 'b', Kaisho: 'b', Ryote: 'b', 'Ryo-kentsui': 'b', 'Ryo-teisho': 'b', 'Ryo-jishi-ippon-ken': 'b' };
   const OPEN = new Set(['Sasho', 'Usho', 'Ryosho', 'Kaisho']);
   const SIDE = { Hidari: 'l', Migi: 'r' };
   const LEVEL = { Jodan: 'J', Chudan: 'C', Gedan: 'G' };
@@ -69,7 +69,8 @@
         if (HAND[t]) start(HAND[t], OPEN.has(t));
         else if (SIDE[t]) start(SIDE[t]);
         else { start(dir ? SIDE[dir] : 'b'); i--; }
-        if (t === 'Ryo-kentsui') cur.toks.push('Kentsui');
+        // „Ryo-kentsui“, „Ryo-teisho“ …: beide Hände mit dieser Handform
+        if (/^Ryo-./.test(t)) cur.toks.push(t[4].toUpperCase() + t.slice(5));
         if (dir) cur.toks.push(...(SIDE[dir] === cur.slot ? ['Sokumen'] : [dir, 'Sokumen']));
         dir = null;
         continue;
@@ -142,10 +143,11 @@
     const cards = k.seq.filter((r) => r[0] >= from && r[0] <= to).map((r) => moveCard(k, r)).join('');
     return `<div class="mcards">${cards}</div>
       <p class="muted small">Die Höhe steht im farbigen Label (<span class="lvl lvl-J">Jodan</span> <span class="lvl lvl-C">Chudan</span> <span class="lvl lvl-G">Gedan</span>); ohne Label nennt das Buch keine Höhe. Bei mehrteiligen Bewegungen ist die Endstellung angegeben (im Buch jeweils zuletzt aufgeführt); Zwischenschritte stehen grau darunter.</p>
-      <p class="src">Quelle: ${util.esc(SK.BOOK_SOURCE)}, ab ${SK.bookPages(k.seq.find((r) => r[0] === from)[3])}</p>`;
+      <p class="src">Quelle: ${util.esc(SK.bookName(k.vol))}, ab ${SK.bookPages(k.seq.find((r) => r[0] === from)[3], k.vol)}</p>`;
   }
 
   function buildKata(k) {
+    const P = (n) => SK.bookSrc(n, k.vol);
     const unit = { id: `kata-${k.id}`, title: k.name, kind: 'kata', desc: `${k.moves} Bewegungen · Kiai bei ${k.kiai.join(' und ')}`, lessons: [] };
     const stances = [...new Set(k.seq.map((r) => r[1]))];
     const stancePool = [...new Set(stances.concat(GLOBAL_STANCES))];
@@ -301,7 +303,7 @@
     const list = SK.kataOrder.map((id) => SK.kata[id]);
     list.forEach((k) => {
       const others = util.shuffle(list.filter((o) => o.moves !== k.moves)).slice(0, 3);
-      L.mc(`Welche Kata hat laut Buch ${k.moves} Bewegungen?`, [k.name].concat(others.map((o) => o.name)), '', P(k.firstPage));
+      L.mc(`Welche Kata hat laut Buch ${k.moves} Bewegungen?`, [k.name].concat(others.map((o) => o.name)), '', SK.bookSrc(k.firstPage, k.vol));
     });
     L.order('Ordne die Kata nach Anzahl der Bewegungen (wenigste zuerst): Heian Sandan, Heian Shodan, Tekki Shodan, Bassai Dai, Kanku Dai', ['Heian Sandan (20)', 'Heian Shodan (21)', 'Tekki Shodan (29)', 'Bassai Dai (42)', 'Kanku Dai (65)'], '', P(5));
     L.order('Ordne nach Anzahl der Bewegungen (wenigste zuerst): Heian Godan, Heian Nidan, Heian Yondan, Enpi', ['Heian Godan (23)', 'Heian Nidan (26)', 'Heian Yondan (27)', 'Enpi (37)'], '', P(5));
@@ -322,6 +324,14 @@
     L.mc('In welcher Heian-Kata kommt Kentsui Tate-mawashi-uchi vor (Bewegung 4)?', ['Heian Shodan', 'Heian Nidan', 'Heian Yondan', 'Heian Godan'], '', P(7));
     L.mc('Welche Kata wird fast vollständig in Kiba-dachi ausgeführt?', ['Tekki Shodan', 'Jion', 'Heian Sandan', 'Enpi'], '', P(67));
     L.multi('Welche Kata beginnen laut Buch aus Heisoku-dachi (Yoi)?', ['Tekki Shodan', 'Bassai Dai', 'Jion', 'Enpi'], ['Heian Shodan', 'Kanku Dai'], '', P(66));
+    // Hangetsu (aus Vol. 2)
+    const P2 = (n) => SK.bookSrc2(n);
+    L.mc('Welche Kata hieß früher Seshan?', ['Hangetsu', 'Tekki Shodan', 'Enpi', 'Jion'], '', P2(44));
+    L.mc('Welche Kata endet in Neko-ashi-dachi mit Teisho Awase-uke?', ['Hangetsu', 'Jion', 'Enpi', 'Kanku Dai'], '', P2(57));
+    L.mc('Welche Kata enthält Stöße mit Jishi-ippon-ken (Zeigefingerknöchel)?', ['Hangetsu', 'Bassai Dai', 'Tekki Shodan', 'Heian Yondan'], '', P2(44));
+    L.mc('In welcher Kata sollen Hüftdrehung und Hände der ersten Bewegungen im Takt der Atmung gehen (1 einatmen, 2 ausatmen)?', ['Hangetsu', 'Heian Shodan', 'Bassai Dai', 'Enpi'], '', P2(42));
+    L.mc('Welche Sentei-Kata wird fast vollständig in Hangetsu-dachi ausgeführt?', ['Hangetsu', 'Jion', 'Kanku Dai', 'Bassai Dai'], '', P2(41));
+    L.order('Ordne nach Anzahl der Bewegungen (wenigste zuerst): Tekki Shodan, Enpi, Hangetsu, Bassai Dai', ['Tekki Shodan (29)', 'Enpi (37)', 'Hangetsu (41)', 'Bassai Dai (42)'], '', `${P(5)}; ${P2(4)}`);
     L.multi('Welche früheren Namen nennt das Buch?', ['Heian – Pin An', 'Tekki – Naihanchi', 'Kanku – Kushanku', 'Enpi – Wanshu'], ['Jion – Wankan', 'Bassai – Chinto'], '', P(65));
   }
 

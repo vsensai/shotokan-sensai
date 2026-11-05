@@ -317,8 +317,11 @@
         }
         // Kreuzschritt in Tekki: der genannte Fuß kreuzt vor dem anderen auf dessen andere Seite und steht auf dem Ballen
         // direkt daneben, mindestens KOSA_SIDE weit
+        // (nur beim seitlichen Kreuzschritt wie in Tekki; in Hangetsu 27 und 33 kreuzt der Fuß nach vorne in Blickrichtung)
         const cross = /^(hidari|migi) ashi-mae kosa$/i.exec(stances[j]);
-        if (cross) {
+        const ahead = (c) => { const v = toe(m.body); return Math.abs((f[c][0] - prev.f[c][0]) * v[0] + (f[c][1] - prev.f[c][1]) * v[1]); };
+        const sideways = (c) => { const v = toe(m.body + 90); return Math.abs((f[c][0] - prev.f[c][0]) * v[0] + (f[c][1] - prev.f[c][1]) * v[1]); };
+        if (cross && sideways(/^h/i.test(cross[1]) ? 0 : 1) >= ahead(/^h/i.test(cross[1]) ? 0 : 1)) {
           const c = /^h/i.test(cross[1]) ? 0 : 1;
           const s = c ? -1 : 1; // der linke Fuß kreuzt nach rechts, der rechte nach links
           const u = toe(m.body + 90);

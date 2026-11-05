@@ -22,4 +22,12 @@ Reihenfolge: `extract_pdf_stdlib.py` → ggf. `ocr_pdf.py` → `summarize_kata.p
 Für die Einzelskizzen: `ocr_boxes.py` → `einzelskizzen.py` → `einzel_register.py`.
 Für die Kata-Ansage: `embusen.py SEITE…` → `ansage_build.py spec/KATA.py > tools/out/KATA.js` → `ansage_insert.py data/kata-….js KATA-ID KANA LAUTSCHRIFT SEITE tools/out/KATA.js`.
 
-Achtung: Im PDF liegt jedes Scan-Bild verschoben auf der Seite; beim normalen Rendern (Viewer, `page.get_pixmap`) fehlt deshalb ein großer Teil. Immer über `scans.py` lesen. Aufruf aus dem Hauptordner, z. B. `python3 tools/kata-pdf/extract_pdf_stdlib.py`.
+**Band 2 (nur Hangetsu):** PDF als `Karate-do-kata-volume-2.pdf` in den Hauptordner legen (87 Seiten) und jedem Aufruf
+`KATA_VOL=2` voranstellen. Dort liegen die Scan-Bilder richtig auf der Seite und es gibt eine Textebene: `ocr_boxes.py`
+liest dann sie statt OCR (nach `tools/out/ocr_boxes_v2.json`, ohne `rapidocr`), `einzelskizzen.py` und
+`einzel_register.py` arbeiten nur Scan-Seite 41–58 (Hangetsu) ab und berücksichtigen die größer gedruckten Skizzen.
+Ablauf: `KATA_VOL=2 python3 tools/kata-pdf/embusen.py 58 59` → `KATA_VOL=2 python3 tools/kata-pdf/ansage_build.py tools/kata-pdf/spec/hangetsu.py > tools/out/hangetsu.js`
+→ `python3 tools/kata-pdf/ansage_insert.py data/kata-hangetsu.js hangetsu はんげつ Hangetsu 58 tools/out/hangetsu.js` (die Zeile `de:` danach entfernen);
+Einzelskizzen: `KATA_VOL=2 python3 tools/kata-pdf/ocr_boxes.py 41 58` → `KATA_VOL=2 python3 tools/kata-pdf/einzelskizzen.py` → `KATA_VOL=2 python3 tools/kata-pdf/einzel_register.py`.
+
+Achtung (Band 1): Im PDF liegt jedes Scan-Bild verschoben auf der Seite; beim normalen Rendern (Viewer, `page.get_pixmap`) fehlt deshalb ein großer Teil. Immer über `scans.py` lesen. Aufruf aus dem Hauptordner, z. B. `python3 tools/kata-pdf/extract_pdf_stdlib.py`.
