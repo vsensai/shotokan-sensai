@@ -120,7 +120,8 @@
   }
   function cell(label, list, cls) {
     const body = list.length ? list.map((p) => `<div class="mp-part">${partHtml(p)}</div>`).join('') : '<span class="mp-none">–</span>';
-    return `<div class="mp-cell${cls ? ` ${cls}` : ''}"><span class="mp-lbl">${label}</span>${body}</div>`;
+    const plain = ['Links', 'Rechts', 'Bein'].includes(label) ? ' mp-lbl-plain' : '';
+    return `<div class="mp-cell${cls ? ` ${cls}` : ''}"><span class="mp-lbl${plain}">${label}</span>${body}</div>`;
   }
 
   function moveCard(k, r) {
@@ -139,9 +140,11 @@
     return `<div class="mcard${kiai ? ' kiai' : ''}"><div class="mcard-top"><span class="mcard-n">${r[0]}</span>${SK.gfx.stanceFor(r[1], { mini: true })}<span class="mcard-st">${util.esc(r[1])}</span>${kiai ? '<span class="badge">Kiai</span>' : ''}</div>${body}${notes.length ? `<div class="mcard-note">${util.esc(notes.join(' · '))}</div>` : ''}</div>`;
   }
 
+  // Spaltenköpfe: nur auf breiten Bildschirmen sichtbar (Tabellenansicht)
+  const HEAD = '<div class="mcards-head"><span>Nr · Stand</span><span>Links</span><span>Rechts</span><span>Bein</span><span>Hinweis</span></div>';
   function moveTable(k, from, to) {
     const cards = k.seq.filter((r) => r[0] >= from && r[0] <= to).map((r) => moveCard(k, r)).join('');
-    return `<div class="mcards">${cards}</div>
+    return `<div class="mcards">${HEAD}${cards}</div>
       <p class="muted small">Die Höhe steht im farbigen Label (<span class="lvl lvl-J">Jodan</span> <span class="lvl lvl-C">Chudan</span> <span class="lvl lvl-G">Gedan</span>); ohne Label nennt das Buch keine Höhe. Bei mehrteiligen Bewegungen ist die Endstellung angegeben (im Buch jeweils zuletzt aufgeführt); Zwischenschritte stehen grau darunter.</p>
       <p class="src">Quelle: ${util.esc(SK.bookName(k.vol))}, ab ${SK.bookPages(k.seq.find((r) => r[0] === from)[3], k.vol)}</p>`;
   }

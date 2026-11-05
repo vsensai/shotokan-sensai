@@ -2452,3 +2452,59 @@ main:fullscreen {
     display: none !important;
   }
 }
+
+/* Bewegungen als Tabelle auf breiten Bildschirmen: eine Zeile je Bewegung, Spaltenköpfe oben;
+   auf dem Handy bleiben die Karten (Spaltenköpfe ausgeblendet, Beschriftung in jeder Zelle). */
+.mcards-head { display: none; }
+@media (min-width: 900px) {
+  .mcards {
+    grid-template-columns: minmax(270px, 1.5fr) repeat(3, minmax(0, 1fr)) minmax(0, 1.2fr);
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--card);
+  }
+  .mcards-head {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    background: var(--bg);
+    font-size: 0.66rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+  }
+  .mcards-head span { padding: 0.45rem 0.6rem; }
+  .mcard {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    align-items: center;
+  }
+  .mcard:last-child { border-bottom: 0; }
+  .mcard:hover { background: var(--bg); }
+  .mcard.kiai { background: #fff3e0; box-shadow: inset 4px 0 0 #e65100; }
+  .mcard.kiai:hover { background: #fff3e0; }
+  .mcard-top { grid-column: 1; background: transparent; align-self: stretch; }
+  .mcard.kiai .mcard-top { background: transparent; }
+  .mp-row { grid-column: 2 / 5; display: grid; grid-template-columns: subgrid; align-self: stretch; }
+  .mp-cell { display: flex; flex-direction: column; justify-content: center; }
+  .mp-cell + .mp-cell { border-left: 0; }
+  .mp-lbl-plain { display: none; }
+  .mcard-note { grid-column: 5; border-top: 0; padding: 0.3rem 0.7rem; }
+}
+@media (prefers-color-scheme: dark) and (min-width: 900px) {
+  .mcard.kiai,
+  .mcard.kiai:hover {
+    background: #3a2a14;
+  }
+  .mcard.kiai .mcard-top {
+    background: transparent;
+  }
+}
