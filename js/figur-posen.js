@@ -472,15 +472,14 @@
   const GNU_HAND = (x, z) => ({ lean: 6, hL: aim(TNU, [x, -0.58, z]), pL: aim(TNU, [-1, 0, 0.2]), eL: aim(TNU, [0.4, -0.3, -0.2]) });
   D['tc:gedan-nagashi-uke'] = T_RUHIG(M(TNU, GNU_HAND(0.3, 0.4)), M(TNU, GNU_HAND(-0.06, 0.44)), M(hit('wristL', 'Faust und Unterarm wischen ab'), { eff: 'tipL', view: 'front3' }));
   D['tc:osae-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [0.0, -0.1, 0.36], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, -0.36, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' }));
-  // Kake-uke wie in Heian Godan 14: aus Kiba-dachi mit rechtem Gedan-barai (Blick nach rechts) wendet sich der Blick nach links;
+  // Kake-uke wie in Heian Godan 14, direkt aus der Ausgangsstellung (Kiba-dachi, Fäuste an den Hüften, Blick nach links):
   // beide Arme holen zusammen aus und liegen vor der Brust übereinander (linke offene Hand oben, rechte Faust darunter),
   // dann langsam und kraftvoll wie beim Spannen eines Bogens: die rechte Faust zieht zur Hüfte, der linke Arm hakt
   // ausgestreckt zur linken Seite (Chudan, Handgelenk außen, Handfläche nach vorn)
-  const KU0 = M(KB, { look: -90, hL: L(H.hip), hR: H.gedan });
-  const KU1 = M(KB, { look: 90, hL: L(H.hip), hR: H.gedan });
+  const KU0 = M(KB, { look: 90 });
   const KU2 = M(KB, { look: 90, hL: [-0.13, -0.06, 0.3], oL: 1, pL: [0, 0, -1], fL: [-0.3, 1, 0], eL: [0.3, -1, 0.3], hR: [0.13, -0.17, 0.27], eR: [-0.4, -1, 0.3] });
   const KU3 = M(KB, { look: 90, hL: [0.705, -0.1, 0.18], oL: 1, pL: [0.1, 0, 1], fL: [0.15, 1, 0], hR: H.hip });
-  D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.1, p: KU0 }, { t: 0.2, p: KU1 }, { t: 0.38, p: KU2 }, { t: 0.45, p: KU2 }, { t: 0.88, p: KU3 }], best: 1, dur: 3.6, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
+  D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.12, p: KU0 }, { t: 0.38, p: KU2 }, { t: 0.45, p: KU2 }, { t: 0.88, p: KU3 }], best: 1, dur: 3.6, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
   // Sukui-uke wie in Bassai Dai 6: aus Migi Zenkutsu-dachi gleitet der rechte Fuß im Halbkreis am linken vorbei nach rechts,
   // Hüfte bleibt auf gleicher Höhe; Fuß und Faust gehen zusammen: die rechte Faust sinkt vor dem Körper nach links unten
   // und schöpft in einem Bogen tief nach rechts und etwas hoch – die Faust nie höher als der Ellbogen
