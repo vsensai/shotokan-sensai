@@ -499,10 +499,13 @@
   const TSU_ST = M(S.hachiji, { L: { x: 0.22 }, R: { x: -0.22 }, pelvis: [0, 0.93, 0] });
   // (die linke Faust liegt vor der rechten, der Ellbogen bleibt vor dem Körper). Die Hand zieht in einem einzigen
   // gleichmäßigen Bogen nach vorn unten und hoch in die Endstellung; erst dort ist der Arm gestreckt
-  const TSU0 = M(TSU_ST, { hR: H.hip, hL: [-0.12, -0.3, 0.14], pL: [0, -1, 0], eL: [0.5, -0.6, 0.6] });
+  // Die linke Hand öffnet sich noch an der Hüfte, Finger in Richtung des Unterarms – so bleibt die rote Handkante
+  // beim Öffnen und auf dem ganzen Weg an derselben Stelle der Hand
+  const TSU0 = M(TSU_ST, { hR: H.hip, hL: [-0.12, -0.3, 0.14], fL: [-0.98, -0.13, -0.13], pL: [0, -1, 0], eL: [0.5, -0.6, 0.6] });
+  const TSU0_OFFEN = M(TSU0, { oL: 1 });
   const TSU_M = M(TSU_ST, { hR: H.hip, hL: [0.01, -0.24, 0.38], oL: 1, fL: [-0.1, 1, 0.4], pL: [-0.4, -0.3, 1], eL: [0.5, -0.8, 0.3] });
   const TSU1 = M(TSU_ST, { hR: H.hip, hL: [0.22, -0.02, 0.52], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] });
-  D['tc:tate-shuto-uke'] = M({ keys: [{ t: 0, p: TSU0 }, { t: 0.15, p: TSU0 }, { t: 0.5, p: TSU_M, e: 'in' }, { t: 0.85, p: TSU1, e: 'out' }], best: 1, dur: 3 }, M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'front3' }));
+  D['tc:tate-shuto-uke'] = M({ keys: [{ t: 0, p: TSU0 }, { t: 0.12, p: TSU0 }, { t: 0.17, p: TSU0_OFFEN }, { t: 0.5, p: TSU_M, e: 'in' }, { t: 0.85, p: TSU1, e: 'out' }], best: 1, dur: 3 }, M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'front3' }));
   // Teisho-uke wie in Jion 23: aus Hidari Zenkutsu-dachi (Gedan-barai) tritt der rechte Fuß vor in Kiba-dachi, die Hüfte dreht
   // ¼ nach links (rechte Seite vorn, Blick nach vorn). Die offene rechte Hand kommt wie beim Teisho-uchi von außen in einem
   // Bogen, nur mit ganz kleinem Radius: von der Hüfte etwas nach außen, dann im kleinen Bogen in die Abwehr zur rechten Seite –
