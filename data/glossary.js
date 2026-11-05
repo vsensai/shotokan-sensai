@@ -211,7 +211,7 @@
     'Neko-ashi-dachi': ['hangetsu', 41],
 
     'Oi-zuki': ['heian-shodan', 2],
-    'Gyaku-zuki': ['heian-godan', 2],
+    'Gyaku-zuki': ['heian-nidan', 18, '', 'im Buch: Saken Chudan-zuki', 'Saken Chudan-zuki'],
     'Kagi-zuki': ['tekki-shodan', 6],
     'Ura-zuki': ['kanku-dai', 42],
     'Age-zuki': ['enpi', 6],
