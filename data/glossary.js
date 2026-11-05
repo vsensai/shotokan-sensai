@@ -219,7 +219,7 @@
     'Otoshi-zuki': ['kanku-dai', 61],
     'Nukite': ['heian-nidan', 11, 'Shihon-nukite'],
     'Morote-zuki': ['hangetsu', 8, 'Jishi-ippon-ken Morote-zuki'],
-    'Ren-zuki': ['hangetsu', 19, '', 'mit 18'],
+    'Ren-zuki': ['heian-yondan', 17, '', 'mit 16'],
 
     'Uraken-uchi': ['heian-nidan', 7, 'Uraken Yoko-mawashi-uchi'],
     'Tettsui-uchi': ['heian-shodan', 4, 'Kentsui Tate-mawashi-uchi'],

@@ -346,11 +346,11 @@
       [14, 'Migi Kokutsu-dachi', 'Ryoken Chudan Kakiwake-uke', 46],
       [15, 'Hidari Ashi-dachi', 'Migi Jodan Mae-geri-keage', 46],
       [16, 'Migi Zenkutsu-dachi', 'Uken Chudan-zuki', 47],
-      [17, 'Migi Zenkutsu-dachi', 'Saken Chudan-zuki', 47],
+      [17, 'Migi Zenkutsu-dachi', 'Saken Chudan-zuki', 47, 'Ren-zuki'],
       [18, 'Hidari Kokutsu-dachi', 'Ryoken Chudan Kakiwake-uke', 48],
       [19, 'Migi Ashi-dachi', 'Hidari Jodan Mae-geri-keage', 48],
       [20, 'Hidari Zenkutsu-dachi', 'Saken Chudan-zuki', 49],
-      [21, 'Hidari Zenkutsu-dachi', 'Uken Chudan-zuki', 49],
+      [21, 'Hidari Zenkutsu-dachi', 'Uken Chudan-zuki', 49, 'Ren-zuki'],
       [22, 'Migi Kokutsu-dachi', 'Hidari Chudan Morote-uke', 49],
       [23, 'Hidari Kokutsu-dachi', 'Migi Chudan Morote-uke', 50],
       [24, 'Migi Kokutsu-dachi', 'Hidari Chudan Morote-uke', 50],
@@ -367,7 +367,7 @@
         <li>Bewegung 11: <b>Hidari Hizakutsu</b> – Shuto-Abwehr und Shuto-Schlag Jodan gleichzeitig.</li>
         <li>Bewegung 13: Sprung von etwa <b>anderthalb Schritten</b> nach vorne in Kosa-dachi (nach Best Karate).</li>
         <li>14 und 18: Kakiwake-uke langsam, kraftvoll, mit dynamischer Spannung – rechte Faust beim Kreuzen oben.</li>
-        <li>16+17 und 20+21: zwei Fauststöße schnell hintereinander.</li>
+        <li>16+17 und 20+21: zwei Fauststöße schnell hintereinander – das Buch nennt das <b>Ren-zuki</b>.</li>
         <li>Bewegung 25: Hände greifen den Hinterkopf des Gegners; direkt aus Kokutsu-dachi, ohne Zenkutsu-dachi und ohne Pause.</li>
       </ul>`,
     facts(L) {
@@ -383,6 +383,7 @@
       L.mc('Heian Yondan, Bewegungen 14 und 18 (Kakiwake-uke): Wie sollen sie ausgeführt werden?', ['Langsam und kraftvoll mit dynamischer Spannung', 'Schnell und locker', 'Mit Kiai', 'Mit offenen Händen'], '', P(46));
       L.mc('Heian Yondan, Kakiwake-uke: Welche Faust liegt beim Überkreuzen oben (nach Karate-Do Kyohan)?', ['Die rechte Faust', 'Die linke Faust', 'Die Arme werden nicht gekreuzt', 'Wechselnd je Seite'], '', P(46));
       L.mc('Heian Yondan, Mae-geri nach Kakiwake-uke: Wohin wird getreten?', ['Jodan, zwischen den Fäusten hindurch', 'Gedan auf das Knie', 'Chudan seitlich', 'Hinter den Körper'], '', P(46));
+      L.mc('Wie nennt das Buch die schnelle Folge der Heian-Yondan-Bewegungen 16 und 17?', ['Ren-zuki', 'Sanbon-zuki', 'Morote-zuki', 'Kizami-zuki'], 'Ebenso 20–21.', P(47));
       L.mc('Heian Yondan, Bewegung 25 (Hiza-tsuchi): Was stellen die Fäuste dar?', ['Das Greifen des Hinterkopfes des Gegners', 'Das Blocken eines Tritts', 'Einen Doppelfauststoß', 'Das Greifen des Fußes'], '', P(51));
       L.mc('Heian Yondan, Bewegung 25: Was soll man beim Übergang aus Bewegung 24 vermeiden?', ['Zenkutsu-dachi zu bilden und beim Anheben der Hände zu pausieren', 'Das Knie anzuheben', 'Kiai zu rufen', 'Die Hände zu öffnen'], '', P(51));
     },

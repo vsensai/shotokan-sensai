@@ -237,7 +237,8 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
   - 13 (Scan 45): linke Hand greift und zieht zur Hüfte; nach Best Karate anderthalb Sprungschritte nach vorne.
   - 14 und 18 (Scan 46, 48): langsam, kraftvoll, mit dynamischer Spannung; die Arme kreuzen (rechts oben) und ziehen
     sofort auseinander.
-  - 16–17 und 20–21 (Scan 47, 49): zwei Fauststöße schnell hintereinander.
+  - 16–17 und 20–21 (Scan 47, 49): zwei Fauststöße schnell hintereinander; das Buch nennt diese Folge Ren-zuki
+    (erste Stelle im Buch).
   - 25 (Scan 51): vom Kokutsu-dachi in 24 direkt zum Herunterziehen des Kopfes – nicht im Zenkutsu-dachi anhalten, wenn
     die Hände vor das Gesicht gehen; die Fäuste greifen den Hinterkopf des Gegners.
 
@@ -260,11 +261,11 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
 | 14 | Migi Kokutsu-dachi | Ryoken Chudan Kakiwake-uke – langsam | Rechtes Bein trägt, linker Fuß gleitet von hinten schräg nach rechts hinten, Drehung links herum | rechts hinten, Wendung ⅝ links herum | 46 |
 | 15 | Hidari Ashi-dachi | Migi Jodan Mae-geri-keage | Hüfte über den linken Fuß, rechtes Knie hoch, Mae-geri-keage | rechts hinten | 46 |
 | 16 | Migi Zenkutsu-dachi | Uken Chudan-zuki – fließend weiter | Rechter Fuß setzt nach dem Tritt vorne ab | rechts hinten | 47 |
-| 17 | Migi Zenkutsu-dachi | Saken Chudan-zuki | Stand bleibt | rechts hinten | 47 |
+| 17 | Migi Zenkutsu-dachi | Saken Chudan-zuki (Ren-zuki) | Stand bleibt | rechts hinten | 47 |
 | 18 | Hidari Kokutsu-dachi | Ryoken Chudan Kakiwake-uke – langsam | Linkes Bein trägt, rechter Fuß gleitet schräg nach links hinten | links hinten, Wendung ¼ rechts herum | 48 |
 | 19 | Migi Ashi-dachi | Hidari Jodan Mae-geri-keage | Hüfte über den rechten Fuß, linkes Knie hoch, Mae-geri-keage | links hinten | 48 |
 | 20 | Hidari Zenkutsu-dachi | Saken Chudan-zuki – fließend weiter | Linker Fuß setzt nach dem Tritt vorne ab | links hinten | 49 |
-| 21 | Hidari Zenkutsu-dachi | Uken Chudan-zuki | Stand bleibt | links hinten | 49 |
+| 21 | Hidari Zenkutsu-dachi | Uken Chudan-zuki (Ren-zuki) | Stand bleibt | links hinten | 49 |
 | 22 | Migi Kokutsu-dachi | Hidari Chudan Morote-uke | Rechtes Bein trägt, linker Fuß rückt nach links auf die Mittellinie, Blick zum Start | Start, Wendung ⅛ links herum | 49 |
 | 23 | Hidari Kokutsu-dachi | Migi Chudan Morote-uke | Rechter Fuß gleitet vor | Start | 50 |
 | 24 | Migi Kokutsu-dachi | Hidari Chudan Morote-uke | Linker Fuß gleitet vor | Start | 50 |
