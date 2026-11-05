@@ -13,7 +13,7 @@
       kana: 'はんげつ',
       page: 58,
       lines: [[-1, 0, 1, 0], [0, -0.8, 0, 1.45]],
-      rei: { f: [[-0.06, -0.23, 330, 0.5], [0.04, -0.23, 30, 0.5]], body: 0, h: 'Verbeugung, Fersen zusammen' },
+      rei: { f: [[-0.06, -0.34, 330, 0.5], [0.04, -0.34, 30, 0.5]], body: 0, h: 'Verbeugung, Fersen zusammen' },
       yoi: { f: [[-0.17, -0.27, 335, 0.5], [0.18, -0.26, 25, 0.5]], body: 0, h: 'Erst linker, dann rechter Fuß nach außen – Hachiji-dachi' },
       moves: [
         { f: [[-0.12, 0.13, 30, 0.5], [0.21, -0.35, 0, 0.5]], body: 0, h: 'Rechtes Bein trägt und dreht nach innen, linker Fuß gleitet im Halbmond (Bogen von innen nach außen) nach vorne – Einatmen' },
