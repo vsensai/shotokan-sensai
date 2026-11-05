@@ -90,7 +90,7 @@
     ['Morote-uke', 'Unterstützte Abwehr – zweite Faust am Ellbogen', 'uke', tc('morote-uke'), PDF(26)],
     ['Juji-uke', 'Gekreuzte Abwehr (auch Kosa-uke)', 'uke', tc('juji-uke'), PDF(41)],
     ['Kakiwake-uke', 'Abwehr, bei der beide Arme auseinanderdrücken', 'uke', tc('kakiwake-uke'), PDF(46)],
-    ['Gedan-kakiwake', 'Beide Hände kreuzen vor dem Körper und gehen dann seitlich nach unten neben den Unterbauch, Handrücken außen (Hangetsu)', 'uke', tc('gedan-kakiwake'), PDF2(45)],
+    ['Gedan-kakiwake', 'Beide Hände kreuzen vor dem Körper und gehen seitlich nach unten, Handrücken außen', 'uke', tc('gedan-kakiwake'), PDF2(45)],
     ['Nagashi-uke', 'Fließende, ablenkende Abwehr', 'uke', tc('nagashi-uke')],
     ['Osae-uke', 'Drückende Abwehr nach unten', 'uke', tc('osae-uke'), PDF(21)],
     ['Kake-uke', 'Hakenabwehr mit dem Handgelenk (z. B. Heian Godan 14, langsam im Kiba-dachi)', 'uke', tc('kake-uke'), PDF(59)],
@@ -280,7 +280,6 @@
     'Gedan-kamae': 'Kampfhaltung mit der vorderen Hand unten, wie nach einer fegenden Abwehr nach unten',
     'Shuto-kamae': 'Kampfhaltung mit offenen Händen, Handkanten nach vorn (wie bei der Handkantenabwehr)',
     'Koshi-kamae': 'Beide Fäuste an der Hüfte übereinander',
-    'Gedan-kakiwake': 'Beide Hände kreuzen vor dem Körper und gehen dann seitlich nach unten neben den Unterbauch, Handrücken außen',
     'Ura-shomen': 'Richtung nach hinten, entgegengesetzt zur Vorderseite der Kata',
     'Kaisho Yama-gamae': 'Haltung mit offenen Händen: Unterarme senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe',
   };
