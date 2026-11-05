@@ -697,6 +697,7 @@ void main(){
     kime: (u) => 1 - Math.pow(1 - u, 3.2), // schnell los, hart abbremsen
     lin: (u) => u,
     in: (u) => u * u, // anlaufen ohne Abbremsen (Zwischenstellung einer fließenden Bewegung)
+    out: (u) => 1 - (1 - u) * (1 - u), // ohne Anlauf weiter und sanft abbremsen (passt nach „in“ gleicher Dauer)
   };
   function cr(p0, p1, p2, p3, u) {
     const u2 = u * u;

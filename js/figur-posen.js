@@ -497,15 +497,12 @@
   // der rechten Hüfte, linke über der rechten) geht die linke Hand geöffnet langsam und kraftvoll im Bogen nach vorn Chudan,
   // Handkante senkrecht, Arm gestreckt; die rechte Faust bleibt an der Hüfte
   const TSU_ST = M(S.hachiji, { L: { x: 0.22 }, R: { x: -0.22 }, pelvis: [0, 0.93, 0] });
-  // (die linke Faust liegt vor der rechten, der Ellbogen bleibt vor dem Körper). Der linke Arm streckt sich gleich zu Beginn
-  // nach vorn unten und hebt sich dann gestreckt in einem einzigen gleichmäßigen Bogen (Abstand zur Schulter ≥ Armlänge)
-  // in die Endstellung; die Hand behält dabei ihre Drehung
+  // (die linke Faust liegt vor der rechten, der Ellbogen bleibt vor dem Körper). Die Hand zieht in einem einzigen
+  // gleichmäßigen Bogen nach vorn unten und hoch in die Endstellung; erst dort ist der Arm gestreckt
   const TSU0 = M(TSU_ST, { hR: H.hip, hL: [-0.12, -0.3, 0.14], pL: [0, -1, 0], eL: [0.5, -0.6, 0.6] });
-  const TSU_HAND = (h) => M(TSU_ST, { hR: H.hip, hL: h, oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] });
-  const TSU_A = TSU_HAND([-0.12, -0.34, 0.5]);
-  const TSU_B = TSU_HAND([-0.022, -0.189, 0.54]);
-  const TSU1 = TSU_HAND([0.1, -0.02, 0.52]);
-  D['tc:tate-shuto-uke'] = M({ keys: [{ t: 0, p: TSU0 }, { t: 0.15, p: TSU0 }, { t: 0.35, p: TSU_A, e: 'in' }, { t: 0.58, p: TSU_B, e: 'lin' }, { t: 0.84, p: TSU1, e: 'io' }], best: 1, dur: 3 }, M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'front3' }));
+  const TSU_M = M(TSU_ST, { hR: H.hip, hL: [-0.05, -0.24, 0.38], oL: 1, fL: [-0.1, 1, 0.4], pL: [-0.4, -0.3, 1], eL: [0.5, -0.8, 0.3] });
+  const TSU1 = M(TSU_ST, { hR: H.hip, hL: [0.1, -0.02, 0.52], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] });
+  D['tc:tate-shuto-uke'] = M({ keys: [{ t: 0, p: TSU0 }, { t: 0.15, p: TSU0 }, { t: 0.5, p: TSU_M, e: 'in' }, { t: 0.85, p: TSU1, e: 'out' }], best: 1, dur: 3 }, M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'front3' }));
   // Teisho-uke wie in Jion 23: aus Hidari Zenkutsu-dachi (Gedan-barai) tritt der rechte Fuß vor in Kiba-dachi, die Hüfte dreht
   // ¼ nach links (rechte Seite vorn, Blick nach vorn). Die offene rechte Hand kommt wie beim Teisho-uchi von außen in einem
   // Bogen, nur mit ganz kleinem Radius: von der Hüfte etwas nach außen, dann im kleinen Bogen in die Abwehr zur rechten Seite –
