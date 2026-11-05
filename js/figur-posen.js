@@ -493,7 +493,13 @@
   // die Rückseite des Unterarms zeigt zum Angriff; die rechte Faust bleibt knapp vor der Hüfte
   D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [-0.2, -0.3, 0.06] }), M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front3' }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
-  D['tc:tate-shuto-uke'] = T(M(S.kk, { hL: [-0.15, 0.02, 0.23], eL: [0.1, -0.5, 0.8], hR: H.hip }), M(S.kk, { hR: H.hip, hL: [0.07, -0.02, 0.5], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] }), M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'side3' }));
+  // Tate-shuto-uke wie in Bassai Dai 8–9: im etwas breiteren Hachiji-dachi aus Ryoken Migi Koshi-kamae (beide Fäuste an
+  // der rechten Hüfte, linke über der rechten) geht die linke Hand geöffnet langsam und kraftvoll nach vorn Chudan,
+  // Handkante senkrecht, Arm gestreckt; die rechte Faust bleibt an der Hüfte
+  const TSU_ST = M(S.hachiji, { L: { x: 0.22 }, R: { x: -0.22 }, pelvis: [0, 0.93, 0] });
+  const TSU0 = M(TSU_ST, { hR: H.hip, hL: [-0.11, -0.33, 0.04], pL: [0, -1, 0] });
+  const TSU1 = M(TSU_ST, { hR: H.hip, hL: [0.1, -0.02, 0.52], oL: 1, fL: [0, 1, 0.25], pL: [-0.3, 0, 1] });
+  D['tc:tate-shuto-uke'] = M({ keys: [{ t: 0, p: TSU0 }, { t: 0.15, p: TSU0 }, { t: 0.8, p: TSU1, e: 'io' }], best: 1, dur: 2.6 }, M(hit('tipL', 'Handkante senkrecht'), { eff: 'wristL', view: 'front3' }));
   // Teisho-uke wie in Jion 23: aus Hidari Zenkutsu-dachi (Gedan-barai) tritt der rechte Fuß vor in Kiba-dachi, die Hüfte dreht
   // ¼ nach links (rechte Seite vorn, Blick nach vorn). Die offene rechte Hand kommt wie beim Teisho-uchi von außen in einem
   // Bogen, nur mit ganz kleinem Radius: von der Hüfte etwas nach außen, dann im kleinen Bogen in die Abwehr zur rechten Seite –
