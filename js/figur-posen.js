@@ -522,8 +522,8 @@
     { t: 0, p: UN1 }, { t: 0.12, p: UN1 },
     { t: 0.25, p: UN_X, e: 'in' },
     { t: 0.38, p: UN2, e: 'out' }, { t: 0.5, p: UN2 },
-    { t: 0.61, p: UN_M, e: 'in' },
-    { t: 0.72, p: UN3, e: 'out' },
+    { t: 0.568, p: UN_M, e: 'in' },
+    { t: 0.636, p: UN3, e: 'out' },
   ], best: 0.38, dur: 2.2 }, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front', yaw: 25 }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
   // Tate-shuto-uke wie in Bassai Dai 8–9: im etwas breiteren Hachiji-dachi aus Ryoken Migi Koshi-kamae (beide Fäuste an
