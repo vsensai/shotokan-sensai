@@ -374,11 +374,14 @@
   const FE_KB = M(KB, { look: -90 });
   const FE_UP = BAL(M({ pelvis: [0.06, 0.86, 0.62], yaw: 45, look: 0, L: { x: 0.12, z: 0.62, yaw: 35, kp: [0.4, 0, 1] },
     R: { x: 0.0, z: 0.78, y: 0.42, yaw: 70, pitch: -25, kp: [-0.2, 0.6, 1] }, hL: L(H.hip), hR: H.hip, w: [1, 0] }), 'L');
+  // Durchgehend fließend (kein Abbremsen beim Aufsetzen); der Ellbogen dreht im Schwung etwas zu weit ein und schnappt
+  // dann kurz in die Endstellung zurück
   D['tc:furi-enpi'] = M({ keys: [
     { t: 0, p: ZK_G }, { t: 0.12, p: ZK_G },
-    { t: 0.42, p: FE_UP },
-    { t: 0.56, p: FE(M(FE_KB, { R: { y: 0.06 }, hR: [-0.21, -0.33, 0.03], eR: [-0.6, -0.8, -0.3], w: [0.6, 0.4] })) },
-    { t: 0.66, p: FE(M(FE_KB, { hR: [-0.2, -0.3, 0.08], eR: [-1, -0.15, 0.2], w: [0.5, 0.5] })), e: 'kime' },
+    { t: 0.42, p: FE_UP, e: 'in' },
+    { t: 0.54, p: FE(M(FE_KB, { R: { y: 0.06 }, hR: [-0.21, -0.33, 0.03], eR: [-0.6, -0.8, -0.3], w: [0.6, 0.4] })), e: 'lin' },
+    { t: 0.61, p: FE(M(FE_KB, { hR: [-0.14, -0.25, 0.17], eR: [-0.7, 0.1, 0.75], w: [0.5, 0.5] })), e: 'out' },
+    { t: 0.68, p: FE(M(FE_KB, { hR: [-0.2, -0.3, 0.08], eR: [-1, -0.15, 0.2], w: [0.5, 0.5] })), e: 'kime' },
   ], best: 1, dur: 2 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3', yaw: 130 }));
   // Yoko-enpi: Unterarm waagerecht vor der Brust (Faust vor der linken Seite, Ellbogen vorn), der linke Arm holt gestreckt
   // unter dem rechten zur rechten Seite aus; dann stößt der Ellbogen zur Seite, die linke Faust zieht als Gegenbewegung an die Hüfte
