@@ -115,7 +115,8 @@
     const d = h && FL[h.fl];
     const out = [];
     if (d) {
-      const tb = e.d.best == null ? 1 : e.d.best;
+      // hit.t: Zeitpunkt der Berührung, wenn er nicht im Kernbild liegt (z. B. Abwehr, die danach weiterzieht)
+      const tb = h.t != null ? h.t : e.d.best == null ? 1 : e.d.best;
       const J1 = E.solve(e.pose(tb));
       h.sides.split('').forEach((s) => {
         const F = frame(J1, d.part, d.o, s);
