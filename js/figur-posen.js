@@ -537,7 +537,15 @@
     { t: 0.42, p: FE(M(FE_KB, { R: { y: 0.05 }, hR: [-0.4, -0.2, -0.02], eR: [-1, -0.4, -0.3], ...TU_HAND, w: [0.6, 0.4] })), e: 'in' },
     { t: 0.48, p: FE(M(FE_KB, { hR: [-0.69, -0.1, 0.16], eR: [-0.3, -1, 0.1], ...TU_HAND, pR: [-1, 0, 1] })), e: 'kime' },
   ], best: 1, dur: 1.8 }, M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'side3', yaw: 130 }));
-  D['tc:uchiotoshi'] = T(M(S.zks, { hL: L(H.hip), hR: [-0.15, 0.35, 0.15] }), M(S.zks, { hL: L(H.hip), hR: [-0.02, -0.25, 0.36], eR: [-0.8, -0.2, 0.3] }), M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' }));
+  // Uchiotoshi wie in Jion 43: aus Hidari Zenkutsu-dachi (Gedan-barai, 42) kommt das rechte Knie hoch, die rechte Faust
+  // steigt neben den Kopf; mit dem Stampfen (Fumikomi) in Kiba-dachi (rechte Seite vorn, Blick nach rechts) schlägt der
+  // rechte Unterarm senkrecht abwärts gegen einen Chudan-Angriff, Faust auf Höhe des Solarplexus; die linke Faust bleibt an der Hüfte
+  D['tc:uchiotoshi'] = M({ keys: [
+    { t: 0, p: ZK_G }, { t: 0.12, p: ZK_G },
+    { t: 0.42, p: M(FE_UP, { hR: [-0.26, 0.3, 0.1], eR: [-1, -0.1, 0.1] }) },
+    { t: 0.52, p: FE(M(FE_KB, { R: { y: 0.06 }, hR: [-0.44, 0.08, 0.2], eR: [-1, -0.6, 0], w: [0.6, 0.4] })), e: 'in' },
+    { t: 0.6, p: FE(M(FE_KB, { hR: [-0.5, -0.2, 0.2], eR: [-0.5, -1, -0.3] })), e: 'kime' },
+  ], best: 1, dur: 2 }, M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'side3', yaw: 130 }));
   // Manji-uke: Ausholen wie beim Shuto-uke – die untere (linke) Faust holt am rechten Ohr aus, der rechte Arm ist nach vorn
   // unten gestreckt, die Arme kreuzen vor der Brust; dann schlägt links Gedan-barai, rechts schwingt der Arm nach oben hinten
   D['tc:manji-uke'] = T(M(S.kk, { hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], hR: [0.1, -0.22, 0.46], eR: [-0.2, -0.6, 0.4] }), M(S.kk, { hL: [0.42, -0.52, 0.18], hR: [-0.34, 0.24, 0.02], eR: [-0.7, 0.2, -0.2] }), M(hit('fistL', 'unten und oben'), { eff: 'fistL', view: 'front3' }));
