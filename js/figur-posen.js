@@ -519,14 +519,15 @@
     M(S.kk, { hL: [-0.15, 0.1, 0.03], eL: [0.8, -0.8, 0.5], pL: [-0.5, 0, -0.9], hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }),
   ], M(hit('elbowL', 'Unterarm'), { hit: { t: 0.62 }, best: 0, eff: 'fistL', view: 'front', yaw: -100 }));
   // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn – nur der Block, der Uraken danach gehört nicht dazu:
-  // aus dem Ende von 8 (linke Faust an der Hüfte, rechts Chudan Uchi-uke) streckt sich der rechte Arm schräg nach unten
+  // aus dem Ende von 8 (linke Faust an der Hüfte, rechts Chudan Uchi-uke) streckt sich der rechte Arm weit schräg nach unten,
+  // genau mittig geradeaus vor dem Körper
   // (Faustrücken oben); der linke Arm stößt erst von der Hüfte nach vorn (Faustrücken unten), sodass sich beide Arme kreuzen,
   // und geht dann hoch – Oberarm zur Seite, Unterarm senkrecht, Faust neben dem Kopf, Faustrücken nach hinten. Beim Hochgehen
   // zeigt die Rückseite (Haiwan) nach außen und lenkt den Jodan-Angriff ab; das Standbild zeigt diesen Moment (best)
   const UN1 = M(KB, { hL: L(H.hip), hR: [-0.22, 0.02, 0.32], eR: [-0.1, -1, 0.3] });
-  const UN_X = M(KB, { hL: [-0.06, -0.16, 0.42], eL: [0.3, -1, 0.2], pL: [0, 1, 0], hR: [-0.24, -0.28, 0.4], eR: [-1, -0.2, 0], pR: [0, -1, 0] });
-  const UN_Y = M(KB, { hL: [0.2, 0.08, 0.34], eL: [0.8, -1, 0.2], pL: [-1, 0, 0.2], hR: [-0.34, -0.38, 0.42], eR: [-1, -0.1, 0.2], pR: [0, -1, 0] });
-  const UN2 = M(KB, { hL: [0.3, 0.2, 0.1], eL: [1, -0.5, 0.3], pL: [0, 0, 1], hR: [-0.4, -0.44, 0.42], eR: [-1, 0, 0.2], pR: [0, -1, 0] });
+  const UN_X = M(KB, { hL: [-0.06, -0.16, 0.42], eL: [0.3, -1, 0.2], pL: [0, 1, 0], hR: [-0.1, -0.32, 0.52], eR: [-1, -0.3, 0], pR: [0, -1, 0] });
+  const UN_Y = M(KB, { hL: [0.2, 0.08, 0.34], eL: [0.8, -1, 0.2], pL: [-1, 0, 0.2], hR: [-0.02, -0.4, 0.6], eR: [-1, -0.3, 0], pR: [0, -1, 0] });
+  const UN2 = M(KB, { hL: [0.3, 0.2, 0.1], eL: [1, -0.5, 0.3], pL: [0, 0, 1], hR: [0, -0.42, 0.62], eR: [-1, -0.3, 0], pR: [0, -1, 0] });
   D['tc:uchi-nagashi-uke'] = M({ keys: [
     { t: 0, p: UN1 }, { t: 0.16, p: UN1 },
     { t: 0.3, p: UN_X, e: 'in' },
