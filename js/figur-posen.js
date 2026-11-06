@@ -495,13 +495,13 @@
   D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), HAIWAN_END, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front', yaw: -60 }));
   // Soto-nagashi-uke wie Heian Nidan 2, fließend aus dem Haiwan-uke (1) im Migi Kokutsu-dachi: der linke Unterarm schiebt
   // den Angriff nach rechts weg und endet mit der Faust am rechten Ohr (wie beim Telefonieren), der Ellbogen zeigt zum
-  // Angreifer; zugleich kommt die rechte Faust von oben herunter und schlägt unter dem linken Arm durch gerade zum Gegner
-  // (Kentsui gegen den Ellbogen) – wie eine Schere
+  // Angreifer; zugleich kommt die rechte Faust von oben herunter und schlägt unter dem linken Arm durch Chudan zum Gegner,
+  // Arm leicht gebeugt, Faustrücken unten wie beim Ura-zuki (Kentsui gegen den Ellbogen) – wie eine Schere
   const W_KK = (v) => aim(S.kk, v);
   D['tc:soto-nagashi-uke'] = FLOW([
     HAIWAN_END,
     M(S.kk, { hL: [0.2, 0.26, 0.2], eL: [1, -0.3, 0.3], hR: [-0.1, 0.12, 0.24], eR: [-1, -0.4, 0.2] }),
-    M(S.kk, { hL: [-0.15, 0.1, 0.03], eL: [1, -0.2, 0.6], pL: [0, 0, -1], hR: [0.3, 0.1, 0.24], eR: [-0.2, -1, 0] }),
+    M(S.kk, { hL: [-0.15, 0.1, 0.03], eL: [1, -0.2, 0.6], pL: [0, 0, -1], hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }),
   ], M(hit('elbowL', 'Unterarm'), { eff: 'fistL', view: 'front', yaw: -100 }));
   // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn, aus dem rechten Uchi-uke (8): die
   // Rückseite des linken Unterarms (Haiwan) steigt vor dem Gesicht hoch und lenkt Jodan nach links ab, zugleich wehrt
