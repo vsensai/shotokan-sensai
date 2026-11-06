@@ -489,9 +489,9 @@
   const SU3 = M(rotate(MZK, -90, SU_C), { hL: L(H.hip), hR: [-0.22, -0.3, 0.42], pR: [0.3, 1, 0], eR: [-0.5, -0.6, 0.1] });
   D['tc:sukui-uke'] = FLOW([SU0, SU1, SU2, SU3], M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3', dur: 1.9 }));
   // wie Heian Nidan 1: der vordere (linke) Arm schwingt seitlich hoch, Unterarm senkrecht, Faust auf Kopfhöhe,
-  // die Rückseite des Unterarms zeigt zum Angriff; der rechte Unterarm liegt schräg über dem Kopf – beide Ellbogen auf
-  // Schulterhöhe, beide Arme bilden ein Rechteck, beide Faustrücken zeigen nach hinten
-  const HAIWAN_END = M(S.kk, { hL: [0.46, 0.24, 0.04], eL: [1, -0.5, 0], hR: [-0.08, 0.36, 0.06], eR: [-1, -0.6, 0], pL: [0, 0, 1], pR: [0, 0, 1] });
+  // die Rückseite des Unterarms zeigt zum Angriff; der rechte Oberarm geht fast senkrecht hoch, der Unterarm
+  // im rechten Winkel leicht abwärts über dem Kopf – beide Arme bilden ein Rechteck, beide Faustrücken zeigen nach hinten
+  const HAIWAN_END = M(S.kk, { hL: [0.46, 0.24, 0.04], eL: [1, -0.5, 0], hR: [0.06, 0.26, 0.16], eR: [-0.4, 1, -0.1], pL: [0, 0, 1], pR: [0, 0, 1] });
   D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), HAIWAN_END, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front', yaw: -60 }));
   // Soto-nagashi-uke wie Heian Nidan 2, fließend aus dem Haiwan-uke (1) im Migi Kokutsu-dachi: der linke Unterarm schiebt
   // senkrecht auf Kopfhöhe den Angriff erst zur Seite (nach rechts) weg und zieht dann mit der Faust ans rechte Ohr (wie beim
