@@ -315,7 +315,7 @@
               <li><b>Nagashi-uke</b> – Oberbegriff für fließende, ablenkende Abwehren (Theorie 1. Dan): der Angriff wird nicht hart gestoppt, sondern abgelenkt. Die Formen:
                 <ul>
                   <li><b>Te-nagashi-uke</b> – die offene Hand lenkt Jodan- oder Chudan-Angriffe zur Seite; die häufigste Form, vor allem im Kampf.</li>
-                  <li><b>Soto-nagashi-uke</b> – der senkrechte Unterarm schiebt den Angriff zur Seite, zugleich schlägt die andere Faust (Kentsui) waagerecht darunter gegen den Ellbogen – wie eine Schere (Heian Nidan 2 und 5).</li>
+                  <li><b>Soto-nagashi-uke</b> – der Unterarm schiebt den Angriff zur Seite, die Faust endet am anderen Ohr; zugleich schlägt die andere Faust (Kentsui) darunter durch gerade zum Gegner – wie eine Schere (Heian Nidan 2 und 5).</li>
                   <li><b>Uchi-nagashi-uke</b> – die Rückseite des Unterarms (Haiwan) lenkt Jodan von innen nach außen ab, die andere Faust wehrt zugleich unten ab (Tekki Shodan 9 und 23).</li>
                   <li><b>Gedan-nagashi-uke</b> – ablenkende Abwehr unten, in Gegenrichtung zum Gedan-barai.</li>
                 </ul>
