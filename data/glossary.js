@@ -91,7 +91,7 @@
     ['Manji-uke', 'Doppelabwehr: eine Hand wehrt unten ab (Gedan-barai), die andere schützt oben (Jodan-uchi-uke)', 'uke', tc('manji-uke'), KO],
     ['Kakiwake-uke', 'Abwehr, bei der beide Arme auseinanderdrücken', 'uke', tc('kakiwake-uke'), PDF(46)],
     ['Gedan-kakiwake', 'Beide Hände kreuzen vor dem Körper und gehen seitlich nach unten, Handrücken außen', 'uke', tc('gedan-kakiwake'), PDF2(45)],
-    ['Nagashi-uke', 'Fließende, ablenkende Abwehr – Oberbegriff. Gezeigt ist die häufigste Form: die offene Hand lenkt einen Jodan- oder Chudan-Angriff zur Seite ab', 'uke', tc('te-nagashi-uke'), KO],
+    ['Nagashi-uke', 'Ablenkende Abwehr mit der offenen Hand: lenkt einen Jodan- oder Chudan-Angriff zur Seite ab', 'uke', tc('te-nagashi-uke'), KO],
     ['Soto-nagashi-uke', 'Ablenkende Abwehr Jodan: der Unterarm zieht von außen vor die Stirn, zugleich schlägt die andere Faust (Kentsui) gegen den Ellbogen des Angreifers', 'uke', tc('soto-nagashi-uke'), PDF(17)],
     ['Uchi-nagashi-uke', 'Ablenkende Abwehr Jodan von innen nach außen mit der Rückseite des Unterarms (Haiwan), zugleich wehrt die andere Faust unten ab', 'uke', tc('uchi-nagashi-uke'), PDF(69)],
     ['Gedan-nagashi-uke', 'Ablenkende Abwehr im unteren Bereich, in Gegenrichtung zum Gedan-barai', 'uke', tc('gedan-nagashi-uke'), KO],
@@ -305,7 +305,8 @@
   // Anderer Name im Buch – nur zeigen, wenn er nicht bloß der eigene Name mit Zusätzen ist
   // („Shuto Chudan-uke“ zu „Shuto-uke“ nein, „Kosa-uke“ zu „Juji-uke“ ja). „-uchi“ zählt dabei nicht.
   // Abweichende Anzeige: kürzerer anderer Name oder gar keiner ('')
-  // Oberbegriffe zeigen ihre häufigste Form; deren Name steht in Klammern im Titel, eine eigene Karte hat sie nicht
+  // Zweiter Name einer Karte in Klammern im Titel (Oberbegriff mit seiner häufigsten Form, Buchname mit Name aus dem Heft);
+  // der Kata-Trainer verlinkt auch diesen Namen auf die Karte
   const FORM = { 'Enpi-uchi': 'Mae-enpi', 'Nagashi-uke': 'Te-nagashi' };
   SK.glossaryForm = FORM;
   const ANDERS = { 'Tettsui-uchi': 'Kentsui-uchi', 'Yoko-geri-kekomi': '', ...FORM };
