@@ -73,7 +73,7 @@
     ['Haito-uchi', 'Schlag mit der inneren Handkante (Daumenseite)', 'uchi', tc('haito-uchi')],
     ['Hasami-uchi', 'Zangenschlag mit beiden Fäusten zu beiden Seiten', 'uchi', tc('hasami-uchi'), PDF(90)],
     ['Teisho-uchi', 'Schlag mit dem Handballen', 'uchi', tc('teisho-uchi')],
-    ['Enpi-uchi', 'Ellbogenschlag – Oberbegriff für alle Ellbogentechniken. Gezeigt ist die häufigste Form: nach vorne, Ellbogen dicht am Körper, gerade Linie zum Ziel', 'uchi', tc('enpi-uchi'), KO],
+    ['Mae-enpi', 'Ellbogenstoß nach vorne: Ellbogen dicht am Körper, gerade Linie zum Ziel', 'uchi', tc('enpi-uchi'), KO],
     ['Furi-enpi', 'Schwingender Ellbogenschlag zur Seite', 'uchi', tc('furi-enpi'), PDF(35)],
     ['Ushiro-enpi', 'Ellbogenstoß nach hinten', 'uchi', tc('ushiro-enpi'), PDF(37)],
     ['Yoko-enpi', 'Ellbogenstoß zur Seite, meist in Kiba-dachi', 'uchi', tc('yoko-enpi'), KO],
@@ -224,7 +224,7 @@
     'Uraken-uchi': ['heian-nidan', 7, 'Uraken Yoko-mawashi-uchi'],
     'Tettsui-uchi': ['heian-shodan', 4, 'Kentsui Tate-mawashi-uchi'],
     'Shuto-uchi': ['heian-yondan', 11, 'Shuto Soto-mawashi-uchi'],
-    'Enpi-uchi': ['heian-yondan', 7, 'Mae-enpi'],
+    'Mae-enpi': ['heian-yondan', 7],
     'Furi-enpi': ['heian-sandan', 12],
     'Ushiro-enpi': ['heian-sandan', 19],
     'Hasami-uchi': ['bassai-dai', 23],
@@ -305,9 +305,9 @@
   // Anderer Name im Buch – nur zeigen, wenn er nicht bloß der eigene Name mit Zusätzen ist
   // („Shuto Chudan-uke“ zu „Shuto-uke“ nein, „Kosa-uke“ zu „Juji-uke“ ja). „-uchi“ zählt dabei nicht.
   // Abweichende Anzeige: kürzerer anderer Name oder gar keiner ('')
-  // Zweiter Name einer Karte in Klammern im Titel (Oberbegriff mit seiner häufigsten Form, Buchname mit Name aus dem Heft);
+  // Zweiter Name einer Karte in Klammern im Titel (Buchname mit Name aus dem Heft, z. B. Nagashi-uke (Te-nagashi));
   // der Kata-Trainer verlinkt auch diesen Namen auf die Karte
-  const FORM = { 'Enpi-uchi': 'Mae-enpi', 'Nagashi-uke': 'Te-nagashi' };
+  const FORM = { 'Nagashi-uke': 'Te-nagashi' };
   SK.glossaryForm = FORM;
   const ANDERS = { 'Tettsui-uchi': 'Kentsui-uchi', 'Yoko-geri-kekomi': '', ...FORM };
   function altName(e) {

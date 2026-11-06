@@ -341,17 +341,18 @@
             </ul>
             ${grid(W('uraken', 'Uraken-uchi'), W('tettsui', 'Tettsui-uchi'), W('shuto', 'Shuto-uchi'), W('hiji', 'Enpi-uchi'))}
             <h4>Die Schläge in Bewegung</h4>
-            ${grid(T('uraken-uchi', 'Uraken-uchi'), T('tettsui-uchi', 'Tettsui-uchi'), T('shuto-uchi', 'Shuto-uchi'), T('haito-uchi', 'Haito-uchi'), T('enpi-uchi', 'Enpi-uchi'), T('furi-enpi', 'Furi-enpi'))}
+            ${grid(T('uraken-uchi', 'Uraken-uchi'), T('tettsui-uchi', 'Tettsui-uchi'), T('shuto-uchi', 'Shuto-uchi'), T('haito-uchi', 'Haito-uchi'))}
             <h4>Ellbogen (Enpi) in alle Richtungen</h4>
             <ul>
               <li><b>Mae-enpi</b> – nach vorne: der Ellbogen bleibt dicht am Körper, die Faust geht dafür über den Bauch zur anderen Seite.</li>
+              <li><b>Furi-enpi</b> – schwingend zur Seite, mit Stampfer in Kiba-dachi.</li>
               <li><b>Mawashi-enpi</b> – im waagerechten Bogen, ohne Kontakt zum Körper.</li>
               <li><b>Age-enpi</b> – senkrecht nach oben, dicht am Körper; die Faust endet neben dem Kopf.</li>
               <li><b>Yoko-enpi</b> – zur Seite, bevorzugt in Kiba-dachi; <b>Otoshi-enpi</b> – senkrecht nach unten, in Fudo- oder Kiba-dachi.</li>
               <li><b>Ushiro-enpi</b> – nach hinten, Jodan oder Chudan.</li>
               <li>Schläge (Uchi) holen ihre Kraft aus dem Schnappen des Ellbogens. Shuto- und Haito-uchi gibt es von innen und von außen, Uraken- und Tettsui-uchi in mehreren Formen.</li>
             </ul>
-            ${grid(T('yoko-enpi', 'Yoko-enpi'), T('mawashi-enpi', 'Mawashi-enpi'), T('age-enpi', 'Age-enpi'), T('otoshi-enpi', 'Otoshi-enpi'), T('ushiro-enpi', 'Ushiro-enpi'))}`,
+            ${grid(T('enpi-uchi', 'Mae-enpi'), T('furi-enpi', 'Furi-enpi'), T('yoko-enpi', 'Yoko-enpi'), T('mawashi-enpi', 'Mawashi-enpi'), T('age-enpi', 'Age-enpi'), T('otoshi-enpi', 'Otoshi-enpi'), T('ushiro-enpi', 'Ushiro-enpi'))}`,
         },
         {
           id: 'ki-geri', title: 'Geri – Fußtritte', minGrade: '8kyu',
