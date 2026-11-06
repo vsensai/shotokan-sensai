@@ -73,11 +73,11 @@
     ['Haito-uchi', 'Schlag mit der inneren Handkante (Daumenseite)', 'uchi', tc('haito-uchi')],
     ['Hasami-uchi', 'Zangenschlag mit beiden Fäusten zu beiden Seiten', 'uchi', tc('hasami-uchi'), PDF(90)],
     ['Teisho-uchi', 'Schlag mit dem Handballen', 'uchi', tc('teisho-uchi')],
-    ['Mae-enpi', 'Ellbogenstoß nach vorne: Ellbogen dicht am Körper, gerade Linie zum Ziel', 'uchi', tc('enpi-uchi'), KO],
+    ['Mae-enpi', 'Ellbogenschlag nach vorne: Ellbogen dicht am Körper auf gerader Linie zum Ziel, die Faust geht über den Bauch zur anderen Seite', 'uchi', tc('enpi-uchi'), KO],
     ['Furi-enpi', 'Schwingender Ellbogenschlag zur Seite', 'uchi', tc('furi-enpi'), PDF(35)],
     ['Ushiro-enpi', 'Ellbogenstoß nach hinten', 'uchi', tc('ushiro-enpi'), PDF(37)],
     ['Yoko-enpi', 'Ellbogenstoß zur Seite, meist in Kiba-dachi', 'uchi', tc('yoko-enpi'), KO],
-    ['Mawashi-enpi', 'Ellbogenschlag im waagerechten Bogen von außen zur Körpermitte', 'uchi', tc('mawashi-enpi'), KO],
+    ['Mawashi-enpi', 'Ellbogenschlag im großen waagerechten Bogen von außen zur Körpermitte, ohne Kontakt zum Körper, mit kräftiger Hüftdrehung', 'uchi', tc('mawashi-enpi'), KO],
     ['Age-enpi', 'Ellbogenschlag senkrecht nach oben, dicht am Körper (auch Tate-enpi)', 'uchi', tc('age-enpi'), KO],
     ['Otoshi-enpi', 'Ellbogenschlag senkrecht nach unten, z. B. in Kiba- oder Fudo-dachi', 'uchi', tc('otoshi-enpi'), KO],
 

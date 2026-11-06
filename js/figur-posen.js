@@ -358,8 +358,15 @@
     M(S.zks, { hL: L(H.hip), hR: [-0.32, -0.08, 0.3], eR: [-1, 0, 0.1], pR: [1, 0, 0.3], ...TS_HAND }),
     M(S.zks, { chest: 12, hL: L(H.hip), hR: [0.04, -0.02, 0.44], eR: [-0.8, 0.1, 0.2], pR: [1, 0, 0.6], ...TS_HAND }),
   ], M(hit('wristR', 'Handballen'), { eff: 'wristR', view: 'front3' }));
-  const MAE_ENPI = M(S.zks, { hL: L(H.hip), hR: [0.08, -0.13, 0.17], eR: [-0.1, 0.1, 1] });
-  D['tc:enpi-uchi'] = T(ZK_G, MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'side3', yaw: 15 }));
+  // Mae-enpi: gerade Linie nach vorn, der Ellbogen streift dicht an den Rippen entlang nach vorn und etwas hoch; die Faust
+  // gleitet dabei über den Bauch zur anderen Seite und endet dicht vor der linken Brust. Kaum Drehung im Oberkörper,
+  // der Ellbogen bleibt unter Schulterhöhe (Unterschied zu Mawashi-enpi: kein Ausholen zur Seite, kein Bogen)
+  const MAE_ENPI = M(S.zks, { chest: 5, hL: L(H.hip), hR: [0.1, -0.17, 0.1], eR: [-0.15, -0.1, 1] });
+  D['tc:enpi-uchi'] = FLOW([
+    ZK_G,
+    M(S.zks, { hL: L(H.hip), hR: [-0.1, -0.24, 0.16], eR: [-0.1, -1, 0.15] }),
+    MAE_ENPI,
+  ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front3' }));
   // Furi-enpi wie in der Kata (Heian Sandan): aus Hidari Zenkutsu-dachi trägt das linke Bein, das rechte Knie kommt hoch,
   // der Körper dreht sich nach links und der rechte Fuß stampft nach vorn in Kiba-dachi (rechte Seite vorn, Blick nach vorn).
   // Die rechte Faust bleibt an der Hüfte; mit dem Aufsetzen schwingt der Ellbogen im Bogen von hinten seitlich nach außen
@@ -382,11 +389,13 @@
   D['tc:yoko-enpi'] = M({ keys: [
     { t: 0, p: YE0 }, { t: 0.32, p: YE0 }, { t: 0.37, p: YE1, e: 'in' }, { t: 0.43, p: YE2, e: 'kime' },
   ], best: 1, dur: 1.6 }, M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front' }));
-  // Mawashi-enpi: aus der Hüfte kommt der Ellbogen seitlich hoch und schwingt waagerecht nach vorn, Faust endet vor der Brust
+  // Mawashi-enpi: großer waagerechter Bogen ohne Kontakt zum Körper. Aus der Hüfte hebt sich der gebeugte Arm weit zur
+  // Seite, Ellbogen auf Schulterhöhe, der Oberkörper dreht dabei nach rechts auf; dann schwingt der Ellbogen mit kräftiger
+  // Hüftdrehung im Bogen nach vorn zur Mitte, der Unterarm liegt am Ende waagerecht auf Schulterhöhe vor der Brust
   D['tc:mawashi-enpi'] = FLOW([
     ZK_G,
-    M(S.zks, { chest: -15, hL: L(H.hip), hR: [-0.34, -0.12, 0.02], eR: [-1, 0, -0.4] }),
-    M(S.zks, { chest: 15, hL: L(H.hip), hR: [0.12, -0.04, 0.12], eR: [-0.25, 0, 1] }),
+    M(S.zks, { chest: -25, hL: L(H.hip), hR: [-0.44, -0.04, 0.2], eR: [-1, 0, -0.3] }),
+    M(S.zks, { chest: 30, hL: L(H.hip), hR: [0.14, -0.03, 0.17], eR: [-0.3, 0, 1] }),
   ], M(hit('elbowR', 'Ellbogen'), { eff: 'elbowR', view: 'front3' }));
   // Age-enpi: aus der Hüfte kommt der Ellbogen nach vorn (zeigt geradeaus, Faust vor der rechten Brust), dann steigt er
   // aus dieser Stellung gerade nach oben – kein Ausschwenken zur Seite, der Arm bleibt weit innen vor dem Körper – und
