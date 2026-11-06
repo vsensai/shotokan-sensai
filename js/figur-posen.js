@@ -506,13 +506,16 @@
     M(S.kk, { hL: [0.02, 0.2, 0.36], eL: [0.3, -1, 0.4], hR: [-0.05, -0.02, 0.26], eR: [-1, -0.4, 0.2] }),
     M(S.kk, { hL: [-0.15, 0.1, 0.03], eL: [0.8, -0.8, 0.5], pL: [0, 0, -1], hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }),
   ], M(hit('elbowL', 'Unterarm'), { hit: { t: 0.62 }, best: 0, eff: 'fistL', view: 'front', yaw: -100 }));
-  // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn, aus dem rechten Uchi-uke (8): die
-  // Rückseite des linken Unterarms (Haiwan) steigt vor dem Gesicht hoch und lenkt Jodan nach links ab, zugleich wehrt
-  // die rechte Faust unten vor dem Körper ab (Gedan-uke)
-  D['tc:uchi-nagashi-uke'] = T(
-    M(KB, { hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD }),
-    M(KB, { hL: [0.16, 0.2, 0.3], eL: [0.3, -1, 0.15], hR: [0.12, -0.5, 0.32], eR: [-0.6, -0.5, 0.3] }),
-    M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front' }));
+  // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn, aus dem rechten Uchi-uke (8): dort steht
+  // der rechte Unterarm senkrecht vor der Körpermitte, die linke Faust liegt unter dem rechten Ellbogen. Der linke Unterarm
+  // geht senkrecht von innen nach außen zur linken Seite hoch, Faust auf Kopfhöhe – die Rückseite (Haiwan) lenkt den
+  // Jodan-Angriff nach außen ab; zugleich geht der rechte Arm nach unten zur rechten Seite (Gedan-uke)
+  const UN0 = M(KB, { hR: [-0.03, 0.12, 0.3], eR: [-0.2, -1, 0.3], hL: [-0.04, -0.17, 0.27], eL: [1, -0.3, 0] });
+  D['tc:uchi-nagashi-uke'] = FLOW([
+    UN0,
+    M(KB, { hL: [0.1, 0.12, 0.3], eL: [0.4, -1, 0.3], hR: [-0.16, -0.2, 0.26], eR: [-1, -0.4, 0.2] }),
+    M(KB, { hL: [0.42, 0.22, 0.12], eL: [1, -0.6, 0], hR: [-0.42, -0.5, 0.12], eR: [-1, 0, 0.1] }),
+  ], M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front' }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
   // Tate-shuto-uke wie in Bassai Dai 8–9: im etwas breiteren Hachiji-dachi aus Ryoken Migi Koshi-kamae (beide Fäuste an
   // der rechten Hüfte, linke über der rechten) geht die linke Hand geöffnet langsam und kraftvoll im Bogen nach vorn Chudan,
