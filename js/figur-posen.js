@@ -489,18 +489,19 @@
   const SU3 = M(rotate(MZK, -90, SU_C), { hL: L(H.hip), hR: [-0.22, -0.3, 0.42], pR: [0.3, 1, 0], eR: [-0.5, -0.6, 0.1] });
   D['tc:sukui-uke'] = FLOW([SU0, SU1, SU2, SU3], M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3', dur: 1.9 }));
   // wie Heian Nidan 1: der vordere (linke) Arm schwingt seitlich hoch, Unterarm senkrecht, Faust auf Kopfhöhe,
-  // die Rückseite des Unterarms zeigt zum Angriff; die rechte Faust bleibt knapp vor der Hüfte
-  const HAIWAN_END = M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [-0.2, -0.3, 0.06] });
+  // die Rückseite des Unterarms zeigt zum Angriff; der rechte Unterarm liegt waagerecht über dem Kopf – beide Arme
+  // bilden ein Rechteck, beide Faustrücken zeigen nach hinten
+  const HAIWAN_END = M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [0.1, 0.36, 0.12], eR: [-0.6, 0.8, 0], pL: [0, 0, 1], pR: [0, 0, 1] });
   D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), HAIWAN_END, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front3' }));
-  // Soto-nagashi-uke wie Heian Nidan 2, fließend aus dem Haiwan-uke (1) im Migi Kokutsu-dachi: der linke Unterarm zieht
-  // waagerecht vor die Stirn und lenkt den Jodan-Angriff ab, zugleich schwingt die rechte Faust (Kentsui) von außen im
-  // Bogen nach vorn gegen den Ellbogen des Gegners – beide Unterarme wie eine Schere
-  const W_KK = (v) => aim(S.kk, v);
+  // Soto-nagashi-uke wie Heian Nidan 2, fließend aus dem Haiwan-uke (1) im Migi Kokutsu-dachi: der linke Unterarm bleibt
+  // senkrecht und schiebt sich nach rechts vor das Gesicht (schiebt den Angriff weg); zugleich geht die rechte Faust von
+  // oben im Bogen außen herunter und unter dem linken Unterarm durch nach vorn (Kentsui) – wie eine Schere
   D['tc:soto-nagashi-uke'] = FLOW([
     HAIWAN_END,
-    M(S.kk, { hL: W_KK([0.08, 0.26, 0.34]), eL: W_KK([0.8, -0.4, 0.4]), hR: W_KK([-0.32, -0.08, 0.26]), eR: W_KK([-0.8, -0.4, 0]) }),
-    M(S.kk, { hL: W_KK([-0.04, 0.24, 0.38]), eL: W_KK([0.9, -0.3, 0.3]), hR: W_KK([0.06, -0.04, 0.54]), eR: W_KK([-0.6, -0.5, 0.1]) }),
-  ], M(hit('elbowL', 'Unterarm'), { eff: 'fistL', view: 'front3' }));
+    M(S.kk, { hL: [0.26, 0.22, 0.26], eL: [0.4, -1, 0.2], hR: [-0.46, 0.0, 0.12], eR: [-1, -0.3, -0.2] }),
+    M(S.kk, { hL: [0.12, 0.22, 0.3], eL: [0.2, -1, 0.2], hR: [-0.2, -0.32, 0.3], eR: [-0.8, -0.6, 0] }),
+    M(S.kk, { hL: [0.0, 0.22, 0.32], eL: [0.1, -1, 0.2], pL: [0, 0, 1], hR: [0.3, -0.1, 0.4], eR: [-0.6, -0.8, 0] }),
+  ], M(hit('elbowL', 'Unterarm'), { eff: 'fistL', view: 'front3', yaw: -80 }));
   // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn, aus dem rechten Uchi-uke (8): die
   // Rückseite des linken Unterarms (Haiwan) steigt vor dem Gesicht hoch und lenkt Jodan nach links ab, zugleich wehrt
   // die rechte Faust unten vor dem Körper ab (Gedan-uke)
