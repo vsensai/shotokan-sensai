@@ -519,12 +519,12 @@
   const UN_M = M(KB, { hL: [0.28, 0.14, 0.3], eL: [1, -0.6, 0.2], pL: [0, 0, -1], hR: [-0.1, -0.3, 0.3], eR: [-1, -0.3, 0.2], pR: [0, -1, 0] });
   const UN3 = M(KB, { hL: [0.05, 0.06, 0.44], eL: [0.2, -1, 0.1], pL: [0, 0, -1], hR: [0.1, -0.24, 0.36], eR: [-1, -0.3, 0.3], pR: [0, -1, 0] });
   D['tc:uchi-nagashi-uke'] = M({ keys: [
-    { t: 0, p: UN1 }, { t: 0.1, p: UN1 },
+    { t: 0, p: UN1 }, { t: 0.12, p: UN1 },
     { t: 0.25, p: UN_X, e: 'in' },
-    { t: 0.4, p: UN2, e: 'out' }, { t: 0.5, p: UN2 },
-    { t: 0.63, p: UN_M, e: 'in' },
-    { t: 0.76, p: UN3, e: 'out' },
-  ], best: 0.4, dur: 2.6 }, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front', yaw: 25 }));
+    { t: 0.38, p: UN2, e: 'out' }, { t: 0.5, p: UN2 },
+    { t: 0.61, p: UN_M, e: 'in' },
+    { t: 0.72, p: UN3, e: 'out' },
+  ], best: 0.38, dur: 2.2 }, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front', yaw: 25 }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
   // Tate-shuto-uke wie in Bassai Dai 8–9: im etwas breiteren Hachiji-dachi aus Ryoken Migi Koshi-kamae (beide Fäuste an
   // der rechten Hüfte, linke über der rechten) geht die linke Hand geöffnet langsam und kraftvoll im Bogen nach vorn Chudan,
