@@ -494,14 +494,16 @@
   const HAIWAN_END = M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [0.1, 0.36, 0.12], eR: [-0.6, 0.8, 0], pL: [0, 0, 1], pR: [0, 0, 1] });
   D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), HAIWAN_END, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front3' }));
   // Soto-nagashi-uke wie Heian Nidan 2, fließend aus dem Haiwan-uke (1) im Migi Kokutsu-dachi: der linke Unterarm bleibt
-  // senkrecht und schiebt sich nach rechts vor das Gesicht (schiebt den Angriff weg); zugleich geht die rechte Faust von
-  // oben im Bogen außen herunter und unter dem linken Unterarm durch nach vorn (Kentsui) – wie eine Schere
+  // senkrecht und schiebt sich nach rechts vor zur Mitte, Faust auf Gesichtshöhe zum Angreifer (schiebt den Angriff weg);
+  // zugleich kommt die rechte Faust von oben vor dem Körper herunter, kreuzt den linken Unterarm und endet waagerecht vor
+  // der Brust unter dem linken Ellbogen (Kentsui gegen den Ellbogen) – wie eine Schere
+  const W_KK = (v) => aim(S.kk, v);
   D['tc:soto-nagashi-uke'] = FLOW([
     HAIWAN_END,
-    M(S.kk, { hL: [0.26, 0.22, 0.26], eL: [0.4, -1, 0.2], hR: [-0.46, 0.0, 0.12], eR: [-1, -0.3, -0.2] }),
-    M(S.kk, { hL: [0.12, 0.22, 0.3], eL: [0.2, -1, 0.2], hR: [-0.2, -0.32, 0.3], eR: [-0.8, -0.6, 0] }),
-    M(S.kk, { hL: [0.0, 0.22, 0.32], eL: [0.1, -1, 0.2], pL: [0, 0, 1], hR: [0.3, -0.1, 0.4], eR: [-0.6, -0.8, 0] }),
-  ], M(hit('elbowL', 'Unterarm'), { eff: 'fistL', view: 'front3', yaw: -80 }));
+    M(S.kk, { hL: W_KK([0.12, 0.2, 0.42]), eL: W_KK([0.3, -1, 0]), hR: W_KK([-0.1, 0.16, 0.3]), eR: W_KK([-1, -0.2, 0]) }),
+    M(S.kk, { hL: W_KK([0.08, 0.18, 0.44]), eL: W_KK([0.1, -1, 0]), hR: W_KK([-0.02, -0.06, 0.32]), eR: W_KK([-1, -0.4, 0]) }),
+    M(S.kk, { hL: W_KK([0.05, 0.16, 0.46]), eL: W_KK([0, -1, 0.05]), hR: W_KK([0.04, -0.16, 0.36]), eR: W_KK([-1, -0.3, -0.2]) }),
+  ], M(hit('elbowL', 'Unterarm'), { eff: 'fistL', view: 'front', yaw: -60 }));
   // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn, aus dem rechten Uchi-uke (8): die
   // Rückseite des linken Unterarms (Haiwan) steigt vor dem Gesicht hoch und lenkt Jodan nach links ab, zugleich wehrt
   // die rechte Faust unten vor dem Körper ab (Gedan-uke)

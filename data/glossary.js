@@ -92,7 +92,7 @@
     ['Kakiwake-uke', 'Abwehr, bei der beide Arme auseinanderdrücken', 'uke', tc('kakiwake-uke'), PDF(46)],
     ['Gedan-kakiwake', 'Beide Hände kreuzen vor dem Körper und gehen seitlich nach unten, Handrücken außen', 'uke', tc('gedan-kakiwake'), PDF2(45)],
     ['Nagashi-uke', 'Ablenkende Abwehr mit der offenen Hand: lenkt einen Jodan- oder Chudan-Angriff zur Seite ab', 'uke', tc('te-nagashi-uke'), KO],
-    ['Soto-nagashi-uke', 'Ablenkende Abwehr Jodan: der Unterarm zieht von außen vor die Stirn, zugleich schlägt die andere Faust (Kentsui) gegen den Ellbogen des Angreifers', 'uke', tc('soto-nagashi-uke'), PDF(17)],
+    ['Soto-nagashi-uke', 'Ablenkende Abwehr Jodan: der senkrechte Unterarm schiebt den Angriff zur Seite, zugleich schlägt die andere Faust (Kentsui) waagerecht darunter gegen den Ellbogen des Angreifers', 'uke', tc('soto-nagashi-uke'), PDF(17)],
     ['Uchi-nagashi-uke', 'Ablenkende Abwehr Jodan von innen nach außen mit der Rückseite des Unterarms (Haiwan), zugleich wehrt die andere Faust unten ab', 'uke', tc('uchi-nagashi-uke'), PDF(69)],
     ['Gedan-nagashi-uke', 'Ablenkende Abwehr im unteren Bereich, in Gegenrichtung zum Gedan-barai', 'uke', tc('gedan-nagashi-uke'), KO],
     ['Osae-uke', 'Drückende Abwehr nach unten', 'uke', tc('osae-uke'), PDF(21)],
