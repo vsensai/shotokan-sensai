@@ -628,8 +628,10 @@
     const norm = (s) => s.toLowerCase().split(/[\s-]+/).filter(Boolean);
     const list = [];
     const byName = new Map();
+    // Oberbegriffe zeigen ihre häufigste Form (SK.glossaryForm): „Mae-enpi“ führt zur Karte „Enpi-uchi (Mae-enpi)“
+    const form = SK.glossaryForm || {};
     SK.glossary.forEach((e) => {
-      e.t.split(' / ').forEach((name) => {
+      [...e.t.split(' / '), ...(form[e.t] ? [form[e.t]] : [])].forEach((name) => {
         if (/[()]/.test(name)) return;
         const w = norm(name);
         list.push({ w, e });

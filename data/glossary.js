@@ -71,16 +71,15 @@
     ['Tettsui-uchi', 'Hammerfaustschlag (auch Kentsui-uchi)', 'uchi', tc('tettsui-uchi')],
     ['Shuto-uchi', 'Handkantenschlag', 'uchi', tc('shuto-uchi')],
     ['Haito-uchi', 'Schlag mit der inneren Handkante (Daumenseite)', 'uchi', tc('haito-uchi')],
-    ['Enpi-uchi', 'Ellbogenschlag', 'uchi', tc('enpi-uchi')],
+    ['Hasami-uchi', 'Zangenschlag mit beiden Fäusten zu beiden Seiten', 'uchi', tc('hasami-uchi'), PDF(90)],
+    ['Teisho-uchi', 'Schlag mit dem Handballen', 'uchi', tc('teisho-uchi')],
+    ['Enpi-uchi', 'Ellbogenschlag – Oberbegriff für alle Ellbogentechniken. Gezeigt ist die häufigste Form: nach vorne, Ellbogen dicht am Körper, gerade Linie zum Ziel', 'uchi', tc('enpi-uchi'), KO],
     ['Furi-enpi', 'Schwingender Ellbogenschlag zur Seite', 'uchi', tc('furi-enpi'), PDF(35)],
     ['Ushiro-enpi', 'Ellbogenstoß nach hinten', 'uchi', tc('ushiro-enpi'), PDF(37)],
-    ['Mae-enpi', 'Ellbogenstoß nach vorne: Ellbogen dicht am Körper, gerade Linie zum Ziel', 'uchi', tc('enpi-uchi'), KO],
     ['Yoko-enpi', 'Ellbogenstoß zur Seite, meist in Kiba-dachi', 'uchi', tc('yoko-enpi'), KO],
     ['Mawashi-enpi', 'Ellbogenschlag im waagerechten Bogen von außen zur Körpermitte', 'uchi', tc('mawashi-enpi'), KO],
     ['Age-enpi', 'Ellbogenschlag senkrecht nach oben, dicht am Körper (auch Tate-enpi)', 'uchi', tc('age-enpi'), KO],
     ['Otoshi-enpi', 'Ellbogenschlag senkrecht nach unten, z. B. in Kiba- oder Fudo-dachi', 'uchi', tc('otoshi-enpi'), KO],
-    ['Hasami-uchi', 'Zangenschlag mit beiden Fäusten zu beiden Seiten', 'uchi', tc('hasami-uchi'), PDF(90)],
-    ['Teisho-uchi', 'Schlag mit dem Handballen', 'uchi', tc('teisho-uchi')],
 
     ['Gedan-barai', 'Abwehr nach unten (fegend)', 'uke', mv('gedan-barai')],
     ['Age-uke', 'Abwehr nach oben (Jodan)', 'uke', mv('age-uke')],
@@ -89,9 +88,11 @@
     ['Shuto-uke', 'Handkantenabwehr, meist in Kokutsu-dachi', 'uke', tc('shuto-uke')],
     ['Morote-uke', 'Unterstützte Abwehr – zweite Faust am Ellbogen', 'uke', tc('morote-uke'), PDF(26)],
     ['Juji-uke', 'Gekreuzte Abwehr (auch Kosa-uke)', 'uke', tc('juji-uke'), PDF(41)],
+    ['Manji-uke', 'Doppelabwehr: eine Hand wehrt unten ab (Gedan-barai), die andere schützt oben (Jodan-uchi-uke)', 'uke', tc('manji-uke'), KO],
     ['Kakiwake-uke', 'Abwehr, bei der beide Arme auseinanderdrücken', 'uke', tc('kakiwake-uke'), PDF(46)],
     ['Gedan-kakiwake', 'Beide Hände kreuzen vor dem Körper und gehen seitlich nach unten, Handrücken außen', 'uke', tc('gedan-kakiwake'), PDF2(45)],
-    ['Nagashi-uke', 'Fließende, ablenkende Abwehr', 'uke', tc('nagashi-uke')],
+    ['Nagashi-uke', 'Fließende, ablenkende Abwehr – Oberbegriff. Gezeigt ist die häufigste Form: die offene Hand lenkt einen Jodan- oder Chudan-Angriff zur Seite ab', 'uke', tc('te-nagashi-uke'), KO],
+    ['Gedan-nagashi-uke', 'Ablenkende Abwehr im unteren Bereich, in Gegenrichtung zum Gedan-barai', 'uke', tc('gedan-nagashi-uke'), KO],
     ['Osae-uke', 'Drückende Abwehr nach unten', 'uke', tc('osae-uke'), PDF(21)],
     ['Kake-uke', 'Hakenabwehr mit dem Handgelenk', 'uke', tc('kake-uke'), PDF(59)],
     ['Sukui-uke', 'Schöpfende Abwehr gegen einen Tritt', 'uke', tc('sukui-uke'), PDF(82)],
@@ -101,9 +102,6 @@
     ['Teisho-uke', 'Abwehr mit dem Handballen', 'uke', tc('teisho-uke'), PDF(142)],
     ['Teisho Awase-uke', 'Abwehr mit beiden Handballen zusammen gegen das Schienbein eines Tritts', 'uke', tc('teisho-awase-uke'), PDF2(57)],
     ['Uchiotoshi', 'Unterarm schlägt einen Angriff nach unten', 'uke', tc('uchiotoshi'), PDF(150)],
-    ['Manji-uke', 'Doppelabwehr: eine Hand wehrt unten ab (Gedan-barai), die andere schützt oben (Jodan-uchi-uke)', 'uke', tc('manji-uke'), KO],
-    ['Te-nagashi-uke', 'Die offene Hand lenkt einen Jodan- oder Chudan-Angriff zur Seite ab – vor allem im Kampf', 'uke', tc('te-nagashi-uke'), KO],
-    ['Gedan-nagashi-uke', 'Ablenkende Abwehr im unteren Bereich, in Gegenrichtung zum Gedan-barai', 'uke', tc('gedan-nagashi-uke'), KO],
 
     ['Mae-geri', 'Fußtritt nach vorne mit dem Fußballen', 'geri', mv('mae-geri')],
     ['Yoko-geri-keage', 'Seitlicher Schnapptritt', 'geri', tc('yoko-geri-keage')],
@@ -224,9 +222,9 @@
     'Uraken-uchi': ['heian-nidan', 7, 'Uraken Yoko-mawashi-uchi'],
     'Tettsui-uchi': ['heian-shodan', 4, 'Kentsui Tate-mawashi-uchi'],
     'Shuto-uchi': ['heian-yondan', 11, 'Shuto Soto-mawashi-uchi'],
+    'Enpi-uchi': ['heian-yondan', 7, 'Mae-enpi'],
     'Furi-enpi': ['heian-sandan', 12],
     'Ushiro-enpi': ['heian-sandan', 19],
-    'Mae-enpi': ['heian-yondan', 7],
     'Hasami-uchi': ['bassai-dai', 23],
 
     'Gedan-barai': ['heian-shodan', 1],
@@ -237,7 +235,7 @@
     'Morote-uke': ['heian-nidan', 22],
     'Juji-uke': ['heian-yondan', 3, 'Kosa-uke'],
     'Kakiwake-uke': ['heian-yondan', 14],
-    'Nagashi-uke': ['heian-nidan', 2, 'Soto-nagashi-uke'],
+    'Nagashi-uke': ['heian-godan', 21, 'Sasho Jodan Nagashi-uke', 'Teil 1', 'Sasho Jodan Nagashi-uke'],
     'Osae-uke': ['heian-nidan', 11],
     'Kake-uke': ['heian-godan', 14],
     'Sukui-uke': ['bassai-dai', 6, '', 'als Zwischentechnik davor'],
@@ -303,7 +301,10 @@
   // Anderer Name im Buch – nur zeigen, wenn er nicht bloß der eigene Name mit Zusätzen ist
   // („Shuto Chudan-uke“ zu „Shuto-uke“ nein, „Kosa-uke“ zu „Juji-uke“ ja). „-uchi“ zählt dabei nicht.
   // Abweichende Anzeige: kürzerer anderer Name oder gar keiner ('')
-  const ANDERS = { 'Tettsui-uchi': 'Kentsui-uchi', 'Yoko-geri-kekomi': '' };
+  // Oberbegriffe zeigen ihre häufigste Form; deren Name steht in Klammern im Titel, eine eigene Karte hat sie nicht
+  const FORM = { 'Enpi-uchi': 'Mae-enpi', 'Nagashi-uke': 'Te-nagashi' };
+  SK.glossaryForm = FORM;
+  const ANDERS = { 'Tettsui-uchi': 'Kentsui-uchi', 'Yoko-geri-kekomi': '', ...FORM };
   function altName(e) {
     if (e.t in ANDERS) return ANDERS[e.t];
     const b = e.erst && e.erst.buch;
