@@ -491,7 +491,24 @@
   D['tc:sukui-uke'] = FLOW([SU0, SU1, SU2, SU3], M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3', dur: 1.9 }));
   // wie Heian Nidan 1: der vordere (linke) Arm schwingt seitlich hoch, Unterarm senkrecht, Faust auf Kopfhöhe,
   // die Rückseite des Unterarms zeigt zum Angriff; die rechte Faust bleibt knapp vor der Hüfte
-  D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [-0.2, -0.3, 0.06] }), M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front3' }));
+  const HAIWAN_END = M(S.kk, { hL: [0.44, 0.22, 0.16], eL: [0.6, -0.3, 0.2], hR: [-0.2, -0.3, 0.06] });
+  D['tc:haiwan-uke'] = T(M(S.kk, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], hR: H.hip }), HAIWAN_END, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front3' }));
+  // Soto-nagashi-uke wie Heian Nidan 2, fließend aus dem Haiwan-uke (1) im Migi Kokutsu-dachi: der linke Unterarm zieht
+  // waagerecht vor die Stirn und lenkt den Jodan-Angriff ab, zugleich schwingt die rechte Faust (Kentsui) von außen im
+  // Bogen nach vorn gegen den Ellbogen des Gegners – beide Unterarme wie eine Schere
+  const W_KK = (v) => aim(S.kk, v);
+  D['tc:soto-nagashi-uke'] = FLOW([
+    HAIWAN_END,
+    M(S.kk, { hL: W_KK([0.08, 0.26, 0.34]), eL: W_KK([0.8, -0.4, 0.4]), hR: W_KK([-0.32, -0.08, 0.26]), eR: W_KK([-0.8, -0.4, 0]) }),
+    M(S.kk, { hL: W_KK([-0.04, 0.24, 0.38]), eL: W_KK([0.9, -0.3, 0.3]), hR: W_KK([0.06, -0.04, 0.54]), eR: W_KK([-0.6, -0.5, 0.1]) }),
+  ], M(hit('elbowL', 'Unterarm'), { eff: 'fistL', view: 'front3' }));
+  // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn, aus dem rechten Uchi-uke (8): die
+  // Rückseite des linken Unterarms (Haiwan) steigt vor dem Gesicht hoch und lenkt Jodan nach links ab, zugleich wehrt
+  // die rechte Faust unten vor dem Körper ab (Gedan-uke)
+  D['tc:uchi-nagashi-uke'] = T(
+    M(KB, { hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD }),
+    M(KB, { hL: [0.16, 0.2, 0.3], eL: [0.3, -1, 0.15], hR: [0.12, -0.5, 0.32], eR: [-0.6, -0.5, 0.3] }),
+    M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front' }));
   D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
   // Tate-shuto-uke wie in Bassai Dai 8–9: im etwas breiteren Hachiji-dachi aus Ryoken Migi Koshi-kamae (beide Fäuste an
   // der rechten Hüfte, linke über der rechten) geht die linke Hand geöffnet langsam und kraftvoll im Bogen nach vorn Chudan,
@@ -716,6 +733,7 @@
     'tc:shuto-uke': 'shuto', 'tc:morote-uke': 'unterarm:L', 'tc:juji-uke': 'handgelenk:LR', 'tc:kakiwake-uke': 'unterarm:LR',
     'tc:nagashi-uke': 'handflaeche', 'tc:te-nagashi-uke': 'handflaeche', 'tc:gedan-nagashi-uke': 'unterarm', 'tc:osae-uke': 'handflaeche',
     'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'unterarm', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',
+    'tc:soto-nagashi-uke': 'unterarm', 'tc:uchi-nagashi-uke': 'unterarm',
     'tc:tate-shuto-uke': 'shuto', 'tc:teisho-uke': 'teisho', 'tc:teisho-awase-uke': 'teisho:LR', 'tc:uchiotoshi': 'unterarm', 'tc:manji-uke': 'unterarm:LR',
     'mv:mae-geri': 'koshi', 'tc:mae-geri-kekomi': 'kakato', 'tc:sonoba-geri': 'koshi', 'tc:kizami-geri': 'koshi', 'tc:ren-geri': 'koshi',
     'mv:yoko-geri': 'sokuto', 'tc:yoko-geri-keage': 'sokuto', 'mv:mawashi-geri': 'koshi', 'mv:ushiro-geri': 'kakato',
