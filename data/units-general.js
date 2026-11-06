@@ -309,15 +309,24 @@
               <li><b>Shuto-uke</b> – Handkantenabwehr, meist in Kokutsu-dachi.</li>
               <li><b>Morote-uke</b> – unterstützte Abwehr (zweite Faust am Ellbogen).</li>
               <li><b>Juji-uke / Kosa-uke</b> – gekreuzte Abwehr; <b>Kakiwake-uke</b> – auseinanderdrückende Abwehr.</li>
-              <li><b>Nagashi-uke</b> – fließende, ablenkende Abwehr (Theorie 1. Dan); <b>Osae-uke</b> – drückende Abwehr.</li>
+              <li><b>Osae-uke</b> – drückende Abwehr nach unten.</li>
               <li><b>Kake-uke</b> – Hakenabwehr; <b>Teisho-uke</b> – Handballenabwehr; <b>Sukui-uke</b> – schöpfende Abwehr.</li>
               <li><b>Manji-uke</b> – Doppelabwehr: eine Hand Gedan-barai, die andere schützt oben (Jodan-uchi-uke).</li>
-              <li><b>Te-nagashi-uke</b> – die offene Hand lenkt Jodan- oder Chudan-Angriffe zur Seite (vor allem im Kampf); <b>Gedan-nagashi-uke</b> – ablenkende Abwehr unten, in Gegenrichtung zum Gedan-barai.</li>
+              <li><b>Nagashi-uke</b> – Oberbegriff für fließende, ablenkende Abwehren (Theorie 1. Dan): der Angriff wird nicht hart gestoppt, sondern abgelenkt. Die Formen:
+                <ul>
+                  <li><b>Te-nagashi-uke</b> – die offene Hand lenkt Jodan- oder Chudan-Angriffe zur Seite; die häufigste Form, vor allem im Kampf.</li>
+                  <li><b>Soto-nagashi-uke</b> – der Unterarm zieht von außen vor die Stirn, zugleich schlägt die andere Faust (Kentsui) gegen den Ellbogen – wie eine Schere (Heian Nidan 2 und 5).</li>
+                  <li><b>Uchi-nagashi-uke</b> – die Rückseite des Unterarms (Haiwan) lenkt Jodan von innen nach außen ab, die andere Faust wehrt zugleich unten ab (Tekki Shodan 9 und 23).</li>
+                  <li><b>Gedan-nagashi-uke</b> – ablenkende Abwehr unten, in Gegenrichtung zum Gedan-barai.</li>
+                </ul>
+              </li>
               <li>Paare mit Gegenrichtung: <b>Soto-uke</b> (außen → innen) und <b>Uchi-uke</b> (innen → außen) schützen beide Chudan; <b>Shuto-uke</b> wehrt wie Uchi-uke nach außen ab.</li>
             </ul>
             ${grid(M('age-uke', 'Age-uke', 'nach oben'), M('gedan-barai', 'Gedan-barai', 'nach unten, fegend'), M('soto-uke', 'Soto-uke', 'von außen nach innen'), M('uchi-uke', 'Uchi-uke', 'von innen nach außen'))}
             <h4>Weitere Abwehrtechniken</h4>
-            ${grid(T('shuto-uke', 'Shuto-uke'), T('morote-uke', 'Morote-uke'), T('juji-uke', 'Juji-uke'), T('kakiwake-uke', 'Kakiwake-uke'), T('nagashi-uke', 'Nagashi-uke'), T('osae-uke', 'Osae-uke'), T('kake-uke', 'Kake-uke'), T('teisho-uke', 'Teisho-uke'), T('sukui-uke', 'Sukui-uke'), T('manji-uke', 'Manji-uke'))}`,
+            ${grid(T('shuto-uke', 'Shuto-uke'), T('morote-uke', 'Morote-uke'), T('juji-uke', 'Juji-uke'), T('kakiwake-uke', 'Kakiwake-uke'), T('osae-uke', 'Osae-uke'), T('kake-uke', 'Kake-uke'), T('teisho-uke', 'Teisho-uke'), T('sukui-uke', 'Sukui-uke'), T('manji-uke', 'Manji-uke'))}
+            <h4>Nagashi-uke – ablenkende Abwehren</h4>
+            ${grid(T('te-nagashi-uke', 'Te-nagashi-uke'), T('soto-nagashi-uke', 'Soto-nagashi-uke'), T('uchi-nagashi-uke', 'Uchi-nagashi-uke'), T('gedan-nagashi-uke', 'Gedan-nagashi-uke'))}`,
         },
         {
           id: 'ki-uchi', title: 'Uchi – Schläge', minGrade: '7kyu',

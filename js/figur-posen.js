@@ -460,7 +460,6 @@
   const TA0 = M(S.neko, OPEN2, { hL: [0.24, -0.34, 0.06], hR: [-0.24, -0.34, 0.06], pL: [0, 0, 1], pR: [0, 0, 1], fL: [0, -1, 0], fR: [0, -1, 0] });
   const TA1 = M(S.neko, OPEN2, { lean: 10, hL: aim(S.neko, [0.08, -0.36, 0.44]), hR: aim(S.neko, [0.0, -0.36, 0.44]), pL: aim(S.neko, [-0.6, 0.3, 0.7]), pR: aim(S.neko, [0.6, 0.3, 0.7]), fL: aim(S.neko, [0.6, 0.5, 0.3]), fR: aim(S.neko, [-0.6, 0.5, 0.3]) });
   D['tc:teisho-awase-uke'] = M({ keys: [{ t: 0, p: TA0 }, { t: 0.15, p: TA0 }, { t: 0.75, p: TA1, e: 'io' }], best: 1, dur: 2.6, eff: 'wristL', view: 'side3' }, hit('wristL', 'beide Handballen'));
-  D['tc:nagashi-uke'] = T_RUHIG(M(S.zks, { hL: L(H.hip), hR: [-0.28, 0.05, 0.32], oR: 1, pR: [1, 0, 0], fR: [0, 1, 0.3] }), M(S.zks, { hL: L(H.hip), hR: [0.08, 0.06, 0.26], oR: 1, pR: [1, 0, 0.3], fR: [0, 1, 0.3] }), M(hit('wristR', 'Handfläche'), { eff: 'tipR', view: 'front3' }));
   // Te-nagashi-uke aus dem Chudan-kamae (links vorn): die rechte Hand bleibt locker in der Kamae vor dem Körper,
   // die linke offene Hand steht auf Jodan-Höhe links seitlich vor dem Kopf und schiebt die Faust, die auf den Kopf zielt,
   // mit der Innenhandfläche nach rechts zur Seite weg (Handfläche zeigt nach rechts, Finger nach oben)
@@ -731,7 +730,7 @@
     'tc:otoshi-enpi': 'ellbogen', 'tc:ushiro-enpi': 'ellbogen', 'tc:hasami-uchi': 'innen:LR',
     'mv:age-uke': 'unterarm', 'mv:gedan-barai': 'unterarm', 'mv:soto-uke': 'unterarm', 'mv:uchi-uke': 'unterarm', 'tc:bunkai': 'unterarm',
     'tc:shuto-uke': 'shuto', 'tc:morote-uke': 'unterarm:L', 'tc:juji-uke': 'handgelenk:LR', 'tc:kakiwake-uke': 'unterarm:LR',
-    'tc:nagashi-uke': 'handflaeche', 'tc:te-nagashi-uke': 'handflaeche', 'tc:gedan-nagashi-uke': 'unterarm', 'tc:osae-uke': 'handflaeche',
+    'tc:te-nagashi-uke': 'handflaeche', 'tc:gedan-nagashi-uke': 'unterarm', 'tc:osae-uke': 'handflaeche',
     'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'unterarm', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',
     'tc:soto-nagashi-uke': 'unterarm', 'tc:uchi-nagashi-uke': 'unterarm',
     'tc:tate-shuto-uke': 'shuto', 'tc:teisho-uke': 'teisho', 'tc:teisho-awase-uke': 'teisho:LR', 'tc:uchiotoshi': 'unterarm', 'tc:manji-uke': 'unterarm:LR',
