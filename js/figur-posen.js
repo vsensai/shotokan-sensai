@@ -592,9 +592,9 @@
   // Seitwärts aus Kiba-dachi: Fußkante nach rechts, Blick zur Seite
   const KB_K = M(KB, { look: -90 });
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
-  // Beide Yoko-geri mit den Händen in Chudan-kamae zur Trittseite: der rechte Arm gebeugt vorn Richtung Ziel,
-  // die linke Faust schützend vor der Brust (Hand in Weltrichtung, das Ziel liegt rechts)
-  const YG = (p) => M(p, { hR: aim(p, [-0.44, -0.17, -0.04]), hL: aim(p, [-0.16, -0.25, 0.06]) });
+  // Beide Yoko-geri mit den Händen in Chudan-kamae (Brustkoordinaten, dreht mit dem Oberkörper): die rechte Faust
+  // vorn auf der Trittseite, die linke vor dem Solarplexus, beide Ellbogen nach unten
+  const YG = (p) => M(p, { hR: [-0.3, -0.16, 0.36], eR: [-0.4, -1, 0], hL: [0.02, -0.2, 0.32], eL: [0.4, -1, 0] });
   const KB_G = YG(KB_K);
   // Yoko-geri kekomi: Knie hoch vor den Körper, Fuß dicht am Standbein; dann stößt das Bein gerade zur Seite und die Hüfte
   // dreht kräftig ein (das Gesäß wendet sich zum Ziel, als wollte man es ansehen), Oberkörper neigt sich zur Gegenseite,
