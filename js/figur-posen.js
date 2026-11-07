@@ -592,9 +592,15 @@
   // Seitwärts aus Kiba-dachi: Fußkante nach rechts, Blick zur Seite
   const KB_K = M(KB, { look: -90 });
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
-  // Beide Yoko-geri mit den Händen in Chudan-kamae (Brustkoordinaten, dreht mit dem Oberkörper): die rechte Faust
-  // vorn auf der Trittseite, die linke vor dem Solarplexus, beide Ellbogen nach unten
-  const YG = (p) => M(p, { hR: [-0.3, -0.16, 0.36], eR: [-0.4, -1, 0], hL: [0.02, -0.2, 0.32], eL: [0.4, -1, 0] });
+  // Beide Yoko-geri mit den Händen in Chudan-kamae in Trittrichtung (nach rechts, auch wenn der Oberkörper beim Tritt
+  // eindreht): die rechte Faust vorn Richtung Ziel, die linke davor auf der Trittseite der Brust, beide Ellbogen nach unten
+  // (ausdrücklich vorgegeben – ohne Vorgabe hielte die Figur eine Faust so nah am Körper für Hikite)
+  // Neigt sich der Oberkörper zur Seite (roll), die Höhe ausgleichen, damit die Fäuste auf Brusthöhe bleiben
+  const YG = (p) => {
+    const r = (E.full(p).roll * Math.PI) / 180;
+    const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
+    return M(p, { hR: h([-0.46, -0.13, 0.05]), eR: [-0.3, -1, 0], hL: h([-0.2, -0.17, 0.12]), eL: [0.3, -1, 0] });
+  };
   const KB_G = YG(KB_K);
   // Yoko-geri kekomi: Knie hoch vor den Körper, Fuß dicht am Standbein; dann stößt das Bein gerade zur Seite und die Hüfte
   // dreht kräftig ein (das Gesäß wendet sich zum Ziel, als wollte man es ansehen), Oberkörper neigt sich zur Gegenseite,
