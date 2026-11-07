@@ -595,9 +595,9 @@
   // Beide Yoko-geri mit den Händen in Kamae in Trittrichtung (nach rechts, auch wenn der Oberkörper beim Tritt eindreht):
   // die rechte Faust hoch Richtung Ziel, Ellbogen nach vorn außen – beim Keage kommt das Knie unter dem rechten Arm hoch;
   // die linke Faust unten auf Höhe des Bauchnabels vor der linken Körperseite (mittig ginge beim Kekomi das Knie hindurch),
-  // Ellbogen nach unten (ausdrücklich vorgegeben – ohne Vorgabe hielte die
-  // Figur eine Faust nah am Körper für Hikite). Arme und Trittbein bleiben im ganzen Ablauf auseinander (Mittellinien beim Kekomi > 30 cm, beim Keage
-  // kommt das Knie fast bis auf Brusthöhe: knapp 14 cm).
+  // Ellbogen nach unten (ausdrücklich vorgegeben – ohne Vorgabe hielte die Figur eine Faust nah am Körper für Hikite).
+  // Arme und Trittbein bleiben im ganzen Ablauf auseinander (Mittellinien mindestens 19 cm; nur beim Keage, wo das Knie
+  // fast bis auf Brusthöhe kommt, rechts knapp 14 cm).
   // Neigt sich der Oberkörper zur Seite (roll), die Höhe ausgleichen, damit die Fäuste auf Brusthöhe bleiben
   // hR: rechte Faust (Weltrichtung zur Brust), eR: Ellbogen; beim Keage höher und weiter vorn, damit das Knie darunter durchkommt
   const YG = (p, hR = [-0.56, 0.1, 0.2], eR = [-0.6, -0.4, 1]) => {
