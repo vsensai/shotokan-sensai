@@ -2282,6 +2282,26 @@ main:fullscreen {
   display: none;
 }
 
+/* Angehaltene Bewegung: Pausenzeichen */
+.f3d-paused .f3d-stage::after,
+.gfx-anim.gfx-paused::after {
+  content: "❚❚";
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #8e1b1b;
+  background: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+.gfx-anim {
+  position: relative;
+}
+
 @keyframes f3d-load {
   to {
     background-position: 100% 0;

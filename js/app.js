@@ -979,6 +979,19 @@
   window.addEventListener('hashchange', route);
   // Grafik-Knöpfe in Lektionen und Lexikon: 3D-Figur ↔ Fußbild, Standbild ↔ Animation
   document.addEventListener('click', (ev) => {
+    // Antippen der Fußbewegung hält sie an bzw. lässt sie weiterlaufen
+    const anim = ev.target.closest('.gfx-anim');
+    const svg = anim && anim.querySelector('svg');
+    if (svg && svg.pauseAnimations) {
+      // schon zu Ende: von vorn abspielen
+      const dur = Math.max(0, ...[...svg.querySelectorAll('[dur]')].map((x) => parseFloat(x.getAttribute('dur')) || 0));
+      if (!svg.animationsPaused() && svg.getCurrentTime() >= dur) { svg.setCurrentTime(0); return; }
+      const pause = !svg.animationsPaused();
+      if (pause) svg.pauseAnimations();
+      else svg.unpauseAnimations();
+      anim.classList.toggle('gfx-paused', pause);
+      return;
+    }
     const btn = ev.target.closest('.gfx-box .gfx-btn');
     // 3D-Knöpfe (data-act="f3d-…") bedient js/figur-app.js
     if (!btn || !['side', 'anim'].includes(btn.dataset.act)) return;
@@ -993,6 +1006,7 @@
     } else if (btn.dataset.act === 'anim') {
       const anim = box.querySelector(':scope > .gfx-anim');
       anim.innerHTML = on ? SK.gfx.animSvg(box.dataset.gfx) : '';
+      anim.classList.remove('gfx-paused');
       anim.hidden = !on;
       views[0].hidden = on;
       btn.textContent = on ? '■ Standbild' : '▶ Bewegung';

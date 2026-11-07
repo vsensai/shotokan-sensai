@@ -417,10 +417,13 @@
     if (!live) return;
     const { box, cv } = live;
     cv.remove();
-    box.classList.remove('f3d-live');
+    box.classList.remove('f3d-live', 'f3d-paused');
     box.querySelectorAll('[data-act^="f3d-"]').forEach((b) => {
       if (b.dataset.act === 'f3d-home') b.hidden = true;
-      else b.setAttribute('aria-pressed', 'false');
+      else {
+        b.setAttribute('aria-pressed', 'false');
+        if (b.dataset.act === 'f3d-play') b.textContent = '▶ Bewegung';
+      }
     });
     live = null;
   }
@@ -439,6 +442,25 @@
     return live;
   }
   const camCopy = (c) => Object.assign({}, c, { target: c.target.slice() });
+  // Knopf und Pausenzeichen dem Abspielzustand anpassen
+  function playUi(L) {
+    const btn = L.box.querySelector('[data-act="f3d-play"]');
+    if (btn) {
+      btn.setAttribute('aria-pressed', String(!!L.st.playing));
+      btn.textContent = L.st.paused ? '▶ Weiter' : '▶ Bewegung';
+    }
+    L.box.classList.toggle('f3d-paused', !!L.st.paused);
+  }
+  // Antippen während der Bewegung: anhalten bzw. weiterlaufen lassen. false: es läuft keine Bewegung
+  function togglePause(box) {
+    const L = live;
+    if (!L || L.box !== box || !(L.st.playing || L.st.paused)) return false;
+    L.st.playing = !L.st.playing;
+    L.st.paused = !L.st.playing;
+    playUi(L);
+    kick();
+    return true;
+  }
   let raf = 0;
   let last = 0;
   function loop() {
@@ -455,7 +477,7 @@
       if (L.st.playing) {
         L.st.t += dt / (L.e.d.dur || 1.6);
         // einmal abspielen, dann in der Endstellung stehen bleiben
-        if (L.st.t >= L.e.t1) { L.st.t = L.e.t1; L.st.playing = false; L.box.querySelector('[data-act="f3d-play"]')?.setAttribute('aria-pressed', 'false'); }
+        if (L.st.t >= L.e.t1) { L.st.t = L.e.t1; L.st.playing = false; playUi(L); }
         L.dirty = true;
       }
       if (L.dirty) {
@@ -524,7 +546,8 @@
       if (tapped && ev.target.closest && ev.target.closest('.f3d-stage') && tapped.contains(ev.target)) {
         const box = tapped;
         tapped = null;
-        openBig(box);
+        // während der Bewegung: anhalten/weiter statt Großansicht
+        if (!togglePause(box)) openBig(box);
         return;
       }
       tapped = null;
@@ -537,10 +560,11 @@
       const L = startLive(box);
       if (act === 'f3d-reset') L.st.cam = camCopy(L.e.cam);
       if (act === 'f3d-play') {
-        // jedes Antippen spielt die Bewegung einmal von vorn
+        // angehalten: weiterlaufen lassen; sonst spielt jedes Antippen die Bewegung einmal von vorn
+        if (!L.st.paused) L.st.t = L.e.t0;
         L.st.playing = true;
-        L.st.t = L.e.t0;
-        btn.setAttribute('aria-pressed', 'true');
+        L.st.paused = false;
+        playUi(L);
       }
       kick();
     });
@@ -676,6 +700,8 @@
       const p = pts.get(ev.pointerId);
       if (!p) return;
       pts.delete(ev.pointerId);
+      // Antippen ohne Ziehen (auch mit der Maus) hält die Bewegung an bzw. lässt sie weiterlaufen
+      if (ev.type === 'pointerup' && !p.n && !pts.size && Math.hypot(ev.clientX - p.x0, ev.clientY - p.y0) < 10) togglePause(stage.parentElement);
       // Doppeltippen mit dem Finger (die Maus nutzt dblclick)
       if (ev.type === 'pointerup' && ev.pointerType !== 'mouse' && !p.n && !pts.size && Math.hypot(ev.clientX - p.x0, ev.clientY - p.y0) < 10) {
         const now = performance.now();
