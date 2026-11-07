@@ -592,16 +592,21 @@
   // Seitwärts aus Kiba-dachi: Fußkante nach rechts, Blick zur Seite
   const KB_K = M(KB, { look: -90 });
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
-  // Beide Yoko-geri mit den Händen in Chudan-kamae in Trittrichtung (nach rechts, auch wenn der Oberkörper beim Tritt
-  // eindreht): die rechte Faust vorn Richtung Ziel, die linke davor auf der Trittseite der Brust, beide Ellbogen nach unten
-  // (ausdrücklich vorgegeben – ohne Vorgabe hielte die Figur eine Faust so nah am Körper für Hikite)
+  // Beide Yoko-geri mit den Händen in Kamae in Trittrichtung (nach rechts, auch wenn der Oberkörper beim Tritt eindreht):
+  // die rechte Faust hoch Richtung Ziel, Ellbogen nach vorn außen – beim Keage kommt das Knie unter dem rechten Arm hoch;
+  // die linke Faust mit Abstand vor dem Körper, Ellbogen nach unten (ausdrücklich vorgegeben – ohne Vorgabe hielte die
+  // Figur eine Faust nah am Körper für Hikite). Arme und Trittbein bleiben im ganzen Ablauf auseinander (Mittellinien beim Kekomi > 30 cm, beim Keage
+  // kommt das Knie fast bis auf Brusthöhe: knapp 14 cm).
   // Neigt sich der Oberkörper zur Seite (roll), die Höhe ausgleichen, damit die Fäuste auf Brusthöhe bleiben
-  const YG = (p) => {
+  // hR: rechte Faust (Weltrichtung zur Brust), eR: Ellbogen; beim Keage höher und weiter vorn, damit das Knie darunter durchkommt
+  const YG = (p, hR = [-0.56, 0.1, 0.2], eR = [-0.6, -0.4, 1]) => {
     const r = (E.full(p).roll * Math.PI) / 180;
     const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
-    return M(p, { hR: h([-0.46, -0.13, 0.05]), eR: [-0.3, -1, 0], hL: h([-0.2, -0.17, 0.12]), eL: [0.3, -1, 0] });
+    return M(p, { hR: h(hR), eR, hL: h([-0.2, 0.02, 0.32]), eL: [0.3, -1, 0] });
   };
+  const YGA = (p) => YG(p, [-0.4, 0.18, 0.4], [0, -1, 1]);
   const KB_G = YG(KB_K);
+  const KB_GA = YGA(KB_K);
   // Yoko-geri kekomi: Knie hoch vor den Körper, Fuß dicht am Standbein; dann stößt das Bein gerade zur Seite und die Hüfte
   // dreht kräftig ein (das Gesäß wendet sich zum Ziel, als wollte man es ansehen), Oberkörper neigt sich zur Gegenseite,
   // Standfuß dreht mit, Ferse und Fußkante führen; etwas langsamer als die anderen Tritte (2,7 s statt 2 s)
@@ -612,10 +617,10 @@
   // Yoko-geri keage: Knie hoch, Knie zeigt zum Ziel; der Unterschenkel schnappt im Bogen seitlich nach oben (Jodan),
   // die Hüfte schnappt dabei mit hoch (rechte Hüfte steigt, Oberkörper kippt etwas zur Gegenseite) und sofort zurück;
   // im Treffpunkt ist das Bein durchgestreckt
-  const YA_CH = YG(BAL(M(KB_K, { pelvis: [0.3, 0.78, 0], yaw: 12, L: { yaw: 15, kp: [0.8, 0.2, 1] }, R: { x: 0.12, z: 0.18, y: 0.5, yaw: -40, pitch: -20, sole: [-0.6, -0.8, 0], kp: [-1, 0.6, 0.5] }, w: [1, 0] }), 'L'));
-  const YA_MID = YG(BAL(M(YA_CH, { pelvis: [0.3, 0.8, 0], roll: 8, R: { x: -0.2, z: 0.18, y: 0.82, yaw: -10, pitch: 10, kp: [-1, 0.8, 0.3] } }), 'L'));
-  const YA_EXT = YG(BAL(M(YA_CH, { pelvis: [0.3, 0.84, 0], yaw: 18, roll: 22, R: { x: -0.52, z: 0.12, y: 1.36, yaw: 0, pitch: 18, sole: [-0.7, -0.7, 0], kp: [-0.3, 1, 0.5] } }), 'L'));
-  D['tc:yoko-geri-keage'] = M({ keys: [{ t: 0, p: KB_G }, { t: 0.1, p: KB_G }, { t: 0.32, p: YA_CH }, { t: 0.42, p: YA_MID, e: 'in' }, { t: 0.5, p: YA_EXT, e: 'kime' }, { t: 0.6, p: YA_MID }, { t: 0.68, p: YA_CH }, { t: 0.9, p: KB_G }], best: 0.5, dur: 2 }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
+  const YA_CH = YGA(BAL(M(KB_K, { pelvis: [0.3, 0.78, 0], yaw: 12, L: { yaw: 15, kp: [0.8, 0.2, 1] }, R: { x: 0.12, z: 0.18, y: 0.5, yaw: -40, pitch: -20, sole: [-0.6, -0.8, 0], kp: [-1, 0.6, 0.5] }, w: [1, 0] }), 'L'));
+  const YA_MID = YGA(BAL(M(YA_CH, { pelvis: [0.3, 0.8, 0], roll: 8, R: { x: -0.2, z: 0.18, y: 0.82, yaw: -10, pitch: 10, kp: [-1, 0.8, 0.3] } }), 'L'));
+  const YA_EXT = YGA(BAL(M(YA_CH, { pelvis: [0.3, 0.84, 0], yaw: 18, roll: 22, R: { x: -0.52, z: 0.12, y: 1.36, yaw: 0, pitch: 18, sole: [-0.7, -0.7, 0], kp: [-0.3, 1, 0.5] } }), 'L'));
+  D['tc:yoko-geri-keage'] = M({ keys: [{ t: 0, p: KB_GA }, { t: 0.1, p: KB_GA }, { t: 0.32, p: YA_CH }, { t: 0.42, p: YA_MID, e: 'in' }, { t: 0.5, p: YA_EXT, e: 'kime' }, { t: 0.6, p: YA_MID }, { t: 0.68, p: YA_CH }, { t: 0.9, p: KB_GA }], best: 0.5, dur: 2 }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
   // Mawashi-geri: Knie seitlich hoch (Oberschenkel waagerecht, Unterschenkel dicht angelegt, Spann gestreckt), Standfuß dreht
   // auf dem Ballen weit auf, die Hüfte dreht ein und kippt (Oberkörper neigt sich vom Ziel weg); dann schnappt der Unterschenkel
   // waagerecht im Bogen nach vorn, Treffer mit dem Fußballen (Zehen hochgezogen)
