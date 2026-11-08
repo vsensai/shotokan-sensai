@@ -32,6 +32,42 @@
     front: { yaw: -6, pitch: 9 }, stand: { yaw: -60, pitch: 20 },
   };
   const entries = new Map();
+  // Bildausschnitt: Blickpunkt in die Mitte der ganzen Figur (Kopf, Hände, Füße) über die ganze Bewegung; der Abstand bleibt
+  // wie gewohnt und wächst nur, wenn sonst etwas aus dem Bild (5 : 4) ragen würde
+  const FRAME_ASPECT = 1.25;
+  const FRAME_FILL = 0.95;
+  function fitCam(cam, pose, partner, t0, t1) {
+    const { add, mul } = E.v;
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const C = E.camera(Object.assign({}, cam, { target: [0, 0, 0], dist: 1 }), 1, 1);
+    const pts = [];
+    const take = (P) => {
+      const J = E.solve(P);
+      [add(J.head, [0, 0.13, 0]), J.toeL, J.toeR, J.heelL, J.heelR, J.tipL, J.tipR, J.fistL, J.fistR, J.elbowL, J.elbowR, J.kneeL, J.kneeR, J.shL, J.shR, J.pel].forEach((p) => p && pts.push(p));
+    };
+    for (let i = 0; i <= 24; i++) {
+      const t = t0 + ((t1 - t0) * i) / 24;
+      take(pose(t));
+      if (partner) take(partner(t));
+    }
+    // Körperbreite (Gi, Gürtel) quer zur Blickrichtung; oben und unten liegen Kopf- und Fußpunkte schon außen
+    const RU = 0.12;
+    const RV = 0.04;
+    const us = pts.map((p) => dot(p, C.cu));
+    const vs = pts.map((p) => dot(p, C.cv));
+    const ws = pts.map((p) => dot(p, C.cw));
+    const uc = (Math.min(...us) + Math.max(...us)) / 2;
+    const vc = (Math.min(...vs) + Math.max(...vs)) / 2;
+    const wc = (Math.min(...ws) + Math.max(...ws)) / 2;
+    cam.target = add(add(mul(C.cu, uc), mul(C.cv, vc)), mul(C.cw, wc));
+    // nötiger Abstand: jeder Punkt (näher an der Kamera erscheint er größer) passt mit Rand ins Bild
+    let need = 0;
+    pts.forEach((p, i) => {
+      const toward = wc - ws[i];
+      need = Math.max(need, C.f * (Math.abs(us[i] - uc) + RU) / (FRAME_ASPECT * FRAME_FILL) + toward, C.f * (Math.abs(vs[i] - vc) + RV) / FRAME_FILL + toward);
+    });
+    cam.dist = Math.max(cam.dist, need);
+  }
   function entry(key) {
     if (entries.has(key)) return entries.get(key);
     const { id, mirrored } = split(key);
@@ -49,11 +85,13 @@
     const cam = {
       target: [(Math.max(...xs) + Math.min(...xs)) / 2, Math.max(0.42, 0.1 + 0.82 * ay), (Math.max(...zs) + Math.min(...zs)) / 2 + (partner ? 0 : 0.12)],
       dist: (ay < 0.6 ? 3.1 : 3.95) + 0.8 * Math.max(spanZ, spanX * 0.8) + (d.view === 'side' || d.view === 'front' ? 0.15 : 0),
-      // d.yaw: Kamera gegenüber der Grundansicht etwas weiter gedreht (positiv = von rechts vorn), d.pitch: steiler von oben
-      yaw: v.yaw + (d.yaw || 0), pitch: v.pitch + (d.pitch || 0), fov: 30,
+      // d.cam: Drehung und Neigung fest (wie im Pose-Editor abgelesen); sonst Grundansicht view, d.yaw/d.pitch drehen weiter
+      // (yaw positiv = von rechts vorn, pitch = steiler von oben)
+      yaw: d.cam ? d.cam.yaw : v.yaw + (d.yaw || 0), pitch: d.cam ? d.cam.pitch : v.pitch + (d.pitch || 0), fov: 30,
     };
     const t0 = d.keys[0].t;
     const t1 = d.keys[d.keys.length - 1].t;
+    fitCam(cam, pose, partner, t0, t1);
     const e = { key, d, pose, partner, cam, mirrored, t0, t1 };
     entries.set(key, e);
     return e;

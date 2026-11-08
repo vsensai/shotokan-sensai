@@ -249,7 +249,7 @@
 <div class="pe-panel"></div>
 <div class="pe-out">
 <label class="pe-lab">Anmerkung (was soll die Pose zeigen, was ist anders?)<textarea class="pe-note" rows="2"></textarea></label>
-<div class="pe-acts"><button type="button" class="btn" data-pe="copy">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden>Ganze Bewegung ausgeben</button><button type="button" class="btn" data-pe="share" hidden>Teilen</button></div>
+<div class="pe-acts"><button type="button" class="btn" data-pe="copy">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden>Ganze Bewegung ausgeben</button></div>
 <p class="pe-msg muted small" aria-live="polite"></p>
 <textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea>
 </div></div></div></div>`;
@@ -258,7 +258,6 @@
     d.addEventListener('close', () => { S = null; });
     d.addEventListener('click', onClick);
     d.querySelector('.pe-note').addEventListener('input', () => { if (S) { S.note = d.querySelector('.pe-note').value; save(); text(); } });
-    if (navigator.share) d.querySelector('[data-pe="share"]').hidden = false;
     bindStage(d.querySelector('.pe-stage'));
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
     // Andere Größenänderungen (z. B. Adressleiste) lassen Drehung und Zoom in Ruhe.
@@ -557,7 +556,6 @@
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(S.text).then(done, fallback);
       else fallback();
     }
-    if (a === 'share') navigator.share({ title: `Pose ${S.id}`, text: S.text }).catch(() => {});
   }
 
   /* ---------- Bild und Anfasser ---------- */
