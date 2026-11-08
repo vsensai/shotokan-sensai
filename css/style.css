@@ -2523,7 +2523,7 @@ main:fullscreen {
   }
 }
 
-/* Pose-Editor (in den Einstellungen einschaltbar): im Querformat Figur links über die ganze Höhe,
+/* Bewegungs-Editor (in den Einstellungen einschaltbar): im Querformat Figur links über die ganze Höhe,
    Ansichten, Körperteile und Regler in einer Spalte rechts daneben; im Hochformat darunter */
 .pe-dlg {
   padding: 0.5rem 0.5rem 0.4rem;
@@ -2548,6 +2548,12 @@ main:fullscreen {
   overflow: hidden;
   touch-action: none;
   background: var(--card);
+}
+
+.pe-time {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.6rem;
 }
 
 .pe-setbest {

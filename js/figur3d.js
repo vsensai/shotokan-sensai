@@ -698,6 +698,7 @@ void main(){
     lin: (u) => u,
     in: (u) => u * u, // anlaufen ohne Abbremsen (Zwischenstellung einer fließenden Bewegung)
     out: (u) => 1 - (1 - u) * (1 - u), // ohne Anlauf weiter und sanft abbremsen (passt nach „in“ gleicher Dauer)
+    fl: (u) => u, // fließend: eigene Kurve in timeline (herm)
   };
   function cr(p0, p1, p2, p3, u) {
     const u2 = u * u;
@@ -711,6 +712,28 @@ void main(){
     for (const k in b) o[k] = blend(a[k], b[k], c[k], d[k], u);
     return o;
   }
+  // Hermite-Kurve zwischen den Bildern A und B (Zeit t); ma/mb: Nachbarbilder für die Geschwindigkeit an A bzw. B
+  // (null = dort in Ruhe, z. B. nach einem Halten oder Kime)
+  function herm(A, B, ma, mb, t) {
+    const T = B.t - A.t;
+    const u = (t - A.t) / T;
+    const u2 = u * u;
+    const u3 = u2 * u;
+    const h00 = 2 * u3 - 3 * u2 + 1;
+    const h10 = u3 - 2 * u2 + u;
+    const h01 = -2 * u3 + 3 * u2;
+    const h11 = u3 - u2;
+    const ka = ma ? T / (ma[1].t - ma[0].t) : 0;
+    const kb = mb ? T / (mb[1].t - mb[0].t) : 0;
+    const go = (a, b, a0, a1, b0, b1) => {
+      if (typeof a === 'number') return h00 * a + h01 * b + (ma ? h10 * ka * (a1 - a0) : 0) + (mb ? h11 * kb * (b1 - b0) : 0);
+      if (Array.isArray(a)) return a.map((_, j) => go(a[j], b[j], a0 && a0[j], a1 && a1[j], b0 && b0[j], b1 && b1[j]));
+      const o = {};
+      for (const k in a) o[k] = go(a[k], b[k], a0 && a0[k], a1 && a1[k], b0 && b0[k], b1 && b1[k]);
+      return o;
+    };
+    return go(A.p, B.p, ma && ma[0].p, ma && ma[1].p, mb && mb[0].p, mb && mb[1].p);
+  }
   // fix: optionale Korrektur jedes fertig gemischten Bildes (z. B. Fuß fest zum Unterschenkel), ändert die Pose nicht in place
   function timeline(keys, fix) {
     const K = keys.map((k) => Object.assign({ t: k.t, e: k.e || 'io' }, { p: full(k.p) }));
@@ -722,6 +745,16 @@ void main(){
       let i = 0;
       while (K[i + 1].t < t) i++;
       if (K[i + 1].hold) return K[i].p;
+      // fließend: durch die Bilder hindurch ohne anzuhalten (Geschwindigkeit an den Bildern stetig, nach der Zeit gewichtet)
+      if (K[i + 1].e === 'fl') {
+        const m = (k) => {
+          if (k <= 0 || k >= K.length - 1 || K[k].hold || K[k].e !== 'fl' || (K[k + 1].e !== 'fl' && K[k + 1].e !== 'kime') || K[k + 1].hold) return null;
+          return [K[k - 1], K[k + 1]];
+        };
+        return herm(K[i], K[i + 1], m(i), m(i + 1), t);
+      }
+      // Kime nach einem fließenden Bild: mit dem Tempo von dort ins Ziel und dort zum Stehen (ohne Ruck beim Übergang)
+      if (K[i + 1].e === 'kime' && i > 0 && K[i].e === 'fl' && !K[i].hold) return herm(K[i], K[i + 1], [K[i - 1], K[i + 1]], null, t);
       const u = ease[K[i + 1].e]((t - K[i].t) / (K[i + 1].t - K[i].t));
       const g = (j) => K[Math.max(0, Math.min(K.length - 1, j))].p;
       return blend(g(i - 1), g(i), g(i + 1), g(i + 2), u);

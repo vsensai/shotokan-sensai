@@ -874,8 +874,8 @@
         ? [el(
           'section',
           { class: 'card' },
-          el('h3', { text: 'Pose-Editor' }),
-          el('p', { class: 'muted small', text: 'Für Korrekturen an den 3D-Figuren: In der Großansicht einer Figur erscheint „✎ Pose“. Dort lassen sich Hände, Füße, Ellbogen, Knie und Körper verschieben und die Werte als Text kopieren.' }),
+          el('h3', { text: 'Bewegungs-Editor' }),
+          el('p', { class: 'muted small', text: 'Für Korrekturen an den 3D-Figuren: In der Großansicht einer Figur erscheint „✎ Bearbeiten“. Dort lassen sich jedes Bild einer Bewegung (Hände, Füße, Ellbogen, Knie, Körper), Zeitpunkte und Übergänge, Kernbild und Kamera einstellen, abspielen und als Text kopieren.' }),
           el(
             'label',
             { class: 'pe-switch' },
@@ -884,7 +884,7 @@
               checked: SK.poseEditor.enabled(),
               onchange: (ev) => SK.poseEditor.setEnabled(ev.target.checked),
             }),
-            ' Pose-Editor einschalten'
+            ' Bewegungs-Editor einschalten'
           )
         )]
         : []),

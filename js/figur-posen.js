@@ -662,7 +662,8 @@
       return M(P, { [s]: { yaw: (Math.atan2(d[0], d[2]) * 180) / Math.PI, pitch: (Math.asin(Math.max(-1, Math.min(1, d[1]))) * 180) / Math.PI, sole: J['sole' + s] } });
     };
   };
-  const MW_KEYS = [{ t: 0, p: MW_A }, { t: 0.1, p: MW_A }, { t: 0.22, p: MW_UP }, { t: 0.32, p: MW_CH }, { t: 0.42, p: MW_MID, e: 'in' }, { t: 0.46, p: MW_SN, e: 'lin' }, { t: 0.5, p: MW_E, e: 'kime' }, { t: 0.58, p: MW_SN }, { t: 0.62, p: MW_MID }, { t: 0.7, p: MW_CH }, { t: 0.8, p: MW_UP }, { t: 0.92, p: MW_A }];
+  // Übergänge fließend: die Figur zieht durch die Zwischenbilder durch, hält nur im Stand, im Treffer (Kime) und am Ende
+  const MW_KEYS = [{ t: 0, p: MW_A }, { t: 0.1, p: MW_A }, { t: 0.22, p: MW_UP, e: 'fl' }, { t: 0.32, p: MW_CH, e: 'fl' }, { t: 0.42, p: MW_MID, e: 'fl' }, { t: 0.46, p: MW_SN, e: 'fl' }, { t: 0.5, p: MW_E, e: 'kime' }, { t: 0.58, p: MW_SN, e: 'fl' }, { t: 0.62, p: MW_MID, e: 'fl' }, { t: 0.7, p: MW_CH, e: 'fl' }, { t: 0.8, p: MW_UP, e: 'fl' }, { t: 0.92, p: MW_A, e: 'fl' }];
   D['mv:mawashi-geri'] = M({ keys: MW_KEYS, fix: FUSS_FEST(MW_KEYS, 'R'), best: 0.5, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', cam: { yaw: -16, pitch: 14 } }));
   const US_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.2], lean: 22, look: 160, R: { x: -0.08, z: 0.32, y: 0.45, yaw: 0, pitch: -70, kp: [0, 0.4, 1] }, w: [1, 0] });
   D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 180, pitch: -70, kp: [0, -1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));

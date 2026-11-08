@@ -1,6 +1,6 @@
-/* Pose-Editor: eine 3D-Figur als Standbild von Hand einstellen (fürs Handy gebaut) und die Werte als Text
-   kopieren oder teilen – zum Übernehmen in js/figur-posen.js. Einschalten unter Fortschritt → Einstellungen;
-   dann steht in der Großansicht jeder Figur der Knopf „✎ Pose“.
+/* Bewegungs-Editor (früher Pose-Editor): jedes Bild einer 3D-Figur von Hand einstellen (fürs Handy gebaut), dazu
+   Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera; die Werte als Text kopieren – zum Übernehmen in js/figur-posen.js.
+   Einschalten unter Fortschritt → Einstellungen; dann steht in der Großansicht jeder Figur der Knopf „✎ Bearbeiten“.
    Bedienung: Punkt antippen und ziehen (bewegt ihn in der Bildebene), daneben ziehen dreht die Ansicht,
    zwei Finger zoomen. Feinarbeit mit den Reglern des gewählten Körperteils. */
 (function () {
@@ -239,7 +239,7 @@
     if (d) return d;
     d = document.createElement('dialog');
     d.className = 'f3d-dlg pe-dlg';
-    d.setAttribute('aria-label', 'Pose-Editor');
+    d.setAttribute('aria-label', 'Bewegungs-Editor');
     d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen">✕</button></div>
 <div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas><span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side">Seite</button><button type="button" class="gfx-btn" data-pe="v-top">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false">Punkte aus</button></div>
@@ -292,9 +292,13 @@
       note = draft.note || '';
     }
     const k0app = k0;
+    // Timing: Zeitpunkt und Übergang je Bild, Dauer der ganzen Bewegung (änderbar, landen in der Ausgabe)
+    const tk = keys.map((k) => ({ t: k.t, e: k.e || 'io' }));
+    const tm = tk.map((x, i) => Object.assign({}, x, draft && draft.tm && draft.tm[i] ? draft.tm[i] : {}));
+    const dur0 = e.d.dur || 1.6;
     if (draft && draft.k0 != null && frames[draft.k0]) k0 = draft.k0;
     const d = dialog();
-    S = { id, title: title || id, e, keys, frames, k0, k0app, all: !!(draft && draft.all), kcam: draft && draft.kcam, best, edits, undos: {}, note, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
+    S = { id, title: title || id, e, keys, frames, k0, k0app, all: !!(draft && draft.all), kcam: draft && draft.kcam, tk, tm, dur0, dur: (draft && draft.dur) || dur0, speed: 1, best, edits, undos: {}, note, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
     d.querySelector('.f3d-dlg-title').textContent = `✎ ${S.title}`;
     const hb = d.querySelector('[data-pe="hide"]');
     hb.setAttribute('aria-pressed', 'false');
@@ -303,7 +307,7 @@
     const ab = d.querySelector('[data-pe="all"]');
     ab.hidden = keys.length < 2;
     ab.setAttribute('aria-pressed', String(S.all));
-    d.querySelector('.pe-msg').textContent = Object.keys(edits).length || k0 !== k0app ? 'Gespeicherter Entwurf geladen – „Original“ setzt das gezeigte Bild zurück.' : '';
+    d.querySelector('.pe-msg').textContent = Object.keys(edits).length || k0 !== k0app || (draft && (draft.tm || draft.dur)) ? 'Gespeicherter Entwurf geladen – „Original“ setzt das gezeigte Bild zurück.' : '';
     if (!d.open) d.showModal();
     goFrame(k0);
     parts();
@@ -318,11 +322,17 @@
     if (n < 2) { box.innerHTML = ''; box.dataset.n = ''; return; }
     if (box.dataset.n !== String(n)) {
       box.dataset.n = String(n);
-      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild">›</button><button type="button" class="gfx-btn" data-pe="fbest" aria-label="zum Kernbild">★</button></div><p class="pe-finfo small"></p><button type="button" class="gfx-btn pe-setbest" data-pe="setbest">☆ Dieses Bild als Kernbild</button>`;
+      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild">›</button><button type="button" class="gfx-btn" data-pe="fbest" aria-label="zum Kernbild">★</button></div><p class="pe-finfo small"></p><button type="button" class="gfx-btn pe-setbest" data-pe="setbest">☆ Dieses Bild als Kernbild</button>
+<div class="pe-time"><label class="pe-row"><span>Zeitpunkt <output class="pe-tv"></output></span><input type="range" class="pe-tt" step="0.01"></label><label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</select></label></div>
+<div class="pe-time"><label class="pe-row"><span>Dauer der Bewegung <output class="pe-dv"></output></span><input type="range" class="pe-dur" min="0.6" max="5" step="0.1"></label><label class="pe-row"><span>Abspielen</span><select class="pe-speed"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label></div>`;
       const sl = box.querySelector('.pe-fslider');
       sl.addEventListener('input', () => { if (S.play) S.play = null; if (+sl.value !== S.k) goFrame(+sl.value); });
+      box.querySelector('.pe-tt').addEventListener('input', (ev) => { S.tm[S.k].t = +ev.target.value; S.t = S.tm[S.k].t; timing(); });
+      box.querySelector('.pe-te').addEventListener('change', (ev) => { S.tm[S.k].e = ev.target.value; timing(); });
+      box.querySelector('.pe-dur').addEventListener('input', (ev) => { S.dur = +ev.target.value; timing(); });
+      box.querySelector('.pe-speed').addEventListener('change', (ev) => { S.speed = +ev.target.value; });
     }
-    const ed = Object.keys(S.edits).map(Number).filter((i) => !same(rounded(S.edits[i]), rounded(S.frames[i]))).sort((x, y) => x - y);
+    const ed = [...new Set(Object.keys(S.edits).map(Number).filter((i) => !same(rounded(S.edits[i]), rounded(S.frames[i]))).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
     const pb = box.querySelector('[data-pe="play"]');
     pb.textContent = S.play ? '■' : '▶';
     pb.setAttribute('aria-label', S.play ? 'Anhalten' : 'Bewegung abspielen');
@@ -333,6 +343,19 @@
     box.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
     box.querySelector('[data-pe="fbest"]').setAttribute('aria-pressed', String(S.k === S.k0));
     box.querySelector('[data-pe="setbest"]').hidden = S.k === S.k0;
+    const tt = box.querySelector('.pe-tt');
+    const first = S.k === 0;
+    tt.min = first ? S.tm[0].t : Math.round((S.tm[S.k - 1].t + 0.01) * 100) / 100;
+    tt.max = first ? S.tm[0].t : S.k === n - 1 ? Math.max(1, S.tm[S.k].t) : Math.round((S.tm[S.k + 1].t - 0.01) * 100) / 100;
+    tt.disabled = first;
+    if (+tt.value !== S.tm[S.k].t) tt.value = S.tm[S.k].t;
+    box.querySelector('.pe-tv').textContent = `t = ${S.tm[S.k].t.toFixed(2)} · ${((S.tm[S.k].t - S.tm[0].t) * S.dur).toFixed(2)} s`;
+    const te = box.querySelector('.pe-te');
+    te.disabled = first;
+    te.value = S.tm[S.k].e in EASE_UI ? S.tm[S.k].e : 'io';
+    const du = box.querySelector('.pe-dur');
+    if (+du.value !== S.dur) du.value = S.dur;
+    box.querySelector('.pe-dv').textContent = `${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(1)} s`;
     const h = holdOf(S.k);
     box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ' · Kernbild ★' : ''}${S.k0 !== S.k0app && S.k === S.k0 ? ' (neu gewählt)' : ''}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
   }
@@ -343,7 +366,7 @@
     S.orig = clone(S.frames[i]);
     S.P = clone(S.edits[i] || S.frames[i]);
     S.undo = S.undos[i] || (S.undos[i] = []);
-    S.t = S.keys[i].t;
+    S.t = S.tm[i].t;
     frames();
     panel();
     text();
@@ -354,14 +377,25 @@
     else delete S.edits[S.k];
   }
 
+  // Übergänge, wie sie im Editor heißen (e in den keys von js/figur-posen.js)
+  const EASE_UI = { fl: 'fließend (durchziehen)', io: 'weich (anhalten)', kime: 'Kime (ins Ziel, stoppen)', in: 'anlaufen', out: 'auslaufen', lin: 'gleichmäßig' };
+  // Schlüsselbilder mit allen Änderungen (Posen und Timing)
+  const effKeys = () => S.keys.map((k, i) => Object.assign({}, k, { t: S.tm[i].t, e: S.tm[i].e, p: S.edits[i] || k.p }));
+  const timingChanged = (i) => S.tm[i].t !== S.tk[i].t || S.tm[i].e !== S.tk[i].e;
+  function timing() {
+    save();
+    text();
+  }
+
   /* ---------- Abspielen: die Bewegung mit den geänderten Bildern ---------- */
   function play() {
     if (S.play) { S.play = null; frames(); draw(); return; }
     keep();
-    const tl = E.timeline(S.keys.map((k, i) => Object.assign({}, k, { p: S.edits[i] || k.p })), S.e.d.fix);
-    const t0 = S.keys[0].t;
-    const t1 = S.keys[S.keys.length - 1].t;
-    const dur = (S.e.d.dur || 1.6) * (t1 - t0 || 1);
+    const K = effKeys();
+    const tl = E.timeline(K, S.e.d.fix);
+    const t0 = K[0].t;
+    const t1 = K[K.length - 1].t;
+    const dur = (S.dur * (t1 - t0 || 1)) / (S.speed || 1);
     const start = performance.now();
     const run = S.play = { pose: tl(t0) };
     frames();
@@ -441,7 +475,9 @@
     const ed = {};
     for (const i in S.edits) ed[i] = diff(S.edits[i]);
     const k0 = S.k0 !== S.k0app ? S.k0 : null;
-    ls.set(DRAFT + S.id, Object.keys(ed).length || S.note || k0 != null || S.kcam || S.all ? JSON.stringify({ edits: ed, note: S.note, k0, kcam: S.kcam, all: S.all }) : null);
+    const tm = S.tm.some((_, i) => timingChanged(i)) ? S.tm : null;
+    const dur = S.dur !== S.dur0 ? S.dur : null;
+    ls.set(DRAFT + S.id, Object.keys(ed).length || S.note || k0 != null || S.kcam || S.all || tm || dur ? JSON.stringify({ edits: ed, note: S.note, k0, kcam: S.kcam, all: S.all, tm, dur }) : null);
     frames();
   }
   // Kamera wie in der App (cam.yaw, cam.pitch in js/figur-app.js): Drehung um die Figur, 0° = von vorn (+z), Neigung von oben
@@ -451,33 +487,35 @@
   // Ausgabe: alle geänderten Bilder (dazu immer das gezeigte), je mit Zeit und geänderten Körperteilen;
   // „Ganze Bewegung“: jedes Bild vollständig, zum Übernehmen der kompletten Bewegung.
   // Die Kamera gilt fürs Kernbild: gemerkt wird, wie das Kernbild zuletzt angesehen wurde (sonst die Kamera der App).
-  const EASE = { io: 'weich', in: 'anlaufen', out: 'auslaufen', kime: 'Kime (schnell, hart abbremsen)', lin: 'gleichmäßig' };
+  const EASE = { fl: 'fließend', io: 'weich', in: 'anlaufen', out: 'auslaufen', kime: 'Kime', lin: 'gleichmäßig' };
   function text() {
     keep();
     if (S.k === S.k0 && S.camMoved) S.kcam = camInfo();
     const changedParts = (P, O) => PARTS.filter((p) => FIELDS[p.id].some((f) => !same(rounded(get(P, f), f.split('.').pop()), rounded(get(O, f), f.split('.').pop())))).map((p) => p.label);
     const n = S.keys.length;
     const all = S.all && n > 1;
-    const k0t = Math.round(S.keys[S.k0].t * 100) / 100;
-    const lines = [`Pose-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${n} Bilder` : `Bewegung mit ${n} Bildern`}, Kernbild = Bild ${S.k0 + 1} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${S.k0app + 1})` : ''}` : ''}`];
+    const k0t = Math.round(S.tm[S.k0].t * 100) / 100;
+    const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${n} Bilder` : `Bewegung mit ${n} Bildern`}, Kernbild = Bild ${S.k0 + 1} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${S.k0app + 1})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${S.dur}${S.dur !== S.dur0 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
     const kc = S.kcam || camInfo0();
     lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
     if (S.note.trim()) lines.push(`Anmerkung: ${S.note.trim()}`);
-    const list = all ? S.keys.map((_, i) => i) : [...new Set(Object.keys(S.edits).map(Number).concat(S.k))].sort((x, y) => x - y);
+    const list = all ? S.keys.map((_, i) => i) : [...new Set(Object.keys(S.edits).map(Number).concat(S.k).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
     list.forEach((i) => {
       const P = S.edits[i] || S.frames[i];
       const ch = changedParts(P, S.frames[i]);
+      if (S.tm[i].t !== S.tk[i].t) ch.push('Zeitpunkt');
+      if (S.tm[i].e !== S.tk[i].e) ch.push('Übergang');
       const h = holdOf(i);
-      const tt = Math.round(S.keys[i].t * 100) / 100;
+      const tt = Math.round(S.tm[i].t * 100) / 100;
       if (all) {
         const eh = (S.edits[h] || S.frames[h]);
         const hold = h !== i && same(rounded(P), rounded(eh));
-        const ease = i ? `, Übergang ${EASE[S.keys[i].e || 'io'] || S.keys[i].e}` : '';
+        const ease = i ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : '';
         lines.push('', `Bild ${i + 1} von ${n} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}) – ${hold ? `gleiche Pose wie Bild ${h + 1}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
         if (!hold) lines.push(lit(diff(P)));
         return;
       }
-      const info = n > 1 ? `Bild ${i + 1} von ${n} (t = ${tt}${i === S.k0 ? ', Kernbild' : ''}${h !== i ? `, in der App gleiche Pose wie Bild ${h + 1}` : ''})` : 'Standbild';
+      const info = n > 1 ? `Bild ${i + 1} von ${n} (t = ${tt}${i ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : ''}${i === S.k0 ? ', Kernbild' : ''}${h !== i ? `, in der App gleiche Pose wie Bild ${h + 1}` : ''})` : 'Standbild';
       lines.push('', `${info} – geändert: ${ch.length ? ch.join(', ') : 'nichts'}`, lit(diff(P)));
     });
     S.dlg.querySelector('[data-pe="copy"]').textContent = all ? 'Bewegung kopieren' : 'Pose kopieren';
@@ -536,9 +574,11 @@
     }
     if (a === 'undo' && S.undo.length) { S.P = S.undo.pop(); panel(); changed(false); }
     if (a === 'orig') {
-      if (same(rounded(S.P), rounded(S.orig))) return;
+      if (same(rounded(S.P), rounded(S.orig)) && !timingChanged(S.k)) return;
       push();
       S.P = clone(S.orig);
+      S.tm[S.k] = Object.assign({}, S.tk[S.k]);
+      S.t = S.tm[S.k].t;
       panel();
       changed(false);
       msg.textContent = 'Bild zurück auf die gespeicherte Pose der App (↶ holt deine Änderungen zurück).';

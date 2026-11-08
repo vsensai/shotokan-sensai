@@ -85,7 +85,7 @@
     const cam = {
       target: [(Math.max(...xs) + Math.min(...xs)) / 2, Math.max(0.42, 0.1 + 0.82 * ay), (Math.max(...zs) + Math.min(...zs)) / 2 + (partner ? 0 : 0.12)],
       dist: (ay < 0.6 ? 3.1 : 3.95) + 0.8 * Math.max(spanZ, spanX * 0.8) + (d.view === 'side' || d.view === 'front' ? 0.15 : 0),
-      // d.cam: Drehung und Neigung fest (wie im Pose-Editor abgelesen); sonst Grundansicht view, d.yaw/d.pitch drehen weiter
+      // d.cam: Drehung und Neigung fest (wie im Bewegungs-Editor abgelesen); sonst Grundansicht view, d.yaw/d.pitch drehen weiter
       // (yaw positiv = von rechts vorn, pitch = steiler von oben)
       yaw: d.cam ? d.cam.yaw : v.yaw + (d.yaw || 0), pitch: d.cam ? d.cam.pitch : v.pitch + (d.pitch || 0), fov: 30,
     };
@@ -595,7 +595,7 @@
       if (!box || !box.classList.contains('f3d-ready')) return;
       const act = btn.dataset.act;
       if (act === 'f3d-home') { stopLive(); return; }
-      // Pose-Editor (in den Einstellungen eingeschaltet): Großansicht schließen, Editor mit dieser Figur öffnen
+      // Bewegungs-Editor (in den Einstellungen eingeschaltet): Großansicht schließen, Editor mit dieser Figur öffnen
       if (act === 'f3d-edit') {
         const title = dlg ? dlg.querySelector('.f3d-dlg-title').textContent : '';
         if (dlg && dlg.open) dlg.close();
@@ -662,7 +662,7 @@
     const e = entry(key);
     const anim = !e.d.still;
     // data-h: die kleine Bildwarteschlange soll diese Figur nicht übernehmen
-    body.innerHTML = `<div class="f3d f3d-big f3d-ready" data-f3d="${esc(key)}" data-h="1"${plain ? ' data-plain="1"' : ''}><div class="f3d-stage"></div><div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-reset">↺ Zurücksetzen</button>${SK.poseEditor && SK.poseEditor.enabled() ? '<button type="button" class="gfx-btn" data-act="f3d-edit">✎ Pose</button>' : ''}</div></div>`;
+    body.innerHTML = `<div class="f3d f3d-big f3d-ready" data-f3d="${esc(key)}" data-h="1"${plain ? ' data-plain="1"' : ''}><div class="f3d-stage"></div><div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-reset">↺ Zurücksetzen</button>${SK.poseEditor && SK.poseEditor.enabled() ? '<button type="button" class="gfx-btn" data-act="f3d-edit">✎ Bearbeiten</button>' : ''}</div></div>`;
     if (!d.open) {
       d.showModal();
       history.pushState({ f3dBig: 1 }, '', location.href);
