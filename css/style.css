@@ -2550,6 +2550,15 @@ main:fullscreen {
   background: var(--card);
 }
 
+.pe-cam {
+  position: absolute;
+  left: 0.4rem;
+  bottom: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--muted, #777);
+  pointer-events: none;
+}
+
 .pe-cv {
   display: block;
   width: 100%;

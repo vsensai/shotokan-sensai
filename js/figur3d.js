@@ -726,7 +726,7 @@ void main(){
       const g = (j) => K[Math.max(0, Math.min(K.length - 1, j))].p;
       return blend(g(i - 1), g(i), g(i + 1), g(i + 2), u);
     };
-    return fix ? (t) => fix(raw(t)) : raw;
+    return fix ? (t) => fix(raw(t), t) : raw;
   }
 
   window.Figur3D = { solve, prims, draw, camera, timeline, full, ok: supported, ready: () => renderer().ok, v: { add, sub, mul, mix, len, norm } };

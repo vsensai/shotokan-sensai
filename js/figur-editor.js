@@ -241,7 +241,7 @@
     d.className = 'f3d-dlg pe-dlg';
     d.setAttribute('aria-label', 'Pose-Editor');
     d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen">✕</button></div>
-<div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas></div>
+<div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas><span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side">Seite</button><button type="button" class="gfx-btn" data-pe="v-top">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false">Punkte aus</button></div>
 <p class="pe-hint muted small">${matchMedia('(pointer: coarse)').matches ? '1 Finger: Punkt ziehen oder drehen · 2 Finger: zoomen und verschieben' : 'Ziehen: Punkt bzw. drehen · Rechte Maustaste/Umschalt: verschieben · Mausrad: zoomen'}</p>
 <div class="pe-scroll">
@@ -438,12 +438,19 @@
     ls.set(DRAFT + S.id, Object.keys(ed).length || S.note ? JSON.stringify({ edits: ed, note: S.note }) : null);
     frames();
   }
+  // Kamera wie in der App (cam.yaw, cam.pitch in js/figur-app.js): Drehung um die Figur, 0° = von vorn (+z), Neigung von oben
+  const camInfo = () => {
+    const y = Math.round(((((S.cam.yaw + 180) % 360) + 360) % 360) - 180);
+    return { y, p: Math.round(S.cam.pitch) };
+  };
   // Ausgabe: alle geänderten Bilder (dazu immer das gezeigte), je mit Zeit und geänderten Körperteilen
   function text() {
     keep();
     const changedParts = (P, O) => PARTS.filter((p) => FIELDS[p.id].some((f) => !same(rounded(get(P, f), f.split('.').pop()), rounded(get(O, f), f.split('.').pop())))).map((p) => p.label);
     const n = S.keys.length;
     const lines = [`Pose-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · Bewegung mit ${n} Bildern, Kernbild = Bild ${S.k0 + 1}` : ''}`];
+    const c = camInfo();
+    lines.push(`Kamera: Drehung ${c.y}°, Neigung ${c.p}°`);
     if (S.note.trim()) lines.push(`Anmerkung: ${S.note.trim()}`);
     const list = [...new Set(Object.keys(S.edits).map(Number).concat(S.k))].sort((x, y) => x - y);
     list.forEach((i) => {
@@ -472,6 +479,7 @@
       if (a === 'v-side') Object.assign(S.cam, { yaw: S.P.yaw - 90, pitch: 6 });
       if (a === 'v-top') Object.assign(S.cam, { yaw: S.P.yaw, pitch: 86 });
       draw();
+      text();
     }
     // Markierungen (Punkte, Linien) aus- und einblenden, um die Figur ungestört anzusehen; ohne Punkte nur drehen und zoomen
     if (a === 'hide') {
@@ -567,6 +575,8 @@
       }
       S.C = C;
       S.scale = w / cw;
+      const c = camInfo();
+      S.dlg.querySelector('.pe-cam').textContent = `Kamera ${c.y}° · ${c.p}°`;
       if (!S.hide && !S.play) handles(ctx, C, r);
     });
   }
