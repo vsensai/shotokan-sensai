@@ -625,10 +625,22 @@
   // Mawashi-geri: Knie seitlich hoch (Oberschenkel waagerecht, Unterschenkel dicht angelegt, Spann gestreckt), Standfuß dreht
   // auf dem Ballen weit auf, die Hüfte dreht ein und kippt (Oberkörper neigt sich vom Ziel weg); dann schnappt der Unterschenkel
   // waagerecht im Bogen nach vorn, Treffer mit dem Fußballen (Zehen hochgezogen)
-  const MW_CH = BAL(M(KAMAE_K, { pelvis: [0.1, 0.8, 0.5], yaw: 50, chest: -40, roll: 12, look: 0, L: { yaw: 70, kp: [0.5, 0.2, 1] }, R: { x: -0.3, z: 0.42, y: 0.82, yaw: 205, pitch: 0, sole: [-0.3, 1, -0.2], kp: [-0.6, 0.1, 1] }, hL: L(H.guardF), hR: H.guardR, w: [1, 0] }), 'L');
-  const MW_MID = BAL(M(MW_CH, { yaw: 68, chest: -55, roll: 18, R: { x: -0.36, z: 0.98, y: 0.95, yaw: 140, pitch: 0, sole: [-0.6, 0.2, -0.8], kp: [-0.3, 0.8, 1] } }), 'L');
-  const MW_EXT = BAL(REACH(M(MW_CH, { yaw: 82, chest: -62, roll: 22, L: { yaw: 105 }, R: { yaw: 0, pitch: 4, sole: [-0.55, -0.83, 0], kp: [-0.2, 1, 0.1] } }), 'R', [0, 0.2, 1]), 'L');
-  D['mv:mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.34, p: MW_CH }, { t: 0.44, p: MW_MID, e: 'in' }, { t: 0.5, p: MW_EXT, e: 'kime' }, { t: 0.6, p: MW_MID }, { t: 0.68, p: MW_CH }, { t: 0.9, p: KAMAE_K }], best: 0.5, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side3' }));
+  // Arme wie bei den Yoko-geri (Chudan-kamae), Ziel vorn: der vordere (linke) Arm gebeugt, Faust auf Schulterhöhe,
+  // Ellbogen etwas nach außen Richtung Rücken; die hintere (rechte) Faust vor dem Solarplexus, Ellbogen unten mit Abstand
+  // Im Stand die hintere Faust mittig vor dem Solarplexus; im Tritt etwas weiter zur linken Brustseite, weil das rechte
+  // Knie vorn herumschwingt (Arme und Trittbein bleiben so mindestens 20 cm auseinander)
+  const MG = (p, hR = ARME_MW.hR) => {
+    const f = E.full(p);
+    const r = (f.roll * Math.PI) / 180;
+    const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
+    return M(p, { hL: h(ARME_MW.hL), eL: ARME_MW.eL, hR: h(hR), eR: ARME_MW.eR });
+  };
+  const ARME_MW = { hL: [0.18, 0.1, 0.4], eL: [0.45, -1, -0.35], hR: [0.16, -0.08, 0.12], eR: [-0.4, -1, -0.4] };
+  const KAMAE_MW = MG(KAMAE_K, [0.02, -0.16, 0.24]);
+  const MW_CH = MG(BAL(M(KAMAE_K, { pelvis: [0.1, 0.8, 0.5], yaw: 50, chest: -40, roll: 12, look: 0, L: { yaw: 70, kp: [0.5, 0.2, 1] }, R: { x: -0.3, z: 0.42, y: 0.82, yaw: 205, pitch: 0, sole: [-0.3, 1, -0.2], kp: [-0.6, 0.1, 1] }, hL: L(H.guardF), hR: H.guardR, w: [1, 0] }), 'L'));
+  const MW_MID = MG(BAL(M(MW_CH, { yaw: 68, chest: -55, roll: 18, R: { x: -0.36, z: 0.98, y: 0.95, yaw: 140, pitch: 0, sole: [-0.6, 0.2, -0.8], kp: [-0.3, 0.8, 1] } }), 'L'));
+  const MW_EXT = MG(BAL(REACH(M(MW_CH, { yaw: 82, chest: -62, roll: 22, L: { yaw: 105 }, R: { yaw: 0, pitch: 4, sole: [-0.55, -0.83, 0], kp: [-0.2, 1, 0.1] } }), 'R', [0, 0.2, 1]), 'L'));
+  D['mv:mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_MW }, { t: 0.1, p: KAMAE_MW }, { t: 0.34, p: MW_CH }, { t: 0.44, p: MW_MID, e: 'in' }, { t: 0.5, p: MW_EXT, e: 'kime' }, { t: 0.6, p: MW_MID }, { t: 0.68, p: MW_CH }, { t: 0.9, p: KAMAE_MW }], best: 0.5, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side3' }));
   const US_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.2], lean: 22, look: 160, R: { x: -0.08, z: 0.32, y: 0.45, yaw: 0, pitch: -70, kp: [0, 0.4, 1] }, w: [1, 0] });
   D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 180, pitch: -70, kp: [0, -1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   // Mikazuki-geri wie in Heian Godan 15: aus Kiba-dachi, die linke offene Hand zur linken Seite gestreckt (Ziel), das linke
