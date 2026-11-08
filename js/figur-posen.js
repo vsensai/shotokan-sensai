@@ -639,7 +639,9 @@
   const KAMAE_MW = MG(KAMAE_K, [0.02, -0.16, 0.24]);
   const MW_CH = MG(BAL(M(KAMAE_K, { pelvis: [0.1, 0.8, 0.5], yaw: 50, chest: -40, roll: 12, look: 0, L: { yaw: 70, kp: [0.5, 0.2, 1] }, R: { x: -0.3, z: 0.42, y: 0.82, yaw: 205, pitch: 0, sole: [-0.3, 1, -0.2], kp: [-0.6, 0.1, 1] }, hL: L(H.guardF), hR: H.guardR, w: [1, 0] }), 'L'));
   const MW_MID = MG(BAL(M(MW_CH, { yaw: 68, chest: -55, roll: 18, R: { x: -0.36, z: 0.98, y: 0.95, yaw: 140, pitch: 0, sole: [-0.6, 0.2, -0.8], kp: [-0.3, 0.8, 1] } }), 'L'));
-  const MW_EXT = MG(BAL(REACH(M(MW_CH, { yaw: 82, chest: -62, roll: 22, L: { yaw: 105 }, R: { yaw: 0, pitch: 4, sole: [-0.55, -0.83, 0], kp: [-0.2, 1, 0.1] } }), 'R', [0, 0.2, 1]), 'L'));
+  // Endpose (Kime) im Pose-Editor modelliert: Hüfte weit eingedreht (Gesäß Richtung Ziel), Oberkörper kippt vom Ziel weg,
+  // Blick über die linke Schulter zum Ziel, Fußballen trifft mit hochgezogenen Zehen
+  const MW_EXT = { pelvis: [0.113, 0.8, 0.715], yaw: 125, chest: -13, lean: 5, roll: 16, look: 23, L: { x: 0.12, z: 0.62, yaw: 105, kp: [0.738, -0.527, -0.421] }, R: { x: 0.711, z: 1.511, y: 0.916, yaw: 132, pitch: -4, kp: [0.811, -0.168, 0.561], sole: [0.653, -0.156, 0.741], tu: 1 }, hL: [-0.206, -0.233, 0.262], hR: [-0.477, -0.092, 0.11], eL: [-0.157, -0.411, 0.408], eR: [-0.061, -0.596, 0.031], w: [1, 0] };
   D['mv:mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_MW }, { t: 0.1, p: KAMAE_MW }, { t: 0.34, p: MW_CH }, { t: 0.44, p: MW_MID, e: 'in' }, { t: 0.5, p: MW_EXT, e: 'kime' }, { t: 0.6, p: MW_MID }, { t: 0.68, p: MW_CH }, { t: 0.9, p: KAMAE_MW }], best: 0.5, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side3' }));
   const US_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.2], lean: 22, look: 160, R: { x: -0.08, z: 0.32, y: 0.45, yaw: 0, pitch: -70, kp: [0, 0.4, 1] }, w: [1, 0] });
   D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 180, pitch: -70, kp: [0, -1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
