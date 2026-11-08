@@ -257,7 +257,7 @@
     d = document.createElement('dialog');
     d.className = 'f3d-dlg pe-dlg';
     d.setAttribute('aria-label', 'Bewegungs-Editor');
-    d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x pe-fullbtn" data-pe="full" aria-pressed="false" aria-label="Vollbild" title="Vollbild an/aus">⛶</button><button type="button" class="f3d-dlg-x" aria-label="Schließen" title="Editor schließen – alles nicht Kopierte geht verloren">✕</button></div>
+    d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x pe-fullbtn" data-pe="full" aria-pressed="false" aria-label="Vollbild" title="Editor über das ganze Fenster">⛶</button><button type="button" class="f3d-dlg-x pe-close" aria-label="Schließen" title="Editor schließen – alles nicht Kopierte geht verloren">✕</button></div>
 <div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas><span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front" title="Figur von vorn ansehen (eingepasst)">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side" title="Figur von der Seite ansehen (eingepasst)">Seite</button><button type="button" class="gfx-btn" data-pe="v-top" title="Figur von oben ansehen (eingepasst)">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false" title="Anfasspunkte und Linien aus- bzw. einblenden">Punkte aus</button></div>
 <p class="pe-hint muted small">${matchMedia('(pointer: coarse)').matches ? '1 Finger: Punkt ziehen oder drehen · 2 Finger: zoomen und verschieben' : 'Ziehen: Punkt bzw. drehen · Rechte Maustaste/Umschalt: verschieben · Mausrad: zoomen'}</p>
@@ -268,25 +268,16 @@
 <div class="pe-acts"><button type="button" class="btn" data-pe="copy" title="Den Text unten in die Zwischenablage kopieren – zum Einfügen im Chat oder zum Sichern (später mit „Importieren“ zurückholen)">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button><button type="button" class="gfx-btn" data-pe="imp" title="Einen früher kopierten Text einfügen und weiterbearbeiten">Importieren</button></div>
 <div class="pe-imp" hidden><textarea class="pe-imptext" rows="5" aria-label="Text zum Importieren" placeholder="Kopierten Text des Bewegungs-Editors hier einfügen"></textarea><div class="pe-acts"><button type="button" class="btn" data-pe="impok" title="Posen, Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera aus dem Text übernehmen">Übernehmen</button><button type="button" class="gfx-btn" data-pe="impx" title="Import abbrechen">Abbrechen</button></div></div>
 <p class="pe-msg muted small" aria-live="polite"></p>
-<textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea>
+<details class="pe-outbox"><summary title="Den Text zeigen, der beim Kopieren in die Zwischenablage kommt">Text anzeigen</summary><textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea></details>
 </div></div></div></div>`;
     document.body.appendChild(d);
-    d.querySelector('.f3d-dlg-x').addEventListener('click', () => d.close());
-    // Beim Wechsel ins/aus dem Vollbild schließt der Browser den Dialog: dann Zustand behalten und gleich wieder öffnen
+    d.querySelector('.pe-close').addEventListener('click', () => d.close());
     d.addEventListener('close', () => {
-      if (d._fs && S) { requestAnimationFrame(() => { if (S && !d.open) d.showModal(); }); return; }
       S = null;
       d.classList.remove('pe-full');
       document.documentElement.classList.remove('pe-fs');
-      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     });
     d.addEventListener('click', onClick);
-    // Vollbild verlassen (z. B. mit Esc): Knopf und Größe nachziehen
-    document.addEventListener('fullscreenchange', () => {
-      setTimeout(() => { d._fs = false; }, 300);
-      if (S && !d.open) d.showModal();
-      if (!document.fullscreenElement && d.classList.contains('pe-full')) full(false);
-    });
     bindStage(d.querySelector('.pe-stage'));
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
     // Andere Größenänderungen (z. B. Adressleiste) lassen Drehung und Zoom in Ruhe.
@@ -554,7 +545,7 @@
     S.dlg.querySelector('.pe-text').value = S.text;
   }
 
-  // Vollbild: Dialog füllt den Bildschirm (wenn möglich echtes Vollbild des Browsers)
+  // Vollbild: Dialog füllt das ganze Browserfenster (kein Vollbild des Browsers)
   function full(on) {
     const d = S ? S.dlg : document.querySelector('.pe-dlg');
     if (!d) return;
@@ -562,12 +553,7 @@
     document.documentElement.classList.toggle('pe-fs', on);
     const b = d.querySelector('[data-pe="full"]');
     b.setAttribute('aria-pressed', String(on));
-    b.title = on ? 'Vollbild beenden' : 'Vollbild an/aus';
-    try {
-      const de = document.documentElement;
-      if (on && de.requestFullscreen && !document.fullscreenElement) { d._fs = true; de.requestFullscreen().catch(() => { d._fs = false; }); }
-      if (!on && document.fullscreenElement) { d._fs = true; document.exitFullscreen().catch(() => { d._fs = false; }); }
-    } catch (err) { /* ohne Vollbild-Schnittstelle bleibt es beim großen Dialog */ }
+    b.title = on ? 'Wieder kleiner' : 'Editor über das ganze Fenster';
     if (S) { S.fit = true; draw(); }
   }
 
@@ -715,6 +701,7 @@
       const ta = S.dlg.querySelector('.pe-text');
       const done = () => (msg.textContent = 'Kopiert – jetzt im Chat einfügen.');
       const fallback = () => {
+        ta.closest('details').open = true;
         ta.focus();
         ta.select();
         let ok = false;

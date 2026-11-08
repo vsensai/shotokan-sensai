@@ -2617,8 +2617,15 @@ html.pe-fs {
 /* Vollbild im Querformat: die Einstellungen bekommen mehr Platz (Regler und Auswahlfelder breiter) */
 @media (orientation: landscape) {
   .pe-full .pe-side {
-    width: clamp(240px, 36%, 560px);
+    width: clamp(220px, 30%, 460px);
   }
+}
+
+.pe-outbox summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0.2rem 0;
 }
 
 /* Hochformat: Figur oben, Einstellungen darunter */
