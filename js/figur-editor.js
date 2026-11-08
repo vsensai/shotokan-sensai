@@ -54,15 +54,15 @@
 
   /* ---------- Körperteile ---------- */
   const PARTS = [
-    { id: 'body', label: 'Körper', pt: (J) => J.pel },
-    { id: 'hL', label: 'Hand li.', s: 'L', pt: (J) => J.wristL },
-    { id: 'hR', label: 'Hand re.', s: 'R', pt: (J) => J.wristR },
-    { id: 'eL', label: 'Ellbogen li.', s: 'L', pt: (J) => J.elbowL },
-    { id: 'eR', label: 'Ellbogen re.', s: 'R', pt: (J) => J.elbowR },
-    { id: 'fL', label: 'Fuß li.', s: 'L', pt: (J) => J.ankleL },
-    { id: 'fR', label: 'Fuß re.', s: 'R', pt: (J) => J.ankleR },
-    { id: 'kL', label: 'Knie li.', s: 'L', pt: (J) => J.kneeL },
-    { id: 'kR', label: 'Knie re.', s: 'R', pt: (J) => J.kneeR },
+    { id: 'body', label: 'Körper', k: 'Körper', pt: (J) => J.pel },
+    { id: 'hL', label: 'Hand li.', k: 'Hand li', s: 'L', pt: (J) => J.wristL },
+    { id: 'hR', label: 'Hand re.', k: 'Hand re', s: 'R', pt: (J) => J.wristR },
+    { id: 'eL', label: 'Ellbogen li.', k: 'Ellb. li', s: 'L', pt: (J) => J.elbowL },
+    { id: 'eR', label: 'Ellbogen re.', k: 'Ellb. re', s: 'R', pt: (J) => J.elbowR },
+    { id: 'fL', label: 'Fuß li.', k: 'Fuß li', s: 'L', pt: (J) => J.ankleL },
+    { id: 'fR', label: 'Fuß re.', k: 'Fuß re', s: 'R', pt: (J) => J.ankleR },
+    { id: 'kL', label: 'Knie li.', k: 'Knie li', s: 'L', pt: (J) => J.kneeL },
+    { id: 'kR', label: 'Knie re.', k: 'Knie re', s: 'R', pt: (J) => J.kneeR },
   ];
   const partOf = (id) => PARTS.find((p) => p.id === id);
   // Was zu einem Körperteil gehört (für „Geändert:“ in der Ausgabe)
@@ -208,8 +208,8 @@
     d.className = 'f3d-dlg pe-dlg';
     d.setAttribute('aria-label', 'Pose-Editor');
     d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen">✕</button></div>
-<div class="pe-stage"><canvas class="pe-cv"></canvas></div>
-<div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side">Seite</button><button type="button" class="gfx-btn" data-pe="v-top">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig">Original</button></div>
+<div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas></div>
+<div class="pe-side"><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side">Seite</button><button type="button" class="gfx-btn" data-pe="v-top">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false">Punkte aus</button></div>
 <div class="pe-scroll">
 <div class="pe-parts" role="radiogroup" aria-label="Körperteil"></div>
 <div class="pe-panel"></div>
@@ -218,7 +218,7 @@
 <div class="pe-acts"><button type="button" class="btn" data-pe="copy">Pose kopieren</button><button type="button" class="btn" data-pe="share" hidden>Teilen</button></div>
 <p class="pe-msg muted small" aria-live="polite"></p>
 <textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea>
-</div></div>`;
+</div></div></div></div>`;
     document.body.appendChild(d);
     d.querySelector('.f3d-dlg-x').addEventListener('click', () => d.close());
     d.addEventListener('close', () => { S = null; });
@@ -241,8 +241,11 @@
     try { draft = JSON.parse(ls.get(DRAFT + id) || 'null'); } catch (err) { draft = null; }
     if (draft && draft.P) { P = E.full(draft.P); note = draft.note || ''; }
     const d = dialog();
-    S = { id, title: title || id, t, orig, P, note, sel: 'body', undo: [], cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m') };
+    S = { id, title: title || id, t, orig, P, note, sel: 'body', undo: [], cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
     d.querySelector('.f3d-dlg-title').textContent = `✎ ${S.title}`;
+    const hb = d.querySelector('[data-pe="hide"]');
+    hb.setAttribute('aria-pressed', 'false');
+    hb.textContent = 'Punkte aus';
     d.querySelector('.pe-note').value = note;
     d.querySelector('.pe-msg').textContent = draft && draft.P ? 'Gespeicherter Entwurf geladen – „Original“ setzt ihn zurück.' : '';
     if (!d.open) d.showModal();
@@ -254,7 +257,7 @@
 
   function parts() {
     const box = S.dlg.querySelector('.pe-parts');
-    box.innerHTML = PARTS.map((p) => `<button type="button" class="gfx-btn pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}">${esc(p.label)}</button>`).join('');
+    box.innerHTML = PARTS.map((p) => `<button type="button" class="gfx-btn pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}" aria-label="${esc(p.label)}">${esc(p.k)}</button>`).join('');
   }
   function select(id) {
     S.sel = id;
@@ -338,10 +341,17 @@
     const J = E.solve(S.P);
     const msg = S.dlg.querySelector('.pe-msg');
     if (a === 'v-front' || a === 'v-side' || a === 'v-top') {
-      S.cam.target = [J.pel[0], S.cam.target[1], J.pel[2]];
+      S.fit = true;
       if (a === 'v-front') Object.assign(S.cam, { yaw: S.P.yaw, pitch: 6 });
       if (a === 'v-side') Object.assign(S.cam, { yaw: S.P.yaw - 90, pitch: 6 });
       if (a === 'v-top') Object.assign(S.cam, { yaw: S.P.yaw, pitch: 86 });
+      draw();
+    }
+    // Markierungen (Punkte, Linien) aus- und einblenden, um die Figur ungestört anzusehen; ohne Punkte nur drehen und zoomen
+    if (a === 'hide') {
+      S.hide = !S.hide;
+      b.setAttribute('aria-pressed', String(S.hide));
+      b.textContent = S.hide ? 'Punkte an' : 'Punkte aus';
       draw();
     }
     if (a === 'undo' && S.undo.length) { S.P = S.undo.pop(); panel(); changed(false); }
@@ -370,12 +380,33 @@
   }
 
   /* ---------- Bild und Anfasser ---------- */
-  // Hochkant: Blickwinkel weiten, damit die Figur in die Breite passt (wie die Großansicht)
-  function fovFor(w, h) {
-    const scale = Math.min(h, w * 1.12);
-    if (scale >= h) return 30;
-    const f = (1 / Math.tan((30 * Math.PI) / 360)) * (scale / h);
-    return (Math.atan(1 / f) * 360) / Math.PI;
+  // Figur einpassen: Blickpunkt in die Mitte der Figur, Abstand so, dass sie die Bildfläche füllt
+  // (beim Öffnen und bei Vorne/Seite/Oben; Drehen und Zoomen lassen die Kamera dann in Ruhe)
+  function fit(w, h) {
+    const J = E.solve(S.P);
+    const pts = [add(J.head, [0, 0.13, 0]), J.toeL, J.toeR, J.heelL, J.heelR, J.tipL, J.tipR, J.fistL, J.fistR, J.elbowL, J.elbowR, J.kneeL, J.kneeR, J.shL, J.shR, J.pel];
+    const cam = S.cam;
+    cam.fov = 30;
+    cam.dist = 6;
+    cam.target = [0, 1, 2].map((i) => (Math.min(...pts.map((p) => p[i])) + Math.max(...pts.map((p) => p[i]))) / 2);
+    // Gelenke plus Körperbreite (Gi, Gürtel) quer zur Blickrichtung
+    const box = () => {
+      const C = E.camera(cam, w, h);
+      const q = pts.flatMap((p) => [C.project(add(p, mul(C.cu, 0.28))), C.project(add(p, mul(C.cu, -0.28)))]);
+      const xs = q.map((v) => v[0]);
+      const ys = q.map((v) => v[1]);
+      return { C, x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+    };
+    for (let it = 0; it < 8; it++) {
+      // Abstand fest, Blickwinkel passend (schmale, hohe Bildfläche am Handy: weiterer Winkel statt sehr weiter Kamera)
+      let B = box();
+      const k = Math.max((B.x1 - B.x0) / (w * 0.9), (B.y1 - B.y0) / (h * 0.86), 0.05);
+      cam.fov = clamp((2 * Math.atan(Math.tan((cam.fov * Math.PI) / 360) * k) * 180) / Math.PI, 8, 90);
+      // dann mittig rücken
+      B = box();
+      const m = (2 * cam.dist) / (B.C.f * h);
+      cam.target = add(add(cam.target, mul(B.C.cu, ((B.x0 + B.x1) / 2 - w / 2) * m)), mul(B.C.cv, -((B.y0 + B.y1) / 2 - h / 2) * m));
+    }
   }
   let raf = 0;
   function draw() {
@@ -392,7 +423,7 @@
       const w = Math.max(80, Math.round(cw * r));
       const h = Math.max(80, Math.round(ch * r));
       if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
-      S.cam.fov = fovFor(w, h);
+      if (S.fit) { S.fit = false; fit(w, h); }
       const ctx = cv.getContext('2d');
       ctx.clearRect(0, 0, w, h);
       const C = E.draw(ctx, w, h, S.P, S.cam, { mode: 0 });
@@ -402,7 +433,7 @@
       }
       S.C = C;
       S.scale = w / cw;
-      handles(ctx, C, r);
+      if (!S.hide) handles(ctx, C, r);
     });
   }
   const COL = { L: '#1565c0', R: '#c62828', C: '#2e7d32' };
@@ -456,7 +487,7 @@
       const [px, py] = xy(ev);
       const reach = 26 * (S.scale || 1);
       let best = null;
-      spots().forEach((s) => {
+      (S.hide ? [] : spots()).forEach((s) => {
         const d = Math.hypot(s.q[0] - px, s.q[1] - py) - (s.p.id === S.sel ? 8 * (S.scale || 1) : 0);
         if (d < reach && (!best || d < best.d)) best = Object.assign({ d }, s);
       });
@@ -477,7 +508,7 @@
       if (pts.size >= 2) {
         const [a, b] = [...pts.values()];
         const dd = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinch > 10) S.cam.dist = clamp(S.cam.dist * (pinch / dd), 1.2, 9);
+        if (pinch > 10) S.cam.dist = clamp(S.cam.dist * (pinch / dd), 1.2, 14);
         pinch = dd;
         S.fast = true;
         draw();
