@@ -2639,6 +2639,28 @@ main:fullscreen {
 .pe-chip.pe-L::before { background: #1565c0; }
 .pe-chip.pe-R::before { background: #c62828; }
 
+/* Bilder einer Bewegung: ▶ spielt sie mit den Änderungen ab, ★ Kernbild, roter Rand = geändert */
+.pe-frames {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0 0 0.4rem;
+}
+
+.pe-frames:empty {
+  display: none;
+}
+
+.pe-dlg .pe-frames .gfx-btn {
+  min-width: 34px;
+  padding: 0.2rem 0.35rem;
+}
+
+.pe-fr.pe-ed {
+  border-color: var(--red);
+}
+
+.pe-fr[aria-checked="true"],
 .pe-chip[aria-checked="true"] {
   background: var(--ink);
   color: var(--card);
