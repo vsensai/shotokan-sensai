@@ -210,6 +210,7 @@
     d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen">✕</button></div>
 <div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas></div>
 <div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side">Seite</button><button type="button" class="gfx-btn" data-pe="v-top">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false">Punkte aus</button></div>
+<p class="pe-hint muted small">${matchMedia('(pointer: coarse)').matches ? '1 Finger: Punkt ziehen oder drehen · 2 Finger: zoomen und verschieben' : 'Ziehen: Punkt bzw. drehen · Rechte Maustaste/Umschalt: verschieben · Mausrad: zoomen'}</p>
 <div class="pe-scroll">
 <div class="pe-parts" role="radiogroup" aria-label="Körperteil"></div>
 <div class="pe-panel"></div>
@@ -552,11 +553,28 @@
     let pinch = 0;
     const xy = (ev) => { const b = stage.getBoundingClientRect(); return [(ev.clientX - b.left) * (S.scale || 1), (ev.clientY - b.top) * (S.scale || 1)]; };
     stage.addEventListener('contextmenu', (ev) => ev.preventDefault());
+    // Bild verschieben: Bildschirm-Pixel → Blickpunkt in der Bildebene (die Figur folgt dem Finger)
+    const pan = (dx, dy) => {
+      const C = S.C;
+      const k = (2 * S.cam.dist) / (C.f * (stage.clientHeight || 1));
+      S.cam.target = add(add(S.cam.target, mul(C.cu, -dx * k)), mul(C.cv, dy * k));
+    };
+    // Mausrad: zoomen (PC)
+    stage.addEventListener('wheel', (ev) => {
+      if (!S || !S.C) return;
+      ev.preventDefault();
+      S.cam.dist = clamp(S.cam.dist * Math.exp(ev.deltaY * (ev.deltaMode === 1 ? 0.05 : 0.0018)), 1.2, 14);
+      S.fast = true;
+      draw();
+      clearTimeout(S.wheelT);
+      S.wheelT = setTimeout(() => S && changed(false), 200);
+    }, { passive: false });
     stage.addEventListener('pointerdown', (ev) => {
       if (!S || !S.C) return;
       if (S.play) { S.play = null; frames(); }
       stage.setPointerCapture && stage.setPointerCapture(ev.pointerId);
-      pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      // rechte/mittlere Maustaste oder Umschalt: verschieben statt drehen
+      pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, pan: ev.button === 1 || ev.button === 2 || ev.shiftKey });
       if (pts.size === 2) {
         grab = null;
         const [a, b] = [...pts.values()];
@@ -586,6 +604,8 @@
       p.x = ev.clientX;
       p.y = ev.clientY;
       if (pts.size >= 2) {
+        // zwei Finger: Abstand zoomt, Mitte verschiebt (ein Finger bewegt die Mitte um die Hälfte)
+        pan(dx / 2, dy / 2);
         const [a, b] = [...pts.values()];
         const dd = Math.hypot(a.x - b.x, a.y - b.y);
         if (pinch > 10) S.cam.dist = clamp(S.cam.dist * (pinch / dd), 1.2, 14);
@@ -601,6 +621,10 @@
         setPoint(S.P, grab.id, add(add(grab.w0, mul(C.cu, mx)), mul(C.cv, -my)));
         grab.moved = true;
         changed(true);
+      } else if (p.pan) {
+        pan(dx, dy);
+        S.fast = true;
+        draw();
       } else {
         S.cam.yaw -= dx * 0.45;
         S.cam.pitch = clamp(S.cam.pitch + dy * 0.35, -4, 86);

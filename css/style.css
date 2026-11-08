@@ -2602,6 +2602,11 @@ main:fullscreen {
   margin: 0 0 0.4rem;
 }
 
+.pe-hint {
+  margin: -0.15rem 0 0.4rem;
+  font-size: 0.72rem;
+}
+
 .pe-scroll {
   flex: 1;
   min-height: 0;
