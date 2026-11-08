@@ -118,7 +118,8 @@
     handgelenk: { part: 'arm', o: 'wrist', mv: 0.03, c: [0, -1, 0], r: 0.054 },
     unterarm: { part: 'arm', o: 'forearm', mv: 0.095, c: [0, 1, 0], r: 0.11 },
     ellbogen: { part: 'arm', o: 'elbow', mv: 0.075, c: 'tip', r: 0.08 },
-    koshi: { part: 'fuss', o: 'ankle', c: [0.115, 0.07, 0], r: 0.066 },
+    // Koshi (Fußballen): nur die Sohle unter den Zehengrundgelenken, nicht der Fußrücken
+    koshi: { part: 'fuss', o: 'ankle', c: [0.115, 0.08, 0], r: 0.06 },
     kakato: { part: 'fuss', o: 'ankle', c: [-0.05, 0.06, 0], r: 0.066 },
     sokuto: { part: 'fuss', o: 'ankle', c: [0.03, 0.055, -0.032], r: 0.069 },
     teisoku: { part: 'fuss', o: 'ankle', c: [0.04, 0.07, 0], r: 0.072 },

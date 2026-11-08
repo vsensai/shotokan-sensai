@@ -585,9 +585,8 @@
   // Treffer (Chudan) im Bewegungs-Editor modelliert: Fußspitze deutlich hochgezogen (Fußballen zum Ziel), Kniescheibe nach
   // vorn – Vorlage für Fuß und Knie der Tritte unten
   const MG_KIME = { pelvis: [0.135, 0.8, 0.615], yaw: -20, lean: -3, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.081, z: 1.43, y: 0.949, yaw: -8.9, pitch: 43, kp: [-0.147, 0.213, 0.966], tu: 1 }, hL: [0.37, -0.55, 0.14], hR: [-0.215, -0.34, -0.01], w: [1, 0] };
-  // Treffer Jodan (Gesichtshöhe): Fuß und Knie wie im Bewegungs-Editor (Fußspitze hoch, Fußballen zum Ziel, Kniescheibe
-  // nach vorn), Bein fast gestreckt, Oberkörper etwas zurück
-  const MG_JODAN = MG_EXT(1.35, 1.25, 42, { lean: -8, R: { kp: MG_KIME.R.kp } });
+  // Treffer Jodan im Bewegungs-Editor eingestellt: Fußspitze hochgezogen, Fußballen zum Ziel, Oberkörper etwas zurück
+  const MG_JODAN = { pelvis: [0.13, 0.8, 0.646], yaw: -20, lean: -8, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.088, z: 1.278, y: 1.35, yaw: -12.5, pitch: 48, kp: [0.163, 0.775, -0.61], tu: 1 }, hL: [0.37, -0.55, 0.14], hR: [-0.215, -0.34, -0.01], w: [1, 0] };
   D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, MG_JODAN, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   // Kniescheibe nach vorn wie beim Mae-geri (Bewegungs-Editor), für Ren-geri
   const MG_KNIE = { R: { kp: MG_KIME.R.kp } };
