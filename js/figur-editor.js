@@ -353,7 +353,7 @@
   function play() {
     if (S.play) { S.play = null; frames(); draw(); return; }
     keep();
-    const tl = E.timeline(S.keys.map((k, i) => Object.assign({}, k, { p: S.edits[i] || k.p })));
+    const tl = E.timeline(S.keys.map((k, i) => Object.assign({}, k, { p: S.edits[i] || k.p })), S.e.d.fix);
     const t0 = S.keys[0].t;
     const t1 = S.keys[S.keys.length - 1].t;
     const dur = (S.e.d.dur || 1.6) * (t1 - t0 || 1);

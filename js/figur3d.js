@@ -711,11 +711,12 @@ void main(){
     for (const k in b) o[k] = blend(a[k], b[k], c[k], d[k], u);
     return o;
   }
-  function timeline(keys) {
+  // fix: optionale Korrektur jedes fertig gemischten Bildes (z. B. Fuß fest zum Unterschenkel), ändert die Pose nicht in place
+  function timeline(keys, fix) {
     const K = keys.map((k) => Object.assign({ t: k.t, e: k.e || 'io' }, { p: full(k.p) }));
     // gleiche Nachbarbilder = Halten: dort nicht interpolieren (die Kurve würde sonst gegen die folgende Bewegung ausschwingen)
     K.forEach((k, i) => (k.hold = i > 0 && JSON.stringify(k.p) === JSON.stringify(K[i - 1].p)));
-    return (t) => {
+    const raw = (t) => {
       if (t <= K[0].t) return K[0].p;
       if (t >= K[K.length - 1].t) return K[K.length - 1].p;
       let i = 0;
@@ -725,6 +726,7 @@ void main(){
       const g = (j) => K[Math.max(0, Math.min(K.length - 1, j))].p;
       return blend(g(i - 1), g(i), g(i + 1), g(i + 2), u);
     };
+    return fix ? (t) => fix(raw(t)) : raw;
   }
 
   window.Figur3D = { solve, prims, draw, camera, timeline, full, ok: supported, ready: () => renderer().ok, v: { add, sub, mul, mix, len, norm } };

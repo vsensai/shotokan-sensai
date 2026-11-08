@@ -155,7 +155,7 @@
   // 3D-Figuren: jede Pose rechenbar, Standfüße erreichen ihren Platz
   const F3 = window.Figur3D;
   Object.entries(SK.fig3dDefs || {}).forEach(([key, d]) => {
-    const tl = F3.timeline(d.keys);
+    const tl = F3.timeline(d.keys, d.fix);
     for (let i = 0; i <= 10; i++) {
       const P = tl(i / 10);
       const J = F3.solve(P);

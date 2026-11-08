@@ -36,7 +36,7 @@
     if (entries.has(key)) return entries.get(key);
     const { id, mirrored } = split(key);
     const d = D[id];
-    const pose = E.timeline(d.keys);
+    const pose = E.timeline(d.keys, d.fix);
     const partner = d.partner ? E.timeline(d.partner) : null;
     const poses = d.keys.map((k) => E.full(k.p)).concat(d.partner ? d.partner.map((k) => E.full(k.p)) : []);
     const xs = poses.map((p) => p.pelvis[0]);
