@@ -605,7 +605,7 @@
     const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
     return M(p, { hR: h(a.hR), eR: a.eR, hL: h(a.hL), eL: a.eL });
   };
-  const ARME_K = { hR: [-0.54, 0.08, 0.2], eR: [-0.6, -1, 0], hL: [-0.02, -0.18, 0.2], eL: [0.8, -1, 0] };
+  const ARME_K = { hR: [-0.44, 0.14, 0.32], eR: [0, -1, 0.8], hL: [-0.02, -0.18, 0.2], eL: [0.8, -1, 0] };
   const ARME_A = { hR: [-0.36, 0.08, 0.4], eR: [0, -1, 0.8], hL: [-0.02, -0.2, 0.28], eL: [0.8, -1, 0] };
   const YGK = (p) => YG(p, ARME_K);
   const YGA = (p) => YG(p, ARME_A);
