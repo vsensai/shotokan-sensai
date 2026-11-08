@@ -585,10 +585,14 @@
   // Treffer im Bewegungs-Editor modelliert: Fußspitze deutlich hochgezogen (Fußballen zum Ziel), Kniescheibe nach vorn
   const MG_KIME = { pelvis: [0.135, 0.8, 0.615], yaw: -20, lean: -3, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.081, z: 1.43, y: 0.949, yaw: -8.9, pitch: 43, kp: [-0.147, 0.213, 0.966], tu: 1 }, hL: [0.37, -0.55, 0.14], hR: [-0.215, -0.34, -0.01], w: [1, 0] };
   D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, MG_KIME, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
-  // Kekomi: Ferse stößt, Fußspitze weit hochgezogen, die Hüfte schiebt kräftig nach
+  // Kekomi: der Fuß stößt gerade nach vorn, Fußspitze weit hochgezogen, die Hüfte schiebt kräftig nach
   // Kniescheibe nach vorn wie beim Mae-geri (Bewegungs-Editor); die Fußspitze bleibt weit hochgezogen (Ferse trifft)
   const MG_KNIE = { R: { kp: MG_KIME.R.kp } };
-  D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.42, 70, M({ yaw: -26 }, MG_KNIE)), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
+  // Treffer mit dem Fußballen; im Kime 2 s gestreckt halten. Zeiten in Sekunden wie beim Mae-geri (0,24 / 0,54 / 0,7 s),
+  // dann 2 s Halten, zurück in 0,24 s bzw. 0,6 s – Gesamtdauer 3,3 s (t = Sekunden / 3,3)
+  const KK_EXT = MG_EXT(0.95, 1.42, 70, M({ yaw: -26 }, MG_KNIE));
+  const KK_T = (sec) => Math.round((sec / 3.3) * 1000) / 1000;
+  D['tc:mae-geri-kekomi'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: KK_T(0.24), p: KAMAE_K }, { t: KK_T(0.54), p: CHAMBER }, { t: KK_T(0.7), p: KK_EXT, e: 'kime' }, { t: KK_T(2.7), p: KK_EXT }, { t: KK_T(2.94), p: CHAMBER }, { t: 1, p: KAMAE_K }], best: KK_T(0.7), dur: 3.3 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   D['tc:sonoba-geri'] = K(YOI, M(YOI, { pelvis: [0, 0.86, 0.02], L: { x: 0.16, z: 0 }, R: { x: -0.1, z: 0.3, y: 0.5, yaw: 0, pitch: -55, kp: [0, 0.5, 1] }, w: [1, 0] }), M(YOI, { lean: -8, pelvis: [0, 0.86, 0.02], R: { x: -0.1, z: 0.92, y: 0.88, yaw: 0, pitch: 8, kp: [0, 1, 0.3] }, w: [1, 0] }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   D['tc:kizami-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.82, 0.0], L: { x: 0.1, z: 0.36, y: 0.5, pitch: -55, kp: [0, 0.5, 1] }, R: { z: -0.4 }, w: [0, 1] }), M(ZK_KAMAE, { pelvis: [0, 0.82, -0.02], lean: -10, L: { x: 0.1, z: 0.88, y: 0.95, pitch: 8, kp: [0, 1, 0.3] }, R: { z: -0.4 }, w: [0, 1] }), M(hit('toeL', 'Fußballen'), { eff: 'toeL', view: 'side' }));
   // Ren-geri: zweimal Mae-geri hintereinander (Gedan, dann Jodan); Kniescheibe nach vorn und Fußspitze hochgezogen
@@ -827,7 +831,7 @@
     'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'unterarm', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',
     'tc:soto-nagashi-uke': 'unterarm', 'tc:uchi-nagashi-uke': 'unterarm',
     'tc:tate-shuto-uke': 'shuto', 'tc:teisho-uke': 'teisho', 'tc:teisho-awase-uke': 'teisho:LR', 'tc:uchiotoshi': 'unterarm', 'tc:manji-uke': 'unterarm:LR',
-    'mv:mae-geri': 'koshi', 'tc:mae-geri-kekomi': 'kakato', 'tc:sonoba-geri': 'koshi', 'tc:kizami-geri': 'koshi', 'tc:ren-geri': 'koshi',
+    'mv:mae-geri': 'koshi', 'tc:mae-geri-kekomi': 'koshi', 'tc:sonoba-geri': 'koshi', 'tc:kizami-geri': 'koshi', 'tc:ren-geri': 'koshi',
     'mv:yoko-geri': 'sokuto', 'tc:yoko-geri-keage': 'sokuto', 'mv:mawashi-geri': 'koshi', 'mv:ushiro-geri': 'kakato',
     'mv:mikazuki-geri': 'teisoku', 'tc:ura-mawashi-geri': 'teisoku', 'tc:ushiro-mawashi-geri': 'teisoku', 'tc:hiza-geri': 'hiza',
     'tc:mawashi-hiza-geri': 'hiza', 'tc:fumikomi': 'sokuto', 'tc:namigaeshi': 'teisoku', 'tc:nidan-geri': 'koshi',
