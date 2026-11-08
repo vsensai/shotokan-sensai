@@ -582,7 +582,9 @@
   // Knie hoch vor den Körper, Unterschenkel locker darunter, dann stößt der Fuß mit der Hüfte nach vorn, Oberkörper aufrecht
   const CHAMBER = BAL({ pelvis: [0, 0.8, 0.55], yaw: -14, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.09, z: 0.86, y: 0.46, yaw: 0, pitch: -45, kp: [0, 0.7, 1] }, hL: L(H.gedan), hR: H.hip, w: [1, 0] }, 'L', 0.02);
   const MG_EXT = (y, z, bend, o) => POINT(BAL(M(CHAMBER, { yaw: -20, lean: -3, R: { x: -0.09, z, y, kp: [0, 1, 0.3] } }, o), 'L', 0.03), 'R', bend);
-  D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.45, 10), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
+  // Treffer im Bewegungs-Editor modelliert: Fußspitze deutlich hochgezogen (Fußballen zum Ziel), Kniescheibe nach vorn
+  const MG_KIME = { pelvis: [0.135, 0.8, 0.615], yaw: -20, lean: -3, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.081, z: 1.43, y: 0.949, yaw: -8.9, pitch: 43, kp: [-0.147, 0.213, 0.966], tu: 1 }, hL: [0.37, -0.55, 0.14], hR: [-0.215, -0.34, -0.01], w: [1, 0] };
+  D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, MG_KIME, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   // Kekomi: Ferse stößt, Fußspitze weit hochgezogen, die Hüfte schiebt kräftig nach
   D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.42, 70, { yaw: -26 }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   D['tc:sonoba-geri'] = K(YOI, M(YOI, { pelvis: [0, 0.86, 0.02], L: { x: 0.16, z: 0 }, R: { x: -0.1, z: 0.3, y: 0.5, yaw: 0, pitch: -55, kp: [0, 0.5, 1] }, w: [1, 0] }), M(YOI, { lean: -8, pelvis: [0, 0.86, 0.02], R: { x: -0.1, z: 0.92, y: 0.88, yaw: 0, pitch: 8, kp: [0, 1, 0.3] }, w: [1, 0] }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
