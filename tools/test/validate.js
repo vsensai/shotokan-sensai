@@ -178,6 +178,22 @@
   });
   out.push(`3D-Figuren: ${Object.keys(SK.fig3dDefs || {}).length}`);
 
+  // Pose-Editor: gezogene Punkte landen dort, wo der Finger sie hinschiebt
+  if (SK.poseEditor && F3) {
+    const PE = SK.poseEditor;
+    const P = F3.full(SK.fig3d.entry('tc:age-zuki').pose(1));
+    const near = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) < 0.002;
+    const J0 = F3.solve(P);
+    const wH = [J0.wristR[0] + 0.05, J0.wristR[1] - 0.2, J0.wristR[2] - 0.1];
+    PE.setPoint(P, 'hR', wH);
+    if (!near(F3.solve(P).wristR, wH)) errors.push('Pose-Editor: Hand folgt dem Finger nicht');
+    const wF = [J0.ankleL[0] + 0.1, 0.075, J0.ankleL[2] - 0.05];
+    PE.setPoint(P, 'fL', wF);
+    if (!near(F3.solve(P).ankleL, wF)) errors.push('Pose-Editor: Fuß folgt dem Finger nicht');
+    const d = PE.diff(P);
+    if (!d.hR || !d.L || d.oL != null) errors.push('Pose-Editor: Ausgabe der geänderten Werte falsch');
+  }
+
   out.push(`Fragen gesamt: ${SK.questions.length}`);
   out.push(`Kata-Fragen: ${SK.questions.filter((q) => lessons.get(q.lesson) && lessons.get(q.lesson).kind === 'kata').length}`);
   out.push(`Typen: ${['mc', 'multi', 'order'].map((t) => `${t}=${SK.questions.filter((q) => q.type === t).length}`).join(', ')}`);

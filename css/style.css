@@ -2522,3 +2522,130 @@ main:fullscreen {
     background: transparent;
   }
 }
+
+/* Pose-Editor (in den Einstellungen einschaltbar): Figur oben, Körperteile und Regler darunter */
+.pe-stage {
+  position: relative;
+  flex: none;
+  height: 46dvh;
+  min-height: 220px;
+  border-radius: 10px;
+  overflow: hidden;
+  touch-action: none;
+  background: var(--card);
+}
+
+.pe-cv {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pe-bar,
+.pe-parts,
+.pe-acts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3rem;
+  margin: 0.4rem 0;
+}
+
+.pe-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.pe-dlg .gfx-btn {
+  padding: 0.3rem 0.6rem;
+}
+
+.pe-chip::before {
+  content: "";
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: 0.3rem;
+  border-radius: 50%;
+  background: #2e7d32;
+  vertical-align: 0.05em;
+}
+
+.pe-chip.pe-L::before { background: #1565c0; }
+.pe-chip.pe-R::before { background: #c62828; }
+
+.pe-chip[aria-checked="true"] {
+  background: var(--ink);
+  color: var(--card);
+}
+
+.pe-panel {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.2rem 0.2rem 0.6rem;
+}
+
+.pe-row {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.pe-row output {
+  float: right;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.pe-row input[type="range"] {
+  width: 100%;
+  height: 30px;
+  accent-color: var(--red);
+}
+
+.pe-row select,
+.pe-note,
+.pe-text {
+  width: 100%;
+  padding: 0.4rem;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.pe-lab {
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.pe-text {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.pe-msg {
+  min-height: 1.2em;
+  margin: 0.2rem 0;
+  text-align: center;
+}
+
+.pe-switch {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+
+.pe-switch input {
+  width: 1.3rem;
+  height: 1.3rem;
+  accent-color: var(--red);
+}

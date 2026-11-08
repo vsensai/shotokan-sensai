@@ -870,6 +870,24 @@
           })
         )
       ),
+      ...(SK.poseEditor && SK.fig3d.ok()
+        ? [el(
+          'section',
+          { class: 'card' },
+          el('h3', { text: 'Pose-Editor' }),
+          el('p', { class: 'muted small', text: 'Für Korrekturen an den 3D-Figuren: In der Großansicht einer Figur erscheint „✎ Pose“. Dort lassen sich Hände, Füße, Ellbogen, Knie und Körper verschieben und die Werte als Text kopieren.' }),
+          el(
+            'label',
+            { class: 'pe-switch' },
+            el('input', {
+              type: 'checkbox',
+              checked: SK.poseEditor.enabled(),
+              onchange: (ev) => SK.poseEditor.setEnabled(ev.target.checked),
+            }),
+            ' Pose-Editor einschalten'
+          )
+        )]
+        : []),
       el(
         'section',
         { class: 'card' },

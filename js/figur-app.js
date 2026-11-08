@@ -557,6 +557,13 @@
       if (!box || !box.classList.contains('f3d-ready')) return;
       const act = btn.dataset.act;
       if (act === 'f3d-home') { stopLive(); return; }
+      // Pose-Editor (in den Einstellungen eingeschaltet): Großansicht schließen, Editor mit dieser Figur öffnen
+      if (act === 'f3d-edit') {
+        const title = dlg ? dlg.querySelector('.f3d-dlg-title').textContent : '';
+        if (dlg && dlg.open) dlg.close();
+        SK.poseEditor.open(box.dataset.f3d, title);
+        return;
+      }
       const L = startLive(box);
       if (act === 'f3d-reset') L.st.cam = camCopy(L.e.cam);
       if (act === 'f3d-play') {
@@ -617,7 +624,7 @@
     const e = entry(key);
     const anim = !e.d.still;
     // data-h: die kleine Bildwarteschlange soll diese Figur nicht übernehmen
-    body.innerHTML = `<div class="f3d f3d-big f3d-ready" data-f3d="${esc(key)}" data-h="1"${plain ? ' data-plain="1"' : ''}><div class="f3d-stage"></div><div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-reset">↺ Zurücksetzen</button></div></div>`;
+    body.innerHTML = `<div class="f3d f3d-big f3d-ready" data-f3d="${esc(key)}" data-h="1"${plain ? ' data-plain="1"' : ''}><div class="f3d-stage"></div><div class="f3d-tools">${anim ? '<button type="button" class="gfx-btn" data-act="f3d-play" aria-pressed="false">▶ Bewegung</button>' : ''}<button type="button" class="gfx-btn" data-act="f3d-reset">↺ Zurücksetzen</button>${SK.poseEditor && SK.poseEditor.enabled() ? '<button type="button" class="gfx-btn" data-act="f3d-edit">✎ Pose</button>' : ''}</div></div>`;
     if (!d.open) {
       d.showModal();
       history.pushState({ f3dBig: 1 }, '', location.href);
