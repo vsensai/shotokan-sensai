@@ -281,7 +281,9 @@
 <div class="pe-row"><span>Dauer der ganzen Bewegung <output class="pe-dv"></output></span>${pm('pe-dur', 'Dauer')}</div>
 <label class="pe-row"><span>Tempo beim Abspielen</span><select class="pe-speed" title="Tempo beim Abspielen mit ▶ (ändert die Bewegung nicht)"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label>
 <button type="button" class="pe-wide pe-setk" data-pe="fbest"></button>
-</div></div>
+</div>
+<div class="pe-camrow"><span class="pe-camv small"></span><button type="button" class="pe-wide" data-pe="camset" title="Die Ansicht, wie du die Figur gerade siehst (Drehung und Neigung), als Kamera fürs Kernbild in die Ausgabe übernehmen">Ansicht als Kamera fürs Kernbild</button><button type="button" class="pe-wide" data-pe="camreset" title="Wieder die Kamera der App verwenden; die Ansicht im Editor bleibt, wie sie ist">Zurück auf App-Kamera</button></div>
+</div>
 <div class="pe-pane" data-pane="koerper">
 <div class="pe-ph"><h3 class="pe-kh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
 <p class="pe-parthint small muted">Anderes Körperteil: seinen Punkt im Bild antippen.</p>
@@ -372,6 +374,11 @@
     d.querySelector('.pe-bh').textContent = head;
     d.querySelector('.pe-kh').textContent = `${partOf(S.sel).label}${n > 1 ? ` · Bild ${S.k + 1}${isK ? ' ★' : ''}` : ''}`;
     d.querySelector('.pe-finfo').innerHTML = [isK && S.k0 !== S.k0app ? 'Kernbild neu gewählt' : '', h !== S.k ? `gleiche Pose wie Bild ${h + 1}` : '', ed.length ? `<span class="pe-ed">geändert: Bild ${ed.map((i) => i + 1).join(', ')}</span>` : ''].filter(Boolean).join(' · ');
+    // Kamera fürs Kernbild: nur über den Knopf übernommen, Drehen zum Anschauen ändert nichts
+    const kc = S.kcam || camInfo0();
+    d.querySelector('.pe-camv').textContent = `Kamera ${n > 1 ? 'fürs Kernbild' : 'des Bildes'}: ${kc.y}° · ${kc.p}°${S.kcam ? ' (neu übernommen)' : ' (wie in der App)'}`;
+    d.querySelector('[data-pe="camset"]').textContent = n > 1 ? 'Ansicht als Kamera fürs Kernbild' : 'Ansicht als Kamera übernehmen';
+    d.querySelector('[data-pe="camreset"]').disabled = !S.kcam;
     if (n < 2) return;
     const pb = d.querySelector('[data-pe="play"]');
     pb.textContent = S.play ? '■' : '▶';
@@ -630,11 +637,10 @@
   const camInfo0 = () => camOf(S.e.cam);
   // Ausgabe: alle geänderten Bilder (dazu immer das gezeigte), je mit Zeit und geänderten Körperteilen;
   // „Ganze Bewegung“: jedes Bild vollständig, zum Übernehmen der kompletten Bewegung.
-  // Die Kamera gilt fürs Kernbild: gemerkt wird, wie das Kernbild zuletzt angesehen wurde (sonst die Kamera der App).
+  // Die Kamera gilt fürs Kernbild: nur was mit „Ansicht als Kamera fürs Kernbild“ übernommen wurde (sonst die Kamera der App).
   const EASE = { fl: 'fließend', io: 'weich', in: 'anlaufen', out: 'auslaufen', kime: 'Kime', lin: 'gleichmäßig' };
   function text() {
     keep();
-    if (S.k === S.k0 && S.camMoved) S.kcam = camInfo();
     const changedParts = (P, O) => PARTS.filter((p) => FIELDS[p.id].some((f) => !same(rounded(get(P, f), f.split('.').pop()), rounded(get(O, f), f.split('.').pop())))).map((p) => p.label);
     const n = S.keys.length;
     const all = S.all && n > 1;
@@ -769,7 +775,6 @@
       if (a === 'v-front') Object.assign(S.cam, { yaw: S.P.yaw, pitch: 6 });
       if (a === 'v-side') Object.assign(S.cam, { yaw: S.P.yaw - 90, pitch: 6 });
       if (a === 'v-top') Object.assign(S.cam, { yaw: S.P.yaw, pitch: 86 });
-      S.camMoved = true;
       draw();
       text();
     }
@@ -806,13 +811,21 @@
       if (/^Importiert/.test(r)) S.dlg.querySelector('.pe-imp').hidden = true;
       return;
     }
+    if (a === 'camset' || a === 'camreset') {
+      const c = camInfo();
+      const c0 = camInfo0();
+      S.kcam = a === 'camset' && (c.y !== c0.y || c.p !== c0.p) ? c : null;
+      save();
+      text();
+      msg.textContent = S.kcam ? `Kamera übernommen: Drehung ${c.y}°, Neigung ${c.p}°.` : 'Es gilt wieder die Kamera der App.';
+      return;
+    }
     if (a === 'fbest') {
       if (S.k === S.k0) return;
       S.k0 = S.k;
-      if (S.camMoved) S.kcam = camInfo();
       save();
       text();
-      msg.textContent = `Bild ${S.k + 1} ist jetzt das Kernbild – wie du es gerade ansiehst, kommt als Kamera mit in die Ausgabe.`;
+      msg.textContent = `Bild ${S.k + 1} ist jetzt das Kernbild.`;
       return;
     }
     if (a === 'fprev' || a === 'fnext') {
@@ -1021,7 +1034,6 @@
         draw();
       } else {
         S.cam.yaw -= dx * 0.45;
-        S.camMoved = true;
         S.cam.pitch = clamp(S.cam.pitch + dy * 0.35, -4, 86);
         S.fast = true;
         draw();

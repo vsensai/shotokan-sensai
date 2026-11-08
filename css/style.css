@@ -2876,6 +2876,22 @@ main:fullscreen {
   color: var(--red);
 }
 
+.pe-camrow {
+  display: grid;
+  gap: 0.3rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.pe-camv {
+  color: var(--muted);
+}
+
+.pe-wide:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .pe-parthint {
   margin: -0.3rem 0 0;
 }
