@@ -593,14 +593,15 @@
   const KB_K = M(KB, { look: -90 });
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
   // Beide Yoko-geri mit den Händen in Kamae in Trittrichtung (nach rechts, auch wenn der Oberkörper beim Tritt eindreht):
-  // die rechte Faust hoch Richtung Ziel, Ellbogen nach vorn außen – beim Keage kommt das Knie unter dem rechten Arm hoch;
+  // Kekomi: die rechte Faust tief Richtung Ziel, Ellbogen unten zur Hüfte; Keage: rechte Faust hoch, Ellbogen nach vorn –
+  // dort kommt das Knie fast bis auf Brusthöhe genau dort hoch, wo sonst der Ellbogen an der Hüfte wäre;
   // die linke Faust unten auf Höhe des Bauchnabels vor der linken Körperseite (mittig ginge beim Kekomi das Knie hindurch),
   // Ellbogen nach unten (ausdrücklich vorgegeben – ohne Vorgabe hielte die Figur eine Faust nah am Körper für Hikite).
   // Arme und Trittbein bleiben im ganzen Ablauf auseinander (Mittellinien mindestens 19 cm; nur beim Keage, wo das Knie
   // fast bis auf Brusthöhe kommt, rechts knapp 14 cm).
   // Neigt sich der Oberkörper zur Seite (roll), die Höhe ausgleichen, damit die Fäuste auf Brusthöhe bleiben
   // hR: rechte Faust (Weltrichtung zur Brust), eR: Ellbogen; beim Keage höher und weiter vorn, damit das Knie darunter durchkommt
-  const YG = (p, hR = [-0.56, 0.1, 0.2], eR = [-0.6, -0.4, 1]) => {
+  const YG = (p, hR = [-0.45, -0.2, 0.2], eR = [0, -1, -0.4]) => {
     const r = (E.full(p).roll * Math.PI) / 180;
     const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
     return M(p, { hR: h(hR), eR, hL: h([0.12, -0.36, 0.2]), eL: [0.3, -1, 0] });
