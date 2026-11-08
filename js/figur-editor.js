@@ -88,6 +88,55 @@
     else if (id[0] === 'k') P[s].kp = norm(sub(W, J['hip' + s]));
   }
 
+  /* ---------- Drehungen um Längsachsen (Fuß, Bein) ---------- */
+  const DEG = Math.PI / 180;
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const perp = (v, a) => sub(v, mul(a, dot(v, a)));
+  const fwd = (deg) => [Math.sin(deg * DEG), 0, Math.cos(deg * DEG)];
+  // Fußrichtung (Ferse → Zehen) und Sohle ohne Vorgabe, wie in figur3d.js
+  function footAxes(F) {
+    const fh = fwd(F.yaw);
+    const dir = norm(add(mul(fh, Math.cos(F.pitch * DEG)), [0, Math.sin(F.pitch * DEG), 0]));
+    let s0 = sub(mul(dir, dir[1]), [0, 1, 0]);
+    s0 = Math.hypot(...s0) < 0.05 ? mul(fh, -1) : norm(s0);
+    return { dir, s0, s90: cross(dir, s0) };
+  }
+  // Fuß kippen: Winkel der Sohle um die Fußachse; positiv = Sohle zeigt zur Körpermitte (wie beim Mawashi-geri: Sohle zum Ziel)
+  const sgnIn = (s) => (s === 'L' ? -1 : 1);
+  function footRoll(F, s) {
+    if (Math.hypot(...F.sole) < 0.01) return 0;
+    const { dir, s0, s90 } = footAxes(F);
+    const v = perp(F.sole, dir);
+    return (Math.atan2(dot(v, s90), dot(v, s0)) / DEG) * sgnIn(s);
+  }
+  function setFootRoll(F, s, deg) {
+    const { s0, s90 } = footAxes(F);
+    const a = deg * sgnIn(s) * DEG;
+    F.sole = Math.abs(deg) < 0.5 ? [0, 0, 0] : add(mul(s0, Math.cos(a)), mul(s90, Math.sin(a)));
+  }
+  // Fuß drehen/neigen: das Kippen bleibt dabei erhalten (die Sohle dreht mit)
+  const keepRoll = (F, s, fn) => { const r = footRoll(F, s); fn(); if (Math.hypot(...F.sole) > 0.01) setFootRoll(F, s, r); };
+  // Bein eindrehen: Richtung des Knies um die Linie Hüfte → Knöchel; 0 = automatisch (über den Zehen), positiv = Knie nach innen
+  function legAxes(P, s) {
+    const J = E.solve(P);
+    const a = norm(sub(J['ankle' + s], J['hip' + s]));
+    let ref = perp(add(fwd(P[s].yaw), [0, 0.15, 0]), a);
+    if (Math.hypot(...ref) < 1e-3) ref = perp([0, 0, 1], a);
+    ref = norm(ref);
+    return { J, a, ref, b: cross(a, ref) };
+  }
+  function legTwist(P, s) {
+    const { J, a, ref, b } = legAxes(P, s);
+    let v = perp(sub(J['knee' + s], J['hip' + s]), a);
+    if (Math.hypot(...v) < 1e-3) { if (Math.hypot(...P[s].kp) < 0.01) return 0; v = perp(P[s].kp, a); }
+    return (Math.atan2(dot(v, b), dot(v, ref)) / DEG) * (s === 'L' ? 1 : -1);
+  }
+  function setLegTwist(P, s, deg) {
+    const { ref, b } = legAxes(P, s);
+    const t = deg * (s === 'L' ? 1 : -1) * DEG;
+    P[s].kp = add(mul(ref, Math.cos(t)), mul(b, Math.sin(t)));
+  }
+
   /* ---------- Regler je Körperteil ---------- */
   const DIRS = (s) => {
     const i = s === 'L' ? -1 : 1;
@@ -129,15 +178,23 @@
     if (id[0] === 'f') {
       const F = P[s];
       return [
-        R('Fuß drehen', -180, 180, 1, () => F.yaw, (v) => (F.yaw = v), '°'),
-        R('Fuß neigen', -60, 90, 1, () => F.pitch, (v) => (F.pitch = v), '°'),
+        R('Fuß drehen (Zehen links/rechts)', -180, 180, 1, () => F.yaw, (v) => keepRoll(F, s, () => (F.yaw = v)), '°'),
+        R('Fuß neigen (Zehen hoch/runter)', -90, 90, 1, () => F.pitch, (v) => keepRoll(F, s, () => (F.pitch = v)), '°'),
+        R('Fuß kippen (+ Sohle nach innen)', -180, 180, 1, () => footRoll(F, s), (v) => setFootRoll(F, s, v), '°'),
+        R('Knie eindrehen (+ nach innen)', -180, 180, 1, () => legTwist(P, s), (v) => setLegTwist(P, s, v), '°'),
         R('Zehen hochziehen', 0, 1, 0.05, () => F.tu, (v) => (F.tu = v), ''),
         R('Höhe', 0.075, 1.2, 0.005, () => F.y, (v) => (F.y = v), 'm'),
         R('vor/zurück', F.z - 1, F.z + 1, 0.005, () => F.z, (v) => (F.z = v), 'm'),
         R('seitlich (+ links)', F.x - 1, F.x + 1, 0.005, () => F.x, (v) => (F.x = v), 'm'),
       ];
     }
-    // Ellbogen, Knie: nur die Richtung; zurück auf automatisch
+    if (id[0] === 'k') {
+      return [
+        R('Knie eindrehen (+ nach innen)', -180, 180, 1, () => legTwist(P, s), (v) => setLegTwist(P, s, v), '°'),
+        { t: 'button', label: 'Richtung wieder automatisch', run: () => (P[s].kp = [0, 0, 0]) },
+      ];
+    }
+    // Ellbogen: nur die Richtung; zurück auf automatisch
     const auto = id[0] === 'e' ? () => (P['e' + s] = [0, 0, 0]) : () => (P[s].kp = [0, 0, 0]);
     return [{ t: 'button', label: 'Richtung wieder automatisch', run: auto }];
   }
@@ -454,5 +511,5 @@
   }
 
   // state: offener Editor (für Tests)
-  SK.poseEditor = { enabled, setEnabled, open, diff, setPoint, loc, state: () => S };
+  SK.poseEditor = { enabled, setEnabled, open, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, state: () => S };
 })();

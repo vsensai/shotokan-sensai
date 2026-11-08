@@ -190,6 +190,13 @@
     const wF = [J0.ankleL[0] + 0.1, 0.075, J0.ankleL[2] - 0.05];
     PE.setPoint(P, 'fL', wF);
     if (!near(F3.solve(P).ankleL, wF)) errors.push('Pose-Editor: Fuß folgt dem Finger nicht');
+    // Fuß kippen und Knie eindrehen: eingestellter Winkel wird wieder gelesen, auch nach Drehen des Fußes
+    [-120, -35, 60, 150].forEach((a) => {
+      PE.setFootRoll(P.R, 'R', a);
+      if (Math.abs(PE.footRoll(P.R, 'R') - a) > 0.5) errors.push(`Pose-Editor: Fuß kippen ${a}° liest ${PE.footRoll(P.R, 'R').toFixed(1)}°`);
+      PE.setLegTwist(P, 'L', a / 2);
+      if (Math.abs(PE.legTwist(P, 'L') - a / 2) > 1) errors.push(`Pose-Editor: Knie eindrehen ${a / 2}° liest ${PE.legTwist(P, 'L').toFixed(1)}°`);
+    });
     const d = PE.diff(P);
     if (!d.hR || !d.L || d.oL != null) errors.push('Pose-Editor: Ausgabe der geänderten Werte falsch');
   }
