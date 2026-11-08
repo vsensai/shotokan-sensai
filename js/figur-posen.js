@@ -599,10 +599,10 @@
   // hielte die Figur eine Faust nah am Körper für Hikite). Arme und Trittbein bleiben im ganzen Ablauf auseinander
   // (Mittellinien mindestens 14 cm). Neigt sich der Oberkörper zur Seite (roll), wird die Höhe ausgeglichen.
   // hR/eR/hL: rechte Faust, rechter Ellbogen, linke Faust (Faust in Weltrichtung zur Brust, das Ziel liegt rechts)
-  const YG = (p, hR = [-0.45, -0.12, 0.2], eR = [0, -1, -0.4], hL = [0.12, -0.36, 0.2]) => {
+  const YG = (p, hR = [-0.45, -0.12, 0.2], eR = [-0.7, -1, -0.2], hL = [0.12, -0.36, 0.2]) => {
     const r = (E.full(p).roll * Math.PI) / 180;
     const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
-    return M(p, { hR: h(hR), eR, hL: h(hL), eL: [0.3, -1, 0] });
+    return M(p, { hR: h(hR), eR, hL: h(hL), eL: [1, -0.6, 0] });
   };
   const YGA = (p) => YG(p, [-0.4, 0.18, 0.4], [0, -1, 1], [-0.05, -0.36, 0.2]);
   // Kekomi: im Treffpunkt rückt die linke Faust etwas Richtung Ziel (beim Anziehen ginge das Knie vor dem Bauch hindurch);
