@@ -257,19 +257,42 @@
     d = document.createElement('dialog');
     d.className = 'f3d-dlg pe-dlg';
     d.setAttribute('aria-label', 'Bewegungs-Editor');
+    const touch = matchMedia('(pointer: coarse)').matches;
+    const HELP = touch ? '1 Finger auf einem Punkt: ziehen · 1 Finger daneben: Ansicht drehen · 2 Finger: zoomen und verschieben' : 'Punkt ziehen: bewegen · daneben ziehen: Ansicht drehen · rechte Maustaste oder Umschalt: verschieben · Mausrad: zoomen';
+    const pm = (cls, label) => `<div class="pe-ctl"><button type="button" class="pe-pm" data-pm="${cls}" data-d="-1" aria-label="${label} weniger" title="${label}: einen Schritt weniger">−</button><input type="range" class="${cls}" aria-label="${label}"><button type="button" class="pe-pm" data-pm="${cls}" data-d="1" aria-label="${label} mehr" title="${label}: einen Schritt mehr">+</button></div>`;
     d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x pe-fullbtn" data-pe="full" aria-pressed="false" aria-label="Vollbild" title="Editor über das ganze Fenster">⛶</button><button type="button" class="f3d-dlg-x pe-close" aria-label="Schließen" title="Editor schließen – alles nicht Kopierte geht verloren">✕</button></div>
-<div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas><span class="pe-cam" aria-hidden="true"></span></div>
-<div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front" title="Figur von vorn ansehen (eingepasst)">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side" title="Figur von der Seite ansehen (eingepasst)">Seite</button><button type="button" class="gfx-btn" data-pe="v-top" title="Figur von oben ansehen (eingepasst)">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false" title="Anfasspunkte und Linien aus- bzw. einblenden">Punkte aus</button></div>
-<p class="pe-hint muted small">${matchMedia('(pointer: coarse)').matches ? '1 Finger: Punkt ziehen oder drehen · 2 Finger: zoomen und verschieben' : 'Ziehen: Punkt bzw. drehen · Rechte Maustaste/Umschalt: verschieben · Mausrad: zoomen'}</p>
-<div class="pe-scroll">
+<div class="pe-main"><div class="pe-left">
+<div class="pe-stage"><canvas class="pe-cv"></canvas>
+<div class="pe-tools"><button type="button" class="pe-tb" data-pe="v-front" title="Figur von vorn ansehen (eingepasst)">Vorne</button><button type="button" class="pe-tb" data-pe="v-side" title="Figur von der Seite ansehen (eingepasst)">Seite</button><button type="button" class="pe-tb" data-pe="v-top" title="Figur von oben ansehen (eingepasst)">Oben</button><button type="button" class="pe-tb" data-pe="hide" aria-pressed="false" title="Anfasspunkte und Linien aus- bzw. einblenden">Punkte aus</button></div>
+<button type="button" class="pe-tb pe-helpbtn" data-pe="help" aria-expanded="false" aria-label="Bedienung" title="Bedienung anzeigen">?</button>
+<p class="pe-helptext" hidden>${HELP}</p>
+<span class="pe-cam" aria-hidden="true"></span></div>
+<div class="pe-grip" title="Ziehen: Bild höher oder niedriger" aria-hidden="true"></div>
+<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
+</div>
+<div class="pe-side">
+<div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Ausgabe, ganze Bewegung, Import">Ausgabe</button></div>
+<div class="pe-pane" data-pane="bild">
+<div class="pe-ph"><h3 class="pe-bh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
+<p class="pe-finfo small"></p>
+<div class="pe-movonly">
+<label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
+<div class="pe-row"><span>Zeitpunkt <output class="pe-tv"></output></span>${pm('pe-tt', 'Zeitpunkt')}<small class="muted pe-tthint">Auch auf der Zeitleiste: Bild anfassen und ziehen.</small></div>
+<div class="pe-row"><span>Dauer der ganzen Bewegung <output class="pe-dv"></output></span>${pm('pe-dur', 'Dauer')}</div>
+<label class="pe-row"><span>Tempo beim Abspielen</span><select class="pe-speed" title="Tempo beim Abspielen mit ▶ (ändert die Bewegung nicht)"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label>
+<button type="button" class="pe-wide pe-setk" data-pe="fbest"></button>
+</div></div>
+<div class="pe-pane" data-pane="koerper">
+<div class="pe-ph"><h3 class="pe-kh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
 <div class="pe-parts" role="radiogroup" aria-label="Körperteil"></div>
-<div class="pe-panel"></div>
-<div class="pe-out">
-<div class="pe-acts"><button type="button" class="btn" data-pe="copy" title="Den Text unten in die Zwischenablage kopieren – zum Einfügen im Chat oder zum Sichern (später mit „Importieren“ zurückholen)">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button><button type="button" class="gfx-btn" data-pe="imp" title="Einen früher kopierten Text einfügen und weiterbearbeiten">Importieren</button></div>
-<div class="pe-imp" hidden><textarea class="pe-imptext" rows="5" aria-label="Text zum Importieren" placeholder="Kopierten Text des Bewegungs-Editors hier einfügen"></textarea><div class="pe-acts"><button type="button" class="btn" data-pe="impok" title="Posen, Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera aus dem Text übernehmen">Übernehmen</button><button type="button" class="gfx-btn" data-pe="impx" title="Import abbrechen">Abbrechen</button></div></div>
-<p class="pe-msg muted small" aria-live="polite"></p>
-<details class="pe-outbox"><summary title="Den Text zeigen, der beim Kopieren in die Zwischenablage kommt">Text anzeigen</summary><textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea></details>
-</div></div></div></div>`;
+<div class="pe-panel"></div></div>
+<div class="pe-pane" data-pane="ausgabe">
+<button type="button" class="pe-wide" data-pe="all" aria-pressed="false" title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button>
+<button type="button" class="pe-wide" data-pe="imp" title="Einen früher kopierten Text einfügen und weiterbearbeiten">Importieren</button>
+<div class="pe-imp" hidden><textarea class="pe-imptext" rows="5" aria-label="Text zum Importieren" placeholder="Kopierten Text des Bewegungs-Editors hier einfügen"></textarea><div class="pe-acts"><button type="button" class="btn" data-pe="impok" title="Posen, Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera aus dem Text übernehmen">Übernehmen</button><button type="button" class="pe-wide" data-pe="impx" title="Import abbrechen">Abbrechen</button></div></div>
+<details class="pe-outbox"><summary title="Den Text zeigen, der beim Kopieren in die Zwischenablage kommt">Text anzeigen</summary><textarea class="pe-text" rows="8" readonly aria-label="Pose als Text"></textarea></details></div>
+<div class="pe-sticky"><p class="pe-msg muted small" aria-live="polite"></p><button type="button" class="btn" data-pe="copy" title="Den Text in die Zwischenablage kopieren – zum Einfügen im Chat oder zum Sichern (später mit „Importieren“ zurückholen)">Pose kopieren</button></div>
+</div></div>`;
     document.body.appendChild(d);
     d.querySelector('.pe-close').addEventListener('click', () => d.close());
     d.addEventListener('close', () => {
@@ -279,6 +302,12 @@
     });
     d.addEventListener('click', onClick);
     bindStage(d.querySelector('.pe-stage'));
+    bindTrack(d.querySelector('.pe-track'));
+    bindGrip(d.querySelector('.pe-grip'), d);
+    d.querySelector('.pe-tt').addEventListener('input', (ev) => { S.tm[S.k].t = +ev.target.value; S.t = S.tm[S.k].t; timing(); });
+    d.querySelector('.pe-te').addEventListener('change', (ev) => { S.tm[S.k].e = ev.target.value; timing(); });
+    d.querySelector('.pe-dur').addEventListener('input', (ev) => { S.dur = +ev.target.value; timing(); });
+    d.querySelector('.pe-speed').addEventListener('change', (ev) => { S.speed = +ev.target.value; });
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
     // Andere Größenänderungen (z. B. Adressleiste) lassen Drehung und Zoom in Ruhe.
     let portrait = innerHeight > innerWidth;
@@ -320,6 +349,10 @@
     const ab = d.querySelector('[data-pe="all"]');
     ab.hidden = keys.length < 2;
     ab.setAttribute('aria-pressed', String(S.all));
+    // Standbild: keine Zeitleiste, kein Timing
+    d.querySelector('.pe-tl').hidden = keys.length < 2;
+    d.querySelector('.pe-movonly').hidden = keys.length < 2;
+    tab(TAB);
     d.querySelector('.pe-msg').textContent = '';
     if (!d.open) d.showModal();
     goFrame(k0);
@@ -328,55 +361,138 @@
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
   const holdOf = (i) => { let j = i; while (j > 0 && same(rounded(S.frames[j - 1]), rounded(S.frames[i]))) j--; return j; };
-  // Bildwahl: Schieber mit ‹ › (auch bei vielen Bildern kompakt), ★ springt zum Kernbild; darunter Nummer und geänderte Bilder
+  // Zeitleiste, Bildleiste und Reiter „Bild“ auf den Stand bringen: jedes Bild ist eine Marke an seinem Zeitpunkt
+  // (★ Kernbild, gestrichelt = hält das Bild davor, rot = Übergang Kime); Klick wählt, Ziehen ändert den Zeitpunkt
   function frames() {
-    const box = S.dlg.querySelector('.pe-frames');
+    const d = S.dlg;
     const n = S.keys.length;
-    if (n < 2) { box.innerHTML = ''; box.dataset.n = ''; return; }
-    if (box.dataset.n !== String(n)) {
-      box.dataset.n = String(n);
-      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung" title="Bild der Bewegung wählen"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="gfx-btn pe-star" data-pe="fbest"></button></div><p class="pe-finfo small"></p>
-<div class="pe-time"><label class="pe-row"><span>Zeitpunkt <output class="pe-tv"></output></span><input type="range" class="pe-tt" step="0.01" title="Wann dieses Bild erreicht wird (t von 0 bis 1, dahinter in Sekunden)"></label><label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label></div>
-<div class="pe-time"><label class="pe-row"><span>Dauer der Bewegung <output class="pe-dv"></output></span><input type="range" class="pe-dur" min="0.6" max="5" step="0.1" title="Wie lange die ganze Bewegung dauert"></label><label class="pe-row"><span>Abspielen</span><select class="pe-speed" title="Tempo beim Abspielen mit ▶ (ändert die Bewegung nicht)"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label></div>`;
-      const sl = box.querySelector('.pe-fslider');
-      sl.addEventListener('input', () => { if (S.play) S.play = null; if (+sl.value !== S.k) goFrame(+sl.value); });
-      box.querySelector('.pe-tt').addEventListener('input', (ev) => { S.tm[S.k].t = +ev.target.value; S.t = S.tm[S.k].t; timing(); });
-      box.querySelector('.pe-te').addEventListener('change', (ev) => { S.tm[S.k].e = ev.target.value; timing(); });
-      box.querySelector('.pe-dur').addEventListener('input', (ev) => { S.dur = +ev.target.value; timing(); });
-      box.querySelector('.pe-speed').addEventListener('change', (ev) => { S.speed = +ev.target.value; });
-    }
     const ed = [...new Set(Object.keys(S.edits).map(Number).filter((i) => !same(rounded(S.edits[i]), rounded(S.frames[i]))).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
-    const pb = box.querySelector('[data-pe="play"]');
+    const h = holdOf(S.k);
+    const isK = S.k === S.k0;
+    const head = n > 1 ? `Bild ${S.k + 1} von ${n}${isK ? ' · Kernbild ★' : ''}` : 'Standbild';
+    d.querySelector('.pe-bh').textContent = head;
+    d.querySelector('.pe-kh').textContent = `${partOf(S.sel).label}${n > 1 ? ` · Bild ${S.k + 1}${isK ? ' ★' : ''}` : ''}`;
+    d.querySelector('.pe-finfo').innerHTML = [isK && S.k0 !== S.k0app ? 'Kernbild neu gewählt' : '', h !== S.k ? `gleiche Pose wie Bild ${h + 1}` : '', ed.length ? `<span class="pe-ed">geändert: Bild ${ed.map((i) => i + 1).join(', ')}</span>` : ''].filter(Boolean).join(' · ');
+    if (n < 2) return;
+    const pb = d.querySelector('[data-pe="play"]');
     pb.textContent = S.play ? '■' : '▶';
     pb.setAttribute('aria-label', S.play ? 'Anhalten' : 'Bewegung abspielen');
-    pb.title = S.play ? 'Anhalten' : 'Bewegung mit allen Änderungen abspielen (Tempo unten bei „Abspielen“)';
+    pb.title = S.play ? 'Anhalten' : 'Bewegung mit allen Änderungen abspielen (Tempo im Reiter „Bild“)';
     pb.setAttribute('aria-pressed', String(!!S.play));
-    const sl = box.querySelector('.pe-fslider');
-    if (+sl.value !== S.k) sl.value = S.k;
-    box.querySelector('[data-pe="fprev"]').disabled = S.k <= 0;
-    box.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
-    const star = box.querySelector('[data-pe="fbest"]');
-    const isK = S.k === S.k0;
-    star.textContent = isK ? '★' : '☆';
-    star.setAttribute('aria-pressed', String(isK));
-    star.setAttribute('aria-label', isK ? 'Kernbild' : 'Dieses Bild als Kernbild');
-    star.title = isK ? 'Dieses Bild ist das Kernbild (das Standbild in der App)' : 'Dieses Bild zum Kernbild machen';
-    const tt = box.querySelector('.pe-tt');
+    d.querySelector('[data-pe="fprev"]').disabled = S.k <= 0;
+    d.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
+    d.querySelectorAll('[data-pe="fbest"]').forEach((b) => {
+      const big = b.classList.contains('pe-setk');
+      b.textContent = big ? (isK ? '★ Dieses Bild ist das Kernbild' : '☆ Dieses Bild als Kernbild') : isK ? '★' : '☆';
+      b.setAttribute('aria-pressed', String(isK));
+      if (!big) b.setAttribute('aria-label', isK ? 'Kernbild' : 'Dieses Bild als Kernbild');
+      b.title = isK ? 'Dieses Bild ist das Kernbild (das Standbild in der App)' : 'Dieses Bild zum Kernbild machen';
+    });
+    // Zeitleiste
+    const tr = d.querySelector('.pe-track');
+    const pos = (t) => `${clamp(t, 0, 1) * 100}%`;
+    tr.innerHTML = S.tm.map((x, i) => {
+      const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
+      const hold = i && holdOf(i) !== i;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · t = ${x.t.toFixed(2)} · ${(x.t * S.dur).toFixed(2)} s${i ? ` · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert den Zeitpunkt' : ''}"><span>${i + 1}</span></button>`;
+    }).join('') + `<span class="pe-tick">0 s</span><span class="pe-tick pe-tend">${S.dur.toFixed(1)} s</span><span class="pe-head" hidden></span>`;
+    // Lage per Skript (die Seite erlaubt keine style-Angaben im HTML)
+    tr.querySelectorAll('[data-mk]').forEach((m) => (m.style.left = pos(S.tm[+m.dataset.mk].t)));
+    tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${(+g.dataset.b - +g.dataset.a) * 100}%`; });
+    // Reiter „Bild“
+    const tt = d.querySelector('.pe-tt');
     const first = S.k === 0;
+    tt.step = 0.01;
     tt.min = first ? S.tm[0].t : Math.round((S.tm[S.k - 1].t + 0.01) * 100) / 100;
-    tt.max = first ? S.tm[0].t : S.k === n - 1 ? Math.max(1, S.tm[S.k].t) : Math.round((S.tm[S.k + 1].t - 0.01) * 100) / 100;
+    tt.max = first ? S.tm[0].t : S.k === n - 1 ? 1 : Math.round((S.tm[S.k + 1].t - 0.01) * 100) / 100;
     tt.disabled = first;
+    d.querySelectorAll('[data-pm="pe-tt"]').forEach((b) => (b.disabled = first));
     if (+tt.value !== S.tm[S.k].t) tt.value = S.tm[S.k].t;
-    box.querySelector('.pe-tv').textContent = `t = ${S.tm[S.k].t.toFixed(2)} · ${((S.tm[S.k].t - S.tm[0].t) * S.dur).toFixed(2)} s`;
-    const te = box.querySelector('.pe-te');
+    d.querySelector('.pe-tv').textContent = `t = ${S.tm[S.k].t.toFixed(2)} · ${((S.tm[S.k].t - S.tm[0].t) * S.dur).toFixed(2)} s`;
+    const te = d.querySelector('.pe-te');
     te.disabled = first;
     te.value = S.tm[S.k].e in EASE_UI ? S.tm[S.k].e : 'io';
     te.title = first ? 'Das erste Bild hat keinen Übergang' : EASE_HELP[te.value];
-    const du = box.querySelector('.pe-dur');
+    const du = d.querySelector('.pe-dur');
+    du.min = 0.6;
+    du.max = 5;
+    du.step = 0.1;
     if (+du.value !== S.dur) du.value = S.dur;
-    box.querySelector('.pe-dv').textContent = `${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(1)} s`;
-    const h = holdOf(S.k);
-    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ` · Kernbild ★${S.k0 !== S.k0app ? ' (neu gewählt)' : ''}` : ''}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
+    d.querySelector('.pe-dv').textContent = `${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(1)} s`;
+  }
+  // Zeitleiste: Marke antippen wählt das Bild, Ziehen (ab 4 Pixel) verschiebt seinen Zeitpunkt zwischen den Nachbarn
+  function bindTrack(tr) {
+    let drag = null;
+    tr.addEventListener('pointerdown', (ev) => {
+      if (!S) return;
+      // Marke unter dem Finger, sonst die nächstgelegene
+      let m = ev.target.closest('[data-mk]');
+      if (!m) {
+        const b = tr.getBoundingClientRect();
+        const t = (ev.clientX - b.left) / b.width;
+        let best = 0;
+        S.tm.forEach((x, k) => { if (Math.abs(x.t - t) < Math.abs(S.tm[best].t - t)) best = k; });
+        m = tr.querySelector(`[data-mk="${best}"]`);
+        if (!m) return;
+      }
+      ev.preventDefault();
+      if (S.play) S.play = null;
+      const i = +m.dataset.mk;
+      if (i !== S.k) goFrame(i);
+      drag = { i, x0: ev.clientX, moved: false, id: ev.pointerId };
+      tr.setPointerCapture(ev.pointerId);
+    });
+    tr.addEventListener('pointermove', (ev) => {
+      if (!drag || !S || drag.i === 0 || ev.pointerId !== drag.id) return;
+      if (!drag.moved && Math.abs(ev.clientX - drag.x0) < 4) return;
+      drag.moved = true;
+      const b = tr.getBoundingClientRect();
+      const i = drag.i;
+      const lo = S.tm[i - 1].t + 0.01;
+      const hi = i === S.tm.length - 1 ? 1 : S.tm[i + 1].t - 0.01;
+      const t = Math.round(clamp((ev.clientX - b.left) / b.width, lo, hi) * 100) / 100;
+      if (t === S.tm[i].t) return;
+      S.tm[i].t = t;
+      S.t = t;
+      const m = tr.querySelector(`[data-mk="${i}"]`);
+      if (m) m.style.left = `${t * 100}%`;
+      S.dlg.querySelector('.pe-tv').textContent = `t = ${t.toFixed(2)} · ${((t - S.tm[0].t) * S.dur).toFixed(2)} s`;
+    });
+    const up = (ev) => {
+      if (!drag || ev.pointerId !== drag.id) return;
+      const moved = drag.moved;
+      drag = null;
+      if (S && moved) timing();
+    };
+    tr.addEventListener('pointerup', up);
+    tr.addEventListener('pointercancel', up);
+  }
+  // Griff unter dem Bild (Hochformat): Bildhöhe ziehen
+  function bindGrip(g, d) {
+    let y0 = null;
+    let h0 = 0;
+    g.addEventListener('pointerdown', (ev) => {
+      y0 = ev.clientY;
+      h0 = d.querySelector('.pe-stage').offsetHeight;
+      g.setPointerCapture(ev.pointerId);
+    });
+    g.addEventListener('pointermove', (ev) => {
+      if (y0 == null) return;
+      const h = clamp(h0 + ev.clientY - y0, 160, innerHeight * 0.75);
+      d.style.setProperty('--pe-sh', `${Math.round(h)}px`);
+      draw();
+    });
+    const up = () => { if (y0 != null) { y0 = null; if (S) { S.fit = true; draw(); } } };
+    g.addEventListener('pointerup', up);
+    g.addEventListener('pointercancel', up);
+  }
+  // Reiter: Bild, Körper, Ausgabe (bleibt beim nächsten Öffnen gewählt)
+  let TAB = 'koerper';
+  function tab(t) {
+    TAB = t;
+    const d = S.dlg;
+    d.querySelectorAll('.pe-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+    d.querySelectorAll('.pe-pane').forEach((p) => (p.hidden = p.dataset.pane !== t));
   }
   // Bild wechseln: Änderungen des bisherigen Bildes merken
   function goFrame(i) {
@@ -430,6 +546,8 @@
       if (!S || S.play !== run) return;
       const u = Math.min(1, (now - start) / 1000 / dur);
       run.pose = tl(t0 + (t1 - t0) * u);
+      const ph = S.dlg.querySelector('.pe-head');
+      if (ph) { ph.hidden = false; ph.style.left = `${clamp(t0 + (t1 - t0) * u, 0, 1) * 100}%`; }
       S.fast = true;
       draw();
       if (u < 1) requestAnimationFrame(step);
@@ -438,23 +556,28 @@
     requestAnimationFrame(step);
   }
 
+  // Körperteile geordnet wie die Punkte im Bild: Körper und Kopf oben, darunter links (blau) und rechts (rot) paarweise
+  const PART_ORDER = ['body', 'head', 'hL', 'hR', 'eL', 'eR', 'kL', 'kR', 'fL', 'fR'];
   function parts() {
     const box = S.dlg.querySelector('.pe-parts');
-    box.innerHTML = PARTS.map((p) => `<button type="button" class="gfx-btn pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}" title="${esc(p.label)} einstellen (Regler darunter, oder den Punkt im Bild ziehen)">${esc(p.label)}</button>`).join('');
+    const chip = (p) => `<button type="button" class="pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}" title="${esc(p.label)} einstellen (Regler darunter, oder den Punkt im Bild ziehen)">${esc(p.label)}</button>`;
+    box.innerHTML = `${PART_ORDER.slice(0, 2).map((id) => chip(partOf(id))).join('')}<span class="pe-colh">links</span><span class="pe-colh">rechts</span>${PART_ORDER.slice(2).map((id) => chip(partOf(id))).join('')}`;
   }
   function select(id) {
     S.sel = id;
     S.dlg.querySelectorAll('.pe-chip').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.part === id)));
+    if (S.dlg.querySelector('.pe-pane[data-pane="koerper"]').hidden) tab('koerper');
     panel();
+    frames();
   }
   function panel() {
     const box = S.dlg.querySelector('.pe-panel');
     const list = controls(S.sel, S.P);
     S.ctl = list;
     box.innerHTML = list.map((c, i) => {
-      if (c.t === 'range') return `<label class="pe-row"><span>${esc(c.label)} <output data-o="${i}"></output></span><input type="range" data-i="${i}" min="${c.min}" max="${c.max}" step="${c.step}"></label>`;
+      if (c.t === 'range') return `<div class="pe-row"><span>${esc(c.label)} <output data-o="${i}"></output></span><div class="pe-ctl"><button type="button" class="pe-pm" data-pi="${i}" data-d="-1" aria-label="${esc(c.label)} weniger" title="Einen Schritt weniger (${c.unit === '°' ? '1°' : c.unit === 'm' ? '1 cm' : c.step})">−</button><input type="range" data-i="${i}" min="${c.min}" max="${c.max}" step="${c.step}" aria-label="${esc(c.label)}"><button type="button" class="pe-pm" data-pi="${i}" data-d="1" aria-label="${esc(c.label)} mehr" title="Einen Schritt mehr (${c.unit === '°' ? '1°' : c.unit === 'm' ? '1 cm' : c.step})">+</button></div></div>`;
       if (c.t === 'select') return `<label class="pe-row"><span>${esc(c.label)}</span><select data-i="${i}">${c.opts.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}<option value="eigen" hidden>eigene Richtung</option></select></label>`;
-      return `<button type="button" class="gfx-btn" data-i="${i}" title="${esc(c.help || c.label)}">${esc(c.label)}</button>`;
+      return `<button type="button" class="pe-wide" data-i="${i}" title="${esc(c.help || c.label)}">${esc(c.label)}</button>`;
     }).join('');
     sync();
     box.querySelectorAll('input[type=range]').forEach((inp) => {
@@ -473,6 +596,14 @@
       if (S.ctl[+sel.dataset.i].label === 'Hand') panel();
     }));
     box.querySelectorAll('button[data-i]').forEach((b) => b.addEventListener('click', () => { push(); S.ctl[+b.dataset.i].run(); changed(false); }));
+    // − / +: ein fester Schritt (1° bzw. 1 cm)
+    box.querySelectorAll('[data-pi]').forEach((b) => b.addEventListener('click', () => {
+      const c = S.ctl[+b.dataset.pi];
+      const st = c.unit === '°' ? 1 : c.unit === 'm' ? 0.01 : c.step;
+      push();
+      c.set(clamp(Math.round((c.get() + st * +b.dataset.d) / c.step) * c.step, c.min, c.max));
+      changed(false);
+    }));
   }
   // Regler auf die aktuellen Werte stellen (nach Ziehen, Rückgängig)
   function sync() {
@@ -623,9 +754,25 @@
     if (!S) return;
     const chip = ev.target.closest('[data-part]');
     if (chip) return select(chip.dataset.part);
+    const tb = ev.target.closest('[data-tab]');
+    if (tb) return tab(tb.dataset.tab);
+    const pmb = ev.target.closest('[data-pm]');
+    if (pmb) {
+      const inp = S.dlg.querySelector(`.${pmb.dataset.pm}`);
+      const v = clamp(Math.round((+inp.value + +inp.step * +pmb.dataset.d) * 100) / 100, +inp.min, +inp.max);
+      inp.value = v;
+      inp.dispatchEvent(new Event('input'));
+      return;
+    }
     const b = ev.target.closest('[data-pe]');
     if (!b) return;
     const a = b.dataset.pe;
+    if (a === 'help') {
+      const h = S.dlg.querySelector('.pe-helptext');
+      h.hidden = !h.hidden;
+      b.setAttribute('aria-expanded', String(!h.hidden));
+      return;
+    }
     const J = E.solve(S.P);
     const msg = S.dlg.querySelector('.pe-msg');
     if (a === 'v-front' || a === 'v-side' || a === 'v-top') {
@@ -827,6 +974,8 @@
     }, { passive: false });
     stage.addEventListener('pointerdown', (ev) => {
       if (!S || !S.C) return;
+      // Werkzeugleiste und Hilfe im Bild sind Knöpfe, kein Ziehen
+      if (ev.target.closest('button, .pe-helptext')) return;
       if (S.play) { S.play = null; frames(); }
       stage.setPointerCapture && stage.setPointerCapture(ev.pointerId);
       // rechte/mittlere Maustaste oder Umschalt: verschieben statt drehen

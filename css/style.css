@@ -2523,8 +2523,9 @@ main:fullscreen {
   }
 }
 
-/* Bewegungs-Editor (in den Einstellungen einschaltbar): im Querformat Figur links über die ganze Höhe,
-   Ansichten, Körperteile und Regler in einer Spalte rechts daneben; im Hochformat darunter */
+/* Bewegungs-Editor (in den Einstellungen einschaltbar). Links das Bild mit Ansichts-Werkzeugen und darunter die
+   Zeitleiste (jedes Bild eine Marke an seinem Zeitpunkt), rechts die Reiter Bild · Körper · Ausgabe und unten fest
+   „Kopieren“. Im Hochformat (Handy) steht alles untereinander, die Bildhöhe lässt sich am Griff ziehen. */
 .pe-dlg {
   padding: 0.5rem 0.5rem 0.4rem;
 }
@@ -2537,20 +2538,508 @@ main:fullscreen {
   flex: 1;
   min-height: 0;
   display: flex;
-  gap: 0.4rem;
+  gap: 0.5rem;
+}
+
+.pe-left {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
 .pe-stage {
   position: relative;
   flex: 1;
-  min-width: 0;
+  min-height: 0;
   border-radius: 10px;
   overflow: hidden;
   touch-action: none;
   background: var(--card);
 }
 
-/* Vollbild: Dialog füllt genau die sichtbare Fläche, die Seite dahinter scrollt nicht (keine Scrollleiste) */
+.pe-cv {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Werkzeuge im Bild */
+.pe-tools {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  right: 2.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.pe-tb {
+  min-height: 28px;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pe-tb[aria-pressed="true"],
+.pe-tb[aria-expanded="true"] {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.pe-helpbtn {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 28px;
+  padding: 0;
+}
+
+.pe-helptext {
+  position: absolute;
+  top: 2.6rem;
+  right: 0.4rem;
+  max-width: min(22rem, calc(100% - 0.8rem));
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.pe-cam {
+  position: absolute;
+  left: 0.4rem;
+  bottom: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.pe-grip {
+  display: none;
+}
+
+/* Zeitleiste: ▶ ‹ [Marken] › ★ */
+.pe-tl {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0;
+}
+
+.pe-rb {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pe-rb:disabled {
+  opacity: 0.4;
+}
+
+.pe-star {
+  color: var(--red);
+}
+
+.pe-track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  margin: 0 12px;
+  touch-action: none;
+}
+
+.pe-track::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 21px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.pe-seg {
+  position: absolute;
+  pointer-events: none;
+  top: 20px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--red);
+  opacity: 0.55;
+}
+
+.pe-mk {
+  position: absolute;
+  top: 12px;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  padding: 0;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 800;
+  cursor: grab;
+  touch-action: none;
+}
+
+.pe-mk.hold {
+  border-style: dashed;
+}
+
+.pe-mk.ed {
+  box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.35);
+}
+
+.pe-mk.sel {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+  z-index: 1;
+}
+
+.pe-mk.kern::after {
+  content: "★";
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--red);
+  font-size: 0.75rem;
+}
+
+.pe-tick {
+  position: absolute;
+  pointer-events: none;
+  top: 35px;
+  left: 0;
+  font-size: 0.62rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pe-tend {
+  left: auto;
+  right: 0;
+}
+
+.pe-head {
+  position: absolute;
+  top: 6px;
+  width: 2px;
+  height: 34px;
+  margin-left: -1px;
+  background: var(--ink);
+  pointer-events: none;
+}
+
+/* Seitenleiste mit Reitern */
+.pe-side {
+  flex: none;
+  width: clamp(240px, 34%, 360px);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.pe-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.35rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.pe-tab {
+  flex: 1;
+  padding: 0.45rem 0.3rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pe-tab[aria-selected="true"] {
+  background: var(--card);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.pe-pane {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.6rem;
+}
+
+.pe-pane > * {
+  flex: none;
+}
+
+.pe-movonly {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.pe-ph {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pe-ph h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.pe-sm {
+  min-height: 28px;
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pe-finfo {
+  margin: -0.3rem 0 0;
+  color: var(--muted);
+}
+
+.pe-finfo:empty {
+  display: none;
+}
+
+.pe-finfo .pe-ed {
+  color: var(--red);
+  font-weight: 700;
+}
+
+.pe-wide {
+  width: 100%;
+  min-height: 36px;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pe-wide[aria-pressed="true"] {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+/* Körperteile: Körper und Kopf oben, darunter links | rechts */
+.pe-parts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+}
+
+.pe-colh {
+  margin-top: 0.15rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pe-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 30px;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pe-chip::before {
+  content: "";
+  flex: none;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: #2e7d32;
+}
+
+.pe-chip.pe-L::before { background: #1565c0; }
+.pe-chip.pe-R::before { background: #c62828; }
+
+.pe-chip[aria-checked="true"] {
+  background: var(--ink);
+  color: var(--card);
+}
+
+.pe-panel {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.pe-row {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.pe-row output {
+  float: right;
+  color: var(--muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.pe-ctl {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pe-ctl input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  margin: 0;
+  accent-color: var(--red);
+}
+
+.pe-pm {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pe-pm:disabled {
+  opacity: 0.4;
+}
+
+.pe-tthint {
+  font-weight: 400;
+}
+
+.pe-row select,
+.pe-text,
+.pe-imp .pe-imptext {
+  width: 100%;
+  padding: 0.4rem;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.pe-text,
+.pe-imp .pe-imptext {
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.pe-acts {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.3rem;
+}
+
+.pe-acts .btn,
+.pe-acts .pe-wide {
+  flex: 1;
+}
+
+.pe-outbox summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0.2rem 0;
+}
+
+/* Kopieren immer unten erreichbar */
+.pe-sticky {
+  padding: 0.4rem 0.5rem 0.5rem;
+  border-top: 1px solid var(--line);
+}
+
+.pe-sticky .btn {
+  width: 100%;
+  min-height: 42px;
+}
+
+.pe-msg {
+  margin: 0 0 0.3rem;
+  text-align: center;
+}
+
+.pe-msg:empty {
+  display: none;
+}
+
+/* Vollbild: Dialog füllt genau das Fenster, die Seite dahinter scrollt nicht */
 html.pe-fs {
   overflow: hidden;
 }
@@ -2570,243 +3059,103 @@ html.pe-fs {
   color: var(--red);
 }
 
-.pe-imp .pe-imptext {
-  width: 100%;
-  padding: 0.4rem;
-  border: 2px solid var(--line);
-  border-radius: 8px;
-  background: var(--card);
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.8rem;
-}
-
-.pe-time {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 0.6rem;
-}
-.pe-time select {
-  width: 100%;
-  min-width: 0;
-}
-
-.pe-cam {
-  position: absolute;
-  left: 0.4rem;
-  bottom: 0.3rem;
-  font-size: 0.7rem;
-  color: var(--muted, #777);
-  pointer-events: none;
-}
-
-.pe-cv {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.pe-side {
-  flex: none;
-  width: clamp(145px, 40%, 340px);
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Vollbild im Querformat: die Einstellungen bekommen mehr Platz (Regler und Auswahlfelder breiter) */
 @media (orientation: landscape) {
   .pe-full .pe-side {
-    width: clamp(220px, 30%, 460px);
+    width: clamp(260px, 30%, 440px);
   }
 }
 
-.pe-outbox summary {
-  cursor: pointer;
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin: 0.2rem 0;
-}
-
-/* Hochformat: Figur oben, Einstellungen darunter */
+/* Hochformat (Handy): Bild oben (Höhe am Griff ziehbar), Zeitleiste, darunter die Reiter */
 @media (orientation: portrait) {
   .pe-main {
     flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .pe-left {
+    flex: none;
   }
 
   .pe-stage {
     flex: none;
-    height: 54dvh;
-    min-height: 220px;
+    height: var(--pe-sh, 36dvh);
+    min-height: 160px;
+  }
+
+  .pe-tb {
+    min-height: 26px;
+    padding: 0.1rem 0.4rem;
+    font-size: 0.7rem;
+  }
+
+  /* Zeitleiste schmal: Kernbild-Stern steht im Reiter „Bild“, Marken ohne Nummer (die steht in der Überschrift) */
+  .pe-tl .pe-star {
+    display: none;
+  }
+
+  .pe-track {
+    margin: 0 8px;
+  }
+
+  .pe-grip {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 16px;
+    cursor: ns-resize;
+    touch-action: none;
+  }
+
+  .pe-grip::before {
+    content: "";
+    width: 44px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line);
+  }
+
+  .pe-mk {
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    top: 16px;
+  }
+
+  .pe-mk span {
+    display: none;
+  }
+
+  .pe-mk.sel {
+    width: 20px;
+    height: 20px;
+    margin-left: -10px;
+    top: 13px;
+  }
+
+  .pe-mk.sel span {
+    display: inline;
+    font-size: 0.55rem;
   }
 
   .pe-side {
     flex: 1;
     width: auto;
   }
-}
 
-.pe-parts {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
-  gap: 0.25rem;
-  margin: 0 0 0.5rem;
-}
+  /* Körperteile als Leiste zum Wischen */
+  .pe-parts {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 0.2rem;
+  }
 
-.pe-dlg .pe-parts .gfx-btn {
-  padding: 0.2rem 0.4rem;
-  white-space: nowrap;
-  text-align: left;
-}
+  .pe-colh {
+    display: none;
+  }
 
-.pe-bar,
-.pe-acts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin: 0 0 0.4rem;
-}
-
-.pe-hint {
-  margin: -0.15rem 0 0.4rem;
-  font-size: 0.72rem;
-}
-
-.pe-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.pe-dlg .pe-side .gfx-btn {
-  min-height: 30px;
-  padding: 0.2rem 0.45rem;
-  font-size: 0.76rem;
-}
-
-.pe-dlg .pe-acts .btn {
-  flex: 1;
-  min-height: 40px;
-  padding: 0.4rem 0.6rem;
-}
-
-.pe-dlg .gfx-btn {
-  padding: 0.3rem 0.6rem;
-}
-
-.pe-chip::before {
-  content: "";
-  display: inline-block;
-  width: 0.6rem;
-  height: 0.6rem;
-  margin-right: 0.3rem;
-  border-radius: 50%;
-  background: #2e7d32;
-  vertical-align: 0.05em;
-}
-
-.pe-chip.pe-L::before { background: #1565c0; }
-.pe-chip.pe-R::before { background: #c62828; }
-
-/* Bilder einer Bewegung: ▶ spielt sie mit den Änderungen ab, Schieber und ‹ › wählen das Bild, ★ Kernbild */
-.pe-frames:empty {
-  display: none;
-}
-
-.pe-fbar {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.pe-fslider {
-  flex: 1;
-  min-width: 60px;
-  height: 30px;
-  margin: 0;
-  accent-color: var(--ink);
-}
-
-.pe-dlg .pe-fbar .gfx-btn {
-  min-width: 34px;
-  padding: 0.2rem 0.35rem;
-}
-
-.pe-fbar .gfx-btn:disabled {
-  opacity: 0.4;
-}
-
-.pe-finfo {
-  margin: 0.1rem 0 0.4rem;
-  text-align: center;
-}
-
-.pe-finfo .pe-ed {
-  color: var(--red);
-  font-weight: 700;
-}
-
-.pe-chip[aria-checked="true"] {
-  background: var(--ink);
-  color: var(--card);
-}
-
-.pe-panel {
-  display: grid;
-  gap: 0.45rem;
-  padding: 0.2rem 0.2rem 0.6rem;
-}
-
-.pe-row {
-  display: grid;
-  gap: 0.1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.pe-row output {
-  float: right;
-  color: var(--muted);
-  font-weight: 500;
-}
-
-.pe-row input[type="range"] {
-  width: 100%;
-  height: 28px;
-  margin: 0;
-  accent-color: var(--red);
-}
-
-.pe-row select,
-.pe-text {
-  width: 100%;
-  padding: 0.4rem;
-  border: 2px solid var(--line);
-  border-radius: 8px;
-  background: var(--card);
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.9rem;
-}
-
-.pe-lab {
-  display: grid;
-  gap: 0.2rem;
-  font-size: 0.86rem;
-  font-weight: 600;
-}
-
-.pe-text {
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 0.75rem;
-}
-
-.pe-msg {
-  min-height: 1.2em;
-  margin: 0.2rem 0;
-  text-align: center;
+  .pe-chip {
+    flex: none;
+  }
 }
 
 .pe-switch {
