@@ -600,12 +600,13 @@
   // (roll), wird die Höhe ausgeglichen. Faust in Weltrichtung zur Brust (x links, y oben, z vorn), Ellbogen in Brustkoordinaten.
   // Die Werte sind je Tritt so gewählt, dass Arme und Trittbein im ganzen Ablauf auseinanderbleiben (Mittellinien ≥ 15 cm):
   // beim Keage steigt der Oberschenkel schräg zum Ziel – dort steht der vordere Arm weiter vor dem Körper.
+  // Kekomi: rechter Ellbogen nach außen Richtung Rücken (nicht zum Bauch), Unterarm aufrecht.
   const YG = (p, a) => {
     const r = (E.full(p).roll * Math.PI) / 180;
     const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
     return M(p, { hR: h(a.hR), eR: a.eR, hL: h(a.hL), eL: a.eL });
   };
-  const ARME_K = { hR: [-0.44, 0.14, 0.32], eR: [0, -1, 0.8], hL: [-0.02, -0.18, 0.2], eL: [0.8, -1, 0] };
+  const ARME_K = { hR: [-0.44, 0.14, 0.32], eR: [-0.7, -0.8, -0.7], hL: [-0.02, -0.18, 0.2], eL: [0.8, -1, 0] };
   const ARME_A = { hR: [-0.36, 0.08, 0.4], eR: [0, -1, 0.8], hL: [-0.02, -0.2, 0.28], eL: [0.8, -1, 0] };
   const YGK = (p) => YG(p, ARME_K);
   const YGA = (p) => YG(p, ARME_A);
