@@ -106,6 +106,7 @@
     ['Uchiotoshi', 'Unterarm schlägt einen Angriff nach unten', 'uke', tc('uchiotoshi'), PDF(150)],
 
     ['Mae-geri', 'Fußtritt nach vorne mit dem Fußballen', 'geri', mv('mae-geri')],
+    ['Mae-geri-kekomi', 'Stoßtritt nach vorne mit Ferse oder Fußballen', 'geri', tc('mae-geri-kekomi'), KO],
     ['Yoko-geri-keage', 'Seitlicher Schnapptritt', 'geri', tc('yoko-geri-keage')],
     ['Yoko-geri-kekomi', 'Seitlicher Stoßtritt mit der Fußkante', 'geri', mv('yoko-geri')],
     ['Mawashi-geri', 'Halbkreisfußtritt', 'geri', mv('mawashi-geri')],
@@ -118,7 +119,6 @@
     ['Ren-geri', 'Kombination mehrerer Fußtritte', 'geri', tc('ren-geri'), PO],
     ['Sonoba-geri', 'Fußtritte am Platz (Standübung)', 'geri', tc('sonoba-geri'), PO],
     ['Kizami-geri', 'Fußtritt mit dem vorderen Bein', 'geri', tc('kizami-geri'), PO],
-    ['Mae-geri-kekomi', 'Stoßtritt nach vorne mit Ferse oder Fußballen', 'geri', tc('mae-geri-kekomi'), KO],
     ['Ura-mawashi-geri', 'Halbkreistritt gegenläufig zum Mawashi-geri, trifft mit Sohle oder Ferse', 'geri', tc('ura-mawashi-geri'), KO],
     ['Ushiro-mawashi-geri', 'Ura-mawashi-geri aus einer Körperdrehung wie beim Ushiro-geri', 'geri', tc('ushiro-mawashi-geri'), KO],
     ['Mawashi-hiza-geri', 'Kniestoß im Bogen, waagerecht oder schräg zum Ziel', 'geri', tc('mawashi-hiza-geri'), KO],

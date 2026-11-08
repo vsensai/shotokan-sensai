@@ -359,6 +359,7 @@
           learn: () => `
             <ul>
               <li><b>Mae-geri</b> – Fußtritt nach vorne (Fußballen); Keage = schnappend, Kekomi = stoßend.</li>
+              <li><b>Mae-geri-kekomi</b> – Stoßtritt nach vorne mit Ferse oder Fußballen.</li>
               <li><b>Yoko-geri-keage</b> – seitlicher Schnapptritt; <b>Yoko-geri-kekomi</b> – seitlicher Stoßtritt (Fußkante).</li>
               <li><b>Mawashi-geri</b> – Halbkreisfußtritt.</li>
               <li><b>Ushiro-geri</b> – Fußtritt nach hinten (Ferse).</li>
@@ -366,13 +367,13 @@
               <li><b>Ren-geri</b> – Kombination mehrerer Fußtritte (Theorie 3. Kyu).</li>
               <li><b>Sonoba-geri</b> – Fußtritte am Platz (Standübung, Theorie 1. Kyu).</li>
               <li><b>Kizami-geri</b> – Tritt mit dem vorderen Bein (Theorie 2. Kyu).</li>
-              <li><b>Mae-geri-kekomi</b> – Stoßtritt nach vorne mit Ferse oder Fußballen; <b>Ura-mawashi-geri</b> – Halbkreistritt in Gegenrichtung zum Mawashi-geri (Sohle oder Ferse); <b>Ushiro-mawashi-geri</b> – derselbe Tritt aus einer Drehung wie beim Ushiro-geri.</li>
+              <li><b>Ura-mawashi-geri</b> – Halbkreistritt in Gegenrichtung zum Mawashi-geri (Sohle oder Ferse); <b>Ushiro-mawashi-geri</b> – derselbe Tritt aus einer Drehung wie beim Ushiro-geri.</li>
               <li><b>Hiza-geri</b> – Kniestoß senkrecht nach oben; <b>Mawashi-hiza-geri</b> – Kniestoß im Bogen. Fuß und Zehen sind dabei zum Schienbein angezogen.</li>
               <li>DJKB: <b>Ushiro-geri und Yoko-geri-kekomi</b> generell Chudan; alle übrigen Fußtritte (auch Kizami-mae-geri) generell <b>Jodan</b>. Seitliche Fußtritte in beide Richtungen.</li>
             </ul>
             ${grid(M('mae-geri', 'Mae-geri', 'nach vorne'), M('yoko-geri', 'Yoko-geri', 'zur Seite'), M('mawashi-geri', 'Mawashi-geri', 'im Halbkreis'), M('ushiro-geri', 'Ushiro-geri', 'nach hinten'), M('mikazuki-geri', 'Mikazuki-geri', 'Sicheltritt'))}
             <h4>Weitere Fußtechniken</h4>
-            ${grid(T('yoko-geri-keage', 'Yoko-geri-keage'), T('fumikomi', 'Fumikomi'), T('ren-geri', 'Ren-geri'), T('sonoba-geri', 'Sonoba-geri'), T('kizami-geri', 'Kizami-geri'), T('hiza-geri', 'Hiza-geri'), T('mae-geri-kekomi', 'Mae-geri-kekomi'), T('ura-mawashi-geri', 'Ura-mawashi-geri'), T('ushiro-mawashi-geri', 'Ushiro-mawashi-geri'), T('mawashi-hiza-geri', 'Mawashi-hiza-geri'))}`,
+            ${grid(T('mae-geri-kekomi', 'Mae-geri-kekomi'), T('yoko-geri-keage', 'Yoko-geri-keage'), T('fumikomi', 'Fumikomi'), T('ren-geri', 'Ren-geri'), T('sonoba-geri', 'Sonoba-geri'), T('kizami-geri', 'Kizami-geri'), T('hiza-geri', 'Hiza-geri'), T('ura-mawashi-geri', 'Ura-mawashi-geri'), T('ushiro-mawashi-geri', 'Ushiro-mawashi-geri'), T('mawashi-hiza-geri', 'Mawashi-hiza-geri'))}`,
         },
       ],
     },
