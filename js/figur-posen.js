@@ -586,11 +586,14 @@
   const MG_KIME = { pelvis: [0.135, 0.8, 0.615], yaw: -20, lean: -3, L: { x: 0.12, z: 0.62, yaw: 4, kp: [0, 0.2, 1] }, R: { x: -0.081, z: 1.43, y: 0.949, yaw: -8.9, pitch: 43, kp: [-0.147, 0.213, 0.966], tu: 1 }, hL: [0.37, -0.55, 0.14], hR: [-0.215, -0.34, -0.01], w: [1, 0] };
   D['mv:mae-geri'] = K(KAMAE_K, CHAMBER, MG_KIME, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   // Kekomi: Ferse stößt, Fußspitze weit hochgezogen, die Hüfte schiebt kräftig nach
-  D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.42, 70, { yaw: -26 }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
+  // Kniescheibe nach vorn wie beim Mae-geri (Bewegungs-Editor); die Fußspitze bleibt weit hochgezogen (Ferse trifft)
+  const MG_KNIE = { R: { kp: MG_KIME.R.kp } };
+  D['tc:mae-geri-kekomi'] = K(KAMAE_K, CHAMBER, MG_EXT(0.95, 1.42, 70, M({ yaw: -26 }, MG_KNIE)), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   D['tc:sonoba-geri'] = K(YOI, M(YOI, { pelvis: [0, 0.86, 0.02], L: { x: 0.16, z: 0 }, R: { x: -0.1, z: 0.3, y: 0.5, yaw: 0, pitch: -55, kp: [0, 0.5, 1] }, w: [1, 0] }), M(YOI, { lean: -8, pelvis: [0, 0.86, 0.02], R: { x: -0.1, z: 0.92, y: 0.88, yaw: 0, pitch: 8, kp: [0, 1, 0.3] }, w: [1, 0] }), M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side' }));
   D['tc:kizami-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.82, 0.0], L: { x: 0.1, z: 0.36, y: 0.5, pitch: -55, kp: [0, 0.5, 1] }, R: { z: -0.4 }, w: [0, 1] }), M(ZK_KAMAE, { pelvis: [0, 0.82, -0.02], lean: -10, L: { x: 0.1, z: 0.88, y: 0.95, pitch: 8, kp: [0, 1, 0.3] }, R: { z: -0.4 }, w: [0, 1] }), M(hit('toeL', 'Fußballen'), { eff: 'toeL', view: 'side' }));
-  // Ren-geri: zweimal Mae-geri hintereinander (Gedan, dann Jodan), Fuß jeweils durchgestreckt
-  D['tc:ren-geri'] = M(D['mv:mae-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.08, p: KAMAE_K }, { t: 0.24, p: CHAMBER }, { t: 0.36, p: MG_EXT(0.55, 1.4, 8), e: 'kime' }, { t: 0.5, p: CHAMBER }, { t: 0.64, p: MG_EXT(1.2, 1.36, 8), e: 'kime' }, { t: 0.78, p: CHAMBER }, { t: 0.95, p: KAMAE_K }], best: 0.64 });
+  // Ren-geri: zweimal Mae-geri hintereinander (Gedan, dann Jodan); Kniescheibe nach vorn und Fußspitze hochgezogen
+  // (Fußballen zum Ziel) wie beim Mae-geri
+  D['tc:ren-geri'] = M(D['mv:mae-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.08, p: KAMAE_K }, { t: 0.24, p: CHAMBER }, { t: 0.36, p: MG_EXT(0.55, 1.4, 42, MG_KNIE), e: 'kime' }, { t: 0.5, p: CHAMBER }, { t: 0.64, p: MG_EXT(1.2, 1.36, 42, MG_KNIE), e: 'kime' }, { t: 0.78, p: CHAMBER }, { t: 0.95, p: KAMAE_K }], best: 0.64 });
   // Seitwärts aus Kiba-dachi: Fußkante nach rechts, Blick zur Seite
   const KB_K = M(KB, { look: -90 });
   const Y_CH = M(KB_K, { pelvis: [0.12, 0.8, 0], R: { x: -0.22, z: 0.12, y: 0.55, yaw: 0, pitch: -30, kp: [-0.5, 0.6, 0.6] }, L: { x: 0.36 }, w: [1, 0] });
