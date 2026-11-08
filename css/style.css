@@ -2876,55 +2876,8 @@ main:fullscreen {
   color: var(--red);
 }
 
-/* Körperteile: Körper und Kopf oben, darunter links | rechts */
-.pe-parts {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.25rem;
-}
-
-.pe-colh {
-  margin-top: 0.15rem;
-  font-size: 0.66rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.pe-chip {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-height: 30px;
-  padding: 0.2rem 0.55rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--card);
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  white-space: nowrap;
-  text-align: left;
-  cursor: pointer;
-}
-
-.pe-chip::before {
-  content: "";
-  flex: none;
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  background: #2e7d32;
-}
-
-.pe-chip.pe-L::before { background: #1565c0; }
-.pe-chip.pe-R::before { background: #c62828; }
-
-.pe-chip[aria-checked="true"] {
-  background: var(--ink);
-  color: var(--card);
+.pe-parthint {
+  margin: -0.3rem 0 0;
 }
 
 .pe-panel {
@@ -3140,21 +3093,6 @@ html.pe-fs {
   .pe-side {
     flex: 1;
     width: auto;
-  }
-
-  /* Körperteile als Leiste zum Wischen */
-  .pe-parts {
-    display: flex;
-    overflow-x: auto;
-    padding-bottom: 0.2rem;
-  }
-
-  .pe-colh {
-    display: none;
-  }
-
-  .pe-chip {
-    flex: none;
   }
 }
 

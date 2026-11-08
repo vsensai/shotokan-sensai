@@ -284,7 +284,7 @@
 </div></div>
 <div class="pe-pane" data-pane="koerper">
 <div class="pe-ph"><h3 class="pe-kh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
-<div class="pe-parts" role="radiogroup" aria-label="Körperteil"></div>
+<p class="pe-parthint small muted">Anderes Körperteil: seinen Punkt im Bild antippen.</p>
 <div class="pe-panel"></div></div>
 <div class="pe-pane" data-pane="ausgabe">
 <button type="button" class="pe-wide" data-pe="all" aria-pressed="false" title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button>
@@ -356,7 +356,6 @@
     d.querySelector('.pe-msg').textContent = '';
     if (!d.open) d.showModal();
     goFrame(k0);
-    parts();
     requestAnimationFrame(() => draw());
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
@@ -556,16 +555,8 @@
     requestAnimationFrame(step);
   }
 
-  // Körperteile geordnet wie die Punkte im Bild: Körper und Kopf oben, darunter links (blau) und rechts (rot) paarweise
-  const PART_ORDER = ['body', 'head', 'hL', 'hR', 'eL', 'eR', 'kL', 'kR', 'fL', 'fR'];
-  function parts() {
-    const box = S.dlg.querySelector('.pe-parts');
-    const chip = (p) => `<button type="button" class="pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}" title="${esc(p.label)} einstellen (Regler darunter, oder den Punkt im Bild ziehen)">${esc(p.label)}</button>`;
-    box.innerHTML = `${PART_ORDER.slice(0, 2).map((id) => chip(partOf(id))).join('')}<span class="pe-colh">links</span><span class="pe-colh">rechts</span>${PART_ORDER.slice(2).map((id) => chip(partOf(id))).join('')}`;
-  }
   function select(id) {
     S.sel = id;
-    S.dlg.querySelectorAll('.pe-chip').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.part === id)));
     if (S.dlg.querySelector('.pe-pane[data-pane="koerper"]').hidden) tab('koerper');
     panel();
     frames();
@@ -752,8 +743,6 @@
 
   function onClick(ev) {
     if (!S) return;
-    const chip = ev.target.closest('[data-part]');
-    if (chip) return select(chip.dataset.part);
     const tb = ev.target.closest('[data-tab]');
     if (tb) return tab(tb.dataset.tab);
     const pmb = ev.target.closest('[data-pm]');
