@@ -276,6 +276,9 @@
     d.addEventListener('close', () => {
       if (d._fs && S) { requestAnimationFrame(() => { if (S && !d.open) d.showModal(); }); return; }
       S = null;
+      d.classList.remove('pe-full');
+      document.documentElement.classList.remove('pe-fs');
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     });
     d.addEventListener('click', onClick);
     // Vollbild verlassen (z. B. mit Esc): Knopf und Größe nachziehen
@@ -556,6 +559,7 @@
     const d = S ? S.dlg : document.querySelector('.pe-dlg');
     if (!d) return;
     d.classList.toggle('pe-full', on);
+    document.documentElement.classList.toggle('pe-fs', on);
     const b = d.querySelector('[data-pe="full"]');
     b.setAttribute('aria-pressed', String(on));
     b.title = on ? 'Vollbild beenden' : 'Vollbild an/aus';

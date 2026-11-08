@@ -2550,11 +2550,17 @@ main:fullscreen {
   background: var(--card);
 }
 
+/* Vollbild: Dialog füllt genau die sichtbare Fläche, die Seite dahinter scrollt nicht (keine Scrollleiste) */
+html.pe-fs {
+  overflow: hidden;
+}
+
 .pe-dlg.pe-full {
-  width: 100vw;
-  height: 100dvh;
-  max-width: 100vw;
-  max-height: 100dvh;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
   margin: 0;
   border-radius: 0;
 }
@@ -2606,6 +2612,13 @@ main:fullscreen {
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Vollbild im Querformat: die Einstellungen bekommen mehr Platz (Regler und Auswahlfelder breiter) */
+@media (orientation: landscape) {
+  .pe-full .pe-side {
+    width: clamp(240px, 36%, 560px);
+  }
 }
 
 /* Hochformat: Figur oben, Einstellungen darunter */
