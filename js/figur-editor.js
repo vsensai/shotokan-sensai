@@ -226,7 +226,15 @@
     d.querySelector('.pe-note').addEventListener('input', () => { if (S) { S.note = d.querySelector('.pe-note').value; save(); text(); } });
     if (navigator.share) d.querySelector('[data-pe="share"]').hidden = false;
     bindStage(d.querySelector('.pe-stage'));
-    window.addEventListener('resize', () => S && draw());
+    // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
+    // Andere Größenänderungen (z. B. Adressleiste) lassen Drehung und Zoom in Ruhe.
+    let portrait = innerHeight > innerWidth;
+    window.addEventListener('resize', () => {
+      if (!S) return;
+      const p = innerHeight > innerWidth;
+      if (p !== portrait) { portrait = p; S.fit = true; }
+      draw();
+    });
     return d;
   }
 

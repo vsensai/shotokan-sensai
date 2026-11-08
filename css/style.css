@@ -2523,8 +2523,8 @@ main:fullscreen {
   }
 }
 
-/* Pose-Editor (in den Einstellungen einschaltbar): Figur links über die ganze Höhe,
-   Ansichten, Körperteile und Regler in einer Spalte rechts daneben */
+/* Pose-Editor (in den Einstellungen einschaltbar): im Querformat Figur links über die ganze Höhe,
+   Ansichten, Körperteile und Regler in einer Spalte rechts daneben; im Hochformat darunter */
 .pe-dlg {
   padding: 0.5rem 0.5rem 0.4rem;
 }
@@ -2562,6 +2562,24 @@ main:fullscreen {
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+/* Hochformat: Figur oben, Einstellungen darunter */
+@media (orientation: portrait) {
+  .pe-main {
+    flex-direction: column;
+  }
+
+  .pe-stage {
+    flex: none;
+    height: 54dvh;
+    min-height: 220px;
+  }
+
+  .pe-side {
+    flex: 1;
+    width: auto;
+  }
 }
 
 .pe-parts {
