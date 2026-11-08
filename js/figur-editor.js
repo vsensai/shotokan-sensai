@@ -249,7 +249,7 @@
 <div class="pe-panel"></div>
 <div class="pe-out">
 <label class="pe-lab">Anmerkung (was soll die Pose zeigen, was ist anders?)<textarea class="pe-note" rows="2"></textarea></label>
-<div class="pe-acts"><button type="button" class="btn" data-pe="copy">Pose kopieren</button><button type="button" class="btn" data-pe="share" hidden>Teilen</button></div>
+<div class="pe-acts"><button type="button" class="btn" data-pe="copy">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden>Ganze Bewegung ausgeben</button><button type="button" class="btn" data-pe="share" hidden>Teilen</button></div>
 <p class="pe-msg muted small" aria-live="polite"></p>
 <textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea>
 </div></div></div></div>`;
@@ -292,14 +292,19 @@
       for (const i in draft.edits) if (frames[i]) edits[i] = E.full(draft.edits[i]);
       note = draft.note || '';
     }
+    const k0app = k0;
+    if (draft && draft.k0 != null && frames[draft.k0]) k0 = draft.k0;
     const d = dialog();
-    S = { id, title: title || id, e, keys, frames, k0, best, edits, undos: {}, note, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
+    S = { id, title: title || id, e, keys, frames, k0, k0app, all: !!(draft && draft.all), kcam: draft && draft.kcam, best, edits, undos: {}, note, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
     d.querySelector('.f3d-dlg-title').textContent = `✎ ${S.title}`;
     const hb = d.querySelector('[data-pe="hide"]');
     hb.setAttribute('aria-pressed', 'false');
     hb.textContent = 'Punkte aus';
     d.querySelector('.pe-note').value = note;
-    d.querySelector('.pe-msg').textContent = Object.keys(edits).length ? 'Gespeicherter Entwurf geladen – „Original“ setzt das gezeigte Bild zurück.' : '';
+    const ab = d.querySelector('[data-pe="all"]');
+    ab.hidden = keys.length < 2;
+    ab.setAttribute('aria-pressed', String(S.all));
+    d.querySelector('.pe-msg').textContent = Object.keys(edits).length || k0 !== k0app ? 'Gespeicherter Entwurf geladen – „Original“ setzt das gezeigte Bild zurück.' : '';
     if (!d.open) d.showModal();
     goFrame(k0);
     parts();
@@ -314,7 +319,7 @@
     if (n < 2) { box.innerHTML = ''; box.dataset.n = ''; return; }
     if (box.dataset.n !== String(n)) {
       box.dataset.n = String(n);
-      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild">›</button><button type="button" class="gfx-btn" data-pe="fbest" aria-label="zum Kernbild">★</button></div><p class="pe-finfo small"></p>`;
+      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild">›</button><button type="button" class="gfx-btn" data-pe="fbest" aria-label="zum Kernbild">★</button></div><p class="pe-finfo small"></p><button type="button" class="gfx-btn pe-setbest" data-pe="setbest">☆ Dieses Bild als Kernbild</button>`;
       const sl = box.querySelector('.pe-fslider');
       sl.addEventListener('input', () => { if (S.play) S.play = null; if (+sl.value !== S.k) goFrame(+sl.value); });
     }
@@ -328,8 +333,9 @@
     box.querySelector('[data-pe="fprev"]').disabled = S.k <= 0;
     box.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
     box.querySelector('[data-pe="fbest"]').setAttribute('aria-pressed', String(S.k === S.k0));
+    box.querySelector('[data-pe="setbest"]').hidden = S.k === S.k0;
     const h = holdOf(S.k);
-    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ' · Kernbild ★' : ''}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
+    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ' · Kernbild ★' : ''}${S.k0 !== S.k0app && S.k === S.k0 ? ' (neu gewählt)' : ''}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
   }
   // Bild wechseln: Änderungen des bisherigen Bildes merken
   function goFrame(i) {
@@ -429,37 +435,54 @@
     S.fast = fast;
     sync();
     draw();
-    if (!fast) { save(); text(); }
+    if (!fast) { text(); save(); }
   }
   function save() {
     keep();
     const ed = {};
     for (const i in S.edits) ed[i] = diff(S.edits[i]);
-    ls.set(DRAFT + S.id, Object.keys(ed).length || S.note ? JSON.stringify({ edits: ed, note: S.note }) : null);
+    const k0 = S.k0 !== S.k0app ? S.k0 : null;
+    ls.set(DRAFT + S.id, Object.keys(ed).length || S.note || k0 != null || S.kcam || S.all ? JSON.stringify({ edits: ed, note: S.note, k0, kcam: S.kcam, all: S.all }) : null);
     frames();
   }
   // Kamera wie in der App (cam.yaw, cam.pitch in js/figur-app.js): Drehung um die Figur, 0° = von vorn (+z), Neigung von oben
-  const camInfo = () => {
-    const y = Math.round(((((S.cam.yaw + 180) % 360) + 360) % 360) - 180);
-    return { y, p: Math.round(S.cam.pitch) };
-  };
-  // Ausgabe: alle geänderten Bilder (dazu immer das gezeigte), je mit Zeit und geänderten Körperteilen
+  const camOf = (c) => ({ y: Math.round(((((c.yaw + 180) % 360) + 360) % 360) - 180), p: Math.round(c.pitch) });
+  const camInfo = () => camOf(S.cam);
+  const camInfo0 = () => camOf(S.e.cam);
+  // Ausgabe: alle geänderten Bilder (dazu immer das gezeigte), je mit Zeit und geänderten Körperteilen;
+  // „Ganze Bewegung“: jedes Bild vollständig, zum Übernehmen der kompletten Bewegung.
+  // Die Kamera gilt fürs Kernbild: gemerkt wird, wie das Kernbild zuletzt angesehen wurde (sonst die Kamera der App).
+  const EASE = { io: 'weich', in: 'anlaufen', out: 'auslaufen', kime: 'Kime (schnell, hart abbremsen)', lin: 'gleichmäßig' };
   function text() {
     keep();
+    if (S.k === S.k0 && S.camMoved) S.kcam = camInfo();
     const changedParts = (P, O) => PARTS.filter((p) => FIELDS[p.id].some((f) => !same(rounded(get(P, f), f.split('.').pop()), rounded(get(O, f), f.split('.').pop())))).map((p) => p.label);
     const n = S.keys.length;
-    const lines = [`Pose-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · Bewegung mit ${n} Bildern, Kernbild = Bild ${S.k0 + 1}` : ''}`];
-    const c = camInfo();
-    lines.push(`Kamera: Drehung ${c.y}°, Neigung ${c.p}°`);
+    const all = S.all && n > 1;
+    const k0t = Math.round(S.keys[S.k0].t * 100) / 100;
+    const lines = [`Pose-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${n} Bilder` : `Bewegung mit ${n} Bildern`}, Kernbild = Bild ${S.k0 + 1} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${S.k0app + 1})` : ''}` : ''}`];
+    const kc = S.kcam || camInfo0();
+    lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
     if (S.note.trim()) lines.push(`Anmerkung: ${S.note.trim()}`);
-    const list = [...new Set(Object.keys(S.edits).map(Number).concat(S.k))].sort((x, y) => x - y);
+    const list = all ? S.keys.map((_, i) => i) : [...new Set(Object.keys(S.edits).map(Number).concat(S.k))].sort((x, y) => x - y);
     list.forEach((i) => {
       const P = S.edits[i] || S.frames[i];
       const ch = changedParts(P, S.frames[i]);
       const h = holdOf(i);
-      const info = n > 1 ? `Bild ${i + 1} von ${n} (t = ${Math.round(S.keys[i].t * 100) / 100}${i === S.k0 ? ', Kernbild' : ''}${h !== i ? `, in der App gleiche Pose wie Bild ${h + 1}` : ''})` : 'Standbild';
+      const tt = Math.round(S.keys[i].t * 100) / 100;
+      if (all) {
+        const eh = (S.edits[h] || S.frames[h]);
+        const hold = h !== i && same(rounded(P), rounded(eh));
+        const ease = i ? `, Übergang ${EASE[S.keys[i].e || 'io'] || S.keys[i].e}` : '';
+        lines.push('', `Bild ${i + 1} von ${n} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}) – ${hold ? `gleiche Pose wie Bild ${h + 1}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
+        if (!hold) lines.push(lit(diff(P)));
+        return;
+      }
+      const info = n > 1 ? `Bild ${i + 1} von ${n} (t = ${tt}${i === S.k0 ? ', Kernbild' : ''}${h !== i ? `, in der App gleiche Pose wie Bild ${h + 1}` : ''})` : 'Standbild';
       lines.push('', `${info} – geändert: ${ch.length ? ch.join(', ') : 'nichts'}`, lit(diff(P)));
     });
+    S.dlg.querySelector('[data-pe="copy"]').textContent = all ? 'Bewegung kopieren' : 'Pose kopieren';
+    S.dlg.querySelector('[data-pe="all"]').textContent = all ? '✓ Ganze Bewegung' : 'Ganze Bewegung ausgeben';
     S.text = lines.join('\n');
     S.dlg.querySelector('.pe-text').value = S.text;
   }
@@ -478,6 +501,7 @@
       if (a === 'v-front') Object.assign(S.cam, { yaw: S.P.yaw, pitch: 6 });
       if (a === 'v-side') Object.assign(S.cam, { yaw: S.P.yaw - 90, pitch: 6 });
       if (a === 'v-top') Object.assign(S.cam, { yaw: S.P.yaw, pitch: 86 });
+      S.camMoved = true;
       draw();
       text();
     }
@@ -489,6 +513,21 @@
       draw();
     }
     if (a === 'play') return play();
+    if (a === 'all') {
+      S.all = !S.all;
+      b.setAttribute('aria-pressed', String(S.all));
+      save();
+      text();
+      return;
+    }
+    if (a === 'setbest') {
+      S.k0 = S.k;
+      if (S.camMoved) S.kcam = camInfo();
+      save();
+      text();
+      msg.textContent = `Bild ${S.k + 1} ist jetzt das Kernbild – wie du es gerade ansiehst, kommt als Kamera mit in die Ausgabe.`;
+      return;
+    }
     if (a === 'fprev' || a === 'fnext' || a === 'fbest') {
       if (S.play) S.play = null;
       const i = a === 'fbest' ? S.k0 : clamp(S.k + (a === 'fnext' ? 1 : -1), 0, S.keys.length - 1);
@@ -691,6 +730,7 @@
         draw();
       } else {
         S.cam.yaw -= dx * 0.45;
+        S.camMoved = true;
         S.cam.pitch = clamp(S.cam.pitch + dy * 0.35, -4, 86);
         S.fast = true;
         draw();

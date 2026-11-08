@@ -2550,6 +2550,12 @@ main:fullscreen {
   background: var(--card);
 }
 
+.pe-setbest {
+  display: block;
+  margin: 0.15rem auto 0.3rem;
+  font-size: 0.8rem;
+}
+
 .pe-cam {
   position: absolute;
   left: 0.4rem;
