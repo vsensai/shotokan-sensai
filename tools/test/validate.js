@@ -197,6 +197,12 @@
       PE.setLegTwist(P, 'L', a / 2);
       if (Math.abs(PE.legTwist(P, 'L') - a / 2) > 1) errors.push(`Pose-Editor: Knie eindrehen ${a / 2}° liest ${PE.legTwist(P, 'L').toFixed(1)}°`);
     });
+    // Ellbogen abspreizen: Arm gebeugt (Hand vor der Brust), Winkel wird wieder gelesen
+    P.hR = [-0.05, -0.1, 0.3];
+    [-40, 0, 45, 90].forEach((a) => {
+      PE.setElbowSpread(P, 'R', a);
+      if (Math.abs(PE.elbowSpread(P, 'R') - a) > 1) errors.push(`Pose-Editor: Ellbogen abspreizen ${a}° liest ${PE.elbowSpread(P, 'R').toFixed(1)}°`);
+    });
     const d = PE.diff(P);
     if (!d.hR || !d.L || d.oL != null) errors.push('Pose-Editor: Ausgabe der geänderten Werte falsch');
   }

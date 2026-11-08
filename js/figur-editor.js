@@ -54,15 +54,15 @@
 
   /* ---------- Körperteile ---------- */
   const PARTS = [
-    { id: 'body', label: 'Körper', k: 'Körper', pt: (J) => J.pel },
-    { id: 'hL', label: 'Hand li.', k: 'Hand li', s: 'L', pt: (J) => J.wristL },
-    { id: 'hR', label: 'Hand re.', k: 'Hand re', s: 'R', pt: (J) => J.wristR },
-    { id: 'eL', label: 'Ellbogen li.', k: 'Ellb. li', s: 'L', pt: (J) => J.elbowL },
-    { id: 'eR', label: 'Ellbogen re.', k: 'Ellb. re', s: 'R', pt: (J) => J.elbowR },
-    { id: 'fL', label: 'Fuß li.', k: 'Fuß li', s: 'L', pt: (J) => J.ankleL },
-    { id: 'fR', label: 'Fuß re.', k: 'Fuß re', s: 'R', pt: (J) => J.ankleR },
-    { id: 'kL', label: 'Knie li.', k: 'Knie li', s: 'L', pt: (J) => J.kneeL },
-    { id: 'kR', label: 'Knie re.', k: 'Knie re', s: 'R', pt: (J) => J.kneeR },
+    { id: 'body', label: 'Körper', pt: (J) => J.pel },
+    { id: 'hL', label: 'Hand links', s: 'L', pt: (J) => J.wristL },
+    { id: 'hR', label: 'Hand rechts', s: 'R', pt: (J) => J.wristR },
+    { id: 'eL', label: 'Ellbogen links', s: 'L', pt: (J) => J.elbowL },
+    { id: 'eR', label: 'Ellbogen rechts', s: 'R', pt: (J) => J.elbowR },
+    { id: 'fL', label: 'Fuß links', s: 'L', pt: (J) => J.ankleL },
+    { id: 'fR', label: 'Fuß rechts', s: 'R', pt: (J) => J.ankleR },
+    { id: 'kL', label: 'Knie links', s: 'L', pt: (J) => J.kneeL },
+    { id: 'kR', label: 'Knie rechts', s: 'R', pt: (J) => J.kneeR },
   ];
   const partOf = (id) => PARTS.find((p) => p.id === id);
   // Was zu einem Körperteil gehört (für „Geändert:“ in der Ausgabe)
@@ -137,6 +137,36 @@
     P[s].kp = add(mul(ref, Math.cos(t)), mul(b, Math.sin(t)));
   }
 
+  // Ellbogen abspreizen: Lage des Ellbogens um die Linie Schulter → Hand; 0 = hängt nach unten, positiv = weg vom Körper (nach außen)
+  function armAxes(P, s) {
+    const J = E.solve(P);
+    const sg = s === 'L' ? 1 : -1;
+    const a = norm(sub(J['wrist' + s], J['sh' + s]));
+    let ref = perp(mul(J.up, -1), a);
+    if (Math.hypot(...ref) < 1e-3) ref = perp(mul(J.fc, -1), a);
+    ref = norm(ref);
+    let out = perp(perp(mul(J.lc, sg), a), ref);
+    out = Math.hypot(...out) < 1e-3 ? cross(a, ref) : norm(out);
+    return { J, a, ref, out };
+  }
+  function elbowSpread(P, s) {
+    const { J, a, ref, out } = armAxes(P, s);
+    let v = perp(sub(J['elbow' + s], J['sh' + s]), a);
+    if (Math.hypot(...v) < 1e-3) {
+      // Arm gestreckt: Richtung aus der Vorgabe
+      const e = P['e' + s];
+      if (Math.hypot(...e) < 0.01) return 0;
+      v = perp(add(add(mul(J.lc, e[0]), mul(J.up, e[1])), mul(J.fc, e[2])), a);
+    }
+    return Math.atan2(dot(v, out), dot(v, ref)) / DEG;
+  }
+  function setElbowSpread(P, s, deg) {
+    const { J, ref, out } = armAxes(P, s);
+    const t = deg * DEG;
+    const d = add(mul(ref, Math.cos(t)), mul(out, Math.sin(t)));
+    P['e' + s] = [dot(d, J.lc) * 0.6, dot(d, J.up) * 0.6, dot(d, J.fc) * 0.6];
+  }
+
   /* ---------- Regler je Körperteil ---------- */
   const DIRS = (s) => {
     const i = s === 'L' ? -1 : 1;
@@ -173,6 +203,7 @@
         R('seitlich (+ links)', -0.75, 0.75, 0.005, () => h[0], (v) => (P['h' + s][0] = v), 'm'),
         R('hoch/runter', -0.85, 0.75, 0.005, () => h[1], (v) => (P['h' + s][1] = v), 'm'),
         R('vor/zurück', -0.5, 0.8, 0.005, () => h[2], (v) => (P['h' + s][2] = v), 'm'),
+        R('Ellbogen abspreizen (+ weg vom Körper)', -90, 180, 1, () => elbowSpread(P, s), (v) => setElbowSpread(P, s, v), '°'),
       ];
     }
     if (id[0] === 'f') {
@@ -194,9 +225,11 @@
         { t: 'button', label: 'Richtung wieder automatisch', run: () => (P[s].kp = [0, 0, 0]) },
       ];
     }
-    // Ellbogen: nur die Richtung; zurück auf automatisch
-    const auto = id[0] === 'e' ? () => (P['e' + s] = [0, 0, 0]) : () => (P[s].kp = [0, 0, 0]);
-    return [{ t: 'button', label: 'Richtung wieder automatisch', run: auto }];
+    // Ellbogen: Richtung abspreizen oder zurück auf automatisch (wie weit er vom Körper weg kann, hängt an der Lage der Hand)
+    return [
+      R('Ellbogen abspreizen (+ weg vom Körper)', -90, 180, 1, () => elbowSpread(P, s), (v) => setElbowSpread(P, s, v), '°'),
+      { t: 'button', label: 'Richtung wieder automatisch', run: () => (P['e' + s] = [0, 0, 0]) },
+    ];
   }
 
   /* ---------- Dialog ---------- */
@@ -274,13 +307,29 @@
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
   const holdOf = (i) => { let j = i; while (j > 0 && same(rounded(S.frames[j - 1]), rounded(S.frames[i]))) j--; return j; };
+  // Bildwahl: Schieber mit ‹ › (auch bei vielen Bildern kompakt), ★ springt zum Kernbild; darunter Nummer und geänderte Bilder
   function frames() {
     const box = S.dlg.querySelector('.pe-frames');
-    if (S.keys.length < 2) { box.innerHTML = ''; return; }
-    box.innerHTML = `<button type="button" class="gfx-btn pe-play" data-pe="play" aria-pressed="${!!S.play}">${S.play ? '■' : '▶'}</button>` + S.keys.map((k, i) => {
-      const ed = S.edits[i] && !same(rounded(S.edits[i]), rounded(S.frames[i]));
-      return `<button type="button" class="gfx-btn pe-fr${ed ? ' pe-ed' : ''}" role="radio" data-frame="${i}" aria-checked="${i === S.k}" aria-label="Bild ${i + 1}, t ${Math.round(k.t * 100) / 100}${i === S.k0 ? ', Kernbild' : ''}${ed ? ', geändert' : ''}">${i + 1}${i === S.k0 ? '★' : ''}</button>`;
-    }).join('');
+    const n = S.keys.length;
+    if (n < 2) { box.innerHTML = ''; box.dataset.n = ''; return; }
+    if (box.dataset.n !== String(n)) {
+      box.dataset.n = String(n);
+      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild">›</button><button type="button" class="gfx-btn" data-pe="fbest" aria-label="zum Kernbild">★</button></div><p class="pe-finfo small"></p>`;
+      const sl = box.querySelector('.pe-fslider');
+      sl.addEventListener('input', () => { if (S.play) S.play = null; if (+sl.value !== S.k) goFrame(+sl.value); });
+    }
+    const ed = Object.keys(S.edits).map(Number).filter((i) => !same(rounded(S.edits[i]), rounded(S.frames[i]))).sort((x, y) => x - y);
+    const pb = box.querySelector('[data-pe="play"]');
+    pb.textContent = S.play ? '■' : '▶';
+    pb.setAttribute('aria-label', S.play ? 'Anhalten' : 'Bewegung abspielen');
+    pb.setAttribute('aria-pressed', String(!!S.play));
+    const sl = box.querySelector('.pe-fslider');
+    if (+sl.value !== S.k) sl.value = S.k;
+    box.querySelector('[data-pe="fprev"]').disabled = S.k <= 0;
+    box.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
+    box.querySelector('[data-pe="fbest"]').setAttribute('aria-pressed', String(S.k === S.k0));
+    const h = holdOf(S.k);
+    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ' · Kernbild ★' : ''}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
   }
   // Bild wechseln: Änderungen des bisherigen Bildes merken
   function goFrame(i) {
@@ -325,7 +374,7 @@
 
   function parts() {
     const box = S.dlg.querySelector('.pe-parts');
-    box.innerHTML = PARTS.map((p) => `<button type="button" class="gfx-btn pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}" aria-label="${esc(p.label)}">${esc(p.k)}</button>`).join('');
+    box.innerHTML = PARTS.map((p) => `<button type="button" class="gfx-btn pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}">${esc(p.label)}</button>`).join('');
   }
   function select(id) {
     S.sel = id;
@@ -410,8 +459,6 @@
 
   function onClick(ev) {
     if (!S) return;
-    const fr = ev.target.closest('[data-frame]');
-    if (fr) { if (S.play) S.play = null; return goFrame(+fr.dataset.frame); }
     const chip = ev.target.closest('[data-part]');
     if (chip) return select(chip.dataset.part);
     const b = ev.target.closest('[data-pe]');
@@ -434,6 +481,13 @@
       draw();
     }
     if (a === 'play') return play();
+    if (a === 'fprev' || a === 'fnext' || a === 'fbest') {
+      if (S.play) S.play = null;
+      const i = a === 'fbest' ? S.k0 : clamp(S.k + (a === 'fnext' ? 1 : -1), 0, S.keys.length - 1);
+      if (i !== S.k) goFrame(i);
+      else { frames(); draw(); }
+      return;
+    }
     if (a === 'undo' && S.undo.length) { S.P = S.undo.pop(); panel(); changed(false); }
     if (a === 'orig') {
       if (same(rounded(S.P), rounded(S.orig))) return;
@@ -646,5 +700,5 @@
   }
 
   // state: offener Editor (für Tests)
-  SK.poseEditor = { enabled, setEnabled, open, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, state: () => S };
+  SK.poseEditor = { enabled, setEnabled, open, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, elbowSpread, setElbowSpread, state: () => S };
 })();

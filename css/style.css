@@ -2584,14 +2584,15 @@ main:fullscreen {
 
 .pe-parts {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
   gap: 0.25rem;
   margin: 0 0 0.5rem;
 }
 
 .pe-dlg .pe-parts .gfx-btn {
-  padding: 0.2rem 0.3rem;
+  padding: 0.2rem 0.4rem;
   white-space: nowrap;
+  text-align: left;
 }
 
 .pe-bar,
@@ -2644,28 +2645,44 @@ main:fullscreen {
 .pe-chip.pe-L::before { background: #1565c0; }
 .pe-chip.pe-R::before { background: #c62828; }
 
-/* Bilder einer Bewegung: ▶ spielt sie mit den Änderungen ab, ★ Kernbild, roter Rand = geändert */
-.pe-frames {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  margin: 0 0 0.4rem;
-}
-
+/* Bilder einer Bewegung: ▶ spielt sie mit den Änderungen ab, Schieber und ‹ › wählen das Bild, ★ Kernbild */
 .pe-frames:empty {
   display: none;
 }
 
-.pe-dlg .pe-frames .gfx-btn {
+.pe-fbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pe-fslider {
+  flex: 1;
+  min-width: 60px;
+  height: 30px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.pe-dlg .pe-fbar .gfx-btn {
   min-width: 34px;
   padding: 0.2rem 0.35rem;
 }
 
-.pe-fr.pe-ed {
-  border-color: var(--red);
+.pe-fbar .gfx-btn:disabled {
+  opacity: 0.4;
 }
 
-.pe-fr[aria-checked="true"],
+.pe-finfo {
+  margin: 0.1rem 0 0.4rem;
+  text-align: center;
+}
+
+.pe-finfo .pe-ed {
+  color: var(--red);
+  font-weight: 700;
+}
+
 .pe-chip[aria-checked="true"] {
   background: var(--ink);
   color: var(--card);
