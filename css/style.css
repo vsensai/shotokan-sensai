@@ -2556,10 +2556,19 @@ main:fullscreen {
   gap: 0 0.6rem;
 }
 
-.pe-setbest {
-  display: block;
-  margin: 0.15rem auto 0.3rem;
-  font-size: 0.8rem;
+.pe-link {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--red);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pe-time select {
+  width: 100%;
+  min-width: 0;
 }
 
 .pe-cam {

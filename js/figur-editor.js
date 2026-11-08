@@ -222,13 +222,13 @@
     if (id[0] === 'k') {
       return [
         R('Knie eindrehen (+ nach innen)', -180, 180, 1, () => legTwist(P, s), (v) => setLegTwist(P, s, v), '°'),
-        { t: 'button', label: 'Richtung wieder automatisch', run: () => (P[s].kp = [0, 0, 0]) },
+        { t: 'button', label: 'Richtung wieder automatisch', help: 'Die Knierichtung wieder automatisch wählen lassen', run: () => (P[s].kp = [0, 0, 0]) },
       ];
     }
     // Ellbogen: Richtung abspreizen oder zurück auf automatisch (wie weit er vom Körper weg kann, hängt an der Lage der Hand)
     return [
       R('Ellbogen abspreizen (+ weg vom Körper)', -90, 180, 1, () => elbowSpread(P, s), (v) => setElbowSpread(P, s, v), '°'),
-      { t: 'button', label: 'Richtung wieder automatisch', run: () => (P['e' + s] = [0, 0, 0]) },
+      { t: 'button', label: 'Richtung wieder automatisch', help: 'Die Ellbogenrichtung wieder automatisch wählen lassen', run: () => (P['e' + s] = [0, 0, 0]) },
     ];
   }
 
@@ -240,16 +240,16 @@
     d = document.createElement('dialog');
     d.className = 'f3d-dlg pe-dlg';
     d.setAttribute('aria-label', 'Bewegungs-Editor');
-    d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen">✕</button></div>
+    d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen" title="Editor schließen – Änderungen bleiben als Entwurf gespeichert">✕</button></div>
 <div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas><span class="pe-cam" aria-hidden="true"></span></div>
-<div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side">Seite</button><button type="button" class="gfx-btn" data-pe="v-top">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false">Punkte aus</button></div>
+<div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front" title="Figur von vorn ansehen (eingepasst)">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side" title="Figur von der Seite ansehen (eingepasst)">Seite</button><button type="button" class="gfx-btn" data-pe="v-top" title="Figur von oben ansehen (eingepasst)">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false" title="Anfasspunkte und Linien aus- bzw. einblenden">Punkte aus</button></div>
 <p class="pe-hint muted small">${matchMedia('(pointer: coarse)').matches ? '1 Finger: Punkt ziehen oder drehen · 2 Finger: zoomen und verschieben' : 'Ziehen: Punkt bzw. drehen · Rechte Maustaste/Umschalt: verschieben · Mausrad: zoomen'}</p>
 <div class="pe-scroll">
 <div class="pe-parts" role="radiogroup" aria-label="Körperteil"></div>
 <div class="pe-panel"></div>
 <div class="pe-out">
 <label class="pe-lab">Anmerkung (was soll die Pose zeigen, was ist anders?)<textarea class="pe-note" rows="2"></textarea></label>
-<div class="pe-acts"><button type="button" class="btn" data-pe="copy">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden>Ganze Bewegung ausgeben</button></div>
+<div class="pe-acts"><button type="button" class="btn" data-pe="copy" title="Den Text unten in die Zwischenablage kopieren – dann im Chat einfügen">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button></div>
 <p class="pe-msg muted small" aria-live="polite"></p>
 <textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea>
 </div></div></div></div>`;
@@ -322,9 +322,9 @@
     if (n < 2) { box.innerHTML = ''; box.dataset.n = ''; return; }
     if (box.dataset.n !== String(n)) {
       box.dataset.n = String(n);
-      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild">›</button><button type="button" class="gfx-btn" data-pe="fbest" aria-label="zum Kernbild">★</button></div><p class="pe-finfo small"></p><button type="button" class="gfx-btn pe-setbest" data-pe="setbest">☆ Dieses Bild als Kernbild</button>
-<div class="pe-time"><label class="pe-row"><span>Zeitpunkt <output class="pe-tv"></output></span><input type="range" class="pe-tt" step="0.01"></label><label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}</select></label></div>
-<div class="pe-time"><label class="pe-row"><span>Dauer der Bewegung <output class="pe-dv"></output></span><input type="range" class="pe-dur" min="0.6" max="5" step="0.1"></label><label class="pe-row"><span>Abspielen</span><select class="pe-speed"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label></div>`;
+      box.innerHTML = `<div class="pe-fbar"><button type="button" class="gfx-btn" data-pe="play"></button><button type="button" class="gfx-btn" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><input type="range" class="pe-fslider" min="0" max="${n - 1}" step="1" aria-label="Bild der Bewegung" title="Bild der Bewegung wählen"><button type="button" class="gfx-btn" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="gfx-btn pe-star" data-pe="fbest"></button></div><p class="pe-finfo small"></p>
+<div class="pe-time"><label class="pe-row"><span>Zeitpunkt <output class="pe-tv"></output></span><input type="range" class="pe-tt" step="0.01" title="Wann dieses Bild erreicht wird (t von 0 bis 1, dahinter in Sekunden)"></label><label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label></div>
+<div class="pe-time"><label class="pe-row"><span>Dauer der Bewegung <output class="pe-dv"></output></span><input type="range" class="pe-dur" min="0.6" max="5" step="0.1" title="Wie lange die ganze Bewegung dauert"></label><label class="pe-row"><span>Abspielen</span><select class="pe-speed" title="Tempo beim Abspielen mit ▶ (ändert die Bewegung nicht)"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label></div>`;
       const sl = box.querySelector('.pe-fslider');
       sl.addEventListener('input', () => { if (S.play) S.play = null; if (+sl.value !== S.k) goFrame(+sl.value); });
       box.querySelector('.pe-tt').addEventListener('input', (ev) => { S.tm[S.k].t = +ev.target.value; S.t = S.tm[S.k].t; timing(); });
@@ -336,13 +336,18 @@
     const pb = box.querySelector('[data-pe="play"]');
     pb.textContent = S.play ? '■' : '▶';
     pb.setAttribute('aria-label', S.play ? 'Anhalten' : 'Bewegung abspielen');
+    pb.title = S.play ? 'Anhalten' : 'Bewegung mit allen Änderungen abspielen (Tempo unten bei „Abspielen“)';
     pb.setAttribute('aria-pressed', String(!!S.play));
     const sl = box.querySelector('.pe-fslider');
     if (+sl.value !== S.k) sl.value = S.k;
     box.querySelector('[data-pe="fprev"]').disabled = S.k <= 0;
     box.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
-    box.querySelector('[data-pe="fbest"]').setAttribute('aria-pressed', String(S.k === S.k0));
-    box.querySelector('[data-pe="setbest"]').hidden = S.k === S.k0;
+    const star = box.querySelector('[data-pe="fbest"]');
+    const isK = S.k === S.k0;
+    star.textContent = isK ? '★' : '☆';
+    star.setAttribute('aria-pressed', String(isK));
+    star.setAttribute('aria-label', isK ? 'Kernbild' : 'Dieses Bild als Kernbild');
+    star.title = isK ? 'Dieses Bild ist das Kernbild (das Standbild in der App)' : 'Dieses Bild zum Kernbild machen';
     const tt = box.querySelector('.pe-tt');
     const first = S.k === 0;
     tt.min = first ? S.tm[0].t : Math.round((S.tm[S.k - 1].t + 0.01) * 100) / 100;
@@ -353,11 +358,12 @@
     const te = box.querySelector('.pe-te');
     te.disabled = first;
     te.value = S.tm[S.k].e in EASE_UI ? S.tm[S.k].e : 'io';
+    te.title = first ? 'Das erste Bild hat keinen Übergang' : EASE_HELP[te.value];
     const du = box.querySelector('.pe-dur');
     if (+du.value !== S.dur) du.value = S.dur;
     box.querySelector('.pe-dv').textContent = `${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(1)} s`;
     const h = holdOf(S.k);
-    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ' · Kernbild ★' : ''}${S.k0 !== S.k0app && S.k === S.k0 ? ' (neu gewählt)' : ''}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
+    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ` · Kernbild ★${S.k0 !== S.k0app ? ' (neu gewählt)' : ''}` : ` · <button type="button" class="pe-link" data-pe="gobest" title="Zum Kernbild springen">Kernbild: Bild ${S.k0 + 1}</button>`}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
   }
   // Bild wechseln: Änderungen des bisherigen Bildes merken
   function goFrame(i) {
@@ -378,7 +384,15 @@
   }
 
   // Übergänge, wie sie im Editor heißen (e in den keys von js/figur-posen.js)
-  const EASE_UI = { fl: 'fließend (durchziehen)', io: 'weich (anhalten)', kime: 'Kime (ins Ziel, stoppen)', in: 'anlaufen', out: 'auslaufen', lin: 'gleichmäßig' };
+  const EASE_UI = { fl: 'fließend', io: 'weich', kime: 'Kime', in: 'anlaufen', out: 'auslaufen', lin: 'gleichmäßig' };
+  const EASE_HELP = {
+    fl: 'fließend: zieht ohne Anhalten durch dieses Bild weiter (für Zwischenbilder)',
+    io: 'weich: fährt sanft an und hält an diesem Bild kurz an',
+    kime: 'Kime: schnell ins Ziel und dort hart stoppen (Treffer)',
+    in: 'anlaufen: startet langsam und wird schneller, ohne am Bild abzubremsen',
+    out: 'auslaufen: startet schnell und bremst zum Bild hin sanft ab',
+    lin: 'gleichmäßig: gleiches Tempo von Bild zu Bild',
+  };
   // Schlüsselbilder mit allen Änderungen (Posen und Timing)
   const effKeys = () => S.keys.map((k, i) => Object.assign({}, k, { t: S.tm[i].t, e: S.tm[i].e, p: S.edits[i] || k.p }));
   const timingChanged = (i) => S.tm[i].t !== S.tk[i].t || S.tm[i].e !== S.tk[i].e;
@@ -413,7 +427,7 @@
 
   function parts() {
     const box = S.dlg.querySelector('.pe-parts');
-    box.innerHTML = PARTS.map((p) => `<button type="button" class="gfx-btn pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}">${esc(p.label)}</button>`).join('');
+    box.innerHTML = PARTS.map((p) => `<button type="button" class="gfx-btn pe-chip pe-${p.s || 'C'}" role="radio" data-part="${p.id}" aria-checked="${p.id === S.sel}" title="${esc(p.label)} einstellen (Regler darunter, oder den Punkt im Bild ziehen)">${esc(p.label)}</button>`).join('');
   }
   function select(id) {
     S.sel = id;
@@ -427,7 +441,7 @@
     box.innerHTML = list.map((c, i) => {
       if (c.t === 'range') return `<label class="pe-row"><span>${esc(c.label)} <output data-o="${i}"></output></span><input type="range" data-i="${i}" min="${c.min}" max="${c.max}" step="${c.step}"></label>`;
       if (c.t === 'select') return `<label class="pe-row"><span>${esc(c.label)}</span><select data-i="${i}">${c.opts.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}<option value="eigen" hidden>eigene Richtung</option></select></label>`;
-      return `<button type="button" class="gfx-btn" data-i="${i}">${esc(c.label)}</button>`;
+      return `<button type="button" class="gfx-btn" data-i="${i}" title="${esc(c.help || c.label)}">${esc(c.label)}</button>`;
     }).join('');
     sync();
     box.querySelectorAll('input[type=range]').forEach((inp) => {
@@ -557,7 +571,13 @@
       text();
       return;
     }
-    if (a === 'setbest') {
+    if (a === 'gobest') {
+      if (S.play) S.play = null;
+      goFrame(S.k0);
+      return;
+    }
+    if (a === 'fbest') {
+      if (S.k === S.k0) return;
       S.k0 = S.k;
       if (S.camMoved) S.kcam = camInfo();
       save();
@@ -565,9 +585,9 @@
       msg.textContent = `Bild ${S.k + 1} ist jetzt das Kernbild – wie du es gerade ansiehst, kommt als Kamera mit in die Ausgabe.`;
       return;
     }
-    if (a === 'fprev' || a === 'fnext' || a === 'fbest') {
+    if (a === 'fprev' || a === 'fnext') {
       if (S.play) S.play = null;
-      const i = a === 'fbest' ? S.k0 : clamp(S.k + (a === 'fnext' ? 1 : -1), 0, S.keys.length - 1);
+      const i = clamp(S.k + (a === 'fnext' ? 1 : -1), 0, S.keys.length - 1);
       if (i !== S.k) goFrame(i);
       else { frames(); draw(); }
       return;
