@@ -622,27 +622,59 @@
   const YA_MID = YGK(BAL(M(YA_CH, { pelvis: [0.3, 0.8, 0], roll: 8, R: { x: -0.05, z: 0.2, y: 0.58, yaw: -10, pitch: 0, kp: [-1, 0.1, 0.3] } }), 'L'));
   const YA_EXT = YGK(BAL(M(YA_CH, { pelvis: [0.3, 0.84, 0], yaw: 18, roll: 22, R: { x: -0.52, z: 0.12, y: 1.36, yaw: 0, pitch: 18, sole: [-0.7, -0.7, 0], kp: [-0.8, 0.4, 0.2] } }), 'L'));
   D['tc:yoko-geri-keage'] = M({ keys: [{ t: 0, p: KB_G }, { t: 0.1, p: KB_G }, { t: 0.32, p: YA_CH }, { t: 0.42, p: YA_MID, e: 'in' }, { t: 0.5, p: YA_EXT, e: 'kime' }, { t: 0.6, p: YA_MID }, { t: 0.68, p: YA_CH }, { t: 0.9, p: KB_G }], best: 0.5, dur: 2 }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
-  // Mawashi-geri: Knie seitlich hoch (Oberschenkel waagerecht, Unterschenkel dicht angelegt, Spann gestreckt), Standfuß dreht
-  // auf dem Ballen weit auf, die Hüfte dreht ein und kippt (Oberkörper neigt sich vom Ziel weg); dann schnappt der Unterschenkel
-  // waagerecht im Bogen nach vorn, Treffer mit dem Fußballen (Zehen hochgezogen)
-  // Arme wie bei den Yoko-geri (Chudan-kamae), Ziel vorn: der vordere (linke) Arm gebeugt, Faust auf Schulterhöhe,
-  // Ellbogen etwas nach außen Richtung Rücken; die hintere (rechte) Faust vor dem Solarplexus, Ellbogen unten mit Abstand
-  // Im Stand die hintere Faust mittig vor dem Solarplexus; im Tritt etwas weiter zur linken Brustseite, weil das rechte
-  // Knie vorn herumschwingt (Arme und Trittbein bleiben so mindestens 20 cm auseinander)
-  const MG = (p, hR = ARME_MW.hR) => {
-    const f = E.full(p);
-    const r = (f.roll * Math.PI) / 180;
-    const h = (w) => { const c = aim(p, w); return [c[0], (w[1] + c[0] * Math.sin(r)) / Math.cos(r), c[2]]; };
-    return M(p, { hL: h(ARME_MW.hL), eL: ARME_MW.eL, hR: h(hR), eR: ARME_MW.eR });
+  // Mawashi-geri, Start- und Endpose im Pose-Editor modelliert. Aus Zenkutsu-dachi (Chudan-kamae) hebt sich das rechte Knie
+  // seitlich, der Unterschenkel liegt dicht an (Ferse zum Gesäß); dabei wird der Fuß angezogen (Zehen hoch, Sohle zum Ziel)
+  // und bleibt bis zum Treffer genau so zum Unterschenkel stehen. Dann dreht die Hüfte weit ein, das Knie zeigt zum Ziel,
+  // und der Unterschenkel schnappt waagerecht im Bogen nach vorn; Treffer mit dem Fußballen. Standfuß dreht auf dem Ballen
+  // mit, der Oberkörper kippt vom Ziel weg, der Blick geht über die linke Schulter zum Ziel.
+  const MW_A = { pelvis: [0, 0.7, 0.1], yaw: -40, chest: -12, lean: 5, L: { x: 0.12, z: 0.62, yaw: 4 }, R: { x: -0.13, z: -0.5, yaw: -32 }, hL: [0.428, 0.055, 0.28], hR: [0.09, -0.16, 0.265], eL: [0.252, -0.534, 0.109], eR: [-0.34, -0.388, 0.307], w: [0.7, 0.3] };
+  const MW_E = { pelvis: [0.113, 0.8, 0.715], yaw: 125, chest: -13, lean: 5, roll: 16, look: 23, L: { x: 0.12, z: 0.62, yaw: 105, kp: [0.738, -0.527, -0.421] }, R: { x: 0.711, z: 1.511, y: 0.916, yaw: 132, pitch: -4, kp: [0.811, -0.168, 0.561], sole: [0.653, -0.156, 0.741], tu: 1 }, hL: [-0.206, -0.233, 0.262], hR: [-0.477, -0.092, 0.11], eL: [-0.157, -0.411, 0.408], eR: [-0.061, -0.596, 0.031], w: [1, 0] };
+  // Achsen des Unterschenkels: entlang (Knie → Knöchel), zur Schienbeinvorderseite, quer
+  const SHIN_AX = (P, s) => {
+    const J = E.solve(P);
+    const a = V.norm(V.sub(J['ankle' + s], J['knee' + s]));
+    const prj = (v) => V.sub(v, V.mul(a, a[0] * v[0] + a[1] * v[1] + a[2] * v[2]));
+    let f = prj(V.sub(J['knee' + s], J['hip' + s]));
+    if (V.len(f) < 0.03) f = prj(P[s].kp);
+    f = V.norm(f);
+    return { J, ax: [a, f, [a[1] * f[2] - a[2] * f[1], a[2] * f[0] - a[0] * f[2], a[0] * f[1] - a[1] * f[0]]] };
   };
-  const ARME_MW = { hL: [0.18, 0.1, 0.4], eL: [0.45, -1, -0.35], hR: [0.16, -0.08, 0.12], eR: [-0.4, -1, -0.4] };
-  const KAMAE_MW = MG(KAMAE_K, [0.02, -0.16, 0.24]);
-  const MW_CH = MG(BAL(M(KAMAE_K, { pelvis: [0.1, 0.8, 0.5], yaw: 50, chest: -40, roll: 12, look: 0, L: { yaw: 70, kp: [0.5, 0.2, 1] }, R: { x: -0.3, z: 0.42, y: 0.82, yaw: 205, pitch: 0, sole: [-0.3, 1, -0.2], kp: [-0.6, 0.1, 1] }, hL: L(H.guardF), hR: H.guardR, w: [1, 0] }), 'L'));
-  const MW_MID = MG(BAL(M(MW_CH, { yaw: 68, chest: -55, roll: 18, R: { x: -0.36, z: 0.98, y: 0.95, yaw: 140, pitch: 0, sole: [-0.6, 0.2, -0.8], kp: [-0.3, 0.8, 1] } }), 'L'));
-  // Endpose (Kime) im Pose-Editor modelliert: Hüfte weit eingedreht (Gesäß Richtung Ziel), Oberkörper kippt vom Ziel weg,
-  // Blick über die linke Schulter zum Ziel, Fußballen trifft mit hochgezogenen Zehen
-  const MW_EXT = { pelvis: [0.113, 0.8, 0.715], yaw: 125, chest: -13, lean: 5, roll: 16, look: 23, L: { x: 0.12, z: 0.62, yaw: 105, kp: [0.738, -0.527, -0.421] }, R: { x: 0.711, z: 1.511, y: 0.916, yaw: 132, pitch: -4, kp: [0.811, -0.168, 0.561], sole: [0.653, -0.156, 0.741], tu: 1 }, hL: [-0.206, -0.233, 0.262], hR: [-0.477, -0.092, 0.11], eL: [-0.157, -0.411, 0.408], eR: [-0.061, -0.596, 0.031], w: [1, 0] };
-  D['mv:mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_MW }, { t: 0.1, p: KAMAE_MW }, { t: 0.34, p: MW_CH }, { t: 0.44, p: MW_MID, e: 'in' }, { t: 0.5, p: MW_EXT, e: 'kime' }, { t: 0.6, p: MW_MID }, { t: 0.68, p: MW_CH }, { t: 0.9, p: KAMAE_MW }], best: 0.5, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side3' }));
+  // Fuß von p so zum Unterschenkel stellen wie in ref (Spannwinkel, Drehung, Zehen)
+  const FUSS_WIE = (p, ref, s) => {
+    const R0 = SHIN_AX(E.full(ref), s);
+    const loc = (v) => R0.ax.map((b) => b[0] * v[0] + b[1] * v[1] + b[2] * v[2]);
+    const dl = loc(R0.J['dir' + s]);
+    const sl = loc(R0.J['sole' + s]);
+    const f = E.full(p);
+    const { ax } = SHIN_AX(f, s);
+    const w = (l) => V.add(V.add(V.mul(ax[0], l[0]), V.mul(ax[1], l[1])), V.mul(ax[2], l[2]));
+    const d = w(dl);
+    const so = w(sl);
+    const yaw = (Math.atan2(d[0], d[2]) * 180) / Math.PI;
+    const pitch = (Math.asin(Math.max(-1, Math.min(1, d[1]))) * 180) / Math.PI;
+    return M(f, { [s]: { yaw, pitch, sole: so.map((x) => Math.round(x * 1000) / 1000), tu: E.full(ref)[s].tu } });
+  };
+  // Trittbein: Knie in Weltrichtung kd (vom Hüftgelenk), Unterschenkel in Weltrichtung sd (vom Knie)
+  const BEIN = (p, s, kd, sd) => {
+    const f = E.full(p);
+    const hp = E.solve(f)['hip' + s];
+    const k = V.add(hp, V.mul(V.norm(kd), 0.44));
+    const a = V.add(k, V.mul(V.norm(sd), 0.44));
+    return M(f, { [s]: { x: a[0], y: a[1], z: a[2], kp: V.sub(k, V.mix(hp, a, 0.5)) } });
+  };
+  const ARM_MIX = (u) => ({ hL: V.mix(MW_A.hL, MW_E.hL, u), hR: V.mix(MW_A.hR, MW_E.hR, u), eL: V.mix(MW_A.eL, MW_E.eL, u), eR: V.mix(MW_A.eR, MW_E.eR, u) });
+  // Trittrichtung (Hüfte → Fuß in der Endpose)
+  const MW_DIR = (() => { const J = E.solve(E.full(MW_E)); return V.norm(V.sub(J.ankleR, J.hipR)); })();
+  const MW_RE = V.norm([-MW_DIR[2], 0, MW_DIR[0]]); // waagerecht rechts davon
+  // Bein hebt sich: Knie nach vorn oben, Unterschenkel hängt unter dem Knie, der Fuß ist schon angezogen
+  const MW_UP = FUSS_WIE(BAL(BEIN(M(MW_A, { pelvis: [0.05, 0.76, 0.36], yaw: 5, chest: -25, look: 4, L: { yaw: 25, kp: [0.5, 0.2, 1] }, w: [1, 0] }, ARM_MIX(0.15)), 'R', [-0.2, -0.15, 0.97], [-0.05, -0.85, -0.5]), 'L'), MW_E, 'R');
+  // Knie hoch: Knie vorn-seitlich auf Hüfthöhe, Ferse zum Gesäß
+  const MW_CH = FUSS_WIE(BAL(BEIN(M(MW_A, { pelvis: [0.08, 0.8, 0.5], yaw: 40, chest: -28, roll: 8, look: 10, L: { yaw: 55, kp: [0.5, 0.2, 1] }, w: [1, 0] }, ARM_MIX(0.35)), 'R', [-0.45, 0.12, 0.88], [-0.15, -0.12, -1]), 'L'), MW_E, 'R');
+  // Hüfte eingedreht, Knie zeigt zum Ziel, Unterschenkel noch angelegt (waagerecht nach rechts hinten)
+  const MW_MID = FUSS_WIE(BAL(BEIN(M(MW_CH, { pelvis: [0.1, 0.8, 0.62], yaw: 95, chest: -20, roll: 14, look: 20, L: { yaw: 90 } }, ARM_MIX(0.75)), 'R', V.add(MW_DIR, [0, 0.12, 0]), V.add(V.mul(MW_DIR, -0.75), V.mul(MW_RE, 0.66))), 'L'), MW_E, 'R');
+  // Unterschenkel schwingt im Bogen: halb geöffnet, quer zur Trittrichtung
+  const MW_SN = FUSS_WIE(BAL(BEIN(M(MW_MID, { yaw: 115, chest: -15, roll: 16, look: 22, L: { yaw: 100 } }, ARM_MIX(0.92)), 'R', V.add(MW_DIR, [0, 0.06, 0]), V.add(V.mul(MW_DIR, 0.2), V.mul(MW_RE, 0.98))), 'L'), MW_E, 'R');
+  D['mv:mawashi-geri'] = M({ keys: [{ t: 0, p: MW_A }, { t: 0.1, p: MW_A }, { t: 0.22, p: MW_UP }, { t: 0.32, p: MW_CH }, { t: 0.42, p: MW_MID, e: 'in' }, { t: 0.46, p: MW_SN, e: 'lin' }, { t: 0.5, p: MW_E, e: 'kime' }, { t: 0.58, p: MW_SN }, { t: 0.62, p: MW_MID }, { t: 0.7, p: MW_CH }, { t: 0.8, p: MW_UP }, { t: 0.92, p: MW_A }], best: 0.5, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', view: 'side3' }));
   const US_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.2], lean: 22, look: 160, R: { x: -0.08, z: 0.32, y: 0.45, yaw: 0, pitch: -70, kp: [0, 0.4, 1] }, w: [1, 0] });
   D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 180, pitch: -70, kp: [0, -1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   // Mikazuki-geri wie in Heian Godan 15: aus Kiba-dachi, die linke offene Hand zur linken Seite gestreckt (Ziel), das linke
