@@ -26,7 +26,7 @@
     const f = E.full(p);
     const ft = (F) => M(F, { x: -F.x, yaw: -F.yaw, kp: mx(F.kp), sole: mx(F.sole) });
     return {
-      pelvis: mx(f.pelvis), yaw: -f.yaw, chest: -f.chest, lean: f.lean, roll: -f.roll, look: -f.look,
+      pelvis: mx(f.pelvis), yaw: -f.yaw, chest: -f.chest, lean: f.lean, roll: -f.roll, look: -f.look, nod: f.nod, tilt: -f.tilt,
       L: ft(f.R), R: ft(f.L), hL: mx(f.hR), hR: mx(f.hL), eL: mx(f.eR), eR: mx(f.eL),
       oL: f.oR, oR: f.oL, pL: mx(f.pR), pR: mx(f.pL), fL: mx(f.fR), fR: mx(f.fL), qL: mx(f.qR), qR: mx(f.qL), w: [f.w[1], f.w[0]],
     };

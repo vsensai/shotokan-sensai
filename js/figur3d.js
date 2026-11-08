@@ -41,7 +41,7 @@
   }
 
   const DEF = {
-    pelvis: [0, 0.9, 0], yaw: 0, chest: 0, lean: 0, roll: 0, look: 0,
+    pelvis: [0, 0.9, 0], yaw: 0, chest: 0, lean: 0, roll: 0, look: 0, nod: 0, tilt: 0,
     // tu: Zehen hochgezogen (0 … 1), z. B. Fußballen beim Mae-geri
     L: { x: 0.1, z: 0, y: 0.075, yaw: 8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0], tu: 0 },
     R: { x: -0.1, z: 0, y: 0.075, yaw: -8, pitch: 0, kp: [0, 0, 0], sole: [0, 0, 0], tu: 0 },
@@ -77,10 +77,24 @@
     const fc = norm(cross(lc, up));
     const chest = add(pel, mul(up, 0.5));
     const J = { pel, chest, up, lc, fc, lp, fp };
-    J.head = add(add(chest, mul(up, 0.2)), mul(fc, 0.005));
-    // Blickrichtung des Kopfes (Welt): meist zum Gegner, unabhängig von der Hüfte
-    J.hf = fwdOf(P.look);
-    J.hl = leftOf(P.look);
+    // Blickrichtung des Kopfes (Welt): meist zum Gegner, unabhängig von der Hüfte; nod neigt den Kopf (positiv = Kinn
+    // zur Brust), tilt kippt ihn seitlich (positiv = zur linken Schulter). Drehpunkt ist der Hals.
+    let hf = fwdOf(P.look);
+    let hl = leftOf(P.look);
+    let hu = up;
+    if (P.nod) {
+      const a = P.nod * D;
+      [hf, hu] = [norm(sub(mul(hf, Math.cos(a)), mul(hu, Math.sin(a)))), norm(add(mul(hu, Math.cos(a)), mul(hf, Math.sin(a))))];
+    }
+    if (P.tilt) {
+      const a = P.tilt * D;
+      [hu, hl] = [norm(add(mul(hu, Math.cos(a)), mul(hl, Math.sin(a)))), norm(sub(mul(hl, Math.cos(a)), mul(hu, Math.sin(a))))];
+    }
+    J.hf = hf;
+    J.hl = hl;
+    J.hu = hu;
+    J.neck = add(chest, mul(up, 0.13));
+    J.head = add(add(J.neck, mul(hu, 0.07)), mul(fc, 0.005));
     const toW = (v) => add(add(add(chest, mul(lc, v[0])), mul(up, v[1])), mul(fc, v[2]));
     ['L', 'R'].forEach((s) => {
       const sg = s === 'L' ? 1 : -1;
@@ -192,10 +206,10 @@
     // Schultern: Nacken fällt zu runden Schultern ab
     [1, -1].forEach((s) => { const sh = s > 0 ? J.shL : J.shR; cone(add(chest, mul(up, 0.02)), sh, 0.05, 0.055, 5); cone(sh, sh, 0.062, 0.062, 0); });
     // Hals reicht bis in den Kopf und geht weich in ihn über (sonst Kerbe unter dem Kinn)
-    cone(add(chest, mul(up, 0.02)), add(add(chest, mul(up, 0.2)), mul(J.hf, -0.012)), 0.05, 0.044, SK(0.03));
+    cone(add(chest, mul(up, 0.02)), add(add(J.neck, mul(J.hu, 0.07)), mul(J.hf, -0.012)), 0.05, 0.044, SK(0.03));
     // Kopf als Ei: runder Schädel, weich angesetztes schmaleres Kinn, seitlich etwas schmaler als tief
-    const skull = add(add(J.head, mul(up, 0.012)), mul(J.hf, -0.008));
-    const chin = add(add(J.head, mul(up, -0.05)), mul(J.hf, 0.03));
+    const skull = add(add(J.head, mul(J.hu, 0.012)), mul(J.hf, -0.008));
+    const chin = add(add(J.head, mul(J.hu, -0.05)), mul(J.hf, 0.03));
     cone(skull, skull, 0.088, 0.088, FL(J.hl, 1.12, 0.01));
     cone(chin, chin, 0.055, 0.055, FL(J.hl, 1.12, 0.0375));
     ['L', 'R'].forEach((s) => {
@@ -287,7 +301,7 @@ uniform vec4 uA[${N}], uB[${N}];
 uniform vec4 uM[${N / 4}];
 float mat(int i){ return uM[i / 4][i % 4]; }
 uniform int uN, uMode, uStyle, uTint;
-uniform vec3 uPel, uUp, uFwd, uLeft, uHead, uHFwd, uPFwd, uPLeft;
+uniform vec3 uPel, uUp, uFwd, uLeft, uHead, uHFwd, uHUp, uPFwd, uPLeft;
 uniform vec4 uBound;
 uniform vec2 uBase;
 uniform vec4 uDec[6], uDecP[6];
@@ -415,12 +429,12 @@ vec3 baseCol(float m, vec3 p, out float kind){
   vec3 skin = uStyle == 1 ? vec3(0.97, 0.93, 0.9) : uStyle == 2 ? vec3(0.76, 0.55, 0.34) : vec3(0.82, 0.62, 0.5);
   vec3 ink = uStyle == 2 ? vec3(0.25, 0.14, 0.08) : vec3(0.045, 0.04, 0.04);
   if (m > 3.5 && m < 4.5) {
-    vec3 q = p - uHead; float hy = dot(q, uUp), hz = dot(q, uHFwd);
+    vec3 q = p - uHead; float hy = dot(q, uHUp), hz = dot(q, uHFwd);
     if (hy > 0.025 + hz * 0.5 && length(q) > 0.088 && uStyle != 2) { kind = 3.0; return vec3(0.07, 0.055, 0.05); }
     kind = 1.0; return skin;
   }
   if (m > 0.5 && m < 1.5) {
-    vec3 q = p - uHead; float hy = dot(q, uUp), hz = dot(q, uHFwd);
+    vec3 q = p - uHead; float hy = dot(q, uHUp), hz = dot(q, uHFwd);
     // Haare: Haaransatz vorn hoch über der Stirn, hinten tief im Nacken
     if (length(q) < 0.13 && hy > mix(-0.04, 0.052, smoothstep(-0.07, 0.07, hz)) && uStyle != 2) { kind = 3.0; return mix(skin, vec3(0.2, 0.16, 0.13), 0.6); }
     kind = 1.0; return skin;
@@ -598,7 +612,7 @@ void main(){
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const U = {};
-    ['uRes', 'uRo', 'uCw', 'uCu', 'uCv', 'uF', 'uA', 'uB', 'uM', 'uN', 'uMode', 'uStyle', 'uTint', 'uPel', 'uUp', 'uFwd', 'uLeft', 'uHead', 'uHFwd', 'uPFwd', 'uPLeft', 'uBound', 'uBase', 'uDec', 'uDecP', 'uHit', 'uHitI'].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
+    ['uRes', 'uRo', 'uCw', 'uCu', 'uCv', 'uF', 'uA', 'uB', 'uM', 'uN', 'uMode', 'uStyle', 'uTint', 'uPel', 'uUp', 'uFwd', 'uLeft', 'uHead', 'uHFwd', 'uHUp', 'uPFwd', 'uPLeft', 'uBound', 'uBase', 'uDec', 'uDecP', 'uHit', 'uHitI'].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
     GL = { ok: true, gl, cv, U };
     return GL;
   }
@@ -668,6 +682,7 @@ void main(){
     gl.uniform3fv(U.uLeft, J.lc);
     gl.uniform3fv(U.uHead, J.head);
     gl.uniform3fv(U.uHFwd, J.hf);
+    gl.uniform3fv(U.uHUp, J.hu);
     gl.uniform3fv(U.uPFwd, J.fp);
     gl.uniform3fv(U.uPLeft, J.lp);
     gl.uniform4fv(U.uBound, bounds(P));

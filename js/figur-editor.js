@@ -1,5 +1,6 @@
 /* Bewegungs-Editor (früher Pose-Editor): jedes Bild einer 3D-Figur von Hand einstellen (fürs Handy gebaut), dazu
-   Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera; die Werte als Text kopieren – zum Übernehmen in js/figur-posen.js.
+   Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera; die Werte als Text kopieren – zum Übernehmen in js/figur-posen.js
+   oder zum Sichern (Import holt sie zurück). Der Editor merkt sich nichts: beim Schließen ist alles Ungesicherte weg.
    Einschalten unter Fortschritt → Einstellungen; dann steht in der Großansicht jeder Figur der Knopf „✎ Bearbeiten“.
    Bedienung: Punkt antippen und ziehen (bewegt ihn in der Bildebene), daneben ziehen dreht die Ansicht,
    zwei Finger zoomen. Feinarbeit mit den Reglern des gewählten Körperteils. */
@@ -15,6 +16,7 @@
 
   /* ---------- Einschalten, Entwürfe ---------- */
   const FLAG = 'sk-pose-editor';
+  // Frühere Fassungen merkten sich Entwürfe; der Editor vergisst jetzt alles beim Schließen (Arbeit über Export/Import sichern)
   const DRAFT = 'sk-pose-draft:';
   const ls = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -26,7 +28,7 @@
   /* ---------- Umrechnen ---------- */
   // Weltpunkt → Brustkoordinaten (x links, y oben, z vorne; Ursprung Brustmitte), wie die Hände in den Posen
   const loc = (J, w) => { const d = sub(w, J.chest); return [dot(d, J.lc), dot(d, J.up), dot(d, J.fc)]; };
-  const ANG = { yaw: 1, chest: 1, lean: 1, roll: 1, look: 1, pitch: 1 };
+  const ANG = { yaw: 1, chest: 1, lean: 1, roll: 1, look: 1, nod: 1, tilt: 1, pitch: 1 };
   const rnd = (k, v) => (ANG[k] ? Math.round(v * 10) / 10 : Math.round(v * 1000) / 1000);
   function rounded(o, k) {
     if (typeof o === 'number') return rnd(k, o) || 0;
@@ -55,6 +57,7 @@
   /* ---------- Körperteile ---------- */
   const PARTS = [
     { id: 'body', label: 'Körper', pt: (J) => J.pel },
+    { id: 'head', label: 'Kopf', pt: (J) => add(J.head, mul(J.hf, 0.09)) },
     { id: 'hL', label: 'Hand links', s: 'L', pt: (J) => J.wristL },
     { id: 'hR', label: 'Hand rechts', s: 'R', pt: (J) => J.wristR },
     { id: 'eL', label: 'Ellbogen links', s: 'L', pt: (J) => J.elbowL },
@@ -67,7 +70,8 @@
   const partOf = (id) => PARTS.find((p) => p.id === id);
   // Was zu einem Körperteil gehört (für „Geändert:“ in der Ausgabe)
   const FIELDS = {
-    body: ['pelvis', 'yaw', 'chest', 'lean', 'roll', 'look'],
+    body: ['pelvis', 'yaw', 'chest', 'lean', 'roll'],
+    head: ['look', 'nod', 'tilt'],
     hL: ['hL', 'oL', 'pL', 'fL', 'qL'], hR: ['hR', 'oR', 'pR', 'fR', 'qR'], eL: ['eL'], eR: ['eR'],
     fL: ['L.x', 'L.y', 'L.z', 'L.yaw', 'L.pitch', 'L.tu', 'L.sole'], fR: ['R.x', 'R.y', 'R.z', 'R.yaw', 'R.pitch', 'R.tu', 'R.sole'],
     kL: ['L.kp'], kR: ['R.kp'],
@@ -79,6 +83,13 @@
     const J = E.solve(P);
     const s = partOf(id).s;
     if (id === 'body') P.pelvis = [W[0], clamp(W[1], 0.3, 1.05), W[2]];
+    else if (id === 'head') {
+      // Kopf: der Punkt vor dem Gesicht zeigt, wohin er schaut (Blick waagerecht, Neigen aus der Höhe)
+      const d = sub(W, J.neck);
+      P.look = Math.round((Math.atan2(d[0], d[2]) * 180) / Math.PI);
+      const el = (Math.atan2(d[1], Math.hypot(d[0], d[2])) * 180) / Math.PI;
+      P.nod = clamp(Math.round((Math.atan2(0.07, 0.09) * 180) / Math.PI - el), -60, 60);
+    }
     else if (id[0] === 'h') P['h' + s] = loc(J, W);
     else if (id[0] === 'e') {
       // Ellbogenrichtung: von der Schulter zum gewünschten Ellbogen, als Punkt um die Brust (Länge 0,6 = ganz vorgegeben)
@@ -185,7 +196,13 @@
         R('Oberkörper drehen', -90, 90, 1, () => P.chest, (v) => (P.chest = v), '°'),
         R('Vorlage', -30, 60, 1, () => P.lean, (v) => (P.lean = v), '°'),
         R('Seitneigung', -30, 30, 1, () => P.roll, (v) => (P.roll = v), '°'),
-        R('Blick', -180, 180, 1, () => P.look, (v) => (P.look = v), '°'),
+      ];
+    }
+    if (id === 'head') {
+      return [
+        R('Blick (Kopf drehen)', -180, 180, 1, () => P.look, (v) => (P.look = v), '°'),
+        R('Kopf neigen (+ Kinn zur Brust)', -60, 60, 1, () => P.nod, (v) => (P.nod = v), '°'),
+        R('Kopf kippen (+ zur linken Schulter)', -45, 45, 1, () => P.tilt, (v) => (P.tilt = v), '°'),
       ];
     }
     if (id[0] === 'h') {
@@ -240,7 +257,7 @@
     d = document.createElement('dialog');
     d.className = 'f3d-dlg pe-dlg';
     d.setAttribute('aria-label', 'Bewegungs-Editor');
-    d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x" aria-label="Schließen" title="Editor schließen – Änderungen bleiben als Entwurf gespeichert">✕</button></div>
+    d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x pe-fullbtn" data-pe="full" aria-pressed="false" aria-label="Vollbild" title="Vollbild an/aus">⛶</button><button type="button" class="f3d-dlg-x" aria-label="Schließen" title="Editor schließen – alles nicht Kopierte geht verloren">✕</button></div>
 <div class="pe-main"><div class="pe-stage"><canvas class="pe-cv"></canvas><span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-side"><div class="pe-frames" role="radiogroup" aria-label="Bild der Bewegung"></div><div class="pe-bar"><button type="button" class="gfx-btn" data-pe="v-front" title="Figur von vorn ansehen (eingepasst)">Vorne</button><button type="button" class="gfx-btn" data-pe="v-side" title="Figur von der Seite ansehen (eingepasst)">Seite</button><button type="button" class="gfx-btn" data-pe="v-top" title="Figur von oben ansehen (eingepasst)">Oben</button><button type="button" class="gfx-btn" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="gfx-btn" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button><button type="button" class="gfx-btn" data-pe="hide" aria-pressed="false" title="Anfasspunkte und Linien aus- bzw. einblenden">Punkte aus</button></div>
 <p class="pe-hint muted small">${matchMedia('(pointer: coarse)').matches ? '1 Finger: Punkt ziehen oder drehen · 2 Finger: zoomen und verschieben' : 'Ziehen: Punkt bzw. drehen · Rechte Maustaste/Umschalt: verschieben · Mausrad: zoomen'}</p>
@@ -248,16 +265,25 @@
 <div class="pe-parts" role="radiogroup" aria-label="Körperteil"></div>
 <div class="pe-panel"></div>
 <div class="pe-out">
-<label class="pe-lab">Anmerkung (was soll die Pose zeigen, was ist anders?)<textarea class="pe-note" rows="2"></textarea></label>
-<div class="pe-acts"><button type="button" class="btn" data-pe="copy" title="Den Text unten in die Zwischenablage kopieren – dann im Chat einfügen">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button></div>
+<div class="pe-acts"><button type="button" class="btn" data-pe="copy" title="Den Text unten in die Zwischenablage kopieren – zum Einfügen im Chat oder zum Sichern (später mit „Importieren“ zurückholen)">Pose kopieren</button><button type="button" class="gfx-btn" data-pe="all" aria-pressed="false" hidden title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button><button type="button" class="gfx-btn" data-pe="imp" title="Einen früher kopierten Text einfügen und weiterbearbeiten">Importieren</button></div>
+<div class="pe-imp" hidden><textarea class="pe-imptext" rows="5" aria-label="Text zum Importieren" placeholder="Kopierten Text des Bewegungs-Editors hier einfügen"></textarea><div class="pe-acts"><button type="button" class="btn" data-pe="impok" title="Posen, Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera aus dem Text übernehmen">Übernehmen</button><button type="button" class="gfx-btn" data-pe="impx" title="Import abbrechen">Abbrechen</button></div></div>
 <p class="pe-msg muted small" aria-live="polite"></p>
 <textarea class="pe-text" rows="5" readonly aria-label="Pose als Text"></textarea>
 </div></div></div></div>`;
     document.body.appendChild(d);
     d.querySelector('.f3d-dlg-x').addEventListener('click', () => d.close());
-    d.addEventListener('close', () => { S = null; });
+    // Beim Wechsel ins/aus dem Vollbild schließt der Browser den Dialog: dann Zustand behalten und gleich wieder öffnen
+    d.addEventListener('close', () => {
+      if (d._fs && S) { requestAnimationFrame(() => { if (S && !d.open) d.showModal(); }); return; }
+      S = null;
+    });
     d.addEventListener('click', onClick);
-    d.querySelector('.pe-note').addEventListener('input', () => { if (S) { S.note = d.querySelector('.pe-note').value; save(); text(); } });
+    // Vollbild verlassen (z. B. mit Esc): Knopf und Größe nachziehen
+    document.addEventListener('fullscreenchange', () => {
+      setTimeout(() => { d._fs = false; }, 300);
+      if (S && !d.open) d.showModal();
+      if (!document.fullscreenElement && d.classList.contains('pe-full')) full(false);
+    });
     bindStage(d.querySelector('.pe-stage'));
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
     // Andere Größenänderungen (z. B. Adressleiste) lassen Drehung und Zoom in Ruhe.
@@ -282,32 +308,25 @@
     // Kernbild: Schlüsselbild an der Zeit „best“ (sonst das nächstgelegene)
     let k0 = 0;
     keys.forEach((k, i) => { if (Math.abs(k.t - best) <= Math.abs(keys[k0].t - best)) k0 = i; });
-    let note = '';
     const edits = {};
-    let draft = null;
-    try { draft = JSON.parse(ls.get(DRAFT + id) || 'null'); } catch (err) { draft = null; }
-    if (draft && draft.P && !draft.edits) draft.edits = { [k0]: draft.P }; // Entwurf aus v1.55: nur Kernbild
-    if (draft && draft.edits) {
-      for (const i in draft.edits) if (frames[i]) edits[i] = E.full(draft.edits[i]);
-      note = draft.note || '';
-    }
+    // Alte Entwürfe früherer Fassungen aufräumen
+    try { Object.keys(localStorage).filter((k) => k.startsWith(DRAFT)).forEach((k) => localStorage.removeItem(k)); } catch (err) { /* ohne Speicher */ }
     const k0app = k0;
     // Timing: Zeitpunkt und Übergang je Bild, Dauer der ganzen Bewegung (änderbar, landen in der Ausgabe)
     const tk = keys.map((k) => ({ t: k.t, e: k.e || 'io' }));
-    const tm = tk.map((x, i) => Object.assign({}, x, draft && draft.tm && draft.tm[i] ? draft.tm[i] : {}));
+    const tm = tk.map((x) => Object.assign({}, x));
     const dur0 = e.d.dur || 1.6;
-    if (draft && draft.k0 != null && frames[draft.k0]) k0 = draft.k0;
     const d = dialog();
-    S = { id, title: title || id, e, keys, frames, k0, k0app, all: !!(draft && draft.all), kcam: draft && draft.kcam, tk, tm, dur0, dur: (draft && draft.dur) || dur0, speed: 1, best, edits, undos: {}, note, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
+    S = { id, title: title || id, e, keys, frames, k0, k0app, all: false, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
     d.querySelector('.f3d-dlg-title').textContent = `✎ ${S.title}`;
     const hb = d.querySelector('[data-pe="hide"]');
     hb.setAttribute('aria-pressed', 'false');
     hb.textContent = 'Punkte aus';
-    d.querySelector('.pe-note').value = note;
+    d.querySelector('.pe-imp').hidden = true;
     const ab = d.querySelector('[data-pe="all"]');
     ab.hidden = keys.length < 2;
     ab.setAttribute('aria-pressed', String(S.all));
-    d.querySelector('.pe-msg').textContent = Object.keys(edits).length || k0 !== k0app || (draft && (draft.tm || draft.dur)) ? 'Gespeicherter Entwurf geladen – „Original“ setzt das gezeigte Bild zurück.' : '';
+    d.querySelector('.pe-msg').textContent = '';
     if (!d.open) d.showModal();
     goFrame(k0);
     parts();
@@ -363,7 +382,7 @@
     if (+du.value !== S.dur) du.value = S.dur;
     box.querySelector('.pe-dv').textContent = `${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(1)} s`;
     const h = holdOf(S.k);
-    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ` · Kernbild ★${S.k0 !== S.k0app ? ' (neu gewählt)' : ''}` : ` · <button type="button" class="pe-link" data-pe="gobest" title="Zum Kernbild springen">Kernbild: Bild ${S.k0 + 1}</button>`}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
+    box.querySelector('.pe-finfo').innerHTML = `<b>Bild ${S.k + 1} von ${n}</b>${S.k === S.k0 ? ` · Kernbild ★${S.k0 !== S.k0app ? ' (neu gewählt)' : ''}` : ''}${h !== S.k ? ` · wie Bild ${h + 1}` : ''}${ed.length ? ` · <span class="pe-ed">geändert: ${ed.map((i) => i + 1).join(', ')}</span>` : ''}`;
   }
   // Bild wechseln: Änderungen des bisherigen Bildes merken
   function goFrame(i) {
@@ -484,14 +503,9 @@
     draw();
     if (!fast) { text(); save(); }
   }
+  // Nichts wird gespeichert: nur die Bildanzeige nachziehen
   function save() {
     keep();
-    const ed = {};
-    for (const i in S.edits) ed[i] = diff(S.edits[i]);
-    const k0 = S.k0 !== S.k0app ? S.k0 : null;
-    const tm = S.tm.some((_, i) => timingChanged(i)) ? S.tm : null;
-    const dur = S.dur !== S.dur0 ? S.dur : null;
-    ls.set(DRAFT + S.id, Object.keys(ed).length || S.note || k0 != null || S.kcam || S.all || tm || dur ? JSON.stringify({ edits: ed, note: S.note, k0, kcam: S.kcam, all: S.all, tm, dur }) : null);
     frames();
   }
   // Kamera wie in der App (cam.yaw, cam.pitch in js/figur-app.js): Drehung um die Figur, 0° = von vorn (+z), Neigung von oben
@@ -512,7 +526,6 @@
     const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${n} Bilder` : `Bewegung mit ${n} Bildern`}, Kernbild = Bild ${S.k0 + 1} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${S.k0app + 1})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${S.dur}${S.dur !== S.dur0 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
     const kc = S.kcam || camInfo0();
     lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
-    if (S.note.trim()) lines.push(`Anmerkung: ${S.note.trim()}`);
     const list = all ? S.keys.map((_, i) => i) : [...new Set(Object.keys(S.edits).map(Number).concat(S.k).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
     list.forEach((i) => {
       const P = S.edits[i] || S.frames[i];
@@ -536,6 +549,84 @@
     S.dlg.querySelector('[data-pe="all"]').textContent = all ? '✓ Ganze Bewegung' : 'Ganze Bewegung ausgeben';
     S.text = lines.join('\n');
     S.dlg.querySelector('.pe-text').value = S.text;
+  }
+
+  // Vollbild: Dialog füllt den Bildschirm (wenn möglich echtes Vollbild des Browsers)
+  function full(on) {
+    const d = S ? S.dlg : document.querySelector('.pe-dlg');
+    if (!d) return;
+    d.classList.toggle('pe-full', on);
+    const b = d.querySelector('[data-pe="full"]');
+    b.setAttribute('aria-pressed', String(on));
+    b.title = on ? 'Vollbild beenden' : 'Vollbild an/aus';
+    try {
+      const de = document.documentElement;
+      if (on && de.requestFullscreen && !document.fullscreenElement) { d._fs = true; de.requestFullscreen().catch(() => { d._fs = false; }); }
+      if (!on && document.fullscreenElement) { d._fs = true; document.exitFullscreen().catch(() => { d._fs = false; }); }
+    } catch (err) { /* ohne Vollbild-Schnittstelle bleibt es beim großen Dialog */ }
+    if (S) { S.fit = true; draw(); }
+  }
+
+  // Import: Text aus „Kopieren“ zurück in den Editor (Posen, Zeitpunkte, Übergänge, Dauer, Kernbild, Kamera)
+  function importText(txt) {
+    const L = String(txt || '').split(/\r?\n/).map((l) => l.trim());
+    const head = L.find((l) => /Editor · /.test(l));
+    if (!head) return 'Kein Text des Bewegungs-Editors gefunden.';
+    if (!head.includes(`· ${S.id} ·`)) return `Der Text gehört zu einer anderen Figur (${(head.split(' · ')[1] || '?')}), nicht zu ${S.id}.`;
+    const n = S.keys.length;
+    const lit2obj = (l) => JSON.parse(l.replace(/([{,]\s*)([A-Za-z_]\w*)\s*:/g, '$1"$2":'));
+    const easeOf = (name) => Object.keys(EASE).find((k) => name.startsWith(EASE[k])) || null;
+    const got = {};
+    try {
+      for (let li = 0; li < L.length; li++) {
+        let i = null;
+        let m = L[li].match(/^Bild (\d+) von (\d+) \(t = ([\d.]+)(?:, Übergang ([^,)]+))?/);
+        if (m) {
+          if (+m[2] !== n) return `Der Text hat ${m[2]} Bilder, die Figur hier ${n}.`;
+          i = +m[1] - 1;
+          got[i] = { t: +m[3], e: m[4] ? easeOf(m[4]) : null };
+        } else if (n === 1 && /^Standbild/.test(L[li])) {
+          i = 0;
+          got[0] = {};
+        }
+        if (i == null) continue;
+        const same2 = L[li].match(/gleiche Pose wie Bild (\d+)/);
+        if (same2) got[i].sameAs = +same2[1] - 1;
+        else if (L[li + 1] && L[li + 1][0] === '{') got[i].p = E.full(lit2obj(L[li + 1]));
+      }
+    } catch (err) {
+      return 'Der Text ließ sich nicht lesen (Posen-Zeile beschädigt?).';
+    }
+    const idx = Object.keys(got).map(Number).sort((a, b) => a - b);
+    if (!idx.length) return 'Im Text stehen keine Bilder.';
+    keep();
+    idx.forEach((i) => {
+      const g = got[i];
+      const P = g.p || (g.sameAs != null ? (got[g.sameAs] && got[g.sameAs].p) || S.edits[g.sameAs] || S.frames[g.sameAs] : null);
+      if (P) {
+        if (same(rounded(P), rounded(S.frames[i]))) delete S.edits[i];
+        else S.edits[i] = clone(P);
+      }
+      if (g.t != null) S.tm[i].t = g.t;
+      if (g.e) S.tm[i].e = g.e;
+    });
+    const k = head.match(/Kernbild = Bild (\d+)/);
+    if (k && S.keys[+k[1] - 1]) S.k0 = +k[1] - 1;
+    const du = head.match(/\(dur ([\d.]+)/);
+    if (du) S.dur = +du[1];
+    const cam = L.find((l) => /^Kamera/.test(l));
+    const cm = cam && cam.match(/Drehung (-?\d+)°, Neigung (-?\d+)°/);
+    if (cm && !/wie in der App/.test(cam)) {
+      S.kcam = { y: +cm[1], p: +cm[2] };
+      Object.assign(S.cam, { yaw: S.kcam.y, pitch: S.kcam.p });
+      S.fit = true;
+    }
+    S.all = /ganze Bewegung/.test(head);
+    S.dlg.querySelector('[data-pe="all"]').setAttribute('aria-pressed', String(S.all));
+    const at = S.k;
+    S.k = null;
+    goFrame(at);
+    return `Importiert: ${idx.length} Bild${idx.length === 1 ? '' : 'er'}${k ? `, Kernbild Bild ${S.k0 + 1}` : ''}${du ? `, Dauer ${S.dur}` : ''}${S.kcam ? ', Kamera' : ''}.`;
   }
 
   function onClick(ev) {
@@ -571,9 +662,22 @@
       text();
       return;
     }
-    if (a === 'gobest') {
-      if (S.play) S.play = null;
-      goFrame(S.k0);
+    if (a === 'full') return full(!S.dlg.classList.contains('pe-full'));
+    if (a === 'imp' || a === 'impx') {
+      const box = S.dlg.querySelector('.pe-imp');
+      box.hidden = a === 'impx' || !box.hidden;
+      if (!box.hidden) {
+        const ta = box.querySelector('.pe-imptext');
+        ta.value = '';
+        ta.focus();
+        if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then((t) => { if (/Editor · /.test(t) && !ta.value) ta.value = t; }).catch(() => {});
+      }
+      return;
+    }
+    if (a === 'impok') {
+      const r = importText(S.dlg.querySelector('.pe-imptext').value);
+      msg.textContent = r;
+      if (/^Importiert/.test(r)) S.dlg.querySelector('.pe-imp').hidden = true;
       return;
     }
     if (a === 'fbest') {
