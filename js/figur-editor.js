@@ -278,6 +278,7 @@
 <div class="pe-movonly">
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
 ${easeGuide()}
+<div class="pe-tbrow pe-pauserow" hidden><span>Pause am Anfang <b class="pe-pv"></b></span><button type="button" class="pe-pm" data-pe="pz-" aria-label="Pause am Anfang kürzer" title="Die Figur steht vor der Bewegung 0,05 s kürzer still">−</button><button type="button" class="pe-pm" data-pe="pz+" aria-label="Pause am Anfang länger" title="Die Figur steht vor der Bewegung 0,05 s länger still">+</button></div>
 <p class="pe-total"></p>
 <div class="pe-ttouch"><div class="pe-tbrow"><span>Zeit vom Bild davor <b class="pe-tsv"></b></span><button type="button" class="pe-pm" data-pe="seg-" aria-label="Zeit vom Bild davor kürzer" title="0,05 s kürzer">−</button><button type="button" class="pe-pm" data-pe="seg+" aria-label="Zeit vom Bild davor länger" title="0,05 s länger">+</button></div><div class="pe-tbrow"><span>Ganze Bewegung <b class="pe-ttv"></b></span><button type="button" class="pe-pm" data-pe="tot-" aria-label="Ganze Bewegung schneller" title="Ganze Bewegung 0,05 s kürzer (alle Abschnitte gleichmäßig)">−</button><button type="button" class="pe-pm" data-pe="tot+" aria-label="Ganze Bewegung langsamer" title="Ganze Bewegung 0,05 s länger (alle Abschnitte gleichmäßig)">+</button></div><p class="small muted">Die Bilder danach rücken mit. Auf der Zeitleiste: Punkt antippen wählt das Bild, wischen verschiebt die Leiste.</p></div>
 <p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen; die Bilder danach rücken mit. Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen. Mit der Tastatur: ← / → für das gewählte Bild.</p>
@@ -351,6 +352,7 @@ ${easeGuide()}
     const dur0 = e.d.dur || 1.6;
     const d = dialog();
     S = { id, title: title || id, e, keys, frames, k0, k0app, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
+    S.pause = keys.length > 2 && same(rounded(frames[0]), rounded(frames[1]));
     d.querySelector('.f3d-dlg-title').textContent = `✎ ${S.title}`;
     const hb = d.querySelector('[data-pe="hide"]');
     hb.setAttribute('aria-pressed', 'false');
@@ -367,6 +369,12 @@ ${easeGuide()}
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
   const holdOf = (i) => { let j = i; while (j > 0 && same(rounded(S.frames[j - 1]), rounded(S.frames[i]))) j--; return j; };
+  // Pause am Anfang: ist Bild 2 nur das stehende Bild 1 (Halten vor der Bewegung), zeigt der Editor es nicht als eigenes
+  // Bild, sondern als Einstellung „Pause am Anfang“ (im Reiter Bild beim ersten Bild). Nummern zählen dann ohne dieses Bild.
+  const PZ = () => !!(S && S.pause);
+  const nr = (i) => (PZ() && i >= 1 ? i : i + 1);
+  const nTot = () => S.keys.length - (PZ() ? 1 : 0);
+  const shown = (i) => !(PZ() && i === 1);
   // Zeitleiste, Bildleiste und Reiter „Bild“ auf den Stand bringen: jedes Bild ist eine Marke an seinem Zeitpunkt
   // (★ Kernbild, gestrichelt = hält das Bild davor, rot = Übergang Kime); Klick wählt, Ziehen ändert den Zeitpunkt
   function frames() {
@@ -375,10 +383,11 @@ ${easeGuide()}
     const ed = [...new Set(Object.keys(S.edits).map(Number).filter((i) => !same(rounded(S.edits[i]), rounded(S.frames[i]))).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
     const h = holdOf(S.k);
     const isK = S.k === S.k0;
-    const head = n > 1 ? `Bild ${S.k + 1} von ${n}${isK ? ' · Kernbild ★' : ''}` : 'Standbild';
+    const edS = ed.filter(shown);
+    const head = n > 1 ? `Bild ${nr(S.k)} von ${nTot()}${isK ? ' · Kernbild ★' : ''}` : 'Standbild';
     d.querySelector('.pe-bh').textContent = head;
-    d.querySelector('.pe-kh').textContent = `${partOf(S.sel).label}${n > 1 ? ` · Bild ${S.k + 1}${isK ? ' ★' : ''}` : ''}`;
-    d.querySelector('.pe-finfo').innerHTML = [isK && S.k0 !== S.k0app ? 'Kernbild neu gewählt' : '', h !== S.k ? `gleiche Pose wie Bild ${h + 1}` : '', ed.length ? `<span class="pe-ed">geändert: Bild ${ed.map((i) => i + 1).join(', ')}</span>` : ''].filter(Boolean).join(' · ');
+    d.querySelector('.pe-kh').textContent = `${partOf(S.sel).label}${n > 1 ? ` · Bild ${nr(S.k)}${isK ? ' ★' : ''}` : ''}`;
+    d.querySelector('.pe-finfo').innerHTML = [isK && S.k0 !== S.k0app ? 'Kernbild neu gewählt' : '', h !== S.k ? `gleiche Pose wie Bild ${nr(h)}` : '', edS.length ? `<span class="pe-ed">geändert: Bild ${edS.map(nr).join(', ')}</span>` : ''].filter(Boolean).join(' · ');
     // Kamera fürs Kernbild: nur über den Knopf übernommen, Drehen zum Anschauen ändert nichts
     const kc = S.kcam || camInfo0();
     d.querySelector('.pe-camv').textContent = `Kamera ${n > 1 ? 'fürs Kernbild' : 'des Bildes'}: ${kc.y}° · ${kc.p}°${S.kcam ? ' (neu übernommen)' : ' (wie in der App)'}`;
@@ -408,14 +417,16 @@ ${easeGuide()}
     const scS = S.drag ? S.drag.scS : total || 1;
     const pos = (t) => `${clamp(sec(t) / scS, 0, 1) * 100}%`;
     tr.innerHTML = S.tm.map((x, i) => {
+      if (!shown(i)) return `<span class="pe-pause" data-a="${S.tm[0].t}" data-b="${x.t}" title="Pause am Anfang: ${sec(x.t).toFixed(2)} s"></span>`;
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
-      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${nr(i)} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${nr(holdOf(i))}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${nr(i)}</span></button>`;
     }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
     // Touch: so breit, dass auch die zwei dichtesten Punkte mindestens 28 px auseinanderliegen (höchstens 2400 px)
     if (d.classList.contains('pe-coarse')) {
       let minF = 1;
-      for (let i = 1; i < n; i++) minF = Math.min(minF, (S.tm[i].t - S.tm[i - 1].t) / (S.tm[n - 1].t - S.tm[0].t || 1));
+      const vis = S.tm.map((_, i) => i).filter(shown);
+      for (let k = 1; k < vis.length; k++) minF = Math.min(minF, (S.tm[vis[k]].t - S.tm[vis[k - 1]].t) / (S.tm[n - 1].t - S.tm[0].t || 1));
       tr.style.minWidth = `${Math.round(Math.min(2400, Math.max(n * 34, 28 / Math.max(minF, 0.005))))}px`;
     }
     // gewähltes Bild sichtbar halten, wenn die Zeitleiste seitlich wischbar ist
@@ -430,7 +441,7 @@ ${easeGuide()}
     }
     // Lage per Skript (die Seite erlaubt keine style-Angaben im HTML)
     tr.querySelectorAll('[data-mk]').forEach((m) => (m.style.left = pos(S.tm[+m.dataset.mk].t)));
-    tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${(((+g.dataset.b - +g.dataset.a) * S.dur) / scS) * 100}%`; });
+    tr.querySelectorAll('.pe-seg, .pe-pause').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${(((+g.dataset.b - +g.dataset.a) * S.dur) / scS) * 100}%`; });
     // Beim Ziehen: Zeit über dem Punkt bzw. Gesamtdauer über dem Griff
     if (S.drag && S.drag.label) {
       const lab = tr.querySelector('.pe-dlab');
@@ -441,6 +452,9 @@ ${easeGuide()}
     // Reiter „Bild“
     const first = S.k === 0;
     const seg = first ? 0 : (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
+    const pr = d.querySelector('.pe-pauserow');
+    pr.hidden = !(first && PZ());
+    if (PZ()) d.querySelector('.pe-pv').textContent = `${((S.tm[1].t - S.tm[0].t) * S.dur).toFixed(2)} s`;
     d.querySelector('.pe-tsv').textContent = first ? '–' : `${seg.toFixed(2)} s`;
     d.querySelector('.pe-ttv').textContent = `${total.toFixed(2)} s`;
     d.querySelectorAll('[data-pe="seg-"], [data-pe="seg+"]').forEach((b) => (b.disabled = first));
@@ -475,7 +489,7 @@ ${easeGuide()}
         const b = tr.getBoundingClientRect();
         const at = ((ev.clientX - b.left) / b.width) * total();
         let best = 0;
-        S.tm.forEach((x, k) => { if (Math.abs(secOf(k) - at) < Math.abs(secOf(best) - at)) best = k; });
+        S.tm.forEach((x, k) => { if (shown(k) && Math.abs(secOf(k) - at) < Math.abs(secOf(best) - at)) best = k; });
         m = tr.querySelector(`[data-mk="${best}"]`);
         if (!m) return;
       }
@@ -573,6 +587,11 @@ ${easeGuide()}
   function keep() {
     if (!same(rounded(S.P), rounded(S.orig))) S.edits[S.k] = clone(S.P);
     else delete S.edits[S.k];
+    // Pause am Anfang: das stehende Bild bleibt genau wie Bild 1
+    if (PZ() && S.k === 0) {
+      if (S.edits[0]) S.edits[1] = clone(S.edits[0]);
+      else delete S.edits[1];
+    }
   }
 
   // Übergänge, wie sie im Editor heißen (e in den keys von js/figur-posen.js)
@@ -763,11 +782,14 @@ ${easeGuide()}
     // Immer die ganze Bewegung (jedes Bild vollständig, gehaltene Bilder als Verweis)
     const all = n > 1;
     const k0t = Math.round(S.tm[S.k0].t * 1000) / 1000;
-    const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${n} Bilder` : `Bewegung mit ${n} Bildern`}, Kernbild = Bild ${S.k0 + 1} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${S.k0app + 1})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${S.dur}${S.dur !== S.dur0 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
+    const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${nTot()} Bilder` : `Bewegung mit ${nTot()} Bildern`}, Kernbild = Bild ${nr(S.k0)} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${nr(S.k0app)})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${S.dur}${S.dur !== S.dur0 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
     const kc = S.kcam || camInfo0();
     lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
+    // Pause am Anfang statt eines eigenen Bildes (im Code: Bild 1 noch einmal zum Zeitpunkt t der Pause)
+    if (PZ()) lines.push(`Pause am Anfang: ${((S.tm[1].t - S.tm[0].t) * S.dur).toFixed(2)} s (t = ${Math.round(S.tm[1].t * 1000) / 1000})${secChanged(1) ? ', geändert' : ''}`);
     const list = all ? S.keys.map((_, i) => i) : [...new Set(Object.keys(S.edits).map(Number).concat(S.k).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
     list.forEach((i) => {
+      if (!shown(i)) return;
       const P = S.edits[i] || S.frames[i];
       const ch = changedParts(P, S.frames[i]);
       if (secChanged(i)) ch.push('Zeitpunkt');
@@ -778,7 +800,7 @@ ${easeGuide()}
         const eh = (S.edits[h] || S.frames[h]);
         const hold = h !== i && same(rounded(P), rounded(eh));
         const ease = i ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : '';
-        lines.push('', `Bild ${i + 1} von ${n} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}) – ${hold ? `gleiche Pose wie Bild ${h + 1}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
+        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}) – ${hold ? `gleiche Pose wie Bild ${nr(h)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
         if (!hold) lines.push(lit(diff(P)));
         return;
       }
@@ -808,6 +830,12 @@ ${easeGuide()}
     if (!head) return 'Kein Text des Bewegungs-Editors gefunden.';
     if (!head.includes(`· ${S.id} ·`)) return `Der Text gehört zu einer anderen Figur (${(head.split(' · ')[1] || '?')}), nicht zu ${S.id}.`;
     const n = S.keys.length;
+    // Neues Format mit „Pause am Anfang“: Bildnummern zählen ohne das stehende Bild 2
+    const pzl = L.find((l) => /^Pause am Anfang: /.test(l));
+    const pzm = pzl && pzl.match(/^Pause am Anfang: ([\d.]+) s/);
+    if (pzl && !PZ()) return 'Der Text hat eine Pause am Anfang, diese Figur nicht.';
+    const nT = pzl ? n - 1 : n;
+    const kix = (d) => (pzl && d >= 2 ? d : d - 1);
     const lit2obj = (l) => JSON.parse(l.replace(/([{,]\s*)([A-Za-z_]\w*)\s*:/g, '$1"$2":'));
     const easeOf = (name) => Object.keys(EASE).find((k) => name.startsWith(EASE[k])) || null;
     const got = {};
@@ -816,8 +844,8 @@ ${easeGuide()}
         let i = null;
         let m = L[li].match(/^Bild (\d+) von (\d+) \(t = ([\d.]+)(?:, Übergang ([^,)]+))?/);
         if (m) {
-          if (+m[2] !== n) return `Der Text hat ${m[2]} Bilder, die Figur hier ${n}.`;
-          i = +m[1] - 1;
+          if (+m[2] !== nT) return `Der Text hat ${m[2]} Bilder, die Figur hier ${nT}.`;
+          i = kix(+m[1]);
           got[i] = { t: +m[3], e: m[4] ? easeOf(m[4]) : null };
         } else if (n === 1 && /^Standbild/.test(L[li])) {
           i = 0;
@@ -825,7 +853,7 @@ ${easeGuide()}
         }
         if (i == null) continue;
         const same2 = L[li].match(/gleiche Pose wie Bild (\d+)/);
-        if (same2) got[i].sameAs = +same2[1] - 1;
+        if (same2) got[i].sameAs = kix(+same2[1]);
         else if (L[li + 1] && L[li + 1][0] === '{') got[i].p = E.full(lit2obj(L[li + 1]));
       }
     } catch (err) {
@@ -845,9 +873,16 @@ ${easeGuide()}
       if (g.e) S.tm[i].e = g.e;
     });
     const k = head.match(/Kernbild = Bild (\d+)/);
-    if (k && S.keys[+k[1] - 1]) S.k0 = +k[1] - 1;
+    if (k && S.keys[kix(+k[1])]) S.k0 = kix(+k[1]);
     const du = head.match(/\(dur ([\d.]+)/);
     if (du) S.dur = +du[1];
+    // Pause: das stehende Bild bekommt Pose und Zeit aus „Pause am Anfang“
+    if (pzm) {
+      if (S.edits[0]) S.edits[1] = clone(S.edits[0]);
+      else delete S.edits[1];
+      const tp = pzl.match(/t = ([\d.]+)/);
+      S.tm[1].t = tp ? +tp[1] : Math.round((S.tm[0].t + +pzm[1] / S.dur) * 1000) / 1000;
+    }
     const cam = L.find((l) => /^Kamera/.test(l));
     const cm = cam && cam.match(/Drehung (-?\d+)°, Neigung (-?\d+)°/);
     if (cm && !/wie in der App/.test(cam)) {
@@ -858,7 +893,7 @@ ${easeGuide()}
     const at = S.k;
     S.k = null;
     goFrame(at);
-    return `Importiert: ${idx.length} Bild${idx.length === 1 ? '' : 'er'}${k ? `, Kernbild Bild ${S.k0 + 1}` : ''}${du ? `, Dauer ${S.dur}` : ''}${S.kcam ? ', Kamera' : ''}.`;
+    return `Importiert: ${idx.length} Bild${idx.length === 1 ? '' : 'er'}${k ? `, Kernbild Bild ${nr(S.k0)}` : ''}${du ? `, Dauer ${S.dur}` : ''}${S.kcam ? ', Kamera' : ''}.`;
   }
 
   function onClick(ev) {
@@ -923,6 +958,12 @@ ${easeGuide()}
       if (/^Importiert/.test(r)) S.dlg.querySelector('.pe-imp').hidden = true;
       return;
     }
+    if (a === 'pz-' || a === 'pz+') {
+      if (!PZ()) return;
+      const pz = (S.tm[1].t - S.tm[0].t) * S.dur;
+      setSeg(1, clamp(Math.round((pz + (a === 'pz+' ? 0.05 : -0.05)) * 20) / 20, 0.05, 3));
+      return;
+    }
     // Handy: Zeit mit − / + (0,05 s)
     if (a === 'seg-' || a === 'seg+') {
       if (!S.k) return;
@@ -952,12 +993,13 @@ ${easeGuide()}
       S.k0 = S.k;
       save();
       text();
-      msg.textContent = `Bild ${S.k + 1} ist jetzt das Kernbild.`;
+      msg.textContent = `Bild ${nr(S.k)} ist jetzt das Kernbild.`;
       return;
     }
     if (a === 'fprev' || a === 'fnext') {
       if (S.play) S.play = null;
-      const i = clamp(S.k + (a === 'fnext' ? 1 : -1), 0, S.keys.length - 1);
+      let i = clamp(S.k + (a === 'fnext' ? 1 : -1), 0, S.keys.length - 1);
+      if (!shown(i)) i = a === 'fnext' ? 2 : 0;
       if (i !== S.k) goFrame(i);
       else { frames(); draw(); }
       return;

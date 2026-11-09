@@ -2833,6 +2833,16 @@ main:fullscreen {
   pointer-events: none;
 }
 
+/* Pause am Anfang: gestreifter Abschnitt statt eines eigenen Bildes */
+.pe-pause {
+  position: absolute;
+  top: 18px;
+  height: 9px;
+  border-radius: 4px;
+  background: repeating-linear-gradient(135deg, var(--line) 0 4px, transparent 4px 8px);
+  pointer-events: none;
+}
+
 /* Griff am Ende: ganze Bewegung strecken oder stauchen */
 .pe-endh {
   position: absolute;
