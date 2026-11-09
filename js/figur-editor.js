@@ -690,7 +690,7 @@ ${easeGuide()}
     const changedParts = (P, O) => PARTS.filter((p) => FIELDS[p.id].some((f) => !same(rounded(get(P, f), f.split('.').pop()), rounded(get(O, f), f.split('.').pop())))).map((p) => p.label);
     const n = S.keys.length;
     const all = S.all && n > 1;
-    const k0t = Math.round(S.tm[S.k0].t * 100) / 100;
+    const k0t = Math.round(S.tm[S.k0].t * 1000) / 1000;
     const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${n} Bilder` : `Bewegung mit ${n} Bildern`}, Kernbild = Bild ${S.k0 + 1} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${S.k0app + 1})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${S.dur}${S.dur !== S.dur0 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
     const kc = S.kcam || camInfo0();
     lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
@@ -701,7 +701,7 @@ ${easeGuide()}
       if (secChanged(i)) ch.push('Zeitpunkt');
       if (S.tm[i].e !== S.tk[i].e) ch.push('Übergang');
       const h = holdOf(i);
-      const tt = Math.round(S.tm[i].t * 100) / 100;
+      const tt = Math.round(S.tm[i].t * 1000) / 1000;
       if (all) {
         const eh = (S.edits[h] || S.frames[h]);
         const hold = h !== i && same(rounded(P), rounded(eh));
