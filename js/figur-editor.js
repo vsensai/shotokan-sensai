@@ -271,7 +271,7 @@
 <div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
 </div>
 <div class="pe-side">
-<div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Ausgabe, ganze Bewegung, Import">Ausgabe</button></div>
+<div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Text der ganzen Bewegung zum Kopieren, Import">Ausgabe</button></div>
 <div class="pe-pane" data-pane="bild">
 <div class="pe-ph"><h3 class="pe-bh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
 <p class="pe-finfo small"></p>
@@ -290,11 +290,10 @@ ${easeGuide()}
 <p class="pe-parthint small muted">Anderes Körperteil: seinen Punkt im Bild antippen.</p>
 <div class="pe-panel"></div></div>
 <div class="pe-pane" data-pane="ausgabe">
-<button type="button" class="pe-wide" data-pe="all" aria-pressed="false" title="An: alle Bilder vollständig ausgeben (ganze Bewegung übernehmen). Aus: nur geänderte Bilder">Ganze Bewegung ausgeben</button>
 <button type="button" class="pe-wide" data-pe="imp" title="Einen früher kopierten Text einfügen und weiterbearbeiten">Importieren</button>
 <div class="pe-imp" hidden><textarea class="pe-imptext" rows="5" aria-label="Text zum Importieren" placeholder="Kopierten Text des Bewegungs-Editors hier einfügen"></textarea><div class="pe-acts"><button type="button" class="btn" data-pe="impok" title="Posen, Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera aus dem Text übernehmen">Übernehmen</button><button type="button" class="pe-wide" data-pe="impx" title="Import abbrechen">Abbrechen</button></div></div>
-<details class="pe-outbox"><summary title="Den Text zeigen, der beim Kopieren in die Zwischenablage kommt">Text anzeigen</summary><textarea class="pe-text" rows="8" readonly aria-label="Pose als Text"></textarea></details></div>
-<div class="pe-sticky"><p class="pe-msg muted small" aria-live="polite"></p><button type="button" class="btn" data-pe="copy" title="Den Text in die Zwischenablage kopieren – zum Einfügen im Chat oder zum Sichern (später mit „Importieren“ zurückholen)">Pose kopieren</button></div>
+<p class="pe-outhint small muted">Dieser Text kommt beim Kopieren in die Zwischenablage – alle Bilder der Bewegung, je mit dem, was geändert ist.</p><textarea class="pe-text" readonly aria-label="Bewegung als Text"></textarea></div>
+<div class="pe-sticky"><p class="pe-msg muted small" aria-live="polite"></p><button type="button" class="btn" data-pe="copy" title="Den Text in die Zwischenablage kopieren – zum Einfügen im Chat oder zum Sichern (später mit „Importieren“ zurückholen)">Kopieren</button></div>
 </div></div>`;
     document.body.appendChild(d);
     d.querySelector('.pe-close').addEventListener('click', () => d.close());
@@ -351,15 +350,12 @@ ${easeGuide()}
     const tm = tk.map((x) => Object.assign({}, x));
     const dur0 = e.d.dur || 1.6;
     const d = dialog();
-    S = { id, title: title || id, e, keys, frames, k0, k0app, all: false, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
+    S = { id, title: title || id, e, keys, frames, k0, k0app, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
     d.querySelector('.f3d-dlg-title').textContent = `✎ ${S.title}`;
     const hb = d.querySelector('[data-pe="hide"]');
     hb.setAttribute('aria-pressed', 'false');
     hb.textContent = 'Punkte aus';
     d.querySelector('.pe-imp').hidden = true;
-    const ab = d.querySelector('[data-pe="all"]');
-    ab.hidden = keys.length < 2;
-    ab.setAttribute('aria-pressed', String(S.all));
     // Standbild: keine Zeitleiste, kein Timing
     d.querySelector('.pe-tl').hidden = keys.length < 2;
     d.querySelector('.pe-movonly').hidden = keys.length < 2;
@@ -689,7 +685,8 @@ ${easeGuide()}
     keep();
     const changedParts = (P, O) => PARTS.filter((p) => FIELDS[p.id].some((f) => !same(rounded(get(P, f), f.split('.').pop()), rounded(get(O, f), f.split('.').pop())))).map((p) => p.label);
     const n = S.keys.length;
-    const all = S.all && n > 1;
+    // Immer die ganze Bewegung (jedes Bild vollständig, gehaltene Bilder als Verweis)
+    const all = n > 1;
     const k0t = Math.round(S.tm[S.k0].t * 1000) / 1000;
     const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${n} Bilder` : `Bewegung mit ${n} Bildern`}, Kernbild = Bild ${S.k0 + 1} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${S.k0app + 1})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${S.dur}${S.dur !== S.dur0 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
     const kc = S.kcam || camInfo0();
@@ -713,8 +710,6 @@ ${easeGuide()}
       const info = n > 1 ? `Bild ${i + 1} von ${n} (t = ${tt}${i ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : ''}${i === S.k0 ? ', Kernbild' : ''}${h !== i ? `, in der App gleiche Pose wie Bild ${h + 1}` : ''})` : 'Standbild';
       lines.push('', `${info} – geändert: ${ch.length ? ch.join(', ') : 'nichts'}`, lit(diff(P)));
     });
-    S.dlg.querySelector('[data-pe="copy"]').textContent = all ? 'Bewegung kopieren' : 'Pose kopieren';
-    S.dlg.querySelector('[data-pe="all"]').textContent = all ? '✓ Ganze Bewegung' : 'Ganze Bewegung ausgeben';
     S.text = lines.join('\n');
     S.dlg.querySelector('.pe-text').value = S.text;
   }
@@ -785,8 +780,6 @@ ${easeGuide()}
       Object.assign(S.cam, { yaw: S.kcam.y, pitch: S.kcam.p });
       S.fit = true;
     }
-    S.all = /ganze Bewegung/.test(head);
-    S.dlg.querySelector('[data-pe="all"]').setAttribute('aria-pressed', String(S.all));
     const at = S.k;
     S.k = null;
     goFrame(at);
@@ -832,13 +825,6 @@ ${easeGuide()}
       draw();
     }
     if (a === 'play') return play();
-    if (a === 'all') {
-      S.all = !S.all;
-      b.setAttribute('aria-pressed', String(S.all));
-      save();
-      text();
-      return;
-    }
     if (a === 'full') return full(!S.dlg.classList.contains('pe-full'));
     if (a === 'imp' || a === 'impx') {
       const box = S.dlg.querySelector('.pe-imp');
@@ -896,7 +882,7 @@ ${easeGuide()}
       const ta = S.dlg.querySelector('.pe-text');
       const done = () => (msg.textContent = 'Kopiert – jetzt im Chat einfügen.');
       const fallback = () => {
-        ta.closest('details').open = true;
+        tab('ausgabe');
         ta.focus();
         ta.select();
         let ok = false;

@@ -3067,11 +3067,15 @@ main:fullscreen {
   flex: 1;
 }
 
-.pe-outbox summary {
-  cursor: pointer;
-  font-size: 0.8rem;
-  color: var(--muted);
-  margin: 0.2rem 0;
+/* Ausgabe: das Textfeld füllt den freien Platz des Reiters */
+.pe-pane[data-pane="ausgabe"] .pe-text {
+  flex: 1 1 auto;
+  min-height: 10rem;
+  resize: none;
+}
+
+.pe-outhint {
+  margin: 0;
 }
 
 /* Kopieren immer unten erreichbar */
