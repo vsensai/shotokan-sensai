@@ -278,9 +278,8 @@
 <div class="pe-movonly">
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
 ${easeGuide()}
-<div class="pe-row"><span>Zeit vom Bild davor <output class="pe-sv"></output></span>${pm('pe-sg', 'Zeit vom Bild davor', 0.05)}<small class="muted pe-tthint">Die Bilder danach rücken mit. Auch auf der Zeitleiste: Bild anfassen und ziehen.</small></div>
 <p class="pe-total"></p>
-<div class="pe-acts"><button type="button" class="pe-wide" data-pe="faster" title="Alle Abschnitte 10 % kürzer – der Rhythmus bleibt gleich">alles schneller</button><button type="button" class="pe-wide" data-pe="slower" title="Alle Abschnitte 10 % länger – der Rhythmus bleibt gleich">alles langsamer</button></div>
+<p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen (die Bilder danach rücken mit). Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen.</p>
 <label class="pe-row"><span>Tempo beim Abspielen</span><select class="pe-speed" title="Tempo beim Abspielen mit ▶ (ändert die Bewegung nicht)"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label>
 <button type="button" class="pe-wide pe-setk" data-pe="fbest"></button>
 </div>
@@ -310,7 +309,14 @@ ${easeGuide()}
     bindStage(d.querySelector('.pe-stage'));
     bindTrack(d.querySelector('.pe-track'));
     bindGrip(d.querySelector('.pe-grip'), d);
-    d.querySelector('.pe-sg').addEventListener('input', (ev) => setSeg(S.k, +ev.target.value));
+    // Pfeiltasten (PC): Zeit vom Bild davor in 0,05-s-Schritten
+    d.addEventListener('keydown', (ev) => {
+      if (!S || S.k === 0 || S.keys.length < 2 || !/^Arrow(Left|Right)$/.test(ev.key)) return;
+      if (ev.target.closest('input, textarea, select')) return;
+      ev.preventDefault();
+      const seg = (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
+      setSeg(S.k, clamp(Math.round((seg + (ev.key === 'ArrowRight' ? 0.05 : -0.05)) * 20) / 20, 0.05, 3));
+    });
     d.querySelector('.pe-te').addEventListener('change', (ev) => { S.tm[S.k].e = ev.target.value; timing(); });
     d.querySelector('.pe-speed').addEventListener('change', (ev) => { S.speed = +ev.target.value; });
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
@@ -400,78 +406,89 @@ ${easeGuide()}
     // Zeitleiste
     const tr = d.querySelector('.pe-track');
     // Maßstab: vom ersten bis zum letzten Bild (die Zeitleiste zeigt die tatsächliche Dauer)
-    const sc = S.tm[n - 1].t - S.tm[0].t || 1;
-    const pos = (t) => `${clamp((t - S.tm[0].t) / sc, 0, 1) * 100}%`;
     const sec = (t) => (t - S.tm[0].t) * S.dur;
+    const total = sec(S.tm[n - 1].t);
+    // Beim Ziehen bleibt der Maßstab vom Beginn des Ziehens, damit die Punkte nicht unter dem Finger wegspringen
+    const scS = S.drag ? S.drag.scS : total || 1;
+    const pos = (t) => `${clamp(sec(t) / scS, 0, 1) * 100}%`;
     tr.innerHTML = S.tm.map((x, i) => {
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
-      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert den Zeitpunkt' : ''}"><span>${i + 1}</span></button>`;
-    }).join('') + `<span class="pe-tick">0 s</span><span class="pe-tick pe-tend">${sec(S.tm[n - 1].t).toFixed(2)} s</span><span class="pe-head" hidden></span>`;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
+    }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)">${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
     // Lage per Skript (die Seite erlaubt keine style-Angaben im HTML)
     tr.querySelectorAll('[data-mk]').forEach((m) => (m.style.left = pos(S.tm[+m.dataset.mk].t)));
-    tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${((+g.dataset.b - +g.dataset.a) / sc) * 100}%`; });
+    tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${(((+g.dataset.b - +g.dataset.a) * S.dur) / scS) * 100}%`; });
+    // Beim Ziehen: Zeit über dem Punkt bzw. Gesamtdauer über dem Griff
+    if (S.drag && S.drag.label) {
+      const lab = tr.querySelector('.pe-dlab');
+      lab.hidden = false;
+      lab.textContent = S.drag.label;
+      lab.style.left = S.drag.end ? '100%' : pos(S.tm[S.drag.i].t);
+    }
     // Reiter „Bild“
     const first = S.k === 0;
-    const sg = d.querySelector('.pe-sg');
-    sg.min = 0.05;
-    sg.max = 3;
-    sg.step = 0.01;
-    sg.disabled = first;
-    d.querySelectorAll('[data-pm="pe-sg"]').forEach((b) => (b.disabled = first));
     const seg = first ? 0 : (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
-    if (Math.abs(+sg.value - seg) > 0.004) sg.value = seg;
-    d.querySelector('.pe-sv').textContent = first ? 'erstes Bild' : `${seg.toFixed(2)} s`;
-    d.querySelector('.pe-total').textContent = `ganze Bewegung: ${sec(S.tm[n - 1].t).toFixed(2)} s`;
+    d.querySelector('.pe-total').textContent = `${first ? 'erstes Bild' : `${seg.toFixed(2)} s vom Bild davor`} · ganze Bewegung ${total.toFixed(2)} s`;
     const te = d.querySelector('.pe-te');
     te.disabled = first;
     te.value = S.tm[S.k].e in EASE_UI ? S.tm[S.k].e : 'io';
     te.title = first ? 'Das erste Bild hat keinen Übergang' : EASE_HELP[te.value];
     d.querySelectorAll('.pe-eh').forEach((x) => x.classList.toggle('on', !first && x.dataset.eh === te.value));
   }
-  // Zeitleiste: Marke antippen wählt das Bild, Ziehen (ab 4 Pixel) verschiebt seinen Zeitpunkt zwischen den Nachbarn
+  // Zeitleiste nur mit Punkten: antippen wählt das Bild; ziehen (ab 4 Pixel) ändert die Zeit vom Bild davor in
+  // 0,05-s-Schritten, die Bilder danach rücken mit; der Griff am Ende streckt oder staucht die ganze Bewegung
   function bindTrack(tr) {
-    let drag = null;
+    const total = () => (S.tm[S.tm.length - 1].t - S.tm[0].t) * S.dur;
+    const secOf = (i) => (S.tm[i].t - S.tm[0].t) * S.dur;
+    let g = null;
     tr.addEventListener('pointerdown', (ev) => {
       if (!S) return;
-      // Marke unter dem Finger, sonst die nächstgelegene
-      let m = ev.target.closest('[data-mk]');
-      if (!m) {
-        const b = tr.getBoundingClientRect();
-        const t = S.tm[0].t + ((ev.clientX - b.left) / b.width) * (S.tm[S.tm.length - 1].t - S.tm[0].t || 1);
-        let best = 0;
-        S.tm.forEach((x, k) => { if (Math.abs(x.t - t) < Math.abs(S.tm[best].t - t)) best = k; });
-        m = tr.querySelector(`[data-mk="${best}"]`);
-        if (!m) return;
-      }
       ev.preventDefault();
       if (S.play) S.play = null;
-      const i = +m.dataset.mk;
-      if (i !== S.k) goFrame(i);
-      drag = { i, x0: ev.clientX, moved: false, id: ev.pointerId, t0: S.tm[0].t, sc: S.tm[S.tm.length - 1].t - S.tm[0].t || 1 };
+      if (ev.target.closest('[data-endh]')) {
+        g = { end: true, x0: ev.clientX, id: ev.pointerId, moved: false, tot0: total(), dur0: S.dur, w: tr.getBoundingClientRect().width };
+      } else {
+        // Punkt unter dem Finger, sonst der nächstgelegene
+        let m = ev.target.closest('[data-mk]');
+        if (!m) {
+          const b = tr.getBoundingClientRect();
+          const at = ((ev.clientX - b.left) / b.width) * total();
+          let best = 0;
+          S.tm.forEach((x, k) => { if (Math.abs(secOf(k) - at) < Math.abs(secOf(best) - at)) best = k; });
+          m = tr.querySelector(`[data-mk="${best}"]`);
+          if (!m) return;
+        }
+        const i = +m.dataset.mk;
+        if (i !== S.k) goFrame(i);
+        g = { i, x0: ev.clientX, id: ev.pointerId, moved: false };
+      }
       tr.setPointerCapture(ev.pointerId);
     });
     tr.addEventListener('pointermove', (ev) => {
-      if (!drag || !S || drag.i === 0 || ev.pointerId !== drag.id) return;
-      if (!drag.moved && Math.abs(ev.clientX - drag.x0) < 4) return;
-      drag.moved = true;
+      if (!g || !S || ev.pointerId !== g.id) return;
+      if (!g.moved && Math.abs(ev.clientX - g.x0) < 4) return;
+      if (!g.end && g.i === 0) return;
+      if (!g.moved) { g.moved = true; S.drag = { scS: total() || 1, end: g.end, i: g.i }; }
       const b = tr.getBoundingClientRect();
-      const i = drag.i;
-      const lo = S.tm[i - 1].t + 0.01;
-      const hi = i === S.tm.length - 1 ? 1 : S.tm[i + 1].t - 0.01;
-      const t = Math.round(clamp(drag.t0 + ((ev.clientX - b.left) / b.width) * drag.sc, lo, hi) * 1000) / 1000;
-      if (t === S.tm[i].t) return;
-      S.tm[i].t = t;
-      S.t = t;
-      const m = tr.querySelector(`[data-mk="${i}"]`);
-      if (m) m.style.left = `${clamp((t - drag.t0) / drag.sc, 0, 1) * 100}%`;
-      S.dlg.querySelector('.pe-sv').textContent = `${((t - S.tm[i - 1].t) * S.dur).toFixed(2)} s`;
+      if (g.end) {
+        const tot = clamp(Math.round(((g.tot0 * (b.width + ev.clientX - g.x0)) / b.width) * 20) / 20, 0.3, 10);
+        S.dur = Math.round(((g.dur0 * tot) / g.tot0) * 10000) / 10000;
+        S.drag.label = `ganze Bewegung ${tot.toFixed(2)} s`;
+        timing();
+        return;
+      }
+      const at = ((ev.clientX - b.left) / b.width) * S.drag.scS;
+      const seg = clamp(Math.round((at - secOf(g.i - 1)) * 20) / 20, 0.05, 3);
+      S.drag.label = `${seg.toFixed(2)} s`;
+      if (Math.abs(seg - (S.tm[g.i].t - S.tm[g.i - 1].t) * S.dur) > 0.001) setSeg(g.i, seg);
+      else frames();
     });
     const up = (ev) => {
-      if (!drag || ev.pointerId !== drag.id) return;
-      const moved = drag.moved;
-      drag = null;
-      if (S && moved) timing();
+      if (!g || ev.pointerId !== g.id) return;
+      const moved = g.moved;
+      g = null;
+      if (S) { S.drag = null; if (moved) timing(); }
     };
     tr.addEventListener('pointerup', up);
     tr.addEventListener('pointercancel', up);
@@ -838,11 +855,6 @@ ${easeGuide()}
       const r = importText(S.dlg.querySelector('.pe-imptext').value);
       msg.textContent = r;
       if (/^Importiert/.test(r)) S.dlg.querySelector('.pe-imp').hidden = true;
-      return;
-    }
-    if (a === 'faster' || a === 'slower') {
-      S.dur = Math.round(S.dur * (a === 'faster' ? 0.9 : 1 / 0.9) * 1000) / 1000;
-      timing();
       return;
     }
     if (a === 'camset' || a === 'camreset') {

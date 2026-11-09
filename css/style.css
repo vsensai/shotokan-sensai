@@ -2743,9 +2743,38 @@ main:fullscreen {
   white-space: nowrap;
 }
 
-.pe-tend {
-  left: auto;
-  right: 0;
+/* Griff am Ende: ganze Bewegung strecken oder stauchen */
+.pe-endh {
+  position: absolute;
+  top: 30px;
+  right: -12px;
+  padding: 0 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+/* Beim Ziehen: Zeit über dem Punkt */
+.pe-dlab {
+  position: absolute;
+  top: -6px;
+  transform: translateX(-50%);
+  padding: 0 0.35rem;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--card);
+  font-size: 0.66rem;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2;
 }
 
 .pe-head {

@@ -30,9 +30,9 @@
   SK.bookSrc = (n, vol) => `${SK.bookName(vol)}, ${SK.bookPages(n, vol)}`;
   SK.bookSrc2 = (n) => SK.bookSrc(n, 2);
   // Bei jeder veröffentlichten Änderung hochzählen: node tools/version.js patch|minor|major (setzt auch ?v= in index.html)
-  SK.VERSION = '1.61.12';
+  SK.VERSION = '1.61.13';
   SK.VERSION_DATE = '09.11.2026';
-  SK.VERSION_TIME = '12:40';
+  SK.VERSION_TIME = '13:07';
 
   // Lektionstexte als Funktion (learn: () => `…`) werden erst beim ersten Öffnen erzeugt.
   SK.lazyLearn = (unit) => unit.lessons.forEach((l) => typeof l.learn === 'function' && SK.util.lazy(l, 'learn', l.learn));
