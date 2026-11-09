@@ -681,14 +681,15 @@
   // Mikazuki-geri wie in Heian Godan 15: aus Kiba-dachi, die linke offene Hand zur linken Seite gestreckt (Ziel), das linke
   // Bein trägt, die Hüfte dreht links herum; der rechte Fuß schwingt im Bogen von außen herein und tritt mit der Sohle
   // in die linke Handfläche
-  const MK_T = [0.92, 1.15, 0.02];
-  const MK_HAND = (p) => M(p, { hL: chestAt(p, V.add(MK_T, [0.025, -0.065, -0.01])), oL: 1, pL: chestAt(p, [-1, 0, -0.15], true), fL: chestAt(p, [0, 1, 0.15], true), hR: H.hip });
-  const MK0 = MK_HAND(M(KB, { look: 90 }));
-  const MK1 = MK_HAND(BAL(M(KB, { pelvis: [0.3, 0.78, 0.02], yaw: 25, look: 80, L: { yaw: 30, kp: [0.8, 0.2, 1] }, R: { x: -0.32, z: 0.12, y: 0.42, yaw: 0, pitch: -10, kp: [-0.6, 0.3, 1] }, w: [1, 0] }), 'L'));
-  const MK2 = MK_HAND(M(KB, { pelvis: [0.33, 0.82, -0.02], yaw: 40, look: 80, roll: 8, L: { yaw: 55, kp: [0.6, 0.2, 1] }, R: { x: MK_T[0] - 0.048, y: MK_T[1] - 0.04, z: MK_T[2] - 0.03, yaw: 0, pitch: 53, sole: [1, 0, 0], kp: [0, 0.3, 1] }, w: [1, 0] }));
+  // Ablauf bis zum Kime im Bewegungs-Editor eingestellt; danach derselbe Weg rückwärts zurück in Kiba-dachi
+  const MK_HL = { oL: 1, pL: [0, 0, 1], hR: [-0.215, -0.34, -0.01] };
+  const MK0 = M({ pelvis: [0, 0.68, 0], look: 90, L: { x: 0.42, yaw: 5, kp: [1, 0, 0.5] }, R: { x: -0.42, yaw: -5, kp: [-1, 0, 0.5] }, hL: [0.696, -0.204, 0.059], fL: [0, 1, 0.15] }, MK_HL);
+  const MK0B = M(MK0, { hL: [0.698, -0.205, 0.057] });
+  const MK1 = M({ pelvis: [0.131, 0.73, 0.105], yaw: 25, look: 80, L: { x: 0.42, yaw: 30, kp: [0.866, -0.432, 0.252] }, R: { x: -0.108, z: 0.257, y: 0.269, yaw: 0, pitch: -10, kp: [-0.62, 0.013, 0.784] }, hL: [0.574, -0.224, 0.3], fL: [-0.063, 1, 0.136], w: [1, 0] }, MK_HL);
   // Zwischenstellung vorn: der Fuß schwingt im Bogen (nicht auf geradem Weg) zur Hand
-  const MK15 = MK_HAND(M(MK2, { yaw: 25, roll: 4, R: { x: 0.2, y: 0.85, z: 0.5, yaw: 0, pitch: 30, sole: [1, 0, -0.3], kp: [-0.2, 0.4, 1] } }));
-  D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: MK0 }, { t: 0.15, p: MK0 }, { t: 0.36, p: MK1 }, { t: 0.5, p: MK15, e: 'in' }, { t: 0.62, p: MK2, e: 'kime' }], best: 1, dur: 1.8, eff: 'toeR', view: 'front', yaw: 6 }, hit('heelR', 'Fußsohle'));
+  const MK15 = M({ pelvis: [0.181, 0.688, 0.074], yaw: 25, roll: 4, look: 80, L: { x: 0.42, yaw: 55, kp: [0.965, -0.137, 0.222] }, R: { x: 0.094, z: 0.636, y: 0.628, yaw: 0, pitch: 30, kp: [-0.2, 0.4, 1], sole: [1, 0, -0.3] }, hL: [0.611, -0.164, 0.298], fL: [-0.133, 0.993, 0.136], w: [1, 0] }, MK_HL);
+  const MK2 = M({ pelvis: [0.33, 0.82, -0.02], yaw: 40, roll: 8, look: 80, L: { x: 0.42, yaw: 55, kp: [0.871, -0.49, 0.039] }, R: { x: 0.883, z: 0.086, y: 1.04, yaw: 2, pitch: 71, kp: [0.471, 0.871, 0.139], sole: [0.408, 0.293, -0.865] }, hL: [0.411, -0.175, 0.418], fL: [-0.235, 0.977, 0.115], w: [1, 0] }, MK_HL);
+  D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: MK0 }, { t: 0.15, p: MK0B }, { t: 0.36, p: MK1 }, { t: 0.5, p: MK15, e: 'in' }, { t: 0.62, p: MK2, e: 'kime' }, { t: 0.72, p: MK15, e: 'fl' }, { t: 0.84, p: MK1, e: 'fl' }, { t: 1, p: MK0, e: 'fl' }], best: 0.62, dur: 1.8, eff: 'toeR', view: 'front', yaw: 6 }, hit('heelR', 'Fußsohle'));
   D['tc:ura-mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(Y_CH, { look: 0 }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], best: 0.72, dur: 1.8, eff: 'heelR', view: 'front3' }, hit('heelR', 'Sohle / Ferse'));
   D['tc:ushiro-mawashi-geri'] = M(D['tc:ura-mawashi-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.32, p: M(KAMAE_K, { yaw: -150, look: -170, L: { yaw: -140 }, R: { x: -0.4, z: -0.2, y: 0.4, yaw: -150, pitch: -40, kp: [0, 0.3, -1] }, w: [1, 0] }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], marks: ['turn'] });
   // Hiza-geri: beide Hände greifen vorn auf Kopfhöhe und ziehen herab, das Knie stößt zwischen den Händen nach oben
