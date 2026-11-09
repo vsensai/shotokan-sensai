@@ -2777,11 +2777,51 @@ main:fullscreen {
   font-size: 0.6rem;
 }
 
-/* Touch: gehaltener Punkt, jetzt ziehbar */
-.pe-coarse .pe-mk.grab {
-  transform: scale(1.35);
-  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.3);
-  z-index: 3;
+/* Zeit ändern: am PC ziehen (Hinweis), am Handy − / + */
+.pe-ttouch {
+  display: none;
+}
+
+.pe-coarse .pe-ttouch {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.pe-coarse .pe-tthint,
+.pe-coarse .pe-total {
+  display: none;
+}
+
+.pe-tbrow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.pe-tbrow span {
+  flex: 1;
+}
+
+.pe-tbrow b {
+  color: var(--red);
+  font-variant-numeric: tabular-nums;
+}
+
+.pe-tbrow .pe-pm {
+  width: 44px;
+  height: 40px;
+  font-size: 1.1rem;
+}
+
+.pe-ttouch p {
+  margin: 0;
+}
+
+.pe-coarse .pe-endh {
+  cursor: default;
+  touch-action: pan-x;
 }
 
 /* Touch: Regler reagieren nur auf seitliches Wischen über ihre Zeile (siehe touchRange) */

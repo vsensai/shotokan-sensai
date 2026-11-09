@@ -279,7 +279,8 @@
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
 ${easeGuide()}
 <p class="pe-total"></p>
-<p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen (am Handy erst kurz halten, bis er größer wird); die Bilder danach rücken mit. Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen.</p>
+<div class="pe-ttouch"><div class="pe-tbrow"><span>Zeit vom Bild davor <b class="pe-tsv"></b></span><button type="button" class="pe-pm" data-pe="seg-" aria-label="Zeit vom Bild davor kürzer" title="0,05 s kürzer">−</button><button type="button" class="pe-pm" data-pe="seg+" aria-label="Zeit vom Bild davor länger" title="0,05 s länger">+</button></div><div class="pe-tbrow"><span>Ganze Bewegung <b class="pe-ttv"></b></span><button type="button" class="pe-pm" data-pe="tot-" aria-label="Ganze Bewegung schneller" title="Ganze Bewegung 0,05 s kürzer (alle Abschnitte gleichmäßig)">−</button><button type="button" class="pe-pm" data-pe="tot+" aria-label="Ganze Bewegung langsamer" title="Ganze Bewegung 0,05 s länger (alle Abschnitte gleichmäßig)">+</button></div><p class="small muted">Die Bilder danach rücken mit. Auf der Zeitleiste: Punkt antippen wählt das Bild, wischen verschiebt die Leiste.</p></div>
+<p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen; die Bilder danach rücken mit. Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen. Mit der Tastatur: ← / → für das gewählte Bild.</p>
 </div>
 <div class="pe-camrow"><span class="pe-camv small"></span><button type="button" class="pe-wide" data-pe="camset" title="Die Ansicht, wie du die Figur gerade siehst (Drehung und Neigung), als Kamera fürs Kernbild in die Ausgabe übernehmen">Ansicht als Kamera fürs Kernbild</button><button type="button" class="pe-wide" data-pe="camreset" title="Wieder die Kamera der App verwenden; die Ansicht im Editor bleibt, wie sie ist">Zurück auf App-Kamera</button></div>
 </div>
@@ -409,7 +410,7 @@ ${easeGuide()}
     tr.innerHTML = S.tm.map((x, i) => {
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
-      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}${S.grab === i ? ' grab' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
     }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
     // Touch: so breit, dass auch die zwei dichtesten Punkte mindestens 28 px auseinanderliegen (höchstens 2400 px)
     if (d.classList.contains('pe-coarse')) {
@@ -440,6 +441,9 @@ ${easeGuide()}
     // Reiter „Bild“
     const first = S.k === 0;
     const seg = first ? 0 : (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
+    d.querySelector('.pe-tsv').textContent = first ? '–' : `${seg.toFixed(2)} s`;
+    d.querySelector('.pe-ttv').textContent = `${total.toFixed(2)} s`;
+    d.querySelectorAll('[data-pe="seg-"], [data-pe="seg+"]').forEach((b) => (b.disabled = first));
     d.querySelector('.pe-total').textContent = `${first ? 'erstes Bild' : `${seg.toFixed(2)} s vom Bild davor`} · ganze Bewegung ${total.toFixed(2)} s`;
     const te = d.querySelector('.pe-te');
     te.disabled = first;
@@ -452,14 +456,12 @@ ${easeGuide()}
   function bindTrack(tr) {
     const total = () => (S.tm[S.tm.length - 1].t - S.tm[0].t) * S.dur;
     const secOf = (i) => (S.tm[i].t - S.tm[0].t) * S.dur;
-    const HOLD = 350; // Touch: so lange halten, bis ein Punkt gezogen werden kann
     let g = null;
-    const grab = (on) => { S.grab = on ? g.i : null; frames(); };
     tr.addEventListener('pointerdown', (ev) => {
       if (!S) return;
       const touch = ev.pointerType === 'touch';
-      // Touch neben den Punkten: die Zeitleiste seitlich wischen
-      if (touch && !ev.target.closest('[data-mk], [data-endh]')) return;
+      // Touch neben den Punkten oder auf dem Griff: die Zeitleiste seitlich wischen
+      if (touch && !ev.target.closest('[data-mk]')) return;
       if (S.play) S.play = null;
       if (ev.target.closest('[data-endh]')) {
         ev.preventDefault();
@@ -486,20 +488,10 @@ ${easeGuide()}
         tr.setPointerCapture(ev.pointerId);
         return;
       }
-      // Touch: Antippen wählt, kurz halten macht den Punkt ziehbar, Wischen scrollt die Zeitleiste
+      // Touch: nur antippen wählt das Bild, Wischen scrollt die Zeitleiste (Zeit ändern mit − / + im Reiter Bild)
       g = { i, touch: true, armed: false, x0: ev.clientX, y0: ev.clientY, id: ev.pointerId, moved: false };
-      if (i > 0) {
-        g.timer = setTimeout(() => {
-          if (!g || g.moved) return;
-          g.armed = true;
-          if (g.i !== S.k) goFrame(g.i);
-          grab(true);
-          try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { /* ohne Vibration */ }
-        }, HOLD);
-      }
     });
     // Touch: solange ein Punkt gezogen wird, darf die Zeitleiste nicht scrollen
-    tr.addEventListener('touchmove', (ev) => { if (g && g.touch && g.armed) ev.preventDefault(); }, { passive: false });
     tr.addEventListener('pointermove', (ev) => {
       if (!g || !S || ev.pointerId !== g.id) return;
       if (!g.armed) {
@@ -528,12 +520,10 @@ ${easeGuide()}
       if (!g || ev.pointerId !== g.id) return;
       const was = g;
       g = null;
-      clearTimeout(was.timer);
       if (!S) return;
       // Touch nur angetippt: Bild wählen
       if (was.touch && !was.armed && ev.type === 'pointerup' && was.i !== S.k) { goFrame(was.i); return; }
       S.drag = null;
-      S.grab = null;
       if (was.moved) timing();
       else frames();
     };
@@ -931,6 +921,21 @@ ${easeGuide()}
       const r = importText(S.dlg.querySelector('.pe-imptext').value);
       msg.textContent = r;
       if (/^Importiert/.test(r)) S.dlg.querySelector('.pe-imp').hidden = true;
+      return;
+    }
+    // Handy: Zeit mit − / + (0,05 s)
+    if (a === 'seg-' || a === 'seg+') {
+      if (!S.k) return;
+      const seg = (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
+      setSeg(S.k, clamp(Math.round((seg + (a === 'seg+' ? 0.05 : -0.05)) * 20) / 20, 0.05, 3));
+      return;
+    }
+    if (a === 'tot-' || a === 'tot+') {
+      const n = S.tm.length;
+      const tot = (S.tm[n - 1].t - S.tm[0].t) * S.dur;
+      const nt = clamp(Math.round((tot + (a === 'tot+' ? 0.05 : -0.05)) * 20) / 20, 0.3, 10);
+      S.dur = Math.round(((S.dur * nt) / tot) * 10000) / 10000;
+      timing();
       return;
     }
     if (a === 'camset' || a === 'camreset') {
