@@ -2660,12 +2660,26 @@ main:fullscreen {
   color: var(--red);
 }
 
-.pe-track {
-  position: relative;
+.pe-trackwrap {
   flex: 1;
   min-width: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+
+.pe-trackpad {
+  flex: none;
+  width: 92px;
+}
+
+.pe-track {
+  position: relative;
+  flex: 1 0 auto;
+  min-width: 0;
   height: 46px;
-  margin: 0 86px 0 12px;
+  margin: 0 0 0 12px;
   touch-action: none;
 }
 
@@ -2741,6 +2755,32 @@ main:fullscreen {
   font-size: 0.62rem;
   color: var(--muted);
   white-space: nowrap;
+}
+
+/* Touch: Punkte mit Mindestabstand (die Zeitleiste wird dann seitlich wischbar), größere Punkte zum Treffen */
+.pe-coarse .pe-track {
+  touch-action: pan-x;
+}
+
+.pe-coarse .pe-mk {
+  width: 24px;
+  height: 24px;
+  margin-left: -12px;
+  top: 11px;
+}
+
+.pe-coarse .pe-mk span {
+  display: inline;
+  font-size: 0.6rem;
+}
+
+/* Touch: Regler reagieren nur auf seitliches Wischen über ihre Zeile (siehe touchRange) */
+.pe-coarse .pe-ctl {
+  touch-action: pan-y;
+}
+
+.pe-coarse .pe-ctl input[type="range"] {
+  pointer-events: none;
 }
 
 /* Griff am Ende: ganze Bewegung strecken oder stauchen */
@@ -3185,8 +3225,12 @@ html.pe-fs {
     font-size: 0.75rem;
   }
 
+  .pe-trackpad {
+    width: 74px;
+  }
+
   .pe-track {
-    margin: 0 64px 0 8px;
+    margin: 0 0 0 10px;
   }
 
   .pe-grip {

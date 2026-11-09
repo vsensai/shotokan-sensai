@@ -268,7 +268,7 @@
 <p class="pe-helptext" hidden>${HELP}</p>
 <span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-grip" title="Ziehen: Bild höher oder niedriger" aria-hidden="true"></div>
-<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
+<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-trackwrap"><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><span class="pe-trackpad" aria-hidden="true"></span></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
 </div>
 <div class="pe-side">
 <div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Text der ganzen Bewegung zum Kopieren, Import">Ausgabe</button></div>
@@ -303,6 +303,8 @@ ${easeGuide()}
       document.documentElement.classList.remove('pe-fs');
     });
     d.addEventListener('click', onClick);
+    // Touch: Zeitleiste mit Mindestabstand (seitlich wischbar), Regler nur bei seitlichem Wischen
+    d.classList.toggle('pe-coarse', touch);
     bindStage(d.querySelector('.pe-stage'));
     bindTrack(d.querySelector('.pe-track'));
     bindGrip(d.querySelector('.pe-grip'), d);
@@ -409,6 +411,22 @@ ${easeGuide()}
       const hold = i && holdOf(i) !== i;
       return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
     }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
+    // Touch: so breit, dass auch die zwei dichtesten Punkte mindestens 28 px auseinanderliegen (höchstens 2400 px)
+    if (d.classList.contains('pe-coarse')) {
+      let minF = 1;
+      for (let i = 1; i < n; i++) minF = Math.min(minF, (S.tm[i].t - S.tm[i - 1].t) / (S.tm[n - 1].t - S.tm[0].t || 1));
+      tr.style.minWidth = `${Math.round(Math.min(2400, Math.max(n * 34, 28 / Math.max(minF, 0.005))))}px`;
+    }
+    // gewähltes Bild sichtbar halten, wenn die Zeitleiste seitlich wischbar ist
+    const wrap = tr.parentElement;
+    if (wrap.scrollWidth > wrap.clientWidth + 2 && !S.drag) {
+      requestAnimationFrame(() => {
+        const sel = tr.querySelector('.pe-mk.sel');
+        if (!sel) return;
+        const a = sel.offsetLeft - wrap.scrollLeft;
+        if (a < 24 || a > wrap.clientWidth - 24) wrap.scrollLeft = sel.offsetLeft - wrap.clientWidth / 2;
+      });
+    }
     // Lage per Skript (die Seite erlaubt keine style-Angaben im HTML)
     tr.querySelectorAll('[data-mk]').forEach((m) => (m.style.left = pos(S.tm[+m.dataset.mk].t)));
     tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${(((+g.dataset.b - +g.dataset.a) * S.dur) / scS) * 100}%`; });
@@ -437,6 +455,8 @@ ${easeGuide()}
     let g = null;
     tr.addEventListener('pointerdown', (ev) => {
       if (!S) return;
+      // Touch neben den Punkten: die Zeitleiste seitlich wischen statt ein Bild zu wählen
+      if (ev.pointerType === 'touch' && !ev.target.closest('[data-mk], [data-endh]')) return;
       ev.preventDefault();
       if (S.play) S.play = null;
       if (ev.target.closest('[data-endh]')) {
@@ -624,6 +644,7 @@ ${easeGuide()}
         changed(true);
       });
       inp.addEventListener('change', () => { inp._busy = false; changed(false); });
+      if (S.dlg.classList.contains('pe-coarse')) touchRange(inp);
     });
     box.querySelectorAll('select').forEach((sel) => sel.addEventListener('change', () => {
       push();
@@ -641,6 +662,39 @@ ${easeGuide()}
       c.set(clamp(Math.round((c.get() + st * +b.dataset.d) / c.step) * c.step, c.min, c.max));
       changed(false);
     }));
+  }
+  // Touch: der Regler selbst nimmt keine Berührung an; erst ein klar seitliches Wischen über seine Zeile verstellt ihn
+  // (relativ, wie beim Schieben des Knopfes), senkrechtes Wischen scrollt die Liste
+  function touchRange(inp) {
+    const row = inp.parentElement;
+    let t = null;
+    row.addEventListener('pointerdown', (ev) => {
+      if (ev.pointerType !== 'touch' || ev.target.closest('button')) return;
+      t = { x: ev.clientX, y: ev.clientY, v: +inp.value, mode: null, id: ev.pointerId };
+    });
+    row.addEventListener('pointermove', (ev) => {
+      if (!t || ev.pointerId !== t.id) return;
+      const dx = ev.clientX - t.x;
+      const dy = ev.clientY - t.y;
+      if (!t.mode) {
+        if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) { t = null; return; }
+        if (Math.abs(dx) < 8) return;
+        t.mode = 'slide';
+        row.setPointerCapture(ev.pointerId);
+      }
+      const w = inp.getBoundingClientRect().width || 1;
+      const st = +inp.step || 0.01;
+      const v = clamp(Math.round((t.v + (dx / w) * (+inp.max - +inp.min)) / st) * st, +inp.min, +inp.max);
+      if (v !== +inp.value) { inp.value = v; inp.dispatchEvent(new Event('input')); }
+    });
+    const end = (ev) => {
+      if (!t || ev.pointerId !== t.id) return;
+      const was = t.mode;
+      t = null;
+      if (was) inp.dispatchEvent(new Event('change'));
+    };
+    row.addEventListener('pointerup', end);
+    row.addEventListener('pointercancel', end);
   }
   // Regler auf die aktuellen Werte stellen (nach Ziehen, Rückgängig)
   function sync() {
