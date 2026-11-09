@@ -2763,6 +2763,9 @@ main:fullscreen {
 }
 
 .pe-coarse .pe-mk {
+  touch-action: pan-x;
+  -webkit-touch-callout: none;
+  user-select: none;
   width: 24px;
   height: 24px;
   margin-left: -12px;
@@ -2772,6 +2775,13 @@ main:fullscreen {
 .pe-coarse .pe-mk span {
   display: inline;
   font-size: 0.6rem;
+}
+
+/* Touch: gehaltener Punkt, jetzt ziehbar */
+.pe-coarse .pe-mk.grab {
+  transform: scale(1.35);
+  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.3);
+  z-index: 3;
 }
 
 /* Touch: Regler reagieren nur auf seitliches Wischen über ihre Zeile (siehe touchRange) */

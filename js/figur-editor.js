@@ -279,7 +279,7 @@
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
 ${easeGuide()}
 <p class="pe-total"></p>
-<p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen (die Bilder danach rücken mit). Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen.</p>
+<p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen (am Handy erst kurz halten, bis er größer wird); die Bilder danach rücken mit. Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen.</p>
 </div>
 <div class="pe-camrow"><span class="pe-camv small"></span><button type="button" class="pe-wide" data-pe="camset" title="Die Ansicht, wie du die Figur gerade siehst (Drehung und Neigung), als Kamera fürs Kernbild in die Ausgabe übernehmen">Ansicht als Kamera fürs Kernbild</button><button type="button" class="pe-wide" data-pe="camreset" title="Wieder die Kamera der App verwenden; die Ansicht im Editor bleibt, wie sie ist">Zurück auf App-Kamera</button></div>
 </div>
@@ -409,7 +409,7 @@ ${easeGuide()}
     tr.innerHTML = S.tm.map((x, i) => {
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
-      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}${S.grab === i ? ' grab' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
     }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
     // Touch: so breit, dass auch die zwei dichtesten Punkte mindestens 28 px auseinanderliegen (höchstens 2400 px)
     if (d.classList.contains('pe-coarse')) {
@@ -452,34 +452,61 @@ ${easeGuide()}
   function bindTrack(tr) {
     const total = () => (S.tm[S.tm.length - 1].t - S.tm[0].t) * S.dur;
     const secOf = (i) => (S.tm[i].t - S.tm[0].t) * S.dur;
+    const HOLD = 350; // Touch: so lange halten, bis ein Punkt gezogen werden kann
     let g = null;
+    const grab = (on) => { S.grab = on ? g.i : null; frames(); };
     tr.addEventListener('pointerdown', (ev) => {
       if (!S) return;
-      // Touch neben den Punkten: die Zeitleiste seitlich wischen statt ein Bild zu wählen
-      if (ev.pointerType === 'touch' && !ev.target.closest('[data-mk], [data-endh]')) return;
-      ev.preventDefault();
+      const touch = ev.pointerType === 'touch';
+      // Touch neben den Punkten: die Zeitleiste seitlich wischen
+      if (touch && !ev.target.closest('[data-mk], [data-endh]')) return;
       if (S.play) S.play = null;
       if (ev.target.closest('[data-endh]')) {
-        g = { end: true, x0: ev.clientX, id: ev.pointerId, moved: false, tot0: total(), dur0: S.dur, w: tr.getBoundingClientRect().width };
-      } else {
-        // Punkt unter dem Finger, sonst der nächstgelegene
-        let m = ev.target.closest('[data-mk]');
-        if (!m) {
-          const b = tr.getBoundingClientRect();
-          const at = ((ev.clientX - b.left) / b.width) * total();
-          let best = 0;
-          S.tm.forEach((x, k) => { if (Math.abs(secOf(k) - at) < Math.abs(secOf(best) - at)) best = k; });
-          m = tr.querySelector(`[data-mk="${best}"]`);
-          if (!m) return;
-        }
-        const i = +m.dataset.mk;
-        if (i !== S.k) goFrame(i);
-        g = { i, x0: ev.clientX, id: ev.pointerId, moved: false };
+        ev.preventDefault();
+        g = { end: true, armed: true, x0: ev.clientX, id: ev.pointerId, moved: false, tot0: total(), dur0: S.dur };
+        tr.setPointerCapture(ev.pointerId);
+        return;
       }
-      tr.setPointerCapture(ev.pointerId);
+      // Punkt unter dem Finger, sonst der nächstgelegene (Maus)
+      let m = ev.target.closest('[data-mk]');
+      if (!m) {
+        const b = tr.getBoundingClientRect();
+        const at = ((ev.clientX - b.left) / b.width) * total();
+        let best = 0;
+        S.tm.forEach((x, k) => { if (Math.abs(secOf(k) - at) < Math.abs(secOf(best) - at)) best = k; });
+        m = tr.querySelector(`[data-mk="${best}"]`);
+        if (!m) return;
+      }
+      const i = +m.dataset.mk;
+      if (!touch) {
+        // Maus: sofort wählen und ziehen
+        ev.preventDefault();
+        if (i !== S.k) goFrame(i);
+        g = { i, armed: true, x0: ev.clientX, id: ev.pointerId, moved: false };
+        tr.setPointerCapture(ev.pointerId);
+        return;
+      }
+      // Touch: Antippen wählt, kurz halten macht den Punkt ziehbar, Wischen scrollt die Zeitleiste
+      g = { i, touch: true, armed: false, x0: ev.clientX, y0: ev.clientY, id: ev.pointerId, moved: false };
+      if (i > 0) {
+        g.timer = setTimeout(() => {
+          if (!g || g.moved) return;
+          g.armed = true;
+          if (g.i !== S.k) goFrame(g.i);
+          grab(true);
+          try { if (navigator.vibrate) navigator.vibrate(12); } catch (err) { /* ohne Vibration */ }
+        }, HOLD);
+      }
     });
+    // Touch: solange ein Punkt gezogen wird, darf die Zeitleiste nicht scrollen
+    tr.addEventListener('touchmove', (ev) => { if (g && g.touch && g.armed) ev.preventDefault(); }, { passive: false });
     tr.addEventListener('pointermove', (ev) => {
       if (!g || !S || ev.pointerId !== g.id) return;
+      if (!g.armed) {
+        // Touch vor dem Halten bewegt: das ist Wischen (Scrollen), kein Ziehen
+        if (Math.abs(ev.clientX - g.x0) > 8 || Math.abs(ev.clientY - g.y0) > 8) { clearTimeout(g.timer); g = null; }
+        return;
+      }
       if (!g.moved && Math.abs(ev.clientX - g.x0) < 4) return;
       if (!g.end && g.i === 0) return;
       if (!g.moved) { g.moved = true; S.drag = { scS: total() || 1, end: g.end, i: g.i }; }
@@ -499,9 +526,16 @@ ${easeGuide()}
     });
     const up = (ev) => {
       if (!g || ev.pointerId !== g.id) return;
-      const moved = g.moved;
+      const was = g;
       g = null;
-      if (S) { S.drag = null; if (moved) timing(); }
+      clearTimeout(was.timer);
+      if (!S) return;
+      // Touch nur angetippt: Bild wählen
+      if (was.touch && !was.armed && ev.type === 'pointerup' && was.i !== S.k) { goFrame(was.i); return; }
+      S.drag = null;
+      S.grab = null;
+      if (was.moved) timing();
+      else frames();
     };
     tr.addEventListener('pointerup', up);
     tr.addEventListener('pointercancel', up);
