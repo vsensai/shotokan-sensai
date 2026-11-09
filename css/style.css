@@ -2665,7 +2665,7 @@ main:fullscreen {
   flex: 1;
   min-width: 0;
   height: 46px;
-  margin: 0 12px;
+  margin: 0 86px 0 12px;
   touch-action: none;
 }
 
@@ -2746,19 +2746,34 @@ main:fullscreen {
 /* Griff am Ende: ganze Bewegung strecken oder stauchen */
 .pe-endh {
   position: absolute;
-  top: 30px;
-  right: -12px;
-  padding: 0 0.35rem;
-  border: 1px solid var(--line);
+  top: 9px;
+  left: calc(100% + 10px);
+  height: 28px;
+  padding: 0 0.45rem;
+  border: 2px solid var(--red);
   border-radius: 999px;
   background: var(--card);
-  color: var(--ink);
+  color: var(--red);
   font: inherit;
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 800;
   white-space: nowrap;
   cursor: ew-resize;
   touch-action: none;
+}
+
+.pe-endh b {
+  font-size: 0.9rem;
+}
+
+.pe-slow {
+  font-size: 0.72rem;
+}
+
+.pe-slow[aria-pressed="true"] {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
 }
 
 /* Beim Ziehen: Zeit über dem Punkt */
@@ -3147,13 +3162,31 @@ html.pe-fs {
     font-size: 0.7rem;
   }
 
-  /* Zeitleiste schmal: Kernbild-Stern steht im Reiter „Bild“, Marken ohne Nummer (die steht in der Überschrift) */
-  .pe-tl .pe-star {
+  /* Zeitleiste schmal: ‹ › entfallen (Punkte antippen), Marken ohne Nummer (die steht in der Überschrift) */
+  .pe-tl [data-pe="fprev"],
+  .pe-tl [data-pe="fnext"] {
     display: none;
   }
 
+  .pe-rb {
+    width: 32px;
+    height: 32px;
+  }
+
+  .pe-endh {
+    top: 11px;
+    left: calc(100% + 8px);
+    height: 24px;
+    padding: 0 0.3rem;
+    font-size: 0.62rem;
+  }
+
+  .pe-endh b {
+    font-size: 0.75rem;
+  }
+
   .pe-track {
-    margin: 0 8px;
+    margin: 0 64px 0 8px;
   }
 
   .pe-grip {

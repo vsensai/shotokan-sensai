@@ -268,7 +268,7 @@
 <p class="pe-helptext" hidden>${HELP}</p>
 <span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-grip" title="Ziehen: Bild höher oder niedriger" aria-hidden="true"></div>
-<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
+<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
 </div>
 <div class="pe-side">
 <div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Text der ganzen Bewegung zum Kopieren, Import">Ausgabe</button></div>
@@ -280,8 +280,6 @@
 ${easeGuide()}
 <p class="pe-total"></p>
 <p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen (die Bilder danach rücken mit). Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen.</p>
-<label class="pe-row"><span>Tempo beim Abspielen</span><select class="pe-speed" title="Tempo beim Abspielen mit ▶ (ändert die Bewegung nicht)"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label>
-<button type="button" class="pe-wide pe-setk" data-pe="fbest"></button>
 </div>
 <div class="pe-camrow"><span class="pe-camv small"></span><button type="button" class="pe-wide" data-pe="camset" title="Die Ansicht, wie du die Figur gerade siehst (Drehung und Neigung), als Kamera fürs Kernbild in die Ausgabe übernehmen">Ansicht als Kamera fürs Kernbild</button><button type="button" class="pe-wide" data-pe="camreset" title="Wieder die Kamera der App verwenden; die Ansicht im Editor bleibt, wie sie ist">Zurück auf App-Kamera</button></div>
 </div>
@@ -317,7 +315,6 @@ ${easeGuide()}
       setSeg(S.k, clamp(Math.round((seg + (ev.key === 'ArrowRight' ? 0.05 : -0.05)) * 20) / 20, 0.05, 3));
     });
     d.querySelector('.pe-te').addEventListener('change', (ev) => { S.tm[S.k].e = ev.target.value; timing(); });
-    d.querySelector('.pe-speed').addEventListener('change', (ev) => { S.speed = +ev.target.value; });
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
     // Andere Größenänderungen (z. B. Adressleiste) lassen Drehung und Zoom in Ruhe.
     let portrait = innerHeight > innerWidth;
@@ -388,15 +385,15 @@ ${easeGuide()}
     const pb = d.querySelector('[data-pe="play"]');
     pb.textContent = S.play ? '■' : '▶';
     pb.setAttribute('aria-label', S.play ? 'Anhalten' : 'Bewegung abspielen');
-    pb.title = S.play ? 'Anhalten' : 'Bewegung mit allen Änderungen abspielen (Tempo im Reiter „Bild“)';
+    pb.title = S.play ? 'Anhalten' : `Bewegung mit allen Änderungen abspielen${S.speed < 1 ? ' – in Zeitlupe' : ''}`;
+    d.querySelector('[data-pe="slow"]').setAttribute('aria-pressed', String(S.speed < 1));
     pb.setAttribute('aria-pressed', String(!!S.play));
     d.querySelector('[data-pe="fprev"]').disabled = S.k <= 0;
     d.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
     d.querySelectorAll('[data-pe="fbest"]').forEach((b) => {
-      const big = b.classList.contains('pe-setk');
-      b.textContent = big ? (isK ? '★ Dieses Bild ist das Kernbild' : '☆ Dieses Bild als Kernbild') : isK ? '★' : '☆';
+      b.textContent = isK ? '★' : '☆';
       b.setAttribute('aria-pressed', String(isK));
-      if (!big) b.setAttribute('aria-label', isK ? 'Kernbild' : 'Dieses Bild als Kernbild');
+      b.setAttribute('aria-label', isK ? 'Kernbild' : 'Dieses Bild als Kernbild');
       b.title = isK ? 'Dieses Bild ist das Kernbild (das Standbild in der App)' : 'Dieses Bild zum Kernbild machen';
     });
     // Zeitleiste
@@ -411,7 +408,7 @@ ${easeGuide()}
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
       return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${i + 1}</span></button>`;
-    }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)">${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
+    }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
     // Lage per Skript (die Seite erlaubt keine style-Angaben im HTML)
     tr.querySelectorAll('[data-mk]').forEach((m) => (m.style.left = pos(S.tm[+m.dataset.mk].t)));
     tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${(((+g.dataset.b - +g.dataset.a) * S.dur) / scS) * 100}%`; });
@@ -825,6 +822,11 @@ ${easeGuide()}
       draw();
     }
     if (a === 'play') return play();
+    if (a === 'slow') {
+      S.speed = S.speed < 1 ? 1 : 0.25;
+      frames();
+      return;
+    }
     if (a === 'full') return full(!S.dlg.classList.contains('pe-full'));
     if (a === 'imp' || a === 'impx') {
       const box = S.dlg.querySelector('.pe-imp');
