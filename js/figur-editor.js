@@ -277,6 +277,7 @@
 <p class="pe-finfo small"></p>
 <div class="pe-movonly">
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
+${easeGuide()}
 <div class="pe-row"><span>Zeit vom Bild davor <output class="pe-sv"></output></span>${pm('pe-sg', 'Zeit vom Bild davor', 0.05)}<small class="muted pe-tthint">Die Bilder danach rücken mit. Auch auf der Zeitleiste: Bild anfassen und ziehen.</small></div>
 <p class="pe-total"></p>
 <div class="pe-acts"><button type="button" class="pe-wide" data-pe="faster" title="Alle Abschnitte 10 % kürzer – der Rhythmus bleibt gleich">alles schneller</button><button type="button" class="pe-wide" data-pe="slower" title="Alle Abschnitte 10 % länger – der Rhythmus bleibt gleich">alles langsamer</button></div>
@@ -426,6 +427,7 @@
     te.disabled = first;
     te.value = S.tm[S.k].e in EASE_UI ? S.tm[S.k].e : 'io';
     te.title = first ? 'Das erste Bild hat keinen Übergang' : EASE_HELP[te.value];
+    d.querySelectorAll('.pe-eh').forEach((x) => x.classList.toggle('on', !first && x.dataset.eh === te.value));
   }
   // Zeitleiste: Marke antippen wählt das Bild, Ziehen (ab 4 Pixel) verschiebt seinen Zeitpunkt zwischen den Nachbarn
   function bindTrack(tr) {
@@ -529,6 +531,16 @@
     out: 'auslaufen: startet schnell und bremst zum Bild hin sanft ab',
     lin: 'gleichmäßig: gleiches Tempo von Bild zu Bild',
   };
+  // Übersicht der Übergänge: Tempo-Kurve (von Bild davor bis zu diesem Bild), Bedeutung, wofür man ihn nimmt
+  const EASE_GUIDE = [
+    ['fl', 'M2 12 C14 6 26 5 34 6 S54 9 58 8', 'zieht ohne Anhalten durch das Bild weiter', 'Zwischenbilder einer fließenden Bewegung'],
+    ['io', 'M2 18 C14 18 20 4 30 4 S46 18 58 18', 'fährt sanft an und hält am Bild kurz an', 'Haltungen, Anfang und Ende'],
+    ['kime', 'M2 10 C10 6 30 2 46 3 L52 4 L56 18 L58 18', 'schnell ins Ziel und dort hart stoppen', 'der Treffer'],
+    ['in', 'M2 18 C24 18 44 10 58 3', 'startet langsam, wird schneller, bremst nicht', 'Ausholen vor einer schnellen Phase'],
+    ['out', 'M2 3 C16 10 36 18 58 18', 'startet schnell, bremst zum Bild hin ab', 'Auslaufen nach einer schnellen Phase'],
+    ['lin', 'M2 9 L58 9', 'gleiches Tempo vom Bild davor bis hier', 'gleichmäßige Wege, selten nötig'],
+  ];
+  const easeGuide = () => `<details class="pe-easehelp"><summary title="Kurze Übersicht: was die Übergänge bedeuten">Was bedeuten die Übergänge?</summary><p class="pe-eh-note">Die Kurve zeigt das Tempo auf dem Weg vom Bild davor bis zu diesem Bild (links Start, rechts Ankunft; oben schnell, unten Stillstand).</p><dl>${EASE_GUIDE.map(([k, d, what, use]) => `<div class="pe-eh" data-eh="${k}"><dt><svg viewBox="0 0 60 21" width="60" height="21" aria-hidden="true"><path d="M2 19 H58" stroke="currentColor" stroke-opacity="0.25" fill="none"/><path d="${d}" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg><b>${esc(EASE_UI[k])}</b></dt><dd>${esc(what)}<br><span class="muted">${esc(use)}</span></dd></div>`).join('')}</dl></details>`;
   // Schlüsselbilder mit allen Änderungen (Posen und Timing)
   const effKeys = () => S.keys.map((k, i) => Object.assign({}, k, { t: S.tm[i].t, e: S.tm[i].e, p: S.edits[i] || k.p }));
   // Geändert zählt in Sekunden (beim Strecken der Zeitachse ändern sich t und Dauer, die Sekunden aber nicht)
