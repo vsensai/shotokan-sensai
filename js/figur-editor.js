@@ -259,7 +259,7 @@
     d.setAttribute('aria-label', 'Bewegungs-Editor');
     const touch = matchMedia('(pointer: coarse)').matches;
     const HELP = touch ? '1 Finger auf einem Punkt: ziehen · 1 Finger daneben: Ansicht drehen · 2 Finger: zoomen und verschieben' : 'Punkt ziehen: bewegen · daneben ziehen: Ansicht drehen · rechte Maustaste oder Umschalt: verschieben · Mausrad: zoomen';
-    const pm = (cls, label) => `<div class="pe-ctl"><button type="button" class="pe-pm" data-pm="${cls}" data-d="-1" aria-label="${label} weniger" title="${label}: einen Schritt weniger">−</button><input type="range" class="${cls}" aria-label="${label}"><button type="button" class="pe-pm" data-pm="${cls}" data-d="1" aria-label="${label} mehr" title="${label}: einen Schritt mehr">+</button></div>`;
+    const pm = (cls, label, st) => `<div class="pe-ctl"><button type="button" class="pe-pm" data-pm="${cls}"${st ? ` data-st="${st}"` : ''} data-d="-1" aria-label="${label} weniger" title="${label}: einen Schritt weniger">−</button><input type="range" class="${cls}" aria-label="${label}"><button type="button" class="pe-pm" data-pm="${cls}"${st ? ` data-st="${st}"` : ''} data-d="1" aria-label="${label} mehr" title="${label}: einen Schritt mehr">+</button></div>`;
     d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x pe-fullbtn" data-pe="full" aria-pressed="false" aria-label="Vollbild" title="Editor über das ganze Fenster">⛶</button><button type="button" class="f3d-dlg-x pe-close" aria-label="Schließen" title="Editor schließen – alles nicht Kopierte geht verloren">✕</button></div>
 <div class="pe-main"><div class="pe-left">
 <div class="pe-stage"><canvas class="pe-cv"></canvas>
@@ -277,8 +277,9 @@
 <p class="pe-finfo small"></p>
 <div class="pe-movonly">
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
-<div class="pe-row"><span>Zeitpunkt <output class="pe-tv"></output></span>${pm('pe-tt', 'Zeitpunkt')}<small class="muted pe-tthint">Auch auf der Zeitleiste: Bild anfassen und ziehen.</small></div>
-<div class="pe-row"><span>Dauer der ganzen Bewegung <output class="pe-dv"></output></span>${pm('pe-dur', 'Dauer')}</div>
+<div class="pe-row"><span>Zeit vom Bild davor <output class="pe-sv"></output></span>${pm('pe-sg', 'Zeit vom Bild davor', 0.05)}<small class="muted pe-tthint">Die Bilder danach rücken mit. Auch auf der Zeitleiste: Bild anfassen und ziehen.</small></div>
+<p class="pe-total"></p>
+<div class="pe-acts"><button type="button" class="pe-wide" data-pe="faster" title="Alle Abschnitte 10 % kürzer – der Rhythmus bleibt gleich">alles schneller</button><button type="button" class="pe-wide" data-pe="slower" title="Alle Abschnitte 10 % länger – der Rhythmus bleibt gleich">alles langsamer</button></div>
 <label class="pe-row"><span>Tempo beim Abspielen</span><select class="pe-speed" title="Tempo beim Abspielen mit ▶ (ändert die Bewegung nicht)"><option value="1">normal schnell</option><option value="0.5">halb so schnell</option><option value="0.25">Zeitlupe (¼)</option></select></label>
 <button type="button" class="pe-wide pe-setk" data-pe="fbest"></button>
 </div>
@@ -298,6 +299,8 @@
     document.body.appendChild(d);
     d.querySelector('.pe-close').addEventListener('click', () => d.close());
     d.addEventListener('close', () => {
+      // Schon wieder geöffnet (Schließen und Öffnen im selben Augenblick): den neuen Stand behalten
+      if (d.open) return;
       S = null;
       d.classList.remove('pe-full');
       document.documentElement.classList.remove('pe-fs');
@@ -306,9 +309,8 @@
     bindStage(d.querySelector('.pe-stage'));
     bindTrack(d.querySelector('.pe-track'));
     bindGrip(d.querySelector('.pe-grip'), d);
-    d.querySelector('.pe-tt').addEventListener('input', (ev) => { S.tm[S.k].t = +ev.target.value; S.t = S.tm[S.k].t; timing(); });
+    d.querySelector('.pe-sg').addEventListener('input', (ev) => setSeg(S.k, +ev.target.value));
     d.querySelector('.pe-te').addEventListener('change', (ev) => { S.tm[S.k].e = ev.target.value; timing(); });
-    d.querySelector('.pe-dur').addEventListener('input', (ev) => { S.dur = +ev.target.value; timing(); });
     d.querySelector('.pe-speed').addEventListener('change', (ev) => { S.speed = +ev.target.value; });
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
     // Andere Größenänderungen (z. B. Adressleiste) lassen Drehung und Zoom in Ruhe.
@@ -396,35 +398,34 @@
     });
     // Zeitleiste
     const tr = d.querySelector('.pe-track');
-    const pos = (t) => `${clamp(t, 0, 1) * 100}%`;
+    // Maßstab: vom ersten bis zum letzten Bild (die Zeitleiste zeigt die tatsächliche Dauer)
+    const sc = S.tm[n - 1].t - S.tm[0].t || 1;
+    const pos = (t) => `${clamp((t - S.tm[0].t) / sc, 0, 1) * 100}%`;
+    const sec = (t) => (t - S.tm[0].t) * S.dur;
     tr.innerHTML = S.tm.map((x, i) => {
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
-      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · t = ${x.t.toFixed(2)} · ${(x.t * S.dur).toFixed(2)} s${i ? ` · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert den Zeitpunkt' : ''}"><span>${i + 1}</span></button>`;
-    }).join('') + `<span class="pe-tick">0 s</span><span class="pe-tick pe-tend">${S.dur.toFixed(1)} s</span><span class="pe-head" hidden></span>`;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${i + 1} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${holdOf(i) + 1}` : ''}${i ? ' – ziehen ändert den Zeitpunkt' : ''}"><span>${i + 1}</span></button>`;
+    }).join('') + `<span class="pe-tick">0 s</span><span class="pe-tick pe-tend">${sec(S.tm[n - 1].t).toFixed(2)} s</span><span class="pe-head" hidden></span>`;
     // Lage per Skript (die Seite erlaubt keine style-Angaben im HTML)
     tr.querySelectorAll('[data-mk]').forEach((m) => (m.style.left = pos(S.tm[+m.dataset.mk].t)));
-    tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${(+g.dataset.b - +g.dataset.a) * 100}%`; });
+    tr.querySelectorAll('.pe-seg').forEach((g) => { g.style.left = pos(+g.dataset.a); g.style.width = `${((+g.dataset.b - +g.dataset.a) / sc) * 100}%`; });
     // Reiter „Bild“
-    const tt = d.querySelector('.pe-tt');
     const first = S.k === 0;
-    tt.step = 0.01;
-    tt.min = first ? S.tm[0].t : Math.round((S.tm[S.k - 1].t + 0.01) * 100) / 100;
-    tt.max = first ? S.tm[0].t : S.k === n - 1 ? 1 : Math.round((S.tm[S.k + 1].t - 0.01) * 100) / 100;
-    tt.disabled = first;
-    d.querySelectorAll('[data-pm="pe-tt"]').forEach((b) => (b.disabled = first));
-    if (+tt.value !== S.tm[S.k].t) tt.value = S.tm[S.k].t;
-    d.querySelector('.pe-tv').textContent = `t = ${S.tm[S.k].t.toFixed(2)} · ${((S.tm[S.k].t - S.tm[0].t) * S.dur).toFixed(2)} s`;
+    const sg = d.querySelector('.pe-sg');
+    sg.min = 0.05;
+    sg.max = 3;
+    sg.step = 0.01;
+    sg.disabled = first;
+    d.querySelectorAll('[data-pm="pe-sg"]').forEach((b) => (b.disabled = first));
+    const seg = first ? 0 : (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
+    if (Math.abs(+sg.value - seg) > 0.004) sg.value = seg;
+    d.querySelector('.pe-sv').textContent = first ? 'erstes Bild' : `${seg.toFixed(2)} s`;
+    d.querySelector('.pe-total').textContent = `ganze Bewegung: ${sec(S.tm[n - 1].t).toFixed(2)} s`;
     const te = d.querySelector('.pe-te');
     te.disabled = first;
     te.value = S.tm[S.k].e in EASE_UI ? S.tm[S.k].e : 'io';
     te.title = first ? 'Das erste Bild hat keinen Übergang' : EASE_HELP[te.value];
-    const du = d.querySelector('.pe-dur');
-    du.min = 0.6;
-    du.max = 5;
-    du.step = 0.1;
-    if (+du.value !== S.dur) du.value = S.dur;
-    d.querySelector('.pe-dv').textContent = `${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(1)} s`;
   }
   // Zeitleiste: Marke antippen wählt das Bild, Ziehen (ab 4 Pixel) verschiebt seinen Zeitpunkt zwischen den Nachbarn
   function bindTrack(tr) {
@@ -435,7 +436,7 @@
       let m = ev.target.closest('[data-mk]');
       if (!m) {
         const b = tr.getBoundingClientRect();
-        const t = (ev.clientX - b.left) / b.width;
+        const t = S.tm[0].t + ((ev.clientX - b.left) / b.width) * (S.tm[S.tm.length - 1].t - S.tm[0].t || 1);
         let best = 0;
         S.tm.forEach((x, k) => { if (Math.abs(x.t - t) < Math.abs(S.tm[best].t - t)) best = k; });
         m = tr.querySelector(`[data-mk="${best}"]`);
@@ -445,7 +446,7 @@
       if (S.play) S.play = null;
       const i = +m.dataset.mk;
       if (i !== S.k) goFrame(i);
-      drag = { i, x0: ev.clientX, moved: false, id: ev.pointerId };
+      drag = { i, x0: ev.clientX, moved: false, id: ev.pointerId, t0: S.tm[0].t, sc: S.tm[S.tm.length - 1].t - S.tm[0].t || 1 };
       tr.setPointerCapture(ev.pointerId);
     });
     tr.addEventListener('pointermove', (ev) => {
@@ -456,13 +457,13 @@
       const i = drag.i;
       const lo = S.tm[i - 1].t + 0.01;
       const hi = i === S.tm.length - 1 ? 1 : S.tm[i + 1].t - 0.01;
-      const t = Math.round(clamp((ev.clientX - b.left) / b.width, lo, hi) * 100) / 100;
+      const t = Math.round(clamp(drag.t0 + ((ev.clientX - b.left) / b.width) * drag.sc, lo, hi) * 1000) / 1000;
       if (t === S.tm[i].t) return;
       S.tm[i].t = t;
       S.t = t;
       const m = tr.querySelector(`[data-mk="${i}"]`);
-      if (m) m.style.left = `${t * 100}%`;
-      S.dlg.querySelector('.pe-tv').textContent = `t = ${t.toFixed(2)} · ${((t - S.tm[0].t) * S.dur).toFixed(2)} s`;
+      if (m) m.style.left = `${clamp((t - drag.t0) / drag.sc, 0, 1) * 100}%`;
+      S.dlg.querySelector('.pe-sv').textContent = `${((t - S.tm[i - 1].t) * S.dur).toFixed(2)} s`;
     });
     const up = (ev) => {
       if (!drag || ev.pointerId !== drag.id) return;
@@ -530,7 +531,23 @@
   };
   // Schlüsselbilder mit allen Änderungen (Posen und Timing)
   const effKeys = () => S.keys.map((k, i) => Object.assign({}, k, { t: S.tm[i].t, e: S.tm[i].e, p: S.edits[i] || k.p }));
-  const timingChanged = (i) => S.tm[i].t !== S.tk[i].t || S.tm[i].e !== S.tk[i].e;
+  // Geändert zählt in Sekunden (beim Strecken der Zeitachse ändern sich t und Dauer, die Sekunden aber nicht)
+  const secChanged = (i) => Math.abs((S.tm[i].t - S.tm[0].t) * S.dur - (S.tk[i].t - S.tk[0].t) * S.dur0) > 0.005;
+  const timingChanged = (i) => secChanged(i) || S.tm[i].e !== S.tk[i].e;
+  // Zeit vom Bild davor (Sekunden) setzen: dieses und alle späteren Bilder rücken mit; reicht die Zeitachse (t bis 1)
+  // nicht, wird sie gestreckt (Dauer und Zeitpunkte so umgerechnet, dass die Sekunden gleich bleiben)
+  function setSeg(i, secs) {
+    if (!i) return;
+    const d = secs / S.dur - (S.tm[i].t - S.tm[i - 1].t);
+    for (let j = i; j < S.tm.length; j++) S.tm[j].t = Math.round((S.tm[j].t + d) * 1000) / 1000;
+    const last = S.tm[S.tm.length - 1].t;
+    if (last > 1) {
+      S.dur = Math.round(S.dur * last * 1000) / 1000;
+      S.tm.forEach((x) => (x.t = Math.round((x.t / last) * 1000) / 1000));
+    }
+    S.t = S.tm[S.k].t;
+    timing();
+  }
   function timing() {
     save();
     text();
@@ -652,7 +669,7 @@
     list.forEach((i) => {
       const P = S.edits[i] || S.frames[i];
       const ch = changedParts(P, S.frames[i]);
-      if (S.tm[i].t !== S.tk[i].t) ch.push('Zeitpunkt');
+      if (secChanged(i)) ch.push('Zeitpunkt');
       if (S.tm[i].e !== S.tk[i].e) ch.push('Übergang');
       const h = holdOf(i);
       const tt = Math.round(S.tm[i].t * 100) / 100;
@@ -754,7 +771,7 @@
     const pmb = ev.target.closest('[data-pm]');
     if (pmb) {
       const inp = S.dlg.querySelector(`.${pmb.dataset.pm}`);
-      const v = clamp(Math.round((+inp.value + +inp.step * +pmb.dataset.d) * 100) / 100, +inp.min, +inp.max);
+      const v = clamp(Math.round((+inp.value + +(pmb.dataset.st || inp.step) * +pmb.dataset.d) * 100) / 100, +inp.min, +inp.max);
       inp.value = v;
       inp.dispatchEvent(new Event('input'));
       return;
@@ -809,6 +826,11 @@
       const r = importText(S.dlg.querySelector('.pe-imptext').value);
       msg.textContent = r;
       if (/^Importiert/.test(r)) S.dlg.querySelector('.pe-imp').hidden = true;
+      return;
+    }
+    if (a === 'faster' || a === 'slower') {
+      S.dur = Math.round(S.dur * (a === 'faster' ? 0.9 : 1 / 0.9) * 1000) / 1000;
+      timing();
       return;
     }
     if (a === 'camset' || a === 'camreset') {

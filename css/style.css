@@ -2947,6 +2947,12 @@ main:fullscreen {
   opacity: 0.4;
 }
 
+.pe-total {
+  margin: -0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
 .pe-tthint {
   font-weight: 400;
 }
