@@ -223,12 +223,12 @@
     }
     ctx.restore();
     if (!C) return false;
-    overlay(ctx, w, h, e, C, J);
+    overlay(ctx, w, h, e, C, J, t);
     return true;
   }
 
   // Einteilung der Übersichtsbilder (Höhen, Trefferzonen)
-  function overlay(g, w, h, e, C, J) {
+  function overlay(g, w, h, e, C, J, t) {
     const pr = (p) => {
       const q = C.project(p);
       return e.mirrored ? [w - q[0], q[1]] : q;
@@ -259,6 +259,27 @@
           g.fillStyle = '#555';
           g.fillText(t2, r + 8 * s, (a + b) / 2 + 14 * s);
         });
+      }
+      if (m === 'stampf') {
+        // Aufstampfen (Fumikomi): ab dem Aufsetzen laufen Stoßringe um den Fuß über den Boden;
+        // im ruhenden Kernbild (Treffer) stehen die ersten Ringe still.
+        const dt = (t - e.d.best) * (e.d.dur || 1.6);
+        const ft = mix(J.heelR, J.toeR, 0.5);
+        if (dt >= 0 && dt < 0.5) {
+          const c = [ft[0], 0.004, ft[2]];
+          [0, 1, 2].forEach((k) => {
+            const r = 0.12 + 0.11 * k + 1.3 * dt;
+            const a = (1 - dt / 0.5) * (0.85 - 0.22 * k);
+            g.strokeStyle = `rgba(198,40,40,${a})`;
+            g.lineWidth = (3.2 - 0.8 * k) * s;
+            g.beginPath();
+            for (let i = 0; i <= 48; i++) {
+              const q = pr(add(c, [r * Math.cos((i / 48) * Math.PI * 2), 0, 0.6 * r * Math.sin((i / 48) * Math.PI * 2)]));
+              if (i) g.lineTo(q[0], q[1]); else g.moveTo(q[0], q[1]);
+            }
+            g.stroke();
+          });
+        }
       }
       if (m === 'targets') {
         // Trefferzonen nach dem Anhang des JKA-Kata-Buchs
