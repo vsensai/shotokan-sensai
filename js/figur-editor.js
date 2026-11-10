@@ -271,7 +271,7 @@
 <div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-trackwrap"><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><span class="pe-trackpad" aria-hidden="true"></span></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
 </div>
 <div class="pe-side">
-<div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Text der ganzen Bewegung zum Kopieren, Import">Ausgabe</button></div>
+<div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="treffer" title="Rot markierte Trefferfläche: welche Fläche, welche Seite, genaue Lage und Größe">Treffer</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Text der ganzen Bewegung zum Kopieren, Import">Ausgabe</button></div>
 <div class="pe-pane" data-pane="bild">
 <div class="pe-ph"><h3 class="pe-bh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
 <p class="pe-finfo small"></p>
@@ -289,6 +289,10 @@ ${easeGuide()}
 <div class="pe-ph"><h3 class="pe-kh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
 <p class="pe-parthint small muted">Anderes Körperteil: seinen Punkt im Bild antippen.</p>
 <div class="pe-panel"></div></div>
+<div class="pe-pane" data-pane="treffer">
+<div class="pe-ph"><h3>Trefferfläche</h3><button type="button" class="pe-sm" data-pe="horig" title="Trefferfläche zurück auf den Stand der App">Original</button></div>
+<p class="small muted">Der rote Fleck sitzt fest am Körperteil und gilt für die ganze Bewegung. Verschieben in cm am Körperteil.</p>
+<div class="pe-panel pe-hpanel"></div></div>
 <div class="pe-pane" data-pane="ausgabe">
 <button type="button" class="pe-wide" data-pe="imp" title="Einen früher kopierten Text einfügen und weiterbearbeiten">Importieren</button>
 <div class="pe-imp" hidden><textarea class="pe-imptext" rows="5" aria-label="Text zum Importieren" placeholder="Kopierten Text des Bewegungs-Editors hier einfügen"></textarea><div class="pe-acts"><button type="button" class="btn" data-pe="impok" title="Posen, Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera aus dem Text übernehmen">Übernehmen</button><button type="button" class="pe-wide" data-pe="impx" title="Import abbrechen">Abbrechen</button></div></div>
@@ -353,6 +357,10 @@ ${easeGuide()}
     const d = dialog();
     S = { id, title: title || id, e, keys, frames, k0, k0app, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
     S.pause = keys.length > 2 && same(rounded(frames[0]), rounded(frames[1]));
+    S.hit0 = hitOf(e.d.hit);
+    S.hit = S.hit0 && clone(S.hit0);
+    S.hitAll = false;
+    hpanel();
     d.querySelector('.f3d-dlg-title').textContent = `✎ ${S.title}`;
     const hb = d.querySelector('[data-pe="hide"]');
     hb.setAttribute('aria-pressed', 'false');
@@ -786,6 +794,7 @@ ${easeGuide()}
     const kc = S.kcam || camInfo0();
     lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
     // Pause am Anfang statt eines eigenen Bildes (im Code: Bild 1 noch einmal zum Zeitpunkt t der Pause)
+    if (S.hit || S.hit0) lines.push(...hitLines());
     if (PZ()) lines.push(`Pause am Anfang: ${((S.tm[1].t - S.tm[0].t) * S.dur).toFixed(2)} s (t = ${Math.round(S.tm[1].t * 1000) / 1000})${secChanged(1) ? ', geändert' : ''}`);
     const list = all ? S.keys.map((_, i) => i) : [...new Set(Object.keys(S.edits).map(Number).concat(S.k).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
     list.forEach((i) => {
@@ -809,6 +818,118 @@ ${easeGuide()}
     });
     S.text = lines.join('\n');
     S.dlg.querySelector('.pe-text').value = S.text;
+  }
+
+  /* ---------- Trefferfläche (Reiter „Treffer“) ---------- */
+  // Flächen aus js/figur-app.js (FL); Feineinstellung x, y, z (m) im Körperteil-Rahmen, rot (°) um Unterarm/Unterschenkel, r Größe (m).
+  // Übernahme in die App: nur diese Technik → FLAECHE (Fläche, Seite) und FLAECHE_FEIN in js/figur-posen.js;
+  // für alle Techniken mit dieser Fläche → die Fläche selbst in FL (js/figur-app.js).
+  const FLN = {
+    seiken: 'Seiken (Faustknöchel)', uraken: 'Uraken (Faustrücken)', tettsui: 'Tettsui (Hammerfaust)', innen: 'Faust innen (Hasami)',
+    shuto: 'Shuto (Handkante)', haito: 'Haito (Innenhandkante)', teisho: 'Teisho (Handballen)', fingerspitzen: 'Nukite (Fingerspitzen)',
+    handflaeche: 'Handfläche', handgelenk: 'Handgelenk', unterarm: 'Unterarm', ellbogen: 'Ellbogen (Enpi)',
+    koshi: 'Koshi (Fußballen)', kakato: 'Kakato (Ferse)', sokuto: 'Sokuto (Fußkante)', teisoku: 'Teisoku (Fußsohle)',
+    haisoku: 'Haisoku (Fußrücken)', hiza: 'Hiza (Knie)', wade: 'Wade',
+  };
+  const SIDES = { R: 'rechts', L: 'links', LR: 'beide' };
+  // Achsen je Körperteil: [Schlüssel, Beschriftung, Richtung +, Richtung −]
+  const HAX = {
+    hand: [['x', 'Finger ⇄ Handgelenk', 'zu den Fingern', 'zum Handgelenk'], ['y', 'Handfläche ⇄ Handrücken', 'zur Handfläche', 'zum Handrücken'], ['z', 'Daumen ⇄ kleiner Finger', 'zur Daumenseite', 'zur Kleinfingerseite']],
+    fuss: [['x', 'Zehen ⇄ Ferse', 'zu den Zehen', 'zur Ferse'], ['y', 'Sohle ⇄ Rist', 'zur Sohle', 'zum Rist'], ['z', 'innen ⇄ außen', 'nach innen', 'nach außen']],
+    arm: [['x', 'Hand ⇄ Ellbogen', 'zur Hand', 'zum Ellbogen'], ['rot', 'Um den Unterarm drehen']],
+    bein: [['x', 'Knöchel ⇄ Knie', 'zum Knöchel', 'zum Knie'], ['rot', 'Um den Unterschenkel drehen']],
+  };
+  const flInfo = (id) => SK.fig3d.flaechen().find((f) => f.id === id);
+  const r3 = (v) => Math.round(v * 1000) / 1000;
+  function hitOf(h) {
+    if (!h || !h.fl || !FLN[h.fl]) return null;
+    const a = h.adj || {};
+    return { fl: h.fl, sides: h.sides || 'R', x: a.x || 0, y: a.y || 0, z: a.z || 0, rot: a.rot || 0, r: a.r || flInfo(h.fl).r };
+  }
+  // Fläche für die Zeichnung; { fl: null } = keine (nicht die der App)
+  function hov() {
+    if (!S.hit) return { fl: null };
+    const h = S.hit;
+    return { fl: h.fl, sides: h.sides, t: S.e.d.hit ? S.e.d.hit.t : undefined, adj: { x: h.x, y: h.y, z: h.z, rot: h.rot, r: h.r } };
+  }
+  const nameOf = (id) => { const n = id.split(':')[1] || id; return n.charAt(0).toUpperCase() + n.slice(1); };
+  // Andere Techniken mit derselben Fläche
+  const sharing = (fl) => Object.keys(SK.fig3dDefs).filter((id) => id !== S.id && SK.fig3dDefs[id].hit && SK.fig3dDefs[id].hit.fl === fl);
+  const cmTxt = (v) => String(Math.round(Math.abs(v) * 1000) / 10).replace('.', ',');
+  function hval(k, v) {
+    if (k === 'r') return `${cmTxt(v)} cm`;
+    if (k === 'rot') return `${Math.round(v)}°`;
+    const ax = HAX[flInfo(S.hit.fl).part].find((a) => a[0] === k);
+    return Math.abs(v) < 0.0005 ? 'Mitte' : `${cmTxt(v)} cm ${v > 0 ? ax[2] : ax[3]}`;
+  }
+  function hitChanges() {
+    const a = S.hit;
+    const b = S.hit0;
+    if (!a || !b) return a || b ? ['Fläche'] : [];
+    const ch = [];
+    if (a.fl !== b.fl) return a.sides !== b.sides ? ['Fläche', 'Seite'] : ['Fläche'];
+    if (a.sides !== b.sides) ch.push('Seite');
+    if (['x', 'y', 'z', 'rot'].some((k) => r3(a[k]) !== r3(b[k]))) ch.push('Lage');
+    if (r3(a.r) !== r3(b.r)) ch.push('Größe');
+    return ch;
+  }
+  function hitLines() {
+    const h = S.hit;
+    const ch = hitChanges();
+    if (!h) return [`Trefferfläche: keine (bisher ${FLN[S.hit0.fl]})`];
+    const sh = sharing(h.fl);
+    const scope = S.hitAll && sh.length ? `gilt für alle Techniken mit dieser Fläche (auch ${sh.join(', ')})` : 'nur diese Technik';
+    return [`Trefferfläche: ${FLN[h.fl]}, Seite ${SIDES[h.sides] || h.sides} – geändert: ${ch.length ? ch.join(', ') : 'nichts'}${ch.length ? ` – ${scope}` : ''}`,
+      lit({ fl: h.fl, sides: h.sides, x: r3(h.x), y: r3(h.y), z: r3(h.z), rot: Math.round(h.rot), r: r3(h.r) })];
+  }
+  function hpanel() {
+    const box = S.dlg.querySelector('.pe-hpanel');
+    const h = S.hit;
+    const part = h && flInfo(h.fl).part;
+    const ctl = !h ? [] : HAX[part].map((a) => (a[0] === 'rot' ? { k: 'rot', label: a[1], min: -180, max: 180, step: 5 } : { k: a[0], label: a[1], min: -0.08, max: 0.08, step: 0.005 })).concat({ k: 'r', label: 'Größe (Radius)', min: 0.02, max: 0.16, step: 0.005 });
+    const sh = h ? sharing(h.fl) : [];
+    box.innerHTML = `<label class="pe-row"><span>Fläche</span><select data-h="fl"><option value="">keine</option>${Object.keys(FLN).map((k) => `<option value="${k}">${esc(FLN[k])}</option>`).join('')}</select></label>`
+      + (h ? `<label class="pe-row"><span>Seite</span><select data-h="sides">${Object.keys(SIDES).map((k) => `<option value="${k}">${SIDES[k]}</option>`).join('')}</select></label>` : '')
+      + ctl.map((c) => `<div class="pe-row"><span>${esc(c.label)} <output data-ho="${c.k}"></output></span><div class="pe-ctl"><button type="button" class="pe-pm" data-hk="${c.k}" data-d="-1" aria-label="${esc(c.label)} weniger" title="Einen Schritt weniger">−</button><input type="range" data-hk="${c.k}" min="${c.min}" max="${c.max}" step="${c.step}" aria-label="${esc(c.label)}"><button type="button" class="pe-pm" data-hk="${c.k}" data-d="1" aria-label="${esc(c.label)} mehr" title="Einen Schritt mehr">+</button></div></div>`).join('')
+      + (h ? (sh.length ? `<label class="pe-row pe-hall"><span><input type="checkbox" data-h="all"> Für alle Techniken mit dieser Fläche</span><span class="small muted">Sonst nur diese Technik. Die Fläche nutzen auch: ${esc(sh.map(nameOf).join(', '))}</span></label>` : '<p class="small muted">Keine andere Technik nutzt diese Fläche – die Änderung gilt nur hier.</p>') : '');
+    const upd = () => {
+      if (!S.hit) return;
+      ctl.forEach((c) => {
+        const v = S.hit[c.k];
+        const n = box.querySelector(`input[data-hk="${c.k}"]`);
+        if (n.value !== String(v)) n.value = v;
+        box.querySelector(`[data-ho="${c.k}"]`).textContent = hval(c.k, v);
+      });
+    };
+    const done = (fast) => { upd(); S.fast = fast; draw(); if (!fast) text(); };
+    box.querySelector('[data-h="fl"]').value = h ? h.fl : '';
+    if (h) box.querySelector('[data-h="sides"]').value = h.sides;
+    const all = box.querySelector('[data-h="all"]');
+    if (all) {
+      all.checked = S.hitAll;
+      all.addEventListener('change', () => { S.hitAll = all.checked; text(); });
+    }
+    box.querySelector('[data-h="fl"]').addEventListener('change', (ev) => {
+      const fl = ev.target.value;
+      // Andere Fläche: Lage und Größe neu (wie in der App), Seite bleibt
+      S.hit = fl ? (S.hit0 && S.hit0.fl === fl ? clone(S.hit0) : { fl, sides: (S.hit || S.hit0 || { sides: 'R' }).sides, x: 0, y: 0, z: 0, rot: 0, r: flInfo(fl).r }) : null;
+      S.hitAll = false;
+      hpanel();
+      done(false);
+    });
+    if (h) box.querySelector('[data-h="sides"]').addEventListener('change', (ev) => { S.hit.sides = ev.target.value; done(false); });
+    box.querySelectorAll('input[data-hk]').forEach((inp) => {
+      inp.addEventListener('input', () => { S.hit[inp.dataset.hk] = +inp.value; done(true); });
+      inp.addEventListener('change', () => done(false));
+      if (S.dlg.classList.contains('pe-coarse')) touchRange(inp);
+    });
+    box.querySelectorAll('button[data-hk]').forEach((b) => b.addEventListener('click', () => {
+      const c = ctl.find((x) => x.k === b.dataset.hk);
+      S.hit[c.k] = clamp(Math.round((S.hit[c.k] + c.step * +b.dataset.d) / c.step) * c.step, c.min, c.max);
+      if (c.k !== 'rot') S.hit[c.k] = r3(S.hit[c.k]);
+      done(false);
+    }));
+    upd();
   }
 
   // Vollbild: Dialog füllt das ganze Browserfenster (kein Vollbild des Browsers)
@@ -890,10 +1011,22 @@ ${easeGuide()}
       Object.assign(S.cam, { yaw: S.kcam.y, pitch: S.kcam.p });
       S.fit = true;
     }
+    const hl = L.findIndex((l) => /^Trefferfläche: /.test(l));
+    if (hl >= 0) {
+      if (/^Trefferfläche: keine/.test(L[hl])) S.hit = null;
+      else if (L[hl + 1] && L[hl + 1][0] === '{') {
+        try {
+          const o = lit2obj(L[hl + 1]);
+          if (FLN[o.fl]) S.hit = Object.assign({ x: 0, y: 0, z: 0, rot: 0 }, o);
+        } catch (err) { /* Zeile beschädigt: Fläche bleibt */ }
+      }
+      S.hitAll = /alle Techniken/.test(L[hl]);
+      hpanel();
+    }
     const at = S.k;
     S.k = null;
     goFrame(at);
-    return `Importiert: ${idx.length} Bild${idx.length === 1 ? '' : 'er'}${k ? `, Kernbild Bild ${nr(S.k0)}` : ''}${du ? `, Dauer ${S.dur}` : ''}${S.kcam ? ', Kamera' : ''}.`;
+    return `Importiert: ${idx.length} Bild${idx.length === 1 ? '' : 'er'}${k ? `, Kernbild Bild ${nr(S.k0)}` : ''}${du ? `, Dauer ${S.dur}` : ''}${S.kcam ? ', Kamera' : ''}${hl >= 0 ? ', Trefferfläche' : ''}.`;
   }
 
   function onClick(ev) {
@@ -1004,6 +1137,15 @@ ${easeGuide()}
       else { frames(); draw(); }
       return;
     }
+    if (a === 'horig') {
+      S.hit = S.hit0 && clone(S.hit0);
+      S.hitAll = false;
+      hpanel();
+      text();
+      draw();
+      msg.textContent = 'Trefferfläche zurück auf den Stand der App.';
+      return;
+    }
     if (a === 'undo' && S.undo.length) { S.P = S.undo.pop(); panel(); changed(false); }
     if (a === 'orig') {
       if (same(rounded(S.P), rounded(S.orig)) && !timingChanged(S.k)) return;
@@ -1080,7 +1222,7 @@ ${easeGuide()}
       ctx.clearRect(0, 0, w, h);
       // Trefferfläche rot wie in der App; sie sitzt fest am Körperteil und wandert mit, wenn die Pose geändert wird
       const pose = S.play ? S.play.pose : S.P;
-      const C = E.draw(ctx, w, h, pose, S.cam, { mode: 0, hit: SK.fig3d.spots(S.e, E.solve(pose)) });
+      const C = E.draw(ctx, w, h, pose, S.cam, { mode: 0, hit: SK.fig3d.spots(S.e, E.solve(pose), hov()) });
       if (!C) {
         S.dlg.querySelector('.pe-msg').textContent = 'Die Figur lässt sich auf diesem Gerät nicht zeichnen (kein WebGL 2).';
         return;

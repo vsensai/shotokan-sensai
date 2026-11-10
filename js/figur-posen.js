@@ -862,11 +862,14 @@
     if (Object.keys(upd).length) last.p = M(last.p, upd);
   });
 
+  // Feineinstellung der Fläche nur für diese Technik (aus dem Bewegungs-Editor, Reiter „Treffer“):
+  // x, y, z Versatz im Körperteil-Rahmen (m), rot Drehung um Unterarm/Unterschenkel (°), r Größe (m) – siehe figur-app.js (FL)
+  const FLAECHE_FEIN = {};
   Object.keys(FLAECHE).forEach((id) => {
     const h = D[id] && D[id].hit;
     if (!h) throw new Error(`Trefferfläche ohne Trefferpunkt: ${id}`);
     const [fl, sides] = FLAECHE[id].split(':');
-    D[id].hit = M(h, { fl, sides: sides || h.at.slice(-1) });
+    D[id].hit = M(h, Object.assign({ fl, sides: sides || h.at.slice(-1) }, FLAECHE_FEIN[id] ? { adj: FLAECHE_FEIN[id] } : {}));
   });
 
   SK.fig3dDefs = D;

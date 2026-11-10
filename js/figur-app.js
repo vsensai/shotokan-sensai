@@ -148,9 +148,14 @@
   const toL = (F, v) => [F.x, F.y, F.z].map((a) => a[0] * v[0] + a[1] * v[1] + a[2] * v[2]);
   // Richtung der Bewegungsflächen: einmal im Kernbild bestimmt (Weg in das Kernbild hinein), dann im Körperteil-Rahmen
   // festgehalten – so bleibt der Fleck beim Abspielen an derselben Stelle des Arms oder Beins.
-  function spotDirs(e) {
-    if (e.spotDirs) return e.spotDirs;
-    const h = e.d.hit;
+  // h: Trefferfläche { fl, sides, t, adj } – sonst die der Figur (e.d.hit). adj: Feineinstellung je Technik (oder im Editor):
+  // x, y, z Versatz im Körperteil-Rahmen (m), rot Drehung um Unterarm bzw. Unterschenkel (°), r Größe (m).
+  // Eine Fläche in FL kann selbst ein adj haben (gilt dann für alle Techniken mit dieser Fläche).
+  function spotDirs(e, h) {
+    h = h || e.d.hit;
+    const ck = JSON.stringify(h || null);
+    e.spotDirs = e.spotDirs || {};
+    if (e.spotDirs[ck]) return e.spotDirs[ck];
     const d = h && FL[h.fl];
     const out = [];
     if (d) {
@@ -185,18 +190,30 @@
           else if (c === 'knee') c = toL(F, E.v.norm(E.v.sub(J1['knee' + s], E.v.mix(J1['hip' + s], J1['ankle' + s], 0.5))));
           c = E.v.mul(c, d.mv);
         }
+        [d.adj, h.adj].forEach((a) => { if (a) c = adjust(c, a); });
         out.push({ s, c });
       });
     }
-    e.spotDirs = out;
+    e.spotDirs[ck] = out;
     return out;
   }
-  function spots(e, J) {
-    const d = e.d.hit && FL[e.d.hit.fl];
+  function adjust(c, a) {
+    let q = c.slice();
+    if (a.rot) {
+      const w = (a.rot * Math.PI) / 180;
+      q = [q[0], q[1] * Math.cos(w) - q[2] * Math.sin(w), q[1] * Math.sin(w) + q[2] * Math.cos(w)];
+    }
+    return [q[0] + (a.x || 0), q[1] + (a.y || 0), q[2] + (a.z || 0)];
+  }
+  const spotR = (d, h) => (h.adj && h.adj.r) || (d.adj && d.adj.r) || d.r;
+  // ov: andere Trefferfläche als die der Figur (Bewegungs-Editor), null = die der Figur
+  function spots(e, J, ov) {
+    const h = ov || e.d.hit;
+    const d = h && FL[h.fl];
     if (!d) return null;
-    return spotDirs(e).map(({ s, c }) => {
+    return spotDirs(e, h).map(({ s, c }) => {
       const F = frame(J, d.part, d.o, s);
-      return { p: E.v.add(F.o, toW(F, c)), r: d.r, part: (d.part === 'hand' || d.part === 'arm' ? 'arm' : 'leg') + s };
+      return { p: E.v.add(F.o, toW(F, c)), r: spotR(d, h), part: (d.part === 'hand' || d.part === 'arm' ? 'arm' : 'leg') + s };
     });
   }
   function paint(ctx, w, h, e, st) {
@@ -819,5 +836,5 @@
     else document.addEventListener('DOMContentLoaded', init);
   }
 
-  SK.fig3d = { ok, known, has, html, entry, paint, still, prefetch, openBig, spots }; // spots: Trefferflächen (auch für validate.js)
+  SK.fig3d = { ok, known, has, html, entry, paint, still, prefetch, openBig, spots, flaechen: () => Object.keys(FL).map((k) => ({ id: k, part: FL[k].part, r: spotR(FL[k], {}) })) }; // spots: Trefferflächen (auch für validate.js)
 })();
