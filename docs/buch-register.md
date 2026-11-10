@@ -572,7 +572,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
   - 19 und 21 (Scan 140–141): Yori-ashi nach links bzw. rechts.
   - 23–25 (Scan 142–143): Arme und Füße mit der Hüftdrehung bewegen und gleichzeitig beenden; Handgelenk stark abknicken,
     Finger leicht gebeugt; drei Wiederholungen mit Kontrast in Tempo und Kraft.
-  - 30 (Scan 145): offene Hände drücken sich langsam abwärts auseinander.
+  - 30 (Scan 145): beide Fäuste drücken sich langsam abwärts auseinander (Ryoken Ryogawa Gedan-kakiwake).
   - 31 (Scan 145): Gedan-kosa-uke stoppt den Tritt am Schienbein. 32: linken Fuß zurück, Beine des Gegners zur Seite
     ziehen.
   - 33–34 (Scan 146–147): Chudan-kakiwake; beim Jodan-kosa-uke ist die vordere Hand immer auf der Seite des vorderen
