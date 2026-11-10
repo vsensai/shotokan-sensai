@@ -691,8 +691,9 @@
   const MK2 = M({ pelvis: [0.33, 0.82, -0.02], yaw: 40, roll: 8, look: 80, L: { x: 0.42, yaw: 55, kp: [0.871, -0.49, 0.039] }, R: { x: 0.883, z: 0.086, y: 1.04, yaw: 2, pitch: 71, kp: [0.471, 0.871, 0.139], sole: [0.408, 0.293, -0.865] }, hL: [0.411, -0.175, 0.418], fL: [-0.235, 0.977, 0.115], w: [1, 0] }, MK_HL);
   // Timing und Kamera im Bewegungs-Editor eingestellt: schnell hinein (fließend), Kime, auslaufend zurück; 1,5 s
   D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: MK0 }, { t: 0.06, p: MK0 }, { t: 0.11, p: MK1, e: 'fl' }, { t: 0.17, p: MK15, e: 'in' }, { t: 0.25, p: MK2, e: 'kime' }, { t: 0.35, p: MK15, e: 'out' }, { t: 0.43, p: MK1, e: 'fl' }, { t: 0.59, p: MK0, e: 'fl' }], best: 0.25, dur: 2.5253, eff: 'toeR', cam: { yaw: 14, pitch: 17 } }, hit('heelR', 'Fußsohle'));
-  D['tc:ura-mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(Y_CH, { look: 0 }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], best: 0.72, dur: 1.8, eff: 'heelR', view: 'front3' }, hit('heelR', 'Sohle / Ferse'));
-  D['tc:ushiro-mawashi-geri'] = M(D['tc:ura-mawashi-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.32, p: M(KAMAE_K, { yaw: -150, look: -170, L: { yaw: -140 }, R: { x: -0.4, z: -0.2, y: 0.4, yaw: -150, pitch: -40, kp: [0, 0.3, -1] }, w: [1, 0] }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.6, 0, 0.8], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 30, pitch: 10, sole: [1, 0, 0.2], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], marks: ['turn'] });
+  // Sohle so gewählt, dass sie beim Einschwingen zum Treffer (Sohle innen) nicht über das Knie dreht (validate: Sprunggelenk)
+  D['tc:ura-mawashi-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(Y_CH, { look: 0 }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.36, -0.85, 0.38], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 0, pitch: 10, sole: [1, 0, 0], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], best: 0.72, dur: 1.8, eff: 'heelR', view: 'front3' }, hit('heelR', 'Sohle / Ferse'));
+  D['tc:ushiro-mawashi-geri'] = M(D['tc:ura-mawashi-geri'], { keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.32, p: M(KAMAE_K, { yaw: -150, look: -170, L: { yaw: -140 }, R: { x: -0.4, z: -0.2, y: 0.4, yaw: -150, pitch: -40, kp: [0, 0.3, -1] }, w: [1, 0] }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.31, 0.95, -0.02], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 0, pitch: 10, sole: [1, 0, 0], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], marks: ['turn'] });
   // Hiza-geri: beide Hände greifen vorn auf Kopfhöhe und ziehen herab, das Knie stößt zwischen den Händen nach oben
   const HZ_CH = BAL(M(S.zk, { pelvis: [0, 0.84, 0.5], hL: [0.12, -0.05, 0.42], hR: [-0.12, -0.05, 0.42], R: { x: -0.08, z: 0.35, y: 0.42, pitch: -70, kp: [0, 0.6, 1] }, w: [1, 0] }), 'L');
   const HZ_E0 = BAL(M(S.zk, { pelvis: [0, 0.86, 0.5], lean: 8, R: { x: -0.07, z: 0.62, y: 0.6, pitch: -65, kp: [0, 1, 0.6] }, w: [1, 0] }), 'L');
@@ -734,11 +735,18 @@
   D['tc:yoi'] = T_RUHIG(S.musubi, S.hachiji, { view: 'front3' });
   const REI = M(S.musubi, { lean: 30, look: 0 });
   D['tc:rei'] = M({ keys: [{ t: 0, p: S.musubi }, { t: 0.15, p: S.musubi }, { t: 0.45, p: REI }, { t: 0.65, p: REI }, { t: 0.9, p: S.musubi }], best: 0.5, dur: 2.4, view: 'side' });
-  const SEIZA = { pelvis: [0, 0.32, 0], yaw: 0, L: { x: 0.1, z: -0.08, y: 0.06, yaw: 180, sole: [0, 1, 0], kp: [0, -1, 0.6] }, R: { x: -0.1, z: -0.08, y: 0.06, yaw: 180, sole: [0, 1, 0], kp: [0, -1, 0.6] }, hL: [0.1, -0.58, 0.24], hR: [-0.1, -0.58, 0.24], oL: 1, oR: 1, pL: [0, 1, 0], pR: [0, 1, 0], w: [0, 0] };
+  // Füße im Seiza: Zehen nach hinten, Sohle oben – als ganz gestreckter Fuß (Neigung −180°) statt um 180° gedreht, damit er
+  // beim Aufstehen über „Zehen nach unten“ in den Stand dreht (wie das Sprunggelenk) und nicht über die Seite umschlägt.
+  // Sohle mit Anteil nach hinten: so läuft sie beim Überblenden über hinten (wird im Bild auf die Fußebene gelegt).
+  const SEIZA = { pelvis: [0, 0.32, 0], yaw: 0, L: { x: 0.1, z: -0.08, y: 0.06, yaw: 0, pitch: -180, sole: [0, 1, -1], kp: [0, -1, 0.6] }, R: { x: -0.1, z: -0.08, y: 0.06, yaw: 0, pitch: -180, sole: [0, 1, -1], kp: [0, -1, 0.6] }, hL: [0.1, -0.58, 0.24], hR: [-0.1, -0.58, 0.24], oL: 1, oR: 1, pL: [0, 1, 0], pR: [0, 1, 0], w: [0, 0] };
   D['tc:seiza'] = STILL(SEIZA, { view: 'side3' });
   D['tc:mokuso'] = STILL(M(SEIZA, { look: 0, hL: [0.03, -0.46, 0.2], hR: [-0.03, -0.47, 0.18], pL: [0, -1, 0], pR: [0, -1, 0] }), { view: 'front3' });
-  const KNEEL_UP = M(SEIZA, { pelvis: [0, 0.5, 0.02], L: { x: 0.12, z: 0.38, y: 0.075, yaw: 0, sole: [0, 0, 0], kp: [0, 0.3, 1] } });
-  D['tc:kiritsu'] = M({ keys: [{ t: 0, p: SEIZA }, { t: 0.15, p: SEIZA }, { t: 0.45, p: KNEEL_UP }, { t: 0.8, p: M(S.heisoku) }], best: 0.45, dur: 2.2, view: 'side3' });
+  // Stehender Fuß: Sohle nach unten, mit Anteil nach hinten (Gegenstück zum Seiza-Fuß, im Bild genau nach unten)
+  const SOHLE_STAND = (p, s) => V.sub([0, -1, 0], E.solve(E.full(p))['dir' + s]);
+  const KNEEL_UP0 = M(SEIZA, { pelvis: [0, 0.5, 0.02], L: { x: 0.12, z: 0.38, y: 0.075, yaw: 0, pitch: 0, kp: [0, 0.3, 1] }, R: { z: -0.22 } });
+  const KNEEL_UP = M(KNEEL_UP0, { L: { sole: SOHLE_STAND(KNEEL_UP0, 'L') } });
+  const KI_END = M(S.heisoku, { L: { sole: SOHLE_STAND(S.heisoku, 'L') }, R: { sole: SOHLE_STAND(S.heisoku, 'R') } });
+  D['tc:kiritsu'] = M({ keys: [{ t: 0, p: SEIZA }, { t: 0.15, p: SEIZA }, { t: 0.45, p: KNEEL_UP }, { t: 0.8, p: KI_END }], best: 0.45, dur: 2.2, view: 'side3' });
   const TURN0 = ZK_G;
   D['tc:mawatte'] = M({ keys: [{ t: 0, p: TURN0 }, { t: 0.15, p: TURN0 }, { t: 0.45, p: rotate(M(TURN0, { pelvis: [0, 0.76, 0.06] }), 90, [0, 0.06]) }, { t: 0.75, p: rotate(TURN0, 180, [0, 0.06]), e: 'kime' }], best: 1, dur: 2, view: 'front3', marks: ['turn'] });
   D['tc:kiai'] = M(D['mv:gyaku-zuki'], { marks: ['kiai'], hit: null });
@@ -763,7 +771,7 @@
   const TB_U1 = M(TB_U0, { pelvis: [0.06, 0.78, TB_U0.pelvis[2] + 0.03], lean: -6, roll: 8, L: { x: 0.06, z: 0.82, y: 0.17, yaw: 160, pitch: 10 }, w: [0, 1] });
   const TB_0 = FIGHT;
   const TB_1 = M(FIGHT, { pelvis: [0.03, 0.76, 0.18], yaw: -20, R: { x: -0.3, z: 0.2, y: 0.12, yaw: -15, pitch: 0, kp: [-0.4, 0.2, 1] }, w: [1, 0] });
-  const TB_2 = M(FIGHT, { pelvis: [0.06, 0.77, 0.24], yaw: 0, lean: -6, R: { x: -0.25, z: 0.76, y: 0.1, yaw: 0, pitch: 5, sole: [1, 0.15, 0], kp: [-0.3, 0.3, 1] }, w: [1, 0] });
+  const TB_2 = M(FIGHT, { pelvis: [0.06, 0.77, 0.24], yaw: 0, lean: -6, R: { x: -0.25, z: 0.76, y: 0.1, yaw: 0, pitch: 5, sole: [1, -0.25, 0], kp: [-0.3, 0.3, 1] }, w: [1, 0] });
   const TB_3 = M(FIGHT, { pelvis: [0.07, 0.78, 0.28], yaw: 15, lean: -6, R: { x: -0.07, z: 0.8, y: 0.16, yaw: 10, pitch: 8, sole: [1, 0.25, 0], kp: [0, 0.3, 1] }, w: [1, 0] });
   const TB = M(FKEYS(
     [{ t: 0, p: TB_0 }, { t: 0.12, p: TB_0 }, { t: 0.4, p: TB_1, e: 'in' }, { t: 0.56, p: TB_2, e: 'lin' }, { t: 0.68, p: TB_3, e: 'kime' }],

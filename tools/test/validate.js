@@ -178,6 +178,35 @@
   });
   out.push(`3D-Figuren: ${Object.keys(SK.fig3dDefs || {}).length}`);
 
+  // Sprunggelenk: die Sohle zeigt nie zum eigenen Knie. Winkel zwischen Sohle und Unterschenkel (vom Knie weg): 0° im Stand,
+  // um 90° bei gestrecktem Fuß (Seiza) – über F3.SOHLE_MAX (110°) geht anatomisch nicht. Zwischenbilder begrenzt die Figur selbst
+  // (figur3d.js, solve); die Schlüsselbilder müssen von sich aus darunter liegen. Dazu darf der Fuß beim Überblenden nicht springen
+  // (sonst hätte die Begrenzung einen Ruck erzeugt oder die Sohle wäre umgeschlagen).
+  const SPRUNG = 25;
+  Object.entries(SK.fig3dDefs || {}).forEach(([key, d]) => {
+    const tl = F3.timeline(d.keys, d.fix);
+    ['L', 'R'].forEach((s) => {
+      d.keys.forEach((k, i) => {
+        const w = F3.solve(tl(k.t))['soleKnee' + s];
+        if (w > F3.SOHLE_MAX) errors.push(`3D ${key}: Bild ${i + 1} – Sohle ${s} zeigt zum Knie (${Math.round(w)}°, höchstens ${F3.SOHLE_MAX}°)`);
+      });
+      const t0 = d.keys[0].t;
+      const t1 = d.keys[d.keys.length - 1].t;
+      let prev = null;
+      let worst = null;
+      for (let i = 0; i <= 200; i++) {
+        const t = t0 + ((t1 - t0) * i) / 200;
+        const so = F3.solve(tl(t))['sole' + s];
+        if (prev) {
+          const j = (Math.acos(Math.max(-1, Math.min(1, so[0] * prev[0] + so[1] * prev[1] + so[2] * prev[2]))) * 180) / Math.PI;
+          if (j > SPRUNG && (!worst || j > worst.j)) worst = { j, t };
+        }
+        prev = so;
+      }
+      if (worst) errors.push(`3D ${key}: Fuß ${s} springt beim Überblenden (Sohle um ${Math.round(worst.j)}° bei t=${worst.t.toFixed(3)})`);
+    });
+  });
+
   // Pose-Editor: gezogene Punkte landen dort, wo der Finger sie hinschiebt
   if (SK.poseEditor && F3) {
     const PE = SK.poseEditor;

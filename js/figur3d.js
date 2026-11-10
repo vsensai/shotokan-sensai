@@ -5,6 +5,8 @@
 (function () {
   'use strict';
   const D = Math.PI / 180;
+  // Grenze des Sprunggelenks: Winkel zwischen Sohle und Unterschenkel (vom Knie weg), siehe solve()
+  const SOHLE_MAX = 110;
 
   /* ---------- Vektoren ---------- */
   const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
@@ -109,6 +111,22 @@
       let sole = sub(mul(dir, dot(UP, dir)), UP);
       sole = len(sole) < 0.05 ? mul(fh, -1) : norm(sole);
       if (len(F.sole) > 0.01) sole = norm(sub(F.sole, mul(dir, dot(F.sole, dir))));
+      // Sprunggelenk: die Sohle zeigt höchstens SOHLE_MAX vom Unterschenkel weg (vom Knie weg gemessen; 0° im Stand, um 90°
+      // bei gestrecktem Fuß). Mehr geht anatomisch nicht – beim Überblenden zweier Bilder kann die Sohle sonst über das Knie
+      // umschlagen. Die Sohle dreht dann um die Fußlängsachse zurück bis an die Grenze; gültige Bilder bleiben unverändert.
+      // J.soleKnee: Winkel vor dieser Begrenzung (geprüft in tools/test/validate.js)
+      const away = sub(ank, knee);
+      const np = sub(away, mul(dir, dot(away, dir)));
+      const m = len(np) / (len(away) || 1);
+      const raw = Math.acos(Math.max(-1, Math.min(1, dot(sole, norm(away))))) / D;
+      J['soleKnee' + s] = raw;
+      if (raw > SOHLE_MAX && m > 1e-4 && Math.cos(SOHLE_MAX * D) / m > -1) {
+        const e = norm(np);
+        let q = sub(sole, mul(e, dot(sole, e)));
+        if (len(q) < 1e-6) q = cross(dir, e);
+        const ph = Math.acos(Math.cos(SOHLE_MAX * D) / m);
+        sole = norm(add(mul(e, Math.cos(ph)), mul(norm(q), Math.sin(ph))));
+      }
       J['hip' + s] = hip;
       J['knee' + s] = knee;
       J['ankle' + s] = ank;
@@ -755,6 +773,14 @@ void main(){
   // fix: optionale Korrektur jedes fertig gemischten Bildes (z. B. Fuß fest zum Unterschenkel), ändert die Pose nicht in place
   function timeline(keys, fix) {
     const K = keys.map((k) => Object.assign({ t: k.t, e: k.e || 'io' }, { p: full(k.p) }));
+    // Bilder ohne Sohlenangabe (automatisch, Sohle nach unten bzw. hinten): die berechnete Sohle eintragen – das Bild bleibt gleich,
+    // aber der Übergang zu einem Bild mit vorgegebener Sohle wird stetig (sonst schnappt die Sohle beim Überblenden um)
+    K.forEach((k) => {
+      const ss = ['L', 'R'].filter((s) => len(k.p[s].sole) <= 0.01);
+      if (!ss.length) return;
+      const J = solve(k.p);
+      ss.forEach((s) => (k.p[s].sole = J['sole' + s].slice()));
+    });
     // gleiche Nachbarbilder = Halten: dort nicht interpolieren (die Kurve würde sonst gegen die folgende Bewegung ausschwingen)
     K.forEach((k, i) => (k.hold = i > 0 && JSON.stringify(k.p) === JSON.stringify(K[i - 1].p)));
     const raw = (t) => {
@@ -780,5 +806,5 @@ void main(){
     return fix ? (t) => fix(raw(t), t) : raw;
   }
 
-  window.Figur3D = { solve, prims, draw, camera, timeline, full, ok: supported, ready: () => renderer().ok, v: { add, sub, mul, mix, len, norm } };
+  window.Figur3D = { SOHLE_MAX, solve, prims, draw, camera, timeline, full, ok: supported, ready: () => renderer().ok, v: { add, sub, mul, mix, len, norm } };
 })();
