@@ -714,7 +714,9 @@
   // und setzt gleich wieder ab – fließend, ohne Halt
   const NG1 = M(KB, { pelvis: [0.08, 0.72, 0], R: { x: -0.18, z: 0.12, y: 0.3, yaw: 30, pitch: -15, sole: [1, 0.3, 0], kp: [-1, 0.4, 0.5] }, w: [1, 0] });
   const NG2 = M(KB, { pelvis: [0.1, 0.74, 0], R: { x: -0.04, z: 0.18, y: 0.42, yaw: 40, pitch: -10, sole: [1, 0.5, 0], kp: [-1, 0.5, 0.6] }, w: [1, 0] });
-  D['tc:namigaeshi'] = M({ keys: [{ t: 0, p: KB }, { t: 0.1, p: KB }, { t: 0.3, p: NG1, e: 'in' }, { t: 0.45, p: NG2, e: 'io' }, { t: 0.62, p: NG1, e: 'lin' }, { t: 0.85, p: KB, e: 'io' }], best: 0.45, dur: 1.8 }, M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'front' }));
+  // Zackig: das Bein wird in 0,18 s hochgerissen (fließend über NG1, harter Stopp oben), hält 0,25 s und schnellt
+  // genauso schnell in den Kiba-dachi zurück (Dauer 1,8 → t 0,1 = 0,18 s)
+  D['tc:namigaeshi'] = M({ keys: [{ t: 0, p: KB }, { t: 0.1, p: KB }, { t: 0.16, p: NG1, e: 'fl' }, { t: 0.2, p: NG2, e: 'kime' }, { t: 0.34, p: NG2 }, { t: 0.38, p: NG1, e: 'fl' }, { t: 0.44, p: KB, e: 'kime' }, { t: 0.56, p: KB }], best: 0.2, dur: 1.8 }, M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'front' }));
   D['tc:nidan-geri'] = M({ keys: [{ t: 0, p: KAMAE_K }, { t: 0.12, p: KAMAE_K }, { t: 0.36, p: M(KAMAE_K, { pelvis: [0, 1.15, 0.3], L: { x: 0.1, z: 0.62, y: 0.68, pitch: 10, kp: [0, 1, 0.5] }, R: { x: -0.08, z: 0.1, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, w: [0, 0] }) }, { t: 0.58, p: M(KAMAE_K, { pelvis: [0, 1.2, 0.32], lean: -8, L: { x: 0.1, z: 0.3, y: 0.62, pitch: -50, kp: [0, 0.6, 1] }, R: { x: -0.08, z: 1.05, y: 1.45, pitch: 15, kp: [0, 1, 0.3] }, w: [0, 0] }), e: 'kime' }], best: 1, dur: 1.8, eff: 'toeR', view: 'side' }, hit('toeR', 'zweiter Tritt'));
 
   /* ---------- Fußfeger ---------- */
