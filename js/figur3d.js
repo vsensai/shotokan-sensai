@@ -264,12 +264,15 @@
       const V = (f, d, q) => add(add(add(B, mul(td, f)), mul(tdn, d)), mul(inner, q));
       // Fuß aus einem Guss: Ferse und Sohle als flacher Keil bis zum Ballen, darüber der Spann vom Knöchel zum Ballen,
       // hinten die Ferse zum Knöchel – mit weichen Übergängen, damit keine einzelnen Wülste sichtbar sind
+      const f0 = P.length;
       group([J['heel' + s], J['toe' + s], 0.065, 0.055], () => {
         cone(a, O(-0.032, 0.04, 0.0), 0.026, 0.027, SK(0.02));
         cone(O(-0.03, 0.05, 0.0), O(0.1, 0.048, 0.005), 0.031, 0.038, FL(sole, 1.5, 0.02));
         cone(add(a, mul(dir, 0.01)), O(0.1, 0.03, 0.004), 0.025, 0.024, SK(0.026));
         cone(V(-0.012, -0.002, 0.003), V(0.048, 0.003, 0.006), 0.032, 0.024, FL(tdn, 1.8, 0.02));
       });
+      // Nur der Fuß (Trefferflächen am Fuß färben nicht Schienbein und Hose mit)
+      P.parts['foot' + s] = [f0, P.length];
       P.parts['leg' + s] = [l0, P.length];
     });
     // Gürtel als eigener Ring um die Taille (über der Jacke)

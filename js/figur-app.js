@@ -213,7 +213,7 @@
     if (!d) return null;
     return spotDirs(e, h).map(({ s, c }) => {
       const F = frame(J, d.part, d.o, s);
-      return { p: E.v.add(F.o, toW(F, c)), r: spotR(d, h), part: (d.part === 'hand' || d.part === 'arm' ? 'arm' : 'leg') + s };
+      return { p: E.v.add(F.o, toW(F, c)), r: spotR(d, h), part: (d.part === 'fuss' ? 'foot' : d.part === 'hand' || d.part === 'arm' ? 'arm' : 'leg') + s };
     });
   }
   function paint(ctx, w, h, e, st) {
