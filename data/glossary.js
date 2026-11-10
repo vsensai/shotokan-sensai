@@ -191,9 +191,12 @@
     ['Bunkai', 'Anwendung / Analyse der Kata-Techniken', 'begriff', tc('bunkai')],
   ];
 
-  // Erstes Vorkommen in den 10 Kata des Buches (Reihenfolge SK.kataOrder), nur wo das Buch die Technik beim Namen nennt.
-  // [Kata, Bewegung, Name im Buch (falls anders), Zusatz, Prüfwort] – validate.js prüft, dass die Bewegung den Namen
+  // Erstes Vorkommen in den Kata des Buches (Reihenfolge SK.kataOrder), nur wo das Buch die Technik beim Namen nennt.
+  // [Kata, Bewegung, Name im Buch (falls anders), Anmerkung, Prüfwort] – validate.js prüft, dass die Bewegung den Namen
   // enthält und keine frühere Bewegung ihn schon hat (außer mit eigenem Prüfwort).
+  // Die Karte zeigt kein eigenes „Zuerst in“ mehr: die Stelle steht in „Kommt vor in …“ (SK.glossaryVorkommen) – auch dort,
+  // wo das Buch die Technik anders nennt und die Erkennung sie nicht findet (Gyaku-zuki in Heian Nidan 18). Der Name im
+  // Buch dient weiter als Zweitname und Suchwort; die Anmerkung ist nur ein Hinweis für die Pflege.
   const ERST = {
     'Heisoku-dachi': ['heian-sandan', 2],
     'Hachiji-dachi': ['bassai-dai', 8],
@@ -324,20 +327,10 @@
   SK.glossary = E.map(([t, de, cat, img, src]) => {
     const e = { t, de, qde: QUIZ[t] || de, cat, img: img || null, src: src || ALLG, kana: kana(t) };
     const z = ERST[t];
-    if (z) e.erst = { kata: z[0], n: z[1], buch: z[2] || '', zusatz: z[3] || '', wort: z[4] || '' };
+    if (z) e.erst = { kata: z[0], n: z[1], buch: z[2] || '', wort: z[4] || '' };
     return e;
   });
   SK.glossaryErst = ERST;
-
-  // Hinweis unten auf der Karte: erste Bewegung mit Link zum passenden Bewegungsblock der Kata
-  function erstHtml(e) {
-    const z = e.erst, k = z && SK.kata[z.kata];
-    const r = k && k.seq[z.n - 1];
-    if (!r) return '';
-    const link = SK.kataMoveLesson ? `#/wissen/${SK.kataMoveLesson(z.kata, z.n)}` : '';
-    const txt = `${SK.util.esc(k.name)}, Bewegung ${z.n}${z.zusatz ? ` (${SK.util.esc(z.zusatz)})` : ''}`;
-    return `<p class="lex-erst">Zuerst in: ${link ? `<a href="${link}">${txt}</a>` : txt}</p>`;
-  }
 
   // Alle Stellen eines Begriffs in den Kata: Bewegungen, in denen der Kata-Trainer den Begriff in Stand, Technik oder
   // Hinweis erkennt (SK.lexParts – dort ist er auch antippbar), dazu das erste Vorkommen aus ERST (dessen Name im Buch
@@ -451,7 +444,7 @@
       .map(
         (e) => `<article class="lex-card" data-cat="${e.cat}" data-t="${SK.util.esc(e.t)}" data-text="${SK.util.esc(`${e.t} ${altName(e)} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
           ${SK.glossarySagHtml(e)}<h4>${SK.util.esc(e.t)}${altName(e) ? ` <span class="lex-alt">(${SK.util.esc(altName(e))})</span>` : ''}</h4><p>${SK.util.esc(e.de)}</p>
-          ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${erstHtml(e)}${vorHtml(e)}</article>`
+          ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${vorHtml(e)}</article>`
       )
       .join('')}</div>`;
   };

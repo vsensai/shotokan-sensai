@@ -88,7 +88,6 @@
       const z = e.erst, k = SK.kata[z.kata];
       const r = k && k.seq[z.n - 1];
       if (!r) return errors.push(`Lexikon „${e.t}“: ${z.kata} ${z.n} gibt es nicht`);
-      if (!lessons.has(SK.kataMoveLesson(z.kata, z.n))) errors.push(`Lexikon „${e.t}“: Lektion ${SK.kataMoveLesson(z.kata, z.n)} fehlt`);
       const name = z.wort || z.buch || e.t;
       if (!has(text(e, r), name)) errors.push(`Lexikon „${e.t}“: ${k.name} ${z.n} enthält „${name}“ nicht`);
       if (z.wort) return;
@@ -112,7 +111,7 @@
       ['a', 'b'].forEach((x) => { if (!qids.has(`${SK.glossaryId(e)}-${x}`)) errors.push(`Lexikon „${e.t}“: Frage ${SK.glossaryId(e)}-${x} fehlt (Karteikarten)`); });
     });
   }
-  // Lexikon „Kommt vor in …“: jede Stelle gibt es im Kata-Trainer, und „Zuerst in“ (SK.glossaryErst) ist die erste davon.
+  // Lexikon „Kommt vor in …“: jede Stelle gibt es im Kata-Trainer, und das erste Vorkommen (SK.glossaryErst) ist die erste davon.
   // Die Prüfung oben vergleicht den ganzen Buchnamen und übersieht dieselbe Technik mit anderem Zusatz
   // (Gedan-kakiwake: „Ryote …“ in Hangetsu 10, aber schon „Ryoken …“ in Jion 30) – diese hier geht vom Begriff aus.
   {
@@ -124,7 +123,7 @@
         if (!k.ansage) errors.push(`Lexikon „${e.t}“: Vorkommen in ${k.name} ohne Kata-Trainer`);
         ns.forEach((n) => { if (!(n >= 1 && n <= k.moves)) errors.push(`Lexikon „${e.t}“: Vorkommen ${k.name} ${n} gibt es nicht`); });
       });
-      if (e.erst && !(v.length && v[0].k.id === e.erst.kata && v[0].ns[0] === e.erst.n)) errors.push(`Lexikon „${e.t}“: „Zuerst in“ (${e.erst.kata} ${e.erst.n}) ist nicht die erste Stelle in „Kommt vor in“ (${v.length ? `${v[0].k.id} ${v[0].ns[0]}` : 'keine'})`);
+      if (e.erst && !(v.length && v[0].k.id === e.erst.kata && v[0].ns[0] === e.erst.n)) errors.push(`Lexikon „${e.t}“: erstes Vorkommen in ERST (${e.erst.kata} ${e.erst.n}) ist nicht die erste Stelle in „Kommt vor in“ (${v.length ? `${v[0].k.id} ${v[0].ns[0]}` : 'keine'})`);
     });
     out.push(`Lexikon: ${SK.glossary.length} Begriffe, ${mit} mit Stellen in den Kata`);
   }

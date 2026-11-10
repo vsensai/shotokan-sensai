@@ -292,7 +292,7 @@
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       if (!count.hidden) count.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-    // Link aus einer Karte (z. B. „Zuerst in: …“): vorher die Karte in die Adresse schreiben,
+    // Link aus einer Karte (z. B. eine Stelle aus „Kommt vor in …“): vorher die Karte in die Adresse schreiben,
     // damit „Zurück“ wieder bei ihr landet statt bei zugeklappten Kategorien.
     const remember = (ev) => {
       const a = ev.target.closest('.lex-card a[href^="#/"]');
