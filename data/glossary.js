@@ -247,7 +247,7 @@
     'Tsukami-uke': ['bassai-dai', 18],
     'Tate-shuto-uke': ['bassai-dai', 9, 'Tate-shuto Chudan-uke'],
     'Teisho-uke': ['jion', 23, 'Teisho Yoko-uke'],
-    'Gedan-kakiwake': ['hangetsu', 10, 'Ryote Ryogawa Gedan-kakiwake'],
+    'Gedan-kakiwake': ['jion', 30, 'Ryoken Ryogawa Gedan-kakiwake', 'dort mit beiden Fäusten'],
     'Teisho Awase-uke': ['hangetsu', 41, 'Ryo-teisho Gedan Awase-uke'],
     'Jishi-ippon-ken': ['hangetsu', 7],
     'Koko': ['hangetsu', 12],

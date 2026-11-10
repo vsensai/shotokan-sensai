@@ -112,9 +112,9 @@
       ['a', 'b'].forEach((x) => { if (!qids.has(`${SK.glossaryId(e)}-${x}`)) errors.push(`Lexikon „${e.t}“: Frage ${SK.glossaryId(e)}-${x} fehlt (Karteikarten)`); });
     });
   }
-  // Lexikon „Kommt vor in …“: jede Stelle gibt es im Kata-Trainer, das erste Vorkommen (SK.glossaryErst) ist dabei.
-  // (Nicht geprüft: dass es die erste Stelle ist – „Zuerst in“ meint die Form der Karte, z. B. Gedan-kakiwake mit offenen
-  // Händen erst in Hangetsu 10, mit Fäusten schon in Jion 30.)
+  // Lexikon „Kommt vor in …“: jede Stelle gibt es im Kata-Trainer, und „Zuerst in“ (SK.glossaryErst) ist die erste davon.
+  // Die Prüfung oben vergleicht den ganzen Buchnamen und übersieht dieselbe Technik mit anderem Zusatz
+  // (Gedan-kakiwake: „Ryote …“ in Hangetsu 10, aber schon „Ryoken …“ in Jion 30) – diese hier geht vom Begriff aus.
   {
     let mit = 0;
     SK.glossary.forEach((e) => {
@@ -124,7 +124,7 @@
         if (!k.ansage) errors.push(`Lexikon „${e.t}“: Vorkommen in ${k.name} ohne Kata-Trainer`);
         ns.forEach((n) => { if (!(n >= 1 && n <= k.moves)) errors.push(`Lexikon „${e.t}“: Vorkommen ${k.name} ${n} gibt es nicht`); });
       });
-      if (e.erst && !v.some((x) => x.k.id === e.erst.kata && x.ns.includes(e.erst.n))) errors.push(`Lexikon „${e.t}“: erstes Vorkommen (${e.erst.kata} ${e.erst.n}) fehlt in „Kommt vor in“`);
+      if (e.erst && !(v.length && v[0].k.id === e.erst.kata && v[0].ns[0] === e.erst.n)) errors.push(`Lexikon „${e.t}“: „Zuerst in“ (${e.erst.kata} ${e.erst.n}) ist nicht die erste Stelle in „Kommt vor in“ (${v.length ? `${v[0].k.id} ${v[0].ns[0]}` : 'keine'})`);
     });
     out.push(`Lexikon: ${SK.glossary.length} Begriffe, ${mit} mit Stellen in den Kata`);
   }
