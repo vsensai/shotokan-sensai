@@ -681,7 +681,8 @@ ${easeGuide()}
       const u = Math.min(1, (now - start) / 1000 / dur);
       run.pose = tl(t0 + (t1 - t0) * u);
       const ph = S.dlg.querySelector('.pe-head');
-      if (ph) { ph.hidden = false; ph.style.left = `${clamp(t0 + (t1 - t0) * u, 0, 1) * 100}%`; }
+      // Zeitleiste reicht vom ersten bis zum letzten Bild: der Balken steht beim Anteil der abgelaufenen Bewegung
+      if (ph) { ph.hidden = false; ph.style.left = `${clamp(u, 0, 1) * 100}%`; }
       S.fast = true;
       draw();
       if (u < 1) requestAnimationFrame(step);
