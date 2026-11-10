@@ -281,7 +281,7 @@ ${easeGuide()}
 <details class="pe-copy"><summary>Pose übernehmen …</summary>
 <div class="pe-cprow"><label class="pe-row"><span>Von Bild</span><select class="pe-cpsrc" aria-label="Pose übernehmen von Bild"></select></label><label class="pe-cpmir"><input type="checkbox" class="pe-cpm"> gespiegelt (links ↔ rechts)</label><button type="button" class="pe-wide" data-pe="cpgo" title="Die ganze Pose des gewählten Bildes in das gezeigte Bild übernehmen – Zeitpunkt und Übergang bleiben">In dieses Bild übernehmen</button></div>
 <p class="small muted">Nur die Pose – Zeitpunkt und Übergang bleiben. ↶ nimmt es zurück. Einzelne Körperteile: im Reiter Körper.${touch ? '' : ' Tastatur: Strg+C kopiert die Pose des gezeigten Bildes, Strg+V fügt sie ein, Strg+Umschalt+V gespiegelt.'}</p></details>
-<div class="pe-tbrow pe-pauserow" hidden><span>Pause am Anfang <b class="pe-pv"></b></span><button type="button" class="pe-pm" data-pe="pz-" aria-label="Pause am Anfang kürzer" title="Die Figur steht vor der Bewegung 0,05 s kürzer still">−</button><button type="button" class="pe-pm" data-pe="pz+" aria-label="Pause am Anfang länger" title="Die Figur steht vor der Bewegung 0,05 s länger still">+</button></div>
+<div class="pe-tbrow pe-pauserow" hidden><span><span class="pe-pl">Halten in diesem Bild</span> <b class="pe-pv"></b></span><button type="button" class="pe-pm" data-pe="pz-" aria-label="Halten kürzer" title="Die Figur verharrt in diesem Bild 0,05 s kürzer">−</button><button type="button" class="pe-pm" data-pe="pz+" aria-label="Halten länger" title="Die Figur verharrt in diesem Bild 0,05 s länger (die Bilder danach rücken mit)">+</button></div>
 <p class="pe-total"></p>
 <div class="pe-ttouch"><div class="pe-tbrow"><span>Zeit vom Bild davor <b class="pe-tsv"></b></span><button type="button" class="pe-pm" data-pe="seg-" aria-label="Zeit vom Bild davor kürzer" title="0,05 s kürzer">−</button><button type="button" class="pe-pm" data-pe="seg+" aria-label="Zeit vom Bild davor länger" title="0,05 s länger">+</button></div><div class="pe-tbrow"><span>Ganze Bewegung <b class="pe-ttv"></b></span><button type="button" class="pe-pm" data-pe="tot-" aria-label="Ganze Bewegung schneller" title="Ganze Bewegung 0,05 s kürzer (alle Abschnitte gleichmäßig)">−</button><button type="button" class="pe-pm" data-pe="tot+" aria-label="Ganze Bewegung langsamer" title="Ganze Bewegung 0,05 s länger (alle Abschnitte gleichmäßig)">+</button></div><p class="small muted">Die Bilder danach rücken mit. Auf der Zeitleiste: Punkt antippen wählt das Bild, wischen verschiebt die Leiste.</p></div>
 <p class="pe-tthint small muted">Zeit ändern: den Punkt auf der Zeitleiste ziehen; die Bilder danach rücken mit. Ganze Bewegung schneller oder langsamer: den Griff am Ende der Zeitleiste ziehen. Mit der Tastatur: ← / → für das gewählte Bild.</p>
@@ -303,10 +303,19 @@ ${easeGuide()}
 <div class="pe-sticky"><p class="pe-msg muted small" aria-live="polite"></p><button type="button" class="btn" data-pe="copy" title="Den Text in die Zwischenablage kopieren – zum Einfügen im Chat oder zum Sichern (später mit „Importieren“ zurückholen)">Kopieren</button></div>
 </div></div>`;
     document.body.appendChild(d);
-    d.querySelector('.pe-close').addEventListener('click', () => d.close());
+    d.querySelector('.pe-close').addEventListener('click', () => {
+      if (dirty() && !window.confirm('Editor schließen? Deine Änderungen sind noch nicht kopiert. (Beim nächsten Öffnen dieser Bewegung lassen sie sich wiederherstellen.)')) return;
+      d.close();
+    });
+    // Esc schließt nicht, solange Änderungen nicht kopiert sind (versehentlich gedrückt) – Schließen dann nur mit ✕
+    const noEsc = () => { const m = d.querySelector('.pe-msg'); if (m) m.textContent = 'Esc schließt den Editor nicht, solange Änderungen nicht kopiert sind – zum Schließen ✕.'; };
+    d.addEventListener('cancel', (ev) => { if (dirty()) { ev.preventDefault(); noEsc(); } });
+    d.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && dirty()) { ev.preventDefault(); noEsc(); } });
     d.addEventListener('close', () => {
       // Schon wieder geöffnet (Schließen und Öffnen im selben Augenblick): den neuen Stand behalten
       if (d.open) return;
+      // Nicht kopierte Änderungen merken: beim nächsten Öffnen derselben Bewegung wiederherstellbar (bis die Seite neu lädt)
+      if (dirty()) LAST = { id: S.id, text: S.text };
       S = null;
       d.classList.remove('pe-full');
       document.documentElement.classList.remove('pe-fs');
@@ -358,7 +367,8 @@ ${easeGuide()}
     const id = String(key).split(':').slice(0, 2).join(':');
     const e = SK.fig3d.entry(id);
     const best = e.d.best == null ? 1 : e.d.best;
-    const keys = e.d.keys;
+    // Eigene Liste: Halten fügt Bilder ein oder entfernt sie – die Bewegung der App bleibt unberührt
+    const keys = e.d.keys.slice();
     const frames = keys.map((k) => E.full(k.p));
     // Kernbild: Schlüsselbild an der Zeit „best“ (sonst das nächstgelegene)
     let k0 = 0;
@@ -373,7 +383,11 @@ ${easeGuide()}
     const dur0 = e.d.dur || 1.6;
     const d = dialog();
     S = { id, title: title || id, e, keys, frames, k0, k0app, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
-    S.pause = keys.length > 2 && same(rounded(frames[0]), rounded(frames[1]));
+    // Gehaltene Bilder: gleiche Pose wie das Bild davor – im Editor kein eigenes Bild, sondern „Halten“ beim Bild davor
+    // (beim ersten Bild: „Pause am Anfang“). Bleiben mindestens zwei Bilder übrig.
+    S.hid = new Set();
+    for (let i = 1; i < keys.length; i++) if (same(rounded(frames[i]), rounded(frames[i - 1]))) S.hid.add(i);
+    if (keys.length - S.hid.size < 2) S.hid.clear();
     S.hit0 = hitOf(e.d.hit);
     S.hit = S.hit0 && clone(S.hit0);
     S.hitAll = false;
@@ -390,16 +404,28 @@ ${easeGuide()}
     d.querySelector('.pe-msg').textContent = '';
     if (!d.open) d.showModal();
     goFrame(k0);
+    S.clean = S.text;
+    if (LAST && LAST.id === id && LAST.text !== S.text) d.querySelector('.pe-msg').innerHTML = 'Nicht kopierte Änderungen vom letzten Mal: <button type="button" class="pe-sm" data-pe="restore">Wiederherstellen</button>';
     requestAnimationFrame(() => draw());
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
   const holdOf = (i) => { let j = i; while (j > 0 && same(rounded(S.frames[j - 1]), rounded(S.frames[i]))) j--; return j; };
   // Pause am Anfang: ist Bild 2 nur das stehende Bild 1 (Halten vor der Bewegung), zeigt der Editor es nicht als eigenes
   // Bild, sondern als Einstellung „Pause am Anfang“ (im Reiter Bild beim ersten Bild). Nummern zählen dann ohne dieses Bild.
-  const PZ = () => !!(S && S.pause);
-  const nr = (i) => (PZ() && i >= 1 ? i : i + 1);
-  const nTot = () => S.keys.length - (PZ() ? 1 : 0);
-  const shown = (i) => !(PZ() && i === 1);
+  const isHid = (i) => !!(S && S.hid && S.hid.has(i));
+  const shown = (i) => !isHid(i);
+  const PZ = () => isHid(1);
+  // Bild, zu dem ein gehaltenes Bild gehört; Nummer zählt nur gezeigte Bilder
+  const ownerOf = (i) => { let j = i; while (j > 0 && isHid(j)) j--; return j; };
+  const nr = (i) => { let c = 0; for (let j = 0; j <= ownerOf(i); j++) if (!isHid(j)) c++; return c; };
+  const nTot = () => S.keys.length - S.hid.size;
+  const showList = () => S.keys.map((_, i) => i).filter(shown);
+  // Halten: letztes gehaltenes Bild und Dauer in Sekunden
+  const holdEnd = (i) => { let j = i; while (isHid(j + 1)) j++; return j; };
+  const holdSec = (i) => (S.tm[holdEnd(i)].t - S.tm[i].t) * S.dur;
+  // Ungesicherte Änderungen: Ausgabe anders als beim Öffnen bzw. beim letzten Kopieren
+  const dirty = () => !!(S && S.text != null && S.clean != null && S.text !== S.clean);
+  let LAST = null;
   // Zeitleiste, Bildleiste und Reiter „Bild“ auf den Stand bringen: jedes Bild ist eine Marke an seinem Zeitpunkt
   // (★ Kernbild, gestrichelt = hält das Bild davor, rot = Übergang Kime); Klick wählt, Ziehen ändert den Zeitpunkt
   function frames() {
@@ -426,8 +452,8 @@ ${easeGuide()}
     pb.title = S.play ? 'Anhalten' : `Bewegung mit allen Änderungen abspielen${S.speed < 1 ? ' – in Zeitlupe' : ''}`;
     d.querySelector('[data-pe="slow"]').setAttribute('aria-pressed', String(S.speed < 1));
     pb.setAttribute('aria-pressed', String(!!S.play));
-    d.querySelector('[data-pe="fprev"]').disabled = S.k <= 0;
-    d.querySelector('[data-pe="fnext"]').disabled = S.k >= n - 1;
+    d.querySelector('[data-pe="fprev"]').disabled = !showList().some((j) => j < S.k);
+    d.querySelector('[data-pe="fnext"]').disabled = !showList().some((j) => j > S.k);
     d.querySelectorAll('[data-pe="fbest"]').forEach((b) => {
       b.textContent = isK ? '★' : '☆';
       b.setAttribute('aria-pressed', String(isK));
@@ -443,7 +469,7 @@ ${easeGuide()}
     const scS = S.drag ? S.drag.scS : total || 1;
     const pos = (t) => `${clamp(sec(t) / scS, 0, 1) * 100}%`;
     tr.innerHTML = S.tm.map((x, i) => {
-      if (!shown(i)) return `<span class="pe-pause" data-a="${S.tm[0].t}" data-b="${x.t}" title="Pause am Anfang: ${sec(x.t).toFixed(2)} s"></span>`;
+      if (!shown(i)) return `<span class="pe-pause" data-a="${S.tm[i - 1].t}" data-b="${x.t}" title="${ownerOf(i) === 0 ? 'Pause am Anfang' : `Bild ${nr(i)} hält`}: ${((x.t - S.tm[ownerOf(i)].t) * S.dur).toFixed(2)} s"></span>`;
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
       return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${nr(i)} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${nr(holdOf(i))}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${nr(i)}</span></button>`;
@@ -479,12 +505,14 @@ ${easeGuide()}
     const first = S.k === 0;
     const seg = first ? 0 : (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
     const pr = d.querySelector('.pe-pauserow');
-    pr.hidden = !(first && PZ());
-    if (PZ()) d.querySelector('.pe-pv').textContent = `${((S.tm[1].t - S.tm[0].t) * S.dur).toFixed(2)} s`;
+    pr.hidden = false;
+    d.querySelector('.pe-pl').textContent = first ? 'Pause am Anfang' : 'Halten in diesem Bild';
+    d.querySelector('.pe-pv').textContent = `${holdSec(S.k).toFixed(2)} s`;
+    d.querySelector('[data-pe="pz-"]').disabled = holdSec(S.k) < 0.001;
     d.querySelector('.pe-tsv').textContent = first ? '–' : `${seg.toFixed(2)} s`;
     d.querySelector('.pe-ttv').textContent = `${total.toFixed(2)} s`;
     d.querySelectorAll('[data-pe="seg-"], [data-pe="seg+"]').forEach((b) => (b.disabled = first));
-    d.querySelector('.pe-total').textContent = `${first ? 'erstes Bild' : `${seg.toFixed(2)} s vom Bild davor`} · ganze Bewegung ${total.toFixed(2)} s`;
+    d.querySelector('.pe-total').textContent = `${first ? 'erstes Bild' : `${seg.toFixed(2)} s vom Bild davor${isHid(S.k - 1) ? ' (nach dem Halten)' : ''}`} · ganze Bewegung ${total.toFixed(2)} s`;
     const te = d.querySelector('.pe-te');
     te.disabled = first;
     te.value = S.tm[S.k].e in EASE_UI ? S.tm[S.k].e : 'io';
@@ -613,11 +641,7 @@ ${easeGuide()}
   function keep() {
     if (!same(rounded(S.P), rounded(S.orig))) S.edits[S.k] = clone(S.P);
     else delete S.edits[S.k];
-    // Pause am Anfang: das stehende Bild bleibt genau wie Bild 1
-    if (PZ() && S.k === 0) {
-      if (S.edits[0]) S.edits[1] = clone(S.edits[0]);
-      else delete S.edits[1];
-    }
+    syncHolds();
   }
 
   // Übergänge, wie sie im Editor heißen (e in den keys von js/figur-posen.js)
@@ -643,8 +667,8 @@ ${easeGuide()}
   // Schlüsselbilder mit allen Änderungen (Posen und Timing)
   const effKeys = () => S.keys.map((k, i) => Object.assign({}, k, { t: S.tm[i].t, e: S.tm[i].e, p: S.edits[i] || k.p }));
   // Geändert zählt in Sekunden (beim Strecken der Zeitachse ändern sich t und Dauer, die Sekunden aber nicht)
-  const secChanged = (i) => Math.abs((S.tm[i].t - S.tm[0].t) * S.dur - (S.tk[i].t - S.tk[0].t) * S.dur0) > 0.005;
-  const timingChanged = (i) => secChanged(i) || S.tm[i].e !== S.tk[i].e;
+  const secChanged = (i) => !S.tk[i] || Math.abs((S.tm[i].t - S.tm[0].t) * S.dur - (S.tk[i].t - S.tk[0].t) * S.dur0) > 0.005;
+  const timingChanged = (i) => !S.tk[i] || secChanged(i) || S.tm[i].e !== S.tk[i].e;
   // Zeit vom Bild davor (Sekunden) setzen: dieses und alle späteren Bilder rücken mit; reicht die Zeitachse (t bis 1)
   // nicht, wird sie gestreckt (Dauer und Zeitpunkte so umgerechnet, dass die Sekunden gleich bleiben)
   function setSeg(i, secs) {
@@ -662,6 +686,67 @@ ${easeGuide()}
   function timing() {
     save();
     text();
+  }
+  // Gehaltene Bilder haben immer die Pose ihres Bildes
+  function syncHolds() {
+    S.hid.forEach((j) => {
+      const o = ownerOf(j);
+      if (S.edits[o]) S.edits[j] = clone(S.edits[o]);
+      else delete S.edits[j];
+    });
+  }
+  const shiftIdx = (o, from, d) => { const r = {}; Object.keys(o).forEach((k) => (r[+k >= from ? +k + d : +k] = o[k])); return r; };
+  // Gehaltenes Bild an Stelle at einfügen (hält Bild at-1) bzw. entfernen
+  function insertHold(at) {
+    const o = at - 1;
+    S.keys.splice(at, 0, Object.assign({}, S.keys[o]));
+    S.frames.splice(at, 0, clone(S.frames[o]));
+    S.tk.splice(at, 0, null);
+    S.tm.splice(at, 0, { t: S.tm[o].t, e: 'io' });
+    S.edits = shiftIdx(S.edits, at, 1);
+    S.undos = shiftIdx(S.undos, at, 1);
+    S.hid = new Set([...S.hid].map((j) => (j >= at ? j + 1 : j)).concat(at));
+    ['k', 'k0', 'k0app'].forEach((f) => { if (S[f] != null && S[f] >= at) S[f]++; });
+  }
+  function removeHold(at) {
+    S.keys.splice(at, 1);
+    S.frames.splice(at, 1);
+    S.tk.splice(at, 1);
+    S.tm.splice(at, 1);
+    delete S.edits[at];
+    delete S.undos[at];
+    S.edits = shiftIdx(S.edits, at + 1, -1);
+    S.undos = shiftIdx(S.undos, at + 1, -1);
+    S.hid = new Set([...S.hid].filter((j) => j !== at).map((j) => (j > at ? j - 1 : j)));
+    ['k', 'k0', 'k0app'].forEach((f) => { if (S[f] != null && S[f] > at) S[f]--; });
+  }
+  // Halten in Bild i auf secs Sekunden setzen (0 = nicht halten); die Bilder danach rücken mit.
+  // quiet: nur die Struktur und Zeiten (für den Import), ohne Anzeige
+  function setHold(i, secs, quiet) {
+    secs = clamp(Math.round(secs * 20) / 20, 0, 5);
+    const e = holdEnd(i);
+    const cur = (S.tm[e].t - S.tm[i].t) * S.dur;
+    const dT = (secs - cur) / S.dur;
+    for (let j = e + 1; j < S.tm.length; j++) S.tm[j].t += dT;
+    if (!secs) for (let j = e; j > i; j--) removeHold(j);
+    else {
+      if (e === i) insertHold(i + 1);
+      const e2 = holdEnd(i);
+      for (let j = i + 1; j <= e2; j++) S.tm[j].t = S.tm[i].t + (j === e2 || cur < 0.001 ? secs : ((S.tm[j].t - S.tm[i].t) * S.dur * secs) / cur) / S.dur;
+    }
+    syncHolds();
+    // Zeitachse (t bis 1) strecken, wenn sie nicht reicht – und wieder stauchen, wenn das Halten kürzer wird (höchstens bis zur Dauer der App)
+    const last = S.tm[S.tm.length - 1].t;
+    const nd = last > 1 ? S.dur * last : S.dur > S.dur0 ? Math.max(S.dur0, S.dur * last) : S.dur;
+    if (Math.abs(nd - S.dur) > 1e-6) {
+      const f = S.dur / nd;
+      S.dur = Math.abs(nd - S.dur0) < 1e-6 ? S.dur0 : nd;
+      S.tm.forEach((x) => (x.t *= f)); // nicht runden: mehrfaches Strecken und Stauchen soll genau zurückführen (gerundet wird in der Ausgabe)
+    }
+    if (quiet) return;
+    S.t = S.tm[S.k].t;
+    timing();
+    draw();
   }
 
   /* ---------- Abspielen: die Bewegung mit den geänderten Bildern ---------- */
@@ -810,12 +895,12 @@ ${easeGuide()}
     // Immer die ganze Bewegung (jedes Bild vollständig, gehaltene Bilder als Verweis)
     const all = n > 1;
     const k0t = Math.round(S.tm[S.k0].t * 1000) / 1000;
-    const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${nTot()} Bilder` : `Bewegung mit ${nTot()} Bildern`}, Kernbild = Bild ${nr(S.k0)} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${nr(S.k0app)})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${S.dur}${S.dur !== S.dur0 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
+    const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${nTot()} Bilder` : `Bewegung mit ${nTot()} Bildern`}, Kernbild = Bild ${nr(S.k0)} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${nr(S.k0app)})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${Math.round(S.dur * 10000) / 10000}${Math.abs(S.dur - S.dur0) > 1e-6 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
     const kc = S.kcam || camInfo0();
     lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
     // Pause am Anfang statt eines eigenen Bildes (im Code: Bild 1 noch einmal zum Zeitpunkt t der Pause)
     if (S.hit || S.hit0) lines.push(...hitLines());
-    if (PZ()) lines.push(`Pause am Anfang: ${((S.tm[1].t - S.tm[0].t) * S.dur).toFixed(2)} s (t = ${Math.round(S.tm[1].t * 1000) / 1000})${secChanged(1) ? ', geändert' : ''}`);
+    if (PZ()) lines.push(`Pause am Anfang: ${holdSec(0).toFixed(2)} s (t = ${Math.round(S.tm[holdEnd(0)].t * 1000) / 1000})${secChanged(holdEnd(0)) ? ', geändert' : ''}`);
     const list = all ? S.keys.map((_, i) => i) : [...new Set(Object.keys(S.edits).map(Number).concat(S.k).concat(S.keys.map((_, i) => i).filter(timingChanged)))].sort((x, y) => x - y);
     list.forEach((i) => {
       if (!shown(i)) return;
@@ -830,7 +915,8 @@ ${easeGuide()}
         const same0 = S.keys.map((_, j) => j).find((j) => j < i && shown(j) && same(rounded(P), rounded(S.edits[j] || S.frames[j])));
         const hold = same0 != null;
         const ease = i ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : '';
-        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}) – ${hold ? `gleiche Pose wie Bild ${nr(same0)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
+        const hs = i && holdEnd(i) > i ? `, hält ${holdSec(i).toFixed(2)} s bis t = ${Math.round(S.tm[holdEnd(i)].t * 1000) / 1000}` : '';
+        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}${hs}) – ${hold ? `gleiche Pose wie Bild ${nr(same0)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
         if (!hold) lines.push(lit(diff(P)));
         return;
       }
@@ -995,59 +1081,69 @@ ${easeGuide()}
     if (!head) return 'Kein Text des Bewegungs-Editors gefunden.';
     if (!head.includes(`· ${S.id} ·`)) return `Der Text gehört zu einer anderen Figur (${(head.split(' · ')[1] || '?')}), nicht zu ${S.id}.`;
     const n = S.keys.length;
-    // Neues Format mit „Pause am Anfang“: Bildnummern zählen ohne das stehende Bild 2
     const pzl = L.find((l) => /^Pause am Anfang: /.test(l));
-    const pzm = pzl && pzl.match(/^Pause am Anfang: ([\d.]+) s/);
-    if (pzl && !PZ()) return 'Der Text hat eine Pause am Anfang, diese Figur nicht.';
-    const nT = pzl ? n - 1 : n;
-    const kix = (d) => (pzl && d >= 2 ? d : d - 1);
+    const pzm = pzl && pzl.match(/^Pause am Anfang: ([\d.]+) s(?: \(t = ([\d.]+)\))?/);
     const lit2obj = (l) => JSON.parse(l.replace(/([{,]\s*)([A-Za-z_]\w*)\s*:/g, '$1"$2":'));
     const easeOf = (name) => Object.keys(EASE).find((k) => name.startsWith(EASE[k])) || null;
-    const got = {};
+    // Zeilen lesen (Bildnummern wie im Text)
+    const rows = [];
+    let tot = null;
     try {
       for (let li = 0; li < L.length; li++) {
-        let i = null;
-        let m = L[li].match(/^Bild (\d+) von (\d+) \(t = ([\d.]+)(?:, Übergang ([^,)]+))?/);
+        const m = L[li].match(/^Bild (\d+) von (\d+) \(t = ([\d.]+)(?:, Übergang ([^,)]+))?/);
+        let r = null;
         if (m) {
-          if (+m[2] !== nT) return `Der Text hat ${m[2]} Bilder, die Figur hier ${nT}.`;
-          i = kix(+m[1]);
-          got[i] = { t: +m[3], e: m[4] ? easeOf(m[4]) : null };
-        } else if (n === 1 && /^Standbild/.test(L[li])) {
-          i = 0;
-          got[0] = {};
-        }
-        if (i == null) continue;
+          tot = +m[2];
+          r = { num: +m[1], t: +m[3], e: m[4] ? easeOf(m[4]) : null };
+          const h = L[li].match(/hält ([\d.]+) s bis t = ([\d.]+)/);
+          if (h) r.hold = { sec: +h[1], until: +h[2] };
+        } else if (n === 1 && /^Standbild/.test(L[li])) r = { num: 1 };
+        if (!r) continue;
         const same2 = L[li].match(/gleiche Pose wie Bild (\d+)/);
-        if (same2) got[i].sameAs = kix(+same2[1]);
-        else if (L[li + 1] && L[li + 1][0] === '{') got[i].p = E.full(lit2obj(L[li + 1]));
+        if (same2) r.sameAs = +same2[1];
+        else if (L[li + 1] && L[li + 1][0] === '{') r.p = E.full(lit2obj(L[li + 1]));
+        rows.push(r);
       }
     } catch (err) {
       return 'Der Text ließ sich nicht lesen (Posen-Zeile beschädigt?).';
     }
-    const idx = Object.keys(got).map(Number).sort((a, b) => a - b);
-    if (!idx.length) return 'Im Text stehen keine Bilder.';
+    if (!rows.length) return 'Im Text stehen keine Bilder.';
     keep();
-    idx.forEach((i) => {
-      const g = got[i];
-      const P = g.p || (g.sameAs != null ? (got[g.sameAs] && got[g.sameAs].p) || S.edits[g.sameAs] || S.frames[g.sameAs] : null);
-      if (P) {
-        if (same(rounded(P), rounded(S.frames[i]))) delete S.edits[i];
-        else S.edits[i] = clone(P);
+    // Neue Texte zählen ohne gehaltene Bilder (Halten steht beim Bild); ältere zählten jedes Bild außer der Pause am Anfang
+    let map;
+    if (n === 1 || tot === nTot()) {
+      // Halten wie im Text (von hinten, damit die Nummern davor stimmen)
+      rows.slice().sort((x, y) => y.num - x.num).forEach((r) => {
+        const i = showList()[r.num - 1];
+        if (i != null && i > 0) setHold(i, r.hold ? r.hold.sec : 0, true);
+      });
+      if (pzm) setHold(0, +pzm[1], true);
+      else if (PZ()) setHold(0, 0, true);
+      map = (num) => showList()[num - 1];
+    } else {
+      const old = S.keys.map((_, i) => i).filter((i) => !(pzl && i === 1));
+      if (tot !== old.length) return `Der Text hat ${tot} Bilder, die Figur hier ${nTot()}.`;
+      if (pzl && !PZ()) return 'Der Text hat eine Pause am Anfang, diese Figur nicht.';
+      map = (num) => old[num - 1];
+    }
+    rows.forEach((r) => {
+      const i = map(r.num);
+      if (i == null) return;
+      const src = r.p || (r.sameAs != null ? (rows.find((x) => x.num === r.sameAs) || {}).p || S.edits[map(r.sameAs)] || S.frames[map(r.sameAs)] : null);
+      if (src) {
+        if (same(rounded(src), rounded(S.frames[i]))) delete S.edits[i];
+        else S.edits[i] = clone(src);
       }
-      if (g.t != null) S.tm[i].t = g.t;
-      if (g.e) S.tm[i].e = g.e;
+      if (r.t != null) S.tm[i].t = r.t;
+      if (r.e) S.tm[i].e = r.e;
+      if (r.hold && holdEnd(i) > i) S.tm[holdEnd(i)].t = r.hold.until;
     });
+    if (pzm && PZ()) S.tm[holdEnd(0)].t = pzm[2] ? +pzm[2] : Math.round((S.tm[0].t + +pzm[1] / S.dur) * 1000) / 1000;
+    syncHolds();
     const k = head.match(/Kernbild = Bild (\d+)/);
-    if (k && S.keys[kix(+k[1])]) S.k0 = kix(+k[1]);
+    if (k && map(+k[1]) != null) S.k0 = map(+k[1]);
     const du = head.match(/\(dur ([\d.]+)/);
     if (du) S.dur = +du[1];
-    // Pause: das stehende Bild bekommt Pose und Zeit aus „Pause am Anfang“
-    if (pzm) {
-      if (S.edits[0]) S.edits[1] = clone(S.edits[0]);
-      else delete S.edits[1];
-      const tp = pzl.match(/t = ([\d.]+)/);
-      S.tm[1].t = tp ? +tp[1] : Math.round((S.tm[0].t + +pzm[1] / S.dur) * 1000) / 1000;
-    }
     const cam = L.find((l) => /^Kamera/.test(l));
     const cm = cam && cam.match(/Drehung (-?\d+)°, Neigung (-?\d+)°/);
     if (cm && !/wie in der App/.test(cam)) {
@@ -1070,7 +1166,7 @@ ${easeGuide()}
     const at = S.k;
     S.k = null;
     goFrame(at);
-    return `Importiert: ${idx.length} Bild${idx.length === 1 ? '' : 'er'}${k ? `, Kernbild Bild ${nr(S.k0)}` : ''}${du ? `, Dauer ${S.dur}` : ''}${S.kcam ? ', Kamera' : ''}${hl >= 0 ? ', Trefferfläche' : ''}.`;
+    return `Importiert: ${rows.length} Bild${rows.length === 1 ? '' : 'er'}${k ? `, Kernbild Bild ${nr(S.k0)}` : ''}${du ? `, Dauer ${Math.round(S.dur * 10000) / 10000}` : ''}${S.kcam ? ', Kamera' : ''}${hl >= 0 ? ', Trefferfläche' : ''}.`;
   }
 
   function onClick(ev) {
@@ -1136,9 +1232,13 @@ ${easeGuide()}
       return;
     }
     if (a === 'pz-' || a === 'pz+') {
-      if (!PZ()) return;
-      const pz = (S.tm[1].t - S.tm[0].t) * S.dur;
-      setSeg(1, clamp(Math.round((pz + (a === 'pz+' ? 0.05 : -0.05)) * 20) / 20, 0.05, 3));
+      setHold(S.k, holdSec(S.k) + (a === 'pz+' ? 0.05 : -0.05));
+      return;
+    }
+    if (a === 'restore') {
+      const t = LAST && LAST.id === S.id ? LAST.text : null;
+      LAST = null;
+      msg.textContent = t ? importText(t) : '';
       return;
     }
     // Handy: Zeit mit − / + (0,05 s)
@@ -1175,8 +1275,9 @@ ${easeGuide()}
     }
     if (a === 'fprev' || a === 'fnext') {
       if (S.play) S.play = null;
-      let i = clamp(S.k + (a === 'fnext' ? 1 : -1), 0, S.keys.length - 1);
-      if (!shown(i)) i = a === 'fnext' ? 2 : 0;
+      const sl = showList();
+      let i = a === 'fnext' ? sl.find((j) => j > S.k) : sl.filter((j) => j < S.k).pop();
+      if (i == null) i = S.k;
       if (i !== S.k) goFrame(i);
       else { frames(); draw(); }
       return;
@@ -1216,13 +1317,14 @@ ${easeGuide()}
     }
     if (a === 'copy') {
       const ta = S.dlg.querySelector('.pe-text');
-      const done = () => (msg.textContent = 'Kopiert – jetzt im Chat einfügen.');
+      const done = () => { S.clean = S.text; msg.textContent = 'Kopiert – jetzt im Chat einfügen.'; };
       const fallback = () => {
         tab('ausgabe');
         ta.focus();
         ta.select();
         let ok = false;
         try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+        if (ok) S.clean = S.text;
         msg.textContent = ok ? 'Kopiert – jetzt im Chat einfügen.' : 'Kopieren ging nicht – Text unten markieren und kopieren.';
       };
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(S.text).then(done, fallback);
@@ -1423,5 +1525,6 @@ ${easeGuide()}
   }
 
   // state: offener Editor (für Tests)
+  window.addEventListener('beforeunload', (ev) => { if (dirty()) { ev.preventDefault(); ev.returnValue = ''; } });
   SK.poseEditor = { enabled, setEnabled, open, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, elbowSpread, setElbowSpread, state: () => S };
 })();
