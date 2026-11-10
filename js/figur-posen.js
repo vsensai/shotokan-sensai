@@ -677,7 +677,8 @@
   const MW_KEYS = [{ t: 0, p: MW_A }, { t: 0.1, p: MW_A }, { t: 0.175, p: MW_UP, e: 'fl' }, { t: 0.25, p: MW_CH, e: 'fl' }, { t: 0.3, p: MW_MID, e: 'fl' }, { t: 0.34, p: MW_SN, e: 'fl' }, { t: 0.38, p: MW_E, e: 'kime' }, { t: 0.46, p: MW_SN, e: 'fl' }, { t: 0.5, p: MW_MID, e: 'fl' }, { t: 0.58, p: MW_CH, e: 'fl' }, { t: 0.68, p: MW_UP, e: 'fl' }, { t: 0.8, p: MW_A, e: 'fl' }];
   D['mv:mawashi-geri'] = M({ keys: MW_KEYS, fix: FUSS_FEST(MW_KEYS, 'R'), best: 0.38, dur: 2 }, M(hit('toeR', 'Fußballen'), { eff: 'toeR', cam: { yaw: -16, pitch: 14 } }));
   const US_CH = M(KAMAE_K, { pelvis: [0, 0.82, 0.2], lean: 22, look: 160, R: { x: -0.08, z: 0.32, y: 0.45, yaw: 0, pitch: -70, kp: [0, 0.4, 1] }, w: [1, 0] });
-  D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 180, pitch: -70, kp: [0, -1, 0.2] } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
+  // Treffer: Zehen zeigen nach unten, Sohle und Ferse nach hinten zum Ziel (Fuß im Bewegungs-Editor eingestellt)
+  D['mv:ushiro-geri'] = K(KAMAE_K, US_CH, M(US_CH, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 0, pitch: -90, kp: [0, -1, 0.2], tu: 1 } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' }));
   // Mikazuki-geri wie in Heian Godan 15: aus Kiba-dachi, die linke offene Hand zur linken Seite gestreckt (Ziel), das linke
   // Bein trägt, die Hüfte dreht links herum; der rechte Fuß schwingt im Bogen von außen herein und tritt mit der Sohle
   // in die linke Handfläche
