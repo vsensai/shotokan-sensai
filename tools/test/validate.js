@@ -103,6 +103,31 @@
       }
     });
   }
+  // Lexikon: jeder Begriff hat eine Lesung für die Aussprache (Wortteile in LESUNG, data/glossary.js) und seine beiden
+  // Fragen im Begriffe-Trainer (die Karteikarten zählen in deren Karteikasten)
+  {
+    const qids = new Set(SK.questions.map((q) => q.id));
+    SK.glossary.forEach((e) => {
+      if (!e.kana || !/^[\u3041-\u3096ー、]+$/.test(e.kana)) errors.push(`Lexikon „${e.t}“: Lesung für die Aussprache fehlt – Wortteil in LESUNG (data/glossary.js) ergänzen`);
+      ['a', 'b'].forEach((x) => { if (!qids.has(`${SK.glossaryId(e)}-${x}`)) errors.push(`Lexikon „${e.t}“: Frage ${SK.glossaryId(e)}-${x} fehlt (Karteikarten)`); });
+    });
+  }
+  // Lexikon „Kommt vor in …“: jede Stelle gibt es im Kata-Trainer, das erste Vorkommen (SK.glossaryErst) ist dabei.
+  // (Nicht geprüft: dass es die erste Stelle ist – „Zuerst in“ meint die Form der Karte, z. B. Gedan-kakiwake mit offenen
+  // Händen erst in Hangetsu 10, mit Fäusten schon in Jion 30.)
+  {
+    let mit = 0;
+    SK.glossary.forEach((e) => {
+      const v = SK.glossaryVorkommen(e);
+      if (v.length) mit++;
+      v.forEach(({ k, ns }) => {
+        if (!k.ansage) errors.push(`Lexikon „${e.t}“: Vorkommen in ${k.name} ohne Kata-Trainer`);
+        ns.forEach((n) => { if (!(n >= 1 && n <= k.moves)) errors.push(`Lexikon „${e.t}“: Vorkommen ${k.name} ${n} gibt es nicht`); });
+      });
+      if (e.erst && !v.some((x) => x.k.id === e.erst.kata && x.ns.includes(e.erst.n))) errors.push(`Lexikon „${e.t}“: erstes Vorkommen (${e.erst.kata} ${e.erst.n}) fehlt in „Kommt vor in“`);
+    });
+    out.push(`Lexikon: ${SK.glossary.length} Begriffe, ${mit} mit Stellen in den Kata`);
+  }
   for (let n = 1; n <= 65; n++) {
     const c = SK.ansageCount(n);
     if (!c.kana || !c.kan || /undefined/.test(Object.values(c).join())) errors.push(`Zählwort ${n} fehlerhaft`);

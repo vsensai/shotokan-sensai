@@ -284,8 +284,45 @@
     'Kaisho Yama-gamae': 'Haltung mit offenen Händen: Unterarme senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe',
   };
 
+  // Aussprache: Lesung je Wortteil in Hiragana (mit den langen Vokalen, die die lateinische Schreibweise der App weglässt:
+  // Jodan = じょうだん). Die japanische Stimme liest lateinische Schrift nicht als Japanisch – sie bekommt diese Lesung.
+  // Aus den Wortteilen entsteht die Lesung des ganzen Begriffs (kana am Eintrag); validate.js prüft, dass kein Wortteil fehlt.
+  const LESUNG = {
+    age: 'あげ', ashi: 'あし', awase: 'あわせ', ayumi: 'あゆみ', barai: 'ばらい', bunkai: 'ぶんかい', choku: 'ちょく', chudan: 'ちゅうだん',
+    dachi: 'だち', deai: 'であい', dome: 'どめ', enbusen: 'えんぶせん', enpi: 'えんぴ', fudo: 'ふどう', fumikae: 'ふみかえ', fumikomi: 'ふみこみ',
+    furi: 'ふり', gamae: 'がまえ', gedan: 'げだん', geri: 'げり', gyaku: 'ぎゃく', hachiji: 'はちじ', haishu: 'はいしゅ', haisoku: 'はいそく',
+    haito: 'はいとう', haiwan: 'はいわん', hajime: 'はじめ', hangetsu: 'はんげつ', hanmi: 'はんみ', hasami: 'はさみ', heisoku: 'へいそく',
+    hiji: 'ひじ', hikite: 'ひきて', hiza: 'ひざ', hizakutsu: 'ひざくつ', ippon: 'いっぽん', jishi: 'じし', josokutei: 'じょうそくてい',
+    juji: 'じゅうじ', kagi: 'かぎ', kaisho: 'かいしょう', kakato: 'かかと', kake: 'かけ', kakiwake: 'かきわけ', kamae: 'かまえ', keage: 'けあげ',
+    kekomi: 'けこみ', ken: 'けん', kiai: 'きあい', kiba: 'きば', kime: 'きめ', kiritsu: 'きりつ', kizami: 'きざみ', kogeki: 'こうげき',
+    koko: 'ここう', kokutsu: 'こうくつ', komura: 'こむら', kosa: 'こうさ', koshi: 'こし', maai: 'まあい', mae: 'まえ', manji: 'まんじ',
+    mawashi: 'まわし', mawatte: 'まわって', mikazuki: 'みかづき', mizunagare: 'みずながれ', mokuso: 'もくそう', morote: 'もろて',
+    musubi: 'むすび', nagashi: 'ながし', namigaeshi: 'なみがえし', naore: 'なおれ', neko: 'ねこ', nidan: 'にだん', no: 'の', nukite: 'ぬきて',
+    oi: 'おい', okuri: 'おくり', orishiki: 'おりしき', osae: 'おさえ', otoshi: 'おとし', rei: 'れい', ren: 'れん', renoji: 'れのじ',
+    sabaki: 'さばき', sanbon: 'さんぼん', sanchin: 'さんちん', sashi: 'さし', seiken: 'せいけん', seiza: 'せいざ', shaho: 'しゃほう',
+    shizentai: 'しぜんたい', shomen: 'しょうめん', shuto: 'しゅとう', sokuto: 'そくとう', sonoba: 'そのば', soto: 'そと', sukui: 'すくい',
+    sun: 'すん', suri: 'すり', tai: 'たい', tate: 'たて', teiji: 'ていじ', teisho: 'ていしょう', teisoku: 'ていそく', tettsui: 'てっつい',
+    tsugi: 'つぎ', tsukami: 'つかみ', uchi: 'うち', uchiotoshi: 'うちおとし', uke: 'うけ', ura: 'うら', uraken: 'うらけん', ushiro: 'うしろ',
+    yama: 'やま', yame: 'やめ', yoi: 'ようい', yoko: 'よこ', yori: 'より', zanshin: 'ざんしん', zenkutsu: 'ぜんくつ', zenwan: 'ぜんわん',
+    zuki: 'づき',
+  };
+  // Deutsche Zusätze im Namen („Ayumi-ashi auf einer Linie“) und Klammern („Tai-sabaki (45°)“, „Koshi (Josokutei)“) spricht
+  // die Stimme nicht; „Hiji / Enpi“ nennt beide Namen mit kurzer Pause. Fehlt ein Wortteil, gibt es keine Aussprache ('').
+  const DEUTSCH = new Set(['auf', 'einer', 'linie']);
+  function kana(t) {
+    const names = t.replace(/\([^)]*\)/g, '').split(' / ').map((name) => {
+      const words = name.toLowerCase().split(/[^a-z]+/).filter((w) => w && !DEUTSCH.has(w));
+      return words.every((w) => LESUNG[w]) ? words.map((w) => LESUNG[w]).join('') : '';
+    });
+    return names.every(Boolean) ? names.join('、') : '';
+  }
+
+  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  // Kennung eines Begriffs: Gruppe seiner Fragen im Begriffe-Trainer (gl-…-a „Was ist …?“, gl-…-b „Wie heißt …?“)
+  SK.glossaryId = (e) => `gl-${slug(e.t)}`;
+
   SK.glossary = E.map(([t, de, cat, img, src]) => {
-    const e = { t, de, qde: QUIZ[t] || de, cat, img: img || null, src: src || ALLG };
+    const e = { t, de, qde: QUIZ[t] || de, cat, img: img || null, src: src || ALLG, kana: kana(t) };
     const z = ERST[t];
     if (z) e.erst = { kata: z[0], n: z[1], buch: z[2] || '', zusatz: z[3] || '', wort: z[4] || '' };
     return e;
@@ -302,13 +339,63 @@
     return `<p class="lex-erst">Zuerst in: ${link ? `<a href="${link}">${txt}</a>` : txt}</p>`;
   }
 
+  // Alle Stellen eines Begriffs in den Kata: Bewegungen, in denen der Kata-Trainer den Begriff in Stand, Technik oder
+  // Hinweis erkennt (SK.lexParts – dort ist er auch antippbar), dazu das erste Vorkommen aus ERST (dessen Name im Buch
+  // manchmal anders lautet). Map Begriff → [{ k: Kata, ns: [Bewegungen] }] in der Reihenfolge der Kata, einmal gerechnet.
+  let vorkommen = null;
+  SK.glossaryVorkommen = function (e) {
+    if (!vorkommen) {
+      vorkommen = new Map();
+      const add = (t, id, n) => {
+        if (!vorkommen.has(t)) vorkommen.set(t, new Map());
+        const m = vorkommen.get(t);
+        if (!m.has(id)) m.set(id, new Set());
+        m.get(id).add(n);
+      };
+      if (SK.lexParts && SK.kataOrder) {
+        SK.kataOrder.forEach((id) => {
+          const k = SK.kata[id];
+          if (!k || !k.ansage) return;
+          k.seq.forEach((r) => {
+            [r[1], `${r[2]}${r[4] ? ` · ${r[4]}` : ''}`].forEach((txt) => SK.lexParts(txt).forEach((p) => p.e && add(p.e.t, id, r[0])));
+          });
+        });
+        SK.glossary.forEach((g) => g.erst && SK.kata[g.erst.kata] && SK.kata[g.erst.kata].ansage && add(g.t, g.erst.kata, g.erst.n));
+      }
+    }
+    const m = vorkommen.get(e.t);
+    if (!m) return [];
+    return SK.kataOrder.filter((id) => m.has(id)).map((id) => ({ k: SK.kata[id], ns: [...m.get(id)].sort((a, b) => a - b) }));
+  };
+  // Aufklappbare Liste unten auf der Karte; aufeinanderfolgende Bewegungen als Bereich („3–6“). Jede Stelle führt
+  // in den Kata-Trainer zu dieser Bewegung.
+  function vorHtml(e) {
+    const list = SK.glossaryVorkommen(e);
+    if (!list.length) return '';
+    const total = list.reduce((s, x) => s + x.ns.length, 0);
+    const rows = list.map(({ k, ns }) => {
+      const runs = [];
+      ns.forEach((n) => {
+        const last = runs[runs.length - 1];
+        if (last && last[1] === n - 1) last[1] = n;
+        else runs.push([n, n]);
+      });
+      const links = runs.map(([a, b]) => `<a href="#/ansage/${k.id}/${a}" aria-label="${SK.util.esc(k.name)}, Bewegung ${a}${b > a ? ` bis ${b}` : ''} im Kata-Trainer">${a}${b > a ? `–${b}` : ''}</a>`);
+      return `<li><span class="lex-vor-k">${SK.util.esc(k.name)}</span> <span class="lex-vor-n">${links.join(' ')}</span></li>`;
+    });
+    return `<details class="lex-vor"><summary>Kommt vor in ${list.length === 1 ? '1 Kata' : `${list.length} Kata`} <span class="muted">(${total === 1 ? '1 Bewegung' : `${total} Bewegungen`})</span></summary><ul>${rows.join('')}</ul><p class="muted small">Zahl antippen: Kata-Trainer öffnet bei dieser Bewegung.</p></details>`;
+  }
+  // Knopf „Aussprache“: die japanische Stimme liest die Lesung vor. Sichtbar nur, wenn das Gerät eine japanische Stimme hat
+  // (Klasse ja-stimme am html-Element, js/kata-ansage.js); den Klick bedient js/app.js.
+  SK.glossarySagHtml = (e) =>
+    e.kana ? `<button type="button" class="lex-sag" data-kana="${SK.util.esc(e.kana)}" aria-label="Aussprache von ${SK.util.esc(e.t)} anhören" title="Aussprache anhören"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5l4.5 4v-13l-4.5 4Z"/><path class="lex-sag-w" d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11"/></svg></button>` : '';
+
   // Anderer Name im Buch – nur zeigen, wenn er nicht bloß der eigene Name mit Zusätzen ist
   // („Shuto Chudan-uke“ zu „Shuto-uke“ nein, „Kosa-uke“ zu „Juji-uke“ ja). „-uchi“ zählt dabei nicht.
   // Abweichende Anzeige: kürzerer anderer Name oder gar keiner ('')
   // Zweiter Name einer Karte in Klammern im Titel (Buchname mit Name aus dem Heft, z. B. Nagashi-uke (Te-nagashi));
-  // der Kata-Trainer verlinkt auch diesen Namen auf die Karte
+  // der Kata-Trainer verlinkt auch diesen Namen auf die Karte (über SK.glossaryAlt, wie die abweichenden Buchnamen)
   const FORM = { 'Nagashi-uke': 'Te-nagashi' };
-  SK.glossaryForm = FORM;
   const ANDERS = { 'Tettsui-uchi': 'Kentsui-uchi', 'Yoko-geri-kekomi': '', ...FORM };
   function altName(e) {
     if (e.t in ANDERS) return ANDERS[e.t];
@@ -320,8 +407,6 @@
   }
 
   SK.glossaryAlt = altName;
-
-  const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
   SK.buildGlossaryContent = function () {
     const unit = { id: 'begriffe-trainer', title: 'Begriffe-Trainer', kind: 'drill', desc: 'Stände, Techniken & Begriffe – kurz abgefragt', lessons: [] };
@@ -340,7 +425,7 @@
       items.forEach((e) => {
         const others = items.filter((o) => o !== e);
         const pick = (field) => SK.util.shuffle(others.map((o) => o[field]).filter((v, i, a) => v !== e[field] && a.indexOf(v) === i)).slice(0, 3);
-        const id = `gl-${slug(e.t)}`;
+        const id = SK.glossaryId(e);
         const base = { lesson: lid, grp: id, type: 'mc', answer: 0, src: e.src };
         const own = !!e.img && !others.some((o) => o.img && o.img.key === e.img.key);
         // Stände und Körperwaffen zeigt das Quiz weiter als SVG (Fußbild bzw. markierte Fläche)
@@ -364,9 +449,9 @@
   SK.glossaryHtml = function (items) {
     return `<div class="lex-grid">${items
       .map(
-        (e) => `<article class="lex-card" data-cat="${e.cat}" data-text="${SK.util.esc(`${e.t} ${altName(e)} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
-          <h4>${SK.util.esc(e.t)}${altName(e) ? ` <span class="lex-alt">(${SK.util.esc(altName(e))})</span>` : ''}</h4><p>${SK.util.esc(e.de)}</p>
-          ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${erstHtml(e)}</article>`
+        (e) => `<article class="lex-card" data-cat="${e.cat}" data-t="${SK.util.esc(e.t)}" data-text="${SK.util.esc(`${e.t} ${altName(e)} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
+          ${SK.glossarySagHtml(e)}<h4>${SK.util.esc(e.t)}${altName(e) ? ` <span class="lex-alt">(${SK.util.esc(altName(e))})</span>` : ''}</h4><p>${SK.util.esc(e.de)}</p>
+          ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${erstHtml(e)}${vorHtml(e)}</article>`
       )
       .join('')}</div>`;
   };

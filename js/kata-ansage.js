@@ -584,6 +584,8 @@
     if (!tts) return;
     // lokale Stimmen zuerst: sie sprechen ohne Netz-Verzögerung und halten den Takt
     voice = tts.getVoices().filter((v) => /^ja/i.test(v.lang)).sort((a, b) => Number(b.localService) - Number(a.localService))[0] || null;
+    // Knöpfe „Aussprache“ (Lexikon, Karteikarten) zeigen sich nur mit japanischer Stimme
+    if (typeof document !== 'undefined') document.documentElement.classList.toggle('ja-stimme', !!voice);
   }
   // Etwas schneller und höher als normal klingt wacher; der Kiai-Ruf noch höher. Mehr lässt die Sprachausgabe nicht zu.
   const TONE = { rate: 1.15, pitch: 1.15 };
@@ -615,6 +617,26 @@
     if (st.kiai) utter(KIAI, TONE_KIAI, fast, false);
   }
 
+  // Einzelnen Begriff vorlesen (Lexikon, Karteikarten): ruhiger als die Ansage, damit man die Silben hört.
+  // Die Stimmen kommen bei manchen Browsern erst nach dem Laden – dann noch einmal suchen.
+  const TONE_WORT = { rate: 0.85, pitch: 1 };
+  SK.stimme = {
+    da: () => !!(tts && voice),
+    sag(kana) {
+      if (!tts || !kana) return false;
+      if (!voice) pickVoice();
+      if (!voice) return false;
+      tts.cancel();
+      tts.resume();
+      utter(kana, TONE_WORT, 1, false);
+      return true;
+    },
+  };
+  if (tts) {
+    pickVoice();
+    if (tts.addEventListener) tts.addEventListener('voiceschanged', pickVoice);
+  }
+
   // ---------- Lexikon-Begriffe in Stand und Technik ----------
   // Zerlegt einen Ansagetext in Textstücke und Lexikon-Treffer: [{ s, e? }]. Gesucht wird nach ganzen Wörtern
   // (Bindestrich und Leerzeichen trennen), längster Begriff zuerst; „Hiji / Enpi“ zählt für beide Namen.
@@ -628,10 +650,11 @@
     const norm = (s) => s.toLowerCase().split(/[\s-]+/).filter(Boolean);
     const list = [];
     const byName = new Map();
-    // Zweiter Name einer Karte (SK.glossaryForm): „Te-nagashi“ führt zur Karte „Nagashi-uke (Te-nagashi)“
-    const form = SK.glossaryForm || {};
+    // Zweiter Name einer Karte (SK.glossaryAlt, steht im Titel in Klammern): „Te-nagashi“ führt zur Karte
+    // „Nagashi-uke (Te-nagashi)“, der Buchname „Kentsui …-uchi“ zu „Tettsui-uchi“, „Kosa-uke“ zu „Juji-uke“
+    const alt = SK.glossaryAlt || (() => '');
     SK.glossary.forEach((e) => {
-      [...e.t.split(' / '), ...(form[e.t] ? [form[e.t]] : [])].forEach((name) => {
+      [...e.t.split(' / '), ...(alt(e) ? [alt(e)] : [])].forEach((name) => {
         if (/[()]/.test(name)) return;
         const w = norm(name);
         list.push({ w, e });
@@ -708,7 +731,8 @@
   };
 
   // ---------- Ansicht ----------
-  SK.viewAnsage = function (app, k) {
+  // startN: Bewegung, bei der der Trainer öffnet (Link „Kommt vor in …“ im Lexikon) – angehalten, nicht zählend
+  SK.viewAnsage = function (app, k, startN) {
     const { el } = util;
     let tempo = loadTempo();
     let steps = SK.ansageTimeline(k, BEATS[tempo], true);
@@ -813,6 +837,25 @@
       const r = lexDlg.getBoundingClientRect();
       if (ev.target === lexDlg && (ev.clientX < r.left || ev.clientX > r.right || ev.clientY < r.top || ev.clientY > r.bottom)) lexDlg.close();
     });
+    // Link „Kommt vor in …“ auf der Karte: Fenster schließen; liegt die Stelle in dieser Kata, direkt hinspringen
+    // (die Adresse ändert sich mit – gleiche Adresse löst sonst keinen Seitenwechsel aus).
+    lexBody.addEventListener('click', (ev) => {
+      const a = ev.target.closest('a[href^="#/ansage/"]');
+      if (!a) return;
+      lexDlg.close();
+      const [, id, n] = /^#\/ansage\/([^/]+)(?:\/(\d+))?$/.exec(a.getAttribute('href')) || [];
+      if (id !== k.id) return;
+      ev.preventDefault();
+      history.replaceState(history.state, '', a.getAttribute('href'));
+      toMove(Number(n));
+    });
+    function toMove(n) {
+      const i = steps.findIndex((s) => s.kind === 'move' && s.n === n);
+      if (i < 0) return;
+      if (running) pause();
+      jump(i);
+      ui();
+    }
     function lexShow(e) {
       if (running) pause();
       lexBody.innerHTML = SK.glossaryHtml([e]);
@@ -1038,7 +1081,8 @@
     buildTrack();
     info();
     tempoInfo();
-    render(0);
+    if (startN) idx = Math.max(0, steps.findIndex((s) => s.kind === 'move' && s.n === startN));
+    render(idx);
     reserve();
     if (document.fonts) document.fonts.ready.then(reserve);
     ui();

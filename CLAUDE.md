@@ -21,6 +21,7 @@
 ## Inhalte
 - App, Texte und Commit-Nachrichten auf Deutsch.
 - Kata-Fragen nur aus „Karate-Do Kata Vol. 1“ (JKA) mit gedruckter Buchseite (`SK.bookSrc`). Einzige Ausnahme: Hangetsu aus „Karate-Do Kata Vol. 2“ (`SK.bookSrc2`, Kata-Daten mit `vol: 2`) – weitere Kata aus Band 2 nur nach Rückfrage.
+- Neuer Lexikon-Begriff (`data/glossary.js`): Lesung neuer Wortteile in `LESUNG` ergänzen (Hiragana mit langen Vokalen, für die Aussprache) – `validate.html` meldet fehlende.
 - Fragen-IDs entstehen aus Lektion, Fragetext und richtiger Antwort (`SK.qb`). `data/legacy-ids.js` ist eingefroren und wird nicht bearbeitet.
 - Die Kata-PDFs (Band 1 und 2) und `tools/out/` niemals committen.
 - Heft „Karate kompakt“ (Quelle `SK.sources.kompakt`): Wissen steht in `docs/karate-kompakt.md`. Keine Scans, Bilder oder wörtlichen Texte des Heftes ins Repo – nur Fakten in eigenen Worten; Grafiken selbst zeichnen. Für Kata-Inhalte gilt weiter nur das JKA-Buch (Band 1, Hangetsu aus Band 2).

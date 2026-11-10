@@ -974,6 +974,165 @@ figure.gfx svg {
   font-size: 0.78rem;
   color: var(--muted);
 }
+/* Aussprache: Knopf oben rechts auf der Karte, nur mit japanischer Stimme (Klasse am html-Element, js/kata-ansage.js) */
+.lex-sag {
+  display: none;
+  float: right;
+  width: 2.2rem;
+  height: 2.2rem;
+  margin: -0.25rem -0.25rem 0.2rem 0.5rem;
+  padding: 0.4rem;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--red);
+  cursor: pointer;
+}
+.ja-stimme .lex-sag {
+  display: block;
+}
+.lex-sag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+.lex-sag .lex-sag-w {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.lex-sag:active {
+  background: var(--red);
+  color: #fff;
+}
+/* „Kommt vor in …“: alle Stellen des Begriffs in den Kata, jede Zahl führt in den Kata-Trainer */
+.lex-vor {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+}
+.lex-vor summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.lex-vor ul {
+  list-style: none;
+  margin: 0.4rem 0 0.3rem;
+  padding: 0;
+}
+.lex-vor li {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--line);
+}
+.lex-vor-k {
+  flex: 0 0 6.5rem;
+  font-weight: 700;
+}
+.lex-vor-n {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.lex-vor-n a {
+  min-width: 2rem;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  text-align: center;
+  text-decoration: none;
+  font-variant-numeric: tabular-nums;
+}
+.lex-vor-n a:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+.lex-card .lex-vor p {
+  margin: 0;
+  font-size: 0.75rem;
+}
+/* Begriffe-Trainer: Kachel mit Wahl zwischen Quiz und Karteikarten */
+.tile-wahl .actions {
+  margin: 0.6rem 0 0;
+}
+.tile-wahl .btn {
+  flex: 1 1 8rem;
+  text-align: center;
+}
+/* Karteikarten: Vorderseite groß zum Antippen, Rückseite ist die Karte aus dem Lexikon */
+.kk-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+.kk-card {
+  width: 100%;
+  font: inherit;
+  color: inherit;
+}
+.kk-front {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  min-height: 15rem;
+  padding: 1.2rem;
+  border: 2px dashed var(--line);
+  border-radius: var(--radius);
+  background: none;
+  cursor: pointer;
+}
+.kk-wort {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.kk-wort.kk-de {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.kk-sag {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.7rem;
+}
+.kk-sag .lex-sag {
+  float: none;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin: 0;
+}
+.kk-back .lex-grid {
+  display: block;
+  margin: 0;
+}
+.kk-back .lex-card {
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.kk-back .lex-card h4 {
+  font-size: 1.4rem;
+}
+.kk-footer {
+  grid-template-columns: 1fr 1fr;
+}
+.kk-footer .btn:only-child {
+  grid-column: 1 / -1;
+}
+.kk-nein {
+  border-color: var(--bad);
+  color: var(--bad);
+}
 
 /* Grafik in der Karte ohne eigenen Rahmen – die Karte ist der Rahmen */
 .lex-img svg > rect:first-of-type {

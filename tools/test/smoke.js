@@ -82,6 +82,42 @@
         await wait();
         log.push(`Seite ${h}: ${app.querySelector('h1') ? app.querySelector('h1').textContent : 'FEHLT'}`);
       }
+      // Lexikon-Karte: Aussprache-Knopf und „Kommt vor in …“; die Stelle öffnet den Kata-Trainer bei dieser Bewegung
+      {
+        const e = SK.glossary.find((x) => x.t === 'Shuto-uke');
+        const card = new DOMParser().parseFromString(SK.glossaryHtml([e]), 'text/html');
+        const link = card.querySelector('.lex-vor a');
+        if (!card.querySelector('.lex-sag[data-kana]') || !link) throw new Error('Lexikon-Karte ohne Aussprache oder „Kommt vor in“');
+        location.hash = link.getAttribute('href');
+        await wait();
+        const pos = app.querySelector('.ans-pos');
+        const n = link.getAttribute('href').split('/').pop();
+        if (!pos || !pos.textContent.startsWith(`${n}/`)) throw new Error(`Kata-Trainer öffnet nicht bei Bewegung ${n}`);
+        if (!/Shuto/.test(app.querySelector('.ans-tech').textContent)) throw new Error('Kata-Trainer: Stelle nennt die Technik nicht');
+        log.push(`Kommt vor in: ${link.getAttribute('href')} → ${pos.textContent}`);
+      }
+      // Karteikarten: eine Karte „nicht gewusst“ (kommt in der Runde wieder), alle anderen „gewusst“; zählt in den Karteikasten
+      {
+        // Vergleich mit dem Stand davor: Zufallsmix und Begriffe-Quiz weiter oben können dieselben Fragen schon gestellt haben
+        const before = JSON.parse(JSON.stringify(SK.store.data.srs));
+        const answered0 = SK.store.data.answered;
+        location.hash = '#/karten/geri';
+        await wait();
+        let cards = 0;
+        for (let guard = 0; guard < 100 && app.querySelector('.kk-card'); guard++) {
+          const front = app.querySelector('.kk-front');
+          if (!front) throw new Error('Karteikarte ohne Vorderseite');
+          front.click();
+          if (!app.querySelector('.kk-back .lex-card')) throw new Error('Karteikarte ohne Rückseite');
+          app.querySelector(cards++ ? '.kk-ja' : '.kk-nein').click();
+        }
+        const head = app.querySelector('.result h2');
+        const changed = Object.entries(SK.store.data.srs).filter(([id, v]) => JSON.stringify(v) !== JSON.stringify(before[id]));
+        const bad = changed.filter(([, v]) => v.due === SK.util.today()).length;
+        if (!head || !/auf Anhieb gewusst/.test(head.textContent)) throw new Error('Karteikarten ohne Auswertung');
+        if (cards !== 16 || changed.length !== 15 || bad !== 1 || SK.store.data.answered !== answered0) throw new Error(`Karteikarten: ${cards} Karten, ${changed.length} im Karteikasten gezählt, ${bad} nicht gewusst`);
+        log.push(`Karteikarten: ${head.textContent}`);
+      }
       location.hash = '#/review';
       await wait();
       log.push(`Wiederholung fällig: ${SK.srs.due().length}`);
