@@ -703,10 +703,11 @@
   // dann stampft der Fuß mit der Fußkante zur rechten Seite, der Körper senkt sich mit in Kiba-dachi (Blick zur Seite)
   const FU0 = M(KB, { look: -90, pelvis: [0.35, 0.88, 0], L: { x: 0.42, kp: [0.3, 0, 1] }, R: { x: 0.26, z: 0, yaw: -5, kp: [-0.3, 0, 1] } });
   // Knie hoch angezogen, kurz oben halten, dann fällt der Fuß schnell und hart; beim Aufsetzen sackt der Körper
-  // kurz tiefer als im Kiba-dachi und federt in den Stand zurück. Stoßringe am Boden: Zeichen 'stampf' (figur-app.js)
+  // kurz tiefer als im Kiba-dachi und federt in den Stand zurück. Stoßringe am Boden: Zeichen 'stampf' (figur-app.js).
+  // Kamera von rechts vorn, damit die rote Fußkante (Außenkante des rechten Fußes) zu sehen ist
   const FU1 = BAL(M(KB, { look: -90, pelvis: [0.38, 0.85, 0], L: { x: 0.42, kp: [0.4, 0.1, 1] }, R: { x: 0.25, z: 0.22, y: 0.62, yaw: -20, pitch: -30, kp: [-0.3, 0.6, 1] }, w: [1, 0] }), 'L');
   const FU2 = M(KB, { look: -90, pelvis: [0, 0.645, 0], R: { y: 0.09, yaw: -5 }, w: [0.4, 0.6] });
-  D['tc:fumikomi'] = M({ keys: [{ t: 0, p: FU0 }, { t: 0.15, p: FU0 }, { t: 0.34, p: FU1 }, { t: 0.38, p: FU1 }, { t: 0.44, p: FU2, e: 'kime' }, { t: 0.56, p: KB_K, e: 'out' }, { t: 0.74, p: KB_K }], best: 0.44, dur: 1.8, marks: ['stampf'] }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', view: 'front' }));
+  D['tc:fumikomi'] = M({ keys: [{ t: 0, p: FU0 }, { t: 0.15, p: FU0 }, { t: 0.34, p: FU1 }, { t: 0.38, p: FU1 }, { t: 0.44, p: FU2, e: 'kime' }, { t: 0.56, p: KB_K, e: 'out' }, { t: 0.74, p: KB_K }], best: 0.44, dur: 1.8, marks: ['stampf'] }, M(hit('heelR', 'Fußkante'), { eff: 'heelR', cam: { yaw: -55, pitch: 16 } }));
   // Namigaeshi: der Fuß federt in einem weichen Bogen nach innen hoch Richtung Unterbauch (Sohle nach oben innen)
   // und setzt gleich wieder ab – fließend, ohne Halt
   const NG1 = M(KB, { pelvis: [0.08, 0.72, 0], R: { x: -0.18, z: 0.12, y: 0.3, yaw: 30, pitch: -15, sole: [1, 0.3, 0], kp: [-1, 0.4, 0.5] }, w: [1, 0] });
