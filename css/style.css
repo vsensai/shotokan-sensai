@@ -2792,6 +2792,44 @@ main:fullscreen {
   display: none;
 }
 
+.pe-copy summary {
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 600;
+  padding: 0.3rem 0;
+}
+
+.pe-cprow {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.2rem 0 0.3rem;
+}
+
+.pe-cpmir {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+}
+
+.pe-cppart .pe-wide {
+  flex: 0 0 auto;
+  width: auto;
+  padding-inline: 0.9rem;
+}
+
+.pe-cppart select {
+  flex: 1;
+  min-width: 0;
+  padding: 0.4rem;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
 .pe-tbrow {
   display: flex;
   align-items: center;

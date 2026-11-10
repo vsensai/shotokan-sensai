@@ -278,6 +278,9 @@
 <div class="pe-movonly">
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
 ${easeGuide()}
+<details class="pe-copy"><summary>Pose übernehmen …</summary>
+<div class="pe-cprow"><label class="pe-row"><span>Von Bild</span><select class="pe-cpsrc" aria-label="Pose übernehmen von Bild"></select></label><label class="pe-cpmir"><input type="checkbox" class="pe-cpm"> gespiegelt (links ↔ rechts)</label><button type="button" class="pe-wide" data-pe="cpgo" title="Die ganze Pose des gewählten Bildes in das gezeigte Bild übernehmen – Zeitpunkt und Übergang bleiben">In dieses Bild übernehmen</button></div>
+<p class="small muted">Nur die Pose – Zeitpunkt und Übergang bleiben. ↶ nimmt es zurück. Einzelne Körperteile: im Reiter Körper.${touch ? '' : ' Tastatur: Strg+C kopiert die Pose des gezeigten Bildes, Strg+V fügt sie ein, Strg+Umschalt+V gespiegelt.'}</p></details>
 <div class="pe-tbrow pe-pauserow" hidden><span>Pause am Anfang <b class="pe-pv"></b></span><button type="button" class="pe-pm" data-pe="pz-" aria-label="Pause am Anfang kürzer" title="Die Figur steht vor der Bewegung 0,05 s kürzer still">−</button><button type="button" class="pe-pm" data-pe="pz+" aria-label="Pause am Anfang länger" title="Die Figur steht vor der Bewegung 0,05 s länger still">+</button></div>
 <p class="pe-total"></p>
 <div class="pe-ttouch"><div class="pe-tbrow"><span>Zeit vom Bild davor <b class="pe-tsv"></b></span><button type="button" class="pe-pm" data-pe="seg-" aria-label="Zeit vom Bild davor kürzer" title="0,05 s kürzer">−</button><button type="button" class="pe-pm" data-pe="seg+" aria-label="Zeit vom Bild davor länger" title="0,05 s länger">+</button></div><div class="pe-tbrow"><span>Ganze Bewegung <b class="pe-ttv"></b></span><button type="button" class="pe-pm" data-pe="tot-" aria-label="Ganze Bewegung schneller" title="Ganze Bewegung 0,05 s kürzer (alle Abschnitte gleichmäßig)">−</button><button type="button" class="pe-pm" data-pe="tot+" aria-label="Ganze Bewegung langsamer" title="Ganze Bewegung 0,05 s länger (alle Abschnitte gleichmäßig)">+</button></div><p class="small muted">Die Bilder danach rücken mit. Auf der Zeitleiste: Punkt antippen wählt das Bild, wischen verschiebt die Leiste.</p></div>
@@ -315,6 +318,20 @@ ${easeGuide()}
     bindTrack(d.querySelector('.pe-track'));
     bindGrip(d.querySelector('.pe-grip'), d);
     // Pfeiltasten (PC): Zeit vom Bild davor in 0,05-s-Schritten
+    // Strg+C / Strg+V (PC): Pose des gezeigten Bildes kopieren und in ein anderes Bild einfügen (mit Umschalt gespiegelt)
+    d.addEventListener('keydown', (ev) => {
+      if (!S || !(ev.ctrlKey || ev.metaKey) || !/^[cv]$/i.test(ev.key)) return;
+      if (ev.target.closest('input, textarea, select') || String(window.getSelection() || '')) return;
+      const msg = S.dlg.querySelector('.pe-msg');
+      ev.preventDefault();
+      if (ev.key.toLowerCase() === 'c') {
+        S.clip = { P: clone(S.P), k: S.k };
+        msg.textContent = `Pose von Bild ${nr(S.k)} kopiert – in einem anderen Bild mit Strg+V einfügen.`;
+      } else if (S.clip) {
+        applyPose(S.clip.P, ev.shiftKey, null);
+        msg.textContent = `Pose von Bild ${nr(S.clip.k)}${ev.shiftKey ? ' gespiegelt' : ''} eingefügt (↶ nimmt es zurück).`;
+      } else msg.textContent = 'Noch keine Pose kopiert (Strg+C im Bild, das du kopieren willst).';
+    });
     d.addEventListener('keydown', (ev) => {
       if (!S || S.k === 0 || S.keys.length < 2 || !/^Arrow(Left|Right)$/.test(ev.key)) return;
       if (ev.target.closest('input, textarea, select')) return;
@@ -402,6 +419,7 @@ ${easeGuide()}
     d.querySelector('[data-pe="camset"]').textContent = n > 1 ? 'Ansicht als Kamera fürs Kernbild' : 'Ansicht als Kamera übernehmen';
     d.querySelector('[data-pe="camreset"]').disabled = !S.kcam;
     if (n < 2) return;
+    fillSrc(d.querySelector('.pe-cpsrc'));
     const pb = d.querySelector('[data-pe="play"]');
     pb.textContent = S.play ? '■' : '▶';
     pb.setAttribute('aria-label', S.play ? 'Anhalten' : 'Bewegung abspielen');
@@ -686,7 +704,8 @@ ${easeGuide()}
       if (c.t === 'range') return `<div class="pe-row"><span>${esc(c.label)} <output data-o="${i}"></output></span><div class="pe-ctl"><button type="button" class="pe-pm" data-pi="${i}" data-d="-1" aria-label="${esc(c.label)} weniger" title="Einen Schritt weniger (${c.unit === '°' ? '1°' : c.unit === 'm' ? '1 cm' : c.step})">−</button><input type="range" data-i="${i}" min="${c.min}" max="${c.max}" step="${c.step}" aria-label="${esc(c.label)}"><button type="button" class="pe-pm" data-pi="${i}" data-d="1" aria-label="${esc(c.label)} mehr" title="Einen Schritt mehr (${c.unit === '°' ? '1°' : c.unit === 'm' ? '1 cm' : c.step})">+</button></div></div>`;
       if (c.t === 'select') return `<label class="pe-row"><span>${esc(c.label)}</span><select data-i="${i}">${c.opts.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}<option value="eigen" hidden>eigene Richtung</option></select></label>`;
       return `<button type="button" class="pe-wide" data-i="${i}" title="${esc(c.help || c.label)}">${esc(c.label)}</button>`;
-    }).join('');
+    }).join('') + (S.keys.length > 1 ? `<div class="pe-row pe-cppart"><span>${esc(partOf(S.sel).label)} von Bild übernehmen</span><div class="pe-ctl"><select class="pe-cpp" aria-label="${esc(partOf(S.sel).label)} von Bild übernehmen"></select><button type="button" class="pe-wide" data-pe="cppart" title="Nur dieses Körperteil aus dem gewählten Bild übernehmen, der Rest der Pose bleibt">Übernehmen</button></div></div>` : '');
+    if (S.keys.length > 1) fillSrc(box.querySelector('.pe-cpp'));
     sync();
     box.querySelectorAll('input[type=range]').forEach((inp) => {
       inp.addEventListener('input', () => {
@@ -697,7 +716,7 @@ ${easeGuide()}
       inp.addEventListener('change', () => { inp._busy = false; changed(false); });
       if (S.dlg.classList.contains('pe-coarse')) touchRange(inp);
     });
-    box.querySelectorAll('select').forEach((sel) => sel.addEventListener('change', () => {
+    box.querySelectorAll('select[data-i]').forEach((sel) => sel.addEventListener('change', () => {
       push();
       S.ctl[+sel.dataset.i].set(sel.value);
       changed(false);
@@ -806,10 +825,11 @@ ${easeGuide()}
       const h = holdOf(i);
       const tt = Math.round(S.tm[i].t * 1000) / 1000;
       if (all) {
-        const eh = (S.edits[h] || S.frames[h]);
-        const hold = h !== i && same(rounded(P), rounded(eh));
+        // Gleiche Pose wie ein früheres Bild (gehalten oder übernommen): nur als Verweis, der Import liest ihn
+        const same0 = S.keys.map((_, j) => j).find((j) => j < i && shown(j) && same(rounded(P), rounded(S.edits[j] || S.frames[j])));
+        const hold = same0 != null;
         const ease = i ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : '';
-        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}) – ${hold ? `gleiche Pose wie Bild ${nr(h)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
+        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}) – ${hold ? `gleiche Pose wie Bild ${nr(same0)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
         if (!hold) lines.push(lit(diff(P)));
         return;
       }
@@ -930,6 +950,29 @@ ${easeGuide()}
       done(false);
     }));
     upd();
+  }
+
+  /* ---------- Pose übernehmen (Reiter Bild: ganze Pose, Reiter Körper: ein Körperteil, PC: Strg+C / Strg+V) ---------- */
+  // Pose eines Bildes, wie sie gerade im Editor steht (mit Änderungen)
+  const srcPose = (j) => clone(j === S.k ? S.P : S.edits[j] || S.frames[j]);
+  // Auswahl der anderen Bilder (ohne das gezeigte und ohne die Pause am Anfang); bleibt bei der letzten Wahl, sonst Bild davor
+  function fillSrc(sel) {
+    if (!sel) return;
+    const was = sel.value;
+    const list = S.keys.map((_, j) => j).filter((j) => j !== S.k && shown(j));
+    sel.innerHTML = list.map((j) => `<option value="${j}">Bild ${nr(j)}${j === S.k0 ? ' ★' : ''}${S.edits[j] ? ' (geändert)' : ''}</option>`).join('');
+    const prev = list.filter((j) => j < S.k).pop();
+    sel.value = list.includes(+was) && was !== '' ? was : String(prev != null ? prev : list[0]);
+  }
+  const setPath = (P, f, v) => { const ks = f.split('.'); const last = ks.pop(); ks.reduce((o, k) => o[k], P)[last] = v; };
+  // part: nur die Felder dieses Körperteils (FIELDS), sonst die ganze Pose; mir: links und rechts getauscht (Spiegel an der Mitte)
+  function applyPose(src, mir, part) {
+    const P = mir ? E.full(SK.fig3dPose.mirror(src)) : clone(src);
+    push();
+    if (part) FIELDS[part].forEach((f) => setPath(S.P, f, clone(get(P, f))));
+    else S.P = P;
+    panel();
+    changed(false);
   }
 
   // Vollbild: Dialog füllt das ganze Browserfenster (kein Vollbild des Browsers)
@@ -1135,6 +1178,19 @@ ${easeGuide()}
       if (!shown(i)) i = a === 'fnext' ? 2 : 0;
       if (i !== S.k) goFrame(i);
       else { frames(); draw(); }
+      return;
+    }
+    if (a === 'cpgo') {
+      const j = +S.dlg.querySelector('.pe-cpsrc').value;
+      const mir = S.dlg.querySelector('.pe-cpm').checked;
+      applyPose(srcPose(j), mir, null);
+      msg.textContent = `Pose von Bild ${nr(j)}${mir ? ' gespiegelt' : ''} übernommen (↶ nimmt es zurück).`;
+      return;
+    }
+    if (a === 'cppart') {
+      const j = +S.dlg.querySelector('.pe-cpp').value;
+      applyPose(srcPose(j), false, S.sel);
+      msg.textContent = `${partOf(S.sel).label} von Bild ${nr(j)} übernommen (↶ nimmt es zurück).`;
       return;
     }
     if (a === 'horig') {
