@@ -1078,7 +1078,9 @@ ${easeGuide()}
       if (S.fit) { S.fit = false; fit(w, h); }
       const ctx = cv.getContext('2d');
       ctx.clearRect(0, 0, w, h);
-      const C = E.draw(ctx, w, h, S.play ? S.play.pose : S.P, S.cam, { mode: 0 });
+      // Trefferfläche rot wie in der App; sie sitzt fest am Körperteil und wandert mit, wenn die Pose geändert wird
+      const pose = S.play ? S.play.pose : S.P;
+      const C = E.draw(ctx, w, h, pose, S.cam, { mode: 0, hit: SK.fig3d.spots(S.e, E.solve(pose)) });
       if (!C) {
         S.dlg.querySelector('.pe-msg').textContent = 'Die Figur lässt sich auf diesem Gerät nicht zeichnen (kein WebGL 2).';
         return;
