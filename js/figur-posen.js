@@ -864,7 +864,9 @@
 
   // Feineinstellung der Fläche nur für diese Technik (aus dem Bewegungs-Editor, Reiter „Treffer“):
   // x, y, z Versatz im Körperteil-Rahmen (m), rot Drehung um Unterarm/Unterschenkel (°), r Größe (m) – siehe figur-app.js (FL)
-  const FLAECHE_FEIN = {};
+  const FLAECHE_FEIN = {
+    'mv:ushiro-geri': { x: 0.04, y: -0.08, r: 0.07 },
+  };
   Object.keys(FLAECHE).forEach((id) => {
     const h = D[id] && D[id].hit;
     if (!h) throw new Error(`Trefferfläche ohne Trefferpunkt: ${id}`);
