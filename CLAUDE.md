@@ -30,6 +30,10 @@
 - Bilder mit ganzer Figur kommen aus `js/figur-posen.js` (Schlüssel wie `tc:age-zuki`). Neue Technik mit Figur: nur die Pose dort ergänzen – keine SVG-Grafik als Rückfall (ohne WebGL 2 bleibt das Bild leer, die Startseite zeigt einen Hinweis). SVG-Grafiken nur, wo keine Figur passt (Fußbilder, Körperwaffen, Fußbewegungen, Schemabilder, Bodenkarte). `validate.html` meldet ein SVG neben einer 3D-Figur als Fehler.
 - Nach Änderungen an Posen `tools/test/gfx3d.html` mit WebGL (Playwright: `--use-angle=swiftshader`) ansehen; `validate.html` prüft, dass alle Posen rechenbar sind und Standfüße ihren Platz erreichen.
 
+## Kata als Figur (Kata-Trainer, Ansicht „Figur“)
+- `js/kata-figur.js` rechnet die ganze Kata als Bewegung: Füße aus `ansage` (Bodenkarte), Arme und Hüfte aus den Abläufen in `js/figur-posen.js`. Neue Technik einer Kata: in `TECH` dem Lexikon-Ablauf zuordnen, neuer Stand in `STAND`; fehlt die Pose, sie in `js/figur-posen.js` ergänzen.
+- Eine Kata erst in `KATA` freigeben, wenn der Nutzer den Ablauf in `labor/kata.html?kata=<id>` gesehen und abgenommen hat. `validate.html` prüft freigegebene Kata (rechenbar, Füße erreichen ihren Platz, nichts springt).
+
 ## Buchwissen (ohne PDF)
 - Bei Fragen zum Buch oder neuen Kata-Inhalten zuerst `docs/buch-register.md` lesen: Seitenzählung, Kapitel, Zusammenfassungen der allgemeinen Kapitel, Hinweise des Buches je Bewegung und Ablauftabellen aller zehn Kata. Nur Fakten und eigene Worte ins Repo, keine Abschriften aus dem Buch.
 - Die Ablauftabellen im Register werden aus den App-Daten erzeugt: nach Änderungen an `seq` oder `ansage` in `data/kata-*.js` `node tools/register-tabellen.js` laufen lassen.

@@ -547,6 +547,20 @@
   SK.ansageBeats = BEATS;
   const fmtNum = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
   const tempoName = (beat) => (beat === 2 ? 'Training' : beat > 2 ? `${fmtNum(beat / 2)}× langsamer` : `${fmtNum(2 / beat)}× schneller`);
+  // Ansicht im Kata-Trainer: Bodenkarte oder Figur (nur wo es die Figur gibt)
+  const VIEW_KEY = 'shotokan-sensai-ansage-ansicht';
+  function loadView() {
+    try {
+      return localStorage.getItem(VIEW_KEY) === 'figur' ? 'figur' : 'karte';
+    } catch (e) {
+      return 'karte';
+    }
+  }
+  function saveView(v) {
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch (e) { /* ohne Speicher */ }
+  }
   const TEMPO_KEY = 'shotokan-sensai-ansage-tempo';
   function loadTempo() {
     try {
@@ -752,7 +766,12 @@
     const cPos = el('span', { class: 'ans-pos' });
     const chips = el('div', { class: 'ans-chips' });
     const map = el('div', { class: 'ans-map-svg' });
-    const mapBox = el('div', { class: 'ans-map' }, map, chips);
+    // Figur statt Bodenkarte: nur für freigegebene Kata und mit WebGL 2 (js/kata-figur.js); gerechnet wird erst beim Einschalten
+    const fig = SK.kataFigur && SK.kataFigur.can(k) ? SK.kataFigur.stage(k) : null;
+    let view = 'karte';
+    const viewBtn = (v, text) => el('button', { type: 'button', 'data-view': v, 'aria-pressed': 'false', text, onclick: () => setView(v) });
+    const viewSw = fig ? el('div', { class: 'ans-view', role: 'group', 'aria-label': 'Ansicht' }, viewBtn('karte', 'Karte'), viewBtn('figur', 'Figur')) : null;
+    const mapBox = el('div', { class: 'ans-map' }, map, fig && fig.node, chips, viewSw);
     const cHint = el('div', { class: 'ans-hint' });
     const cTech = el('div', { class: 'ans-tech muted' });
     const head = el('div', { class: 'ans-head' }, cKan, el('div', { class: 'ans-head-txt' }, cRo, cPos));
@@ -790,6 +809,7 @@
       steps = SK.ansageTimeline(k, BEATS[tempo], true);
       tempoInfo();
       if (running) start(idx);
+      else figShow();
     });
 
     // Hinweis nur, wenn etwas fehlt: japanische Stimme oder Bildschirm-an
@@ -906,7 +926,7 @@
       if (!s) return;
       fill(s);
       stage.classList.toggle('kiai', !!s.kiai);
-      map.innerHTML = SK.embusenSvg(k, s.pose, i ? s.prev : null, mapBox.clientWidth / mapBox.clientHeight || null);
+      if (view === 'karte') map.innerHTML = SK.embusenSvg(k, s.pose, i ? s.prev : null, mapBox.clientWidth / mapBox.clientHeight || null);
       const firstMove = steps.findIndex((x) => x.kind === 'move');
       const cur = s.kind === 'move' ? s.n : i < firstMove ? 0 : Infinity;
       track.querySelectorAll('.ans-dot').forEach((d) => {
@@ -914,6 +934,26 @@
         d.classList.toggle('cur', n === cur);
         d.classList.toggle('done', n < cur);
       });
+    }
+
+    // Ansicht Karte ↔ Figur. Die Figur läuft nach derselben Uhr wie die Ansage: zählt sie, bewegt sich die Figur mit;
+    // steht sie, zeigt die Figur die Endstellung der aktuellen Ansage – beim Weiterschalten von Hand deren Bewegung einmal.
+    function setView(v) {
+      view = fig && v === 'figur' ? 'figur' : 'karte';
+      saveView(view);
+      if (!fig) return;
+      viewSw.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+      map.hidden = view === 'figur';
+      fig.on(view === 'figur');
+      if (view === 'karte') render(idx);
+      else if (running) { fig.beat(BEATS[tempo]); fig.run((performance.now() - base) / 1000); }
+      else figShow();
+    }
+    function figShow(move) {
+      if (view !== 'figur') return;
+      fig.beat(BEATS[tempo]);
+      if (move) fig.run(steps[idx].t, fig.end(idx));
+      else fig.show(fig.end(idx));
     }
 
     function buildTrack() {
@@ -952,6 +992,7 @@
       base = performance.now() - steps[from].t * 1000;
       speak(steps[from], BEATS[tempo]);
       render(from);
+      if (view === 'figur') { fig.beat(BEATS[tempo]); fig.run(steps[from].t); }
       // nach einem Sprung folgt die nächste Ansage mit dem normalen Abstand
       if (from + 1 < steps.length) schedule(from + 1);
       else timers.push(setTimeout(finish, 1500));
@@ -963,6 +1004,7 @@
       clearTimers();
       if (tts) tts.cancel();
       running = false;
+      if (view === 'figur') fig.freeze();
       ui();
     }
     function finish() {
@@ -975,7 +1017,7 @@
     function jump(i) {
       i = Math.max(0, Math.min(steps.length - 1, i));
       if (running) start(i);
-      else { idx = i; render(i); }
+      else { idx = i; render(i); figShow(true); }
     }
     function ui() {
       playBtn.textContent = running ? '❚❚ Pause' : idx > 0 && idx < steps.length - 1 ? '▶ Weiter zählen' : '▶ Start';
@@ -1046,7 +1088,9 @@
     stage.addEventListener('touchstart', (ev) => {
       const t = ev.touches[0];
       const edge = 24;
-      touch = ev.touches.length === 1 && t.clientX > edge && t.clientX < window.innerWidth - edge ? { x: t.clientX, y: t.clientY, at: Date.now() } : null;
+      // auf der Figur dreht Wischen die Kamera, dort wechselt es nicht die Kata
+      const free = !(ev.target.closest && ev.target.closest('.ans-fig'));
+      touch = free && ev.touches.length === 1 && t.clientX > edge && t.clientX < window.innerWidth - edge ? { x: t.clientX, y: t.clientY, at: Date.now() } : null;
     }, { passive: true });
     stage.addEventListener('touchend', (ev) => {
       if (!touch) return;
@@ -1084,6 +1128,7 @@
     if (startN) idx = Math.max(0, steps.findIndex((s) => s.kind === 'move' && s.n === startN));
     render(idx);
     reserve();
+    if (fig) setView(loadView());
     if (document.fonts) document.fonts.ready.then(reserve);
     ui();
   };

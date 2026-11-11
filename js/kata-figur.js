@@ -1,4 +1,4 @@
-/* Kata als 3D-Figur (Pilot im Labor, noch nicht in der App).
+/* Kata als 3D-Figur: die ganze Kata als durchgehende Bewegung (Ansicht „Figur“ im Kata-Trainer, Versuchsseite labor/kata.html).
    Baut aus zwei vorhandenen Quellen einen durchgehenden Ablauf der ganzen Kata:
    – Bodenkarte der Kata-Ansage (SK.ansagePoses): Platz, Richtung und Gewicht beider Füße je Bewegung, Körperrichtung, Drehung
    – Technik-Abläufe des Lexikons (SK.fig3dDefs): Ausholen und Endstellung von Armen, Hüfte und Oberkörper
@@ -227,6 +227,7 @@
     const warn = [];
     const segs = [];
     const marks = [];
+    const ends = steps.map((st) => st.t); // je Ansage: Zeitpunkt, zu dem ihre Bewegung fertig ist
     const key = (m, stance, prev, up) => {
       const turn = m.turn != null && prev ? -m.turn : prev ? wrap(-m.body - prev.byaw) : -m.body;
       const byaw = prev ? prev.byaw + turn : turn;
@@ -330,6 +331,7 @@
       marks.push({ t: st.t, t1: st.t + d, n: st.n, kan: st.kan, ro: st.ro, text: `${st.stance} · ${st.tech}`, kiai: st.kiai });
       cur = nk;
     });
+    steps.forEach((st, i) => segs.forEach((sg) => { if (sg.t0 >= st.t - 1e-9 && (i + 1 >= steps.length || sg.t0 < steps[i + 1].t - 1e-9)) ends[i] = Math.max(ends[i], sg.t1); }));
     const dur = segs[segs.length - 1].t1 + 1;
     function pose(t) {
       let i = 0;
@@ -339,7 +341,7 @@
     }
     // Zählzeit zum Zeitpunkt t (für Anzeige und Sprünge)
     const markAt = (t) => { let i = -1; while (i + 1 < marks.length && marks[i + 1].t <= t) i++; return i; };
-    return { kata: k, beat, dur, pose, marks, markAt, warn, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
+    return { kata: k, beat, dur, pose, marks, markAt, ends, warn, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
   }
 
   // Prüfung des fertigen Ablaufs: jedes Bild rechenbar, Füße am Boden erreichen ihren Platz, keine Sprünge
@@ -370,5 +372,164 @@
     return out;
   }
 
-  SK.kataFigur = { build, check, SCALE };
+  /* ---------- Bühne für den Kata-Trainer ---------- */
+  // Freigegebene Kata: Ablauf von Hand durchgesehen, alle Stände und Techniken haben eine Figur (validate.js prüft das)
+  const KATA = ['heian-shodan'];
+  const can = (k) => KATA.includes(k.id) && !!k.ansage && E.ok();
+  // Kamera: yaw 0 = von vorne (die Figur schaut am Anfang zur Kamera), 180 = von hinten (links bleibt links)
+  const CAMS = [
+    ['Von hinten', { yaw: 158, pitch: 20, dist: 6.2 }],
+    ['Von vorne', { yaw: -22, pitch: 16, dist: 6.2 }],
+    ['Von der Seite', { yaw: -90, pitch: 12, dist: 6.4 }],
+    ['Von oben', { yaw: 180, pitch: 78, dist: 7.2 }],
+  ];
+  // Bildpunkte je Bild: in Bewegung wenige (flüssig), im Stand scharf
+  const PX_MOVE = 260000;
+  const PX_STILL = 1000000;
+
+  // Liefert die Bühne: node (Leinwand, kleine Karte, Kamera-Knopf) und die Steuerung. Die Zeit t läuft in Sekunden wie in
+  // SK.ansageTimeline(k, beat, true); gerechnet wird erst mit dem ersten beat().
+  function stage(k) {
+    const { el } = SK.util;
+    const cv = el('canvas', { class: 'ans-fig-cv', role: 'img', 'aria-label': `${k.name} als 3D-Figur` });
+    const mapCv = el('canvas', { class: 'ans-fig-map', width: '192', height: '192', 'aria-hidden': 'true' });
+    const camBtn = el('button', { class: 'ans-fig-cam', type: 'button', title: 'Blickwinkel wechseln' });
+    const node = el('div', { class: 'ans-fig', hidden: true }, cv, mapCv, camBtn);
+    const ctx = cv.getContext('2d');
+    const mg = mapCv.getContext('2d');
+    const anims = new Map();
+    let anim = null;
+    let camIdx = 0;
+    const cam = Object.assign({ fov: 30 }, CAMS[0][1]);
+    let t = 0;
+    let t0 = 0;
+    let tEnd = 0;
+    let clock = 0;
+    let moving = false;
+    let drag = null;
+    let rough = false;
+    let raf = 0;
+    let on = false;
+
+    // Blickpunkt: Hüfte der Figur, über gut eine Sekunde geglättet (rein aus dem Zeitpunkt – auch beim Springen ruhig)
+    function center(at) {
+      let x = 0;
+      let z = 0;
+      for (let i = -3; i <= 3; i++) {
+        const P = anim.pose(clamp(at + i * 0.22, 0, anim.dur));
+        x += P.pelvis[0] / 7;
+        z += P.pelvis[2] / 7;
+      }
+      return [x, z];
+    }
+    const grounded = (J, s) => J['ankle' + s][1] < 0.09;
+    function draw() {
+      const cw = cv.clientWidth;
+      const ch = cv.clientHeight;
+      if (!on || !anim || !cw || !ch) return;
+      const fast = moving || !!drag;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5, Math.sqrt((fast ? PX_MOVE : PX_STILL) / (cw * ch)));
+      const w = Math.max(120, Math.round(cw * dpr));
+      const h = Math.max(120, Math.round(ch * dpr));
+      if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+      const P = anim.pose(t);
+      const J = E.solve(P);
+      const c = center(t);
+      // im Hochformat weiter weg, damit auch ein breiter Stand ganz ins Bild passt
+      const view = Object.assign({}, cam, { target: [c[0], 0.78, c[1]], dist: Math.max(cam.dist, (4.9 * h) / w) });
+      const decals = ['L', 'R'].filter((s) => grounded(J, s)).map((s) => ({ heel: J['heel' + s], toe: J['toe' + s], w: P.w[s === 'L' ? 0 : 1], a: 1, side: s }));
+      ctx.clearRect(0, 0, w, h);
+      E.draw(ctx, w, h, P, view, { mode: 0, style: 0, decals });
+      rough = fast;
+      mini(J);
+    }
+    // Kleine Karte: Embusen von oben (vorne ist oben, links ist links), Füße und Blickrichtung
+    function mini(J) {
+      const S = mapCv.width;
+      const ext = anim.lines.reduce((a, l) => [Math.min(a[0], l[0], l[2]), Math.max(a[1], l[0], l[2]), Math.min(a[2], l[1], l[3]), Math.max(a[3], l[1], l[3])], [1e9, -1e9, 1e9, -1e9]);
+      const sc = S / (Math.max(ext[1] - ext[0], ext[3] - ext[2]) + 1.4);
+      const X = (x) => S / 2 - (x - (ext[0] + ext[1]) / 2) * sc;
+      const Y = (z) => S / 2 - (z - (ext[2] + ext[3]) / 2) * sc;
+      mg.clearRect(0, 0, S, S);
+      mg.lineCap = 'round';
+      mg.strokeStyle = '#b9b2a6';
+      mg.lineWidth = 2.5;
+      anim.lines.forEach((l) => { mg.beginPath(); mg.moveTo(X(l[0]), Y(l[1])); mg.lineTo(X(l[2]), Y(l[3])); mg.stroke(); });
+      ['L', 'R'].forEach((s) => {
+        const a = J['heel' + s];
+        const b = J['toe' + s];
+        mg.strokeStyle = grounded(J, s) ? '#1f2328' : '#9a948a';
+        mg.lineWidth = 7;
+        mg.beginPath();
+        mg.moveTo(X(a[0]), Y(a[2]));
+        mg.lineTo(X(b[0]), Y(b[2]));
+        mg.stroke();
+      });
+      const hx = X(J.head[0]);
+      const hy = Y(J.head[2]);
+      mg.fillStyle = '#c62828';
+      mg.beginPath();
+      mg.moveTo(hx - J.hf[0] * 20, hy - J.hf[2] * 20);
+      mg.lineTo(hx + J.hl[0] * 7, hy + J.hl[2] * 7);
+      mg.lineTo(hx - J.hl[0] * 7, hy - J.hl[2] * 7);
+      mg.fill();
+    }
+    // Ein Bild je Bildwechsel des Browsers; die Zeit läuft nach der Uhr (Echtzeit, auch wenn ein Bild länger dauert)
+    function frame(now) {
+      raf = 0;
+      if (!on || !node.isConnected) return;
+      if (moving) {
+        t = Math.min(tEnd, t0 + (now - clock) / 1000);
+        if (t >= tEnd) moving = false;
+      }
+      draw();
+      if (moving || rough) request();
+    }
+    function request() {
+      if (!raf && on) raf = requestAnimationFrame(frame);
+    }
+    function setCam(i) {
+      camIdx = i % CAMS.length;
+      Object.assign(cam, CAMS[camIdx][1]);
+      camBtn.textContent = `Blick: ${CAMS[camIdx][0].replace(/^Von (der )?/, '')}`;
+      camBtn.setAttribute('aria-label', `Blickwinkel: ${CAMS[camIdx][0]} – wechseln`);
+      request();
+    }
+    camBtn.addEventListener('click', () => setCam(camIdx + 1));
+    // Drehen mit Finger oder Maus: waagerecht dreht, senkrecht neigt (am Handy scrollt senkrecht die Seite)
+    cv.addEventListener('pointerdown', (ev) => { drag = [ev.clientX, ev.clientY]; cv.setPointerCapture(ev.pointerId); });
+    cv.addEventListener('pointermove', (ev) => {
+      if (!drag) return;
+      cam.yaw -= (ev.clientX - drag[0]) * 0.45;
+      cam.pitch = clamp(cam.pitch + (ev.clientY - drag[1]) * 0.35, -2, 86);
+      drag = [ev.clientX, ev.clientY];
+      request();
+    });
+    const drop = () => { drag = null; request(); };
+    cv.addEventListener('pointerup', drop);
+    cv.addEventListener('pointercancel', drop);
+    if (window.ResizeObserver) new ResizeObserver(() => request()).observe(node);
+    setCam(0);
+
+    return {
+      node,
+      // Ansicht ein- oder ausschalten (aus: es wird nichts gerechnet)
+      on(v) { on = !!v; node.hidden = !on; if (on) request(); },
+      // Takt der Ansage (Sekunden je Bewegung): Ablauf dafür rechnen bzw. aus dem Vorrat nehmen
+      beat(b) {
+        if (!anims.has(b)) anims.set(b, build(k, { beat: b }));
+        anim = anims.get(b);
+      },
+      // Zeitpunkt, zu dem die Bewegung der Ansage i fertig ist
+      end: (i) => anim.ends[i],
+      // ab Zeitpunkt a in Echtzeit laufen, bis b (ohne b: bis zum Schluss)
+      run(a, b) { t0 = t = a; tEnd = b == null ? anim.dur : b; clock = performance.now(); moving = tEnd > a; request(); },
+      // Standbild zum Zeitpunkt a
+      show(a) { t = a; moving = false; request(); },
+      freeze() { moving = false; request(); },
+      time: () => t,
+    };
+  }
+
+  SK.kataFigur = { build, check, SCALE, KATA, can, stage };
 })();

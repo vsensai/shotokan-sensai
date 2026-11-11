@@ -82,6 +82,35 @@
         await wait();
         log.push(`Seite ${h}: ${app.querySelector('h1') ? app.querySelector('h1').textContent : 'FEHLT'}`);
       }
+      // Kata-Trainer, Ansicht „Figur“: nur bei freigegebenen Kata; umschalten, weiterschalten, zählen lassen, zurück zur Karte
+      {
+        location.hash = '#/ansage/heian-nidan';
+        await wait();
+        if (app.querySelector('.ans-view')) throw new Error('Kata-Trainer: Ansicht „Figur“ bei einer nicht freigegebenen Kata');
+        location.hash = '#/ansage/heian-shodan';
+        await wait();
+        const sw = app.querySelector('.ans-view');
+        if (!window.Figur3D.ok()) log.push('Kata-Figur: übersprungen (kein WebGL 2)');
+        else {
+          if (!sw) throw new Error('Kata-Trainer: Umschalter Karte/Figur fehlt bei Heian Shodan');
+          const frame = () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+          sw.querySelector('[data-view=figur]').click();
+          await frame();
+          const cv = app.querySelector('.ans-fig-cv');
+          if (app.querySelector('.ans-fig').hidden || !app.querySelector('.ans-map-svg').hidden || !(cv.width > 100)) throw new Error('Kata-Trainer: Figur erscheint nicht');
+          const lit = () => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 3; i < d.length; i += 400) if (d[i]) n++; return n; };
+          if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist leer');
+          app.querySelector('.ans-controls .btn:last-child').click();
+          app.querySelector('.ans-fig-cam').click();
+          app.querySelector('.ans-play').click();
+          await frame();
+          app.querySelector('.ans-play').click();
+          if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist beim Zählen leer');
+          sw.querySelector('[data-view=karte]').click();
+          if (!app.querySelector('.ans-fig').hidden || !app.querySelector('.ans-map-svg svg')) throw new Error('Kata-Trainer: zurück zur Karte klappt nicht');
+          log.push(`Kata-Figur: ${app.querySelector('.ans-fig-cam').textContent}, ${cv.width}×${cv.height}`);
+        }
+      }
       // Lexikon-Karte: Aussprache-Knopf und „Kommt vor in …“; die Stelle öffnet den Kata-Trainer bei dieser Bewegung
       {
         const e = SK.glossary.find((x) => x.t === 'Shuto-uke');
