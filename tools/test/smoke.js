@@ -96,7 +96,8 @@
         if (!/Shuto/.test(app.querySelector('.ans-tech').textContent)) throw new Error('Kata-Trainer: Stelle nennt die Technik nicht');
         log.push(`Kommt vor in: ${link.getAttribute('href')} → ${pos.textContent}`);
       }
-      // Karteikarten: eine Karte „nicht gewusst“ (kommt in der Runde wieder), alle anderen „gewusst“; zählt in den Karteikasten
+      // Karteikarten: vorn nur das Bild (kein Name, keine Bedeutung), nach dem Umdrehen Name und Bedeutung. Eine Karte
+      // „nicht gewusst“ (kommt in der Runde wieder), alle anderen „gewusst“; zählt in den Karteikasten der Bildfrage (gl-…-c)
       {
         // Vergleich mit dem Stand davor: Zufallsmix und Begriffe-Quiz weiter oben können dieselben Fragen schon gestellt haben
         const before = JSON.parse(JSON.stringify(SK.store.data.srs));
@@ -104,18 +105,21 @@
         location.hash = '#/karten/geri';
         await wait();
         let cards = 0;
-        for (let guard = 0; guard < 100 && app.querySelector('.kk-card'); guard++) {
-          const front = app.querySelector('.kk-front');
-          if (!front) throw new Error('Karteikarte ohne Vorderseite');
-          front.click();
-          if (!app.querySelector('.kk-back .lex-card')) throw new Error('Karteikarte ohne Rückseite');
+        for (let guard = 0; guard < 100 && app.querySelector('.kk'); guard++) {
+          const card = app.querySelector('.kk');
+          const names = SK.glossary.filter((e) => e.cat === 'geri').flatMap((e) => [e.t, e.de]);
+          if (!card.querySelector('.kk-bild .f3d, .kk-bild svg')) throw new Error('Karteikarte ohne Bild');
+          if (names.some((t) => card.textContent.includes(t)) || card.querySelector('.kk-ja')) throw new Error(`Karteikarte verrät vorn die Lösung: ${card.textContent}`);
+          app.querySelector('.kk-um').click();
+          const h4 = card.querySelector('.kk-loesung h4');
+          if (!h4 || !names.includes(h4.textContent.split(' (')[0].trim()) || !card.querySelector('.kk-loesung p')) throw new Error('Karteikarte ohne Lösung');
           app.querySelector(cards++ ? '.kk-ja' : '.kk-nein').click();
         }
         const head = app.querySelector('.result h2');
         const changed = Object.entries(SK.store.data.srs).filter(([id, v]) => JSON.stringify(v) !== JSON.stringify(before[id]));
         const bad = changed.filter(([, v]) => v.due === SK.util.today()).length;
         if (!head || !/auf Anhieb gewusst/.test(head.textContent)) throw new Error('Karteikarten ohne Auswertung');
-        if (cards !== 16 || changed.length !== 15 || bad !== 1 || SK.store.data.answered !== answered0) throw new Error(`Karteikarten: ${cards} Karten, ${changed.length} im Karteikasten gezählt, ${bad} nicht gewusst`);
+        if (cards !== 16 || changed.length !== 15 || bad !== 1 || !changed.every(([id]) => /^gl-.*-c$/.test(id)) || SK.store.data.answered !== answered0) throw new Error(`Karteikarten: ${cards} Karten, ${changed.length} im Karteikasten gezählt, ${bad} nicht gewusst`);
         log.push(`Karteikarten: ${head.textContent}`);
       }
       location.hash = '#/review';

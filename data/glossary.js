@@ -335,6 +335,11 @@
   // Alle Stellen eines Begriffs in den Kata: Bewegungen, in denen der Kata-Trainer den Begriff in Stand, Technik oder
   // Hinweis erkennt (SK.lexParts – dort ist er auch antippbar), dazu das erste Vorkommen aus ERST (dessen Name im Buch
   // manchmal anders lautet). Map Begriff → [{ k: Kata, ns: [Bewegungen] }] in der Reihenfolge der Kata, einmal gerechnet.
+  // Techniken, die das Buch nicht beim Namen nennt, sondern als Kombination beschreibt (der Name stammt aus dem Heft
+  // „Karate kompakt“): Muster für den Techniktext einer Bewegung. Manji-uke = Jodan Uchi-uke zur einen und Gedan-uke
+  // zur anderen Seite (Heian Godan 21 und 23, Bassai Dai 25, Kanku Dai 18 und 23, Jion 18, 20, 26, 28).
+  const MUSTER = { 'Manji-uke': /^\S+ Sokumen Jodan Uchi-uke \+ \S+ Sokumen Gedan-uke$/ };
+  SK.glossaryMuster = MUSTER;
   let vorkommen = null;
   SK.glossaryVorkommen = function (e) {
     if (!vorkommen) {
@@ -351,6 +356,7 @@
           if (!k || !k.ansage) return;
           k.seq.forEach((r) => {
             [r[1], `${r[2]}${r[4] ? ` · ${r[4]}` : ''}`].forEach((txt) => SK.lexParts(txt).forEach((p) => p.e && add(p.e.t, id, r[0])));
+            Object.entries(MUSTER).forEach(([t, re]) => re.test(r[2]) && add(t, id, r[0]));
           });
         });
         SK.glossary.forEach((g) => g.erst && SK.kata[g.erst.kata] && SK.kata[g.erst.kata].ansage && add(g.t, g.erst.kata, g.erst.n));
@@ -439,11 +445,17 @@
     return unit;
   };
 
+  // Textteile einer Karte: Kopf (Aussprache, Name, Bedeutung) und Stellen in den Kata – auch für die Rückseite der Karteikarten
+  const kopfHtml = (e) => `${SK.glossarySagHtml(e)}<h4>${SK.util.esc(e.t)}${altName(e) ? ` <span class="lex-alt">(${SK.util.esc(altName(e))})</span>` : ''}</h4><p>${SK.util.esc(e.de)}</p>`;
+  SK.glossaryTextHtml = (e) => `${kopfHtml(e)}${vorHtml(e)}`;
+  // Bild einer Karte ohne Beschriftungen, die den Namen verraten (Vorderseite der Karteikarten)
+  SK.glossaryBildHtml = (e) => (e.img ? G.box(e.img.key, e.img, true) : '');
+
   SK.glossaryHtml = function (items) {
     return `<div class="lex-grid">${items
       .map(
         (e) => `<article class="lex-card" data-cat="${e.cat}" data-t="${SK.util.esc(e.t)}" data-text="${SK.util.esc(`${e.t} ${altName(e)} ${e.erst ? e.erst.buch : ''} ${e.de}`.toLowerCase())}">
-          ${SK.glossarySagHtml(e)}<h4>${SK.util.esc(e.t)}${altName(e) ? ` <span class="lex-alt">(${SK.util.esc(altName(e))})</span>` : ''}</h4><p>${SK.util.esc(e.de)}</p>
+          ${kopfHtml(e)}
           ${e.img ? `<div class="lex-img">${G.box(e.img.key, e.img())}</div>` : ''}${vorHtml(e)}</article>`
       )
       .join('')}</div>`;

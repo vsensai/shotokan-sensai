@@ -102,13 +102,13 @@
       }
     });
   }
-  // Lexikon: jeder Begriff hat eine Lesung für die Aussprache (Wortteile in LESUNG, data/glossary.js) und seine beiden
-  // Fragen im Begriffe-Trainer (die Karteikarten zählen in deren Karteikasten)
+  // Lexikon: jeder Begriff hat eine Lesung für die Aussprache (Wortteile in LESUNG, data/glossary.js) und seine Fragen im
+  // Begriffe-Trainer; jeder Begriff mit Bild hat eine eigene Bildfrage (gl-…-c) – in deren Karteikasten zählen die Karteikarten
   {
     const qids = new Set(SK.questions.map((q) => q.id));
     SK.glossary.forEach((e) => {
       if (!e.kana || !/^[\u3041-\u3096ー、]+$/.test(e.kana)) errors.push(`Lexikon „${e.t}“: Lesung für die Aussprache fehlt – Wortteil in LESUNG (data/glossary.js) ergänzen`);
-      ['a', 'b'].forEach((x) => { if (!qids.has(`${SK.glossaryId(e)}-${x}`)) errors.push(`Lexikon „${e.t}“: Frage ${SK.glossaryId(e)}-${x} fehlt (Karteikarten)`); });
+      ['a', 'b'].concat(e.img ? ['c'] : []).forEach((x) => { if (!qids.has(`${SK.glossaryId(e)}-${x}`)) errors.push(`Lexikon „${e.t}“: Frage ${SK.glossaryId(e)}-${x} fehlt${x === 'c' ? ' (Karteikarten; zwei Begriffe mit demselben Bild?)' : ''}`); });
     });
   }
   // Lexikon „Kommt vor in …“: jede Stelle gibt es im Kata-Trainer, und das erste Vorkommen (SK.glossaryErst) ist die erste davon.
@@ -124,6 +124,12 @@
         ns.forEach((n) => { if (!(n >= 1 && n <= k.moves)) errors.push(`Lexikon „${e.t}“: Vorkommen ${k.name} ${n} gibt es nicht`); });
       });
       if (e.erst && !(v.length && v[0].k.id === e.erst.kata && v[0].ns[0] === e.erst.n)) errors.push(`Lexikon „${e.t}“: erstes Vorkommen in ERST (${e.erst.kata} ${e.erst.n}) ist nicht die erste Stelle in „Kommt vor in“ (${v.length ? `${v[0].k.id} ${v[0].ns[0]}` : 'keine'})`);
+    });
+    // Techniken, die das Buch als Kombination beschreibt (SK.glossaryMuster): Begriff bekannt, Muster trifft Bewegungen
+    Object.keys(SK.glossaryMuster).forEach((t) => {
+      const e = SK.glossary.find((x) => x.t === t);
+      if (!e) errors.push(`Lexikon-Muster: „${t}“ gibt es im Lexikon nicht`);
+      else if (!SK.glossaryVorkommen(e).length) errors.push(`Lexikon-Muster „${t}“ trifft keine Bewegung`);
     });
     out.push(`Lexikon: ${SK.glossary.length} Begriffe, ${mit} mit Stellen in den Kata`);
   }

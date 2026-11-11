@@ -544,7 +544,7 @@
       el('h1', { text: 'Begriffe-Trainer' }),
       el('p', { class: 'muted', text: `Stände, Techniken & Begriffe – kurz abgefragt. Jeder Begriff kommt in beide Richtungen und, wo es eine Grafik gibt, auch als Bildfrage (${total} Fragen).` }),
       el('div', { class: 'actions' }, el('a', { class: 'btn primary', href: '#/zufall/begriffe', text: 'Alle Begriffe gemischt' }), el('a', { class: 'btn', href: '#/karten', text: 'Karteikarten: alle gemischt' }), el('a', { class: 'btn', href: '#/lexikon', text: 'Lexikon ansehen' })),
-      el('p', { class: 'muted small', text: 'Quiz: Antwort auswählen. Karteikarten: Begriff ansehen, umdrehen und selbst einschätzen – „nicht gewusst“ landet wie eine falsche Antwort in der Wiederholung.' }),
+      el('p', { class: 'muted small', text: 'Quiz: Antwort auswählen. Karteikarten: nur das Bild oder die Bewegung sehen, Namen überlegen, umdrehen und selbst einschätzen – „nicht gewusst“ landet wie eine falsche Antwort in der Wiederholung.' }),
       el(
         'div',
         { class: 'tiles' },
@@ -552,12 +552,13 @@
           const st = lessonState(l.id);
           const n = (qByLesson[l.id] || []).length;
           const cards = SK.glossary.filter((e) => `gl-${e.cat}` === l.id).length;
+          const karten = kartenBegriffe(l.id.slice(3)).length;
           return el(
             'div',
             { class: 'tile tile-wahl' },
             el('h3', { text: l.title }),
             el('p', { text: `${cards} Begriffe · ${n} Fragen${st ? ` · bestes Ergebnis ${Math.round(st.best * 100)} %` : ''}` }),
-            el('div', { class: 'actions' }, el('a', { class: 'btn primary', href: `#/quiz/${l.id}`, text: 'Quiz' }), el('a', { class: 'btn', href: `#/karten/${l.id.slice(3)}`, text: 'Karteikarten' }))
+            el('div', { class: 'actions' }, el('a', { class: 'btn primary', href: `#/quiz/${l.id}`, text: 'Quiz' }), karten ? el('a', { class: 'btn', href: `#/karten/${l.id.slice(3)}`, text: 'Karteikarten' }) : '')
           );
         })
       )
@@ -566,27 +567,34 @@
   }
 
   // ---------- Karteikarten ----------
-  // Begriff ansehen, umdrehen (Rückseite = Karte aus dem Lexikon), selbst einschätzen. Jede Karte zählt beim ersten Mal in den
-  // Karteikasten ihrer Frage aus dem Begriffe-Trainer: Japanisch → Deutsch in „Was ist …?“ (gl-…-a), Deutsch → Japanisch in
-  // „Wie heißt …?“ (gl-…-b). Nicht gewusste Karten kommen in derselben Runde noch einmal, bis sie sitzen (zählt dann nicht
-  // erneut). Trefferquote und „gestellt“ (Zufallsmix) bleiben unberührt – die misst nur das Quiz.
+  // Vorderseite: nur das Bild bzw. die Bewegung aus dem Lexikon, ohne Namen und Beschreibung. Umdrehen zeigt darunter Namen,
+  // Bedeutung und die Stellen in den Kata; dann selbst einschätzen. Jede Karte zählt beim ersten Mal in den Karteikasten ihrer
+  // Bildfrage aus dem Begriffe-Trainer (gl-…-c). Nicht gewusste Karten kommen in derselben Runde noch einmal, bis sie sitzen
+  // (zählt dann nicht erneut). Trefferquote und „gestellt“ (Zufallsmix) bleiben unberührt – die misst nur das Quiz.
+  // Begriffe ohne Bild gibt es nicht als Karte; ohne WebGL 2 nur die mit SVG-Bild (Fußbilder, Körperwaffen, Fußbewegungen).
   const KARTEN_RUNDE = 15;
+  const kartenFrage = (e) => qById[`${SK.glossaryId(e)}-c`];
+  const kartenBegriffe = (catId) =>
+    SK.glossary.filter((e) => (!catId || e.cat === catId) && e.img && kartenFrage(e) && (SK.fig3d.ok() || !SK.fig3d.known(e.img.key) || /^st:/.test(e.img.key)));
   function viewKarten(catId) {
     const cat = SK.glossaryCats.find((c) => c.id === catId);
     if (catId && !cat) return viewNotFound();
     setNav('quiz');
     setTitle(`Karteikarten${cat ? `: ${cat.title}` : ''}`);
-    const entries = SK.glossary.filter((e) => !cat || e.cat === cat.id);
-    const byQ = new Map(entries.map((e) => [`${SK.glossaryId(e)}-a`, e]));
-    const qOf = (e, dir) => qById[`${SK.glossaryId(e)}-${dir === 'de' ? 'b' : 'a'}`];
-    // Auswahl wie im Quiz: neue und fällige Begriffe zuerst
-    const round = pickRound(entries.map((e) => qOf(e, 'ja')).filter(Boolean), KARTEN_RUNDE).map((q) => byQ.get(q.id));
-    if (!round.length) return viewNotFound();
     const back = '#/begriffe';
-    let dir = (store.data.settings || {}).karten === 'de' ? 'de' : 'ja';
+    const entries = kartenBegriffe(cat && cat.id);
+    if (!entries.length) {
+      app.innerHTML = '';
+      app.append(el('h1', { text: 'Karteikarten' }), el('p', { text: 'Für diese Auswahl gibt es keine Bilder, die dein Browser anzeigen kann.' }), el('a', { class: 'btn', href: back, text: 'Zurück' }));
+      return finishView();
+    }
+    const byQ = new Map(entries.map((e) => [kartenFrage(e).id, e]));
+    // Auswahl wie im Quiz: neue und fällige Begriffe zuerst
+    const round = pickRound(entries.map(kartenFrage), KARTEN_RUNDE).map((q) => byQ.get(q.id));
     const queue = round.slice();
-    const first = new Map(); // Begriff → { ok: beim ersten Mal gewusst?, q: Frage, in deren Karteikasten das zählt }
+    const first = new Map(); // Begriff → beim ersten Mal gewusst?
     let flipped = false;
+    let flip = () => {};
 
     function cleanup() {
       document.removeEventListener('keydown', onKey);
@@ -594,6 +602,8 @@
     }
     function onKey(ev) {
       if (/INPUT|SELECT|TEXTAREA/.test(ev.target.tagName) || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+      // geöffnete Großansicht einer Figur hat ihre eigene Bedienung
+      if (document.querySelector('dialog[open]')) return;
       if (!flipped && (ev.key === ' ' || ev.key === 'Enter') && ev.target.tagName !== 'BUTTON' && ev.target.tagName !== 'A') {
         ev.preventDefault();
         flip();
@@ -604,29 +614,23 @@
     SK.quizCleanup = cleanup;
     document.addEventListener('keydown', onKey);
 
-    function flip() {
-      flipped = true;
-      render();
-    }
     function answer(ok) {
       const e = queue.shift();
       if (!first.has(e)) {
-        const q = qOf(e, dir);
-        first.set(e, { ok, q });
-        SK.srs.record(q.id, ok);
+        first.set(e, ok);
+        SK.srs.record(kartenFrage(e).id, ok);
         store.save();
       }
       if (!ok) queue.push(e);
-      flipped = false;
       if (queue.length) return render();
       cleanup();
-      const results = round.map((x) => first.get(x));
+      const results = round.map((x) => ({ q: kartenFrage(x), ok: first.get(x) }));
       const known = results.filter((r) => r.ok).length;
-      const again = `#/karten${cat ? `/${cat.id}` : ''}`;
-      showResult({ results, again, back, heading: known === results.length ? 'Alle gewusst – stark!' : `${known} von ${results.length} auf Anhieb gewusst` });
+      showResult({ results, again: `#/karten${cat ? `/${cat.id}` : ''}`, back, heading: known === results.length ? 'Alle gewusst – stark!' : `${known} von ${results.length} auf Anhieb gewusst` });
     }
     function render() {
       const e = queue[0];
+      flipped = false;
       const done = round.length - new Set(queue).size;
       app.innerHTML = '';
       const progress = el('div', { class: 'progress' }, el('div', { class: 'progress-bar' }));
@@ -638,48 +642,29 @@
         progress,
         el('span', { class: 'quiz-count', text: `${done}/${round.length}` })
       );
-      const again = first.has(e);
-      const title = el('div', { class: 'quiz-title', text: `Karteikarten · ${cat ? cat.title : 'Alle Begriffe'}${again ? ' · noch einmal' : ''}` });
-      let card;
-      if (!flipped) {
-        // Vorderseite: nur der Begriff (bzw. die Bedeutung in der Quiz-Fassung, die den Namen nicht verrät)
-        card = el(
-          'button',
-          { type: 'button', class: 'kk-card kk-front', 'aria-label': 'Karte umdrehen', onclick: flip },
-          el('span', { class: 'kk-frage muted small', text: dir === 'ja' ? 'Was bedeutet …' : 'Wie heißt auf Japanisch …' }),
-          el('span', { class: dir === 'ja' ? 'kk-wort' : 'kk-wort kk-de', lang: dir === 'ja' ? 'ja-Latn' : null, text: dir === 'ja' ? e.t : e.qde }),
-          el('span', { class: 'kk-tipp muted small', text: 'Antippen zum Umdrehen' })
-        );
-      } else {
-        card = el('div', { class: 'kk-card kk-back', html: SK.glossaryHtml([e]) });
-      }
-      const sag = dir === 'ja' && !flipped && e.kana ? el('div', { class: 'kk-sag', html: SK.glossarySagHtml(e) }) : '';
-      const footer = el('div', { class: 'quiz-footer kk-footer' });
-      if (!flipped) footer.append(el('button', { class: 'btn primary', type: 'button', text: 'Umdrehen', onclick: flip }));
-      else {
+      const eCat = SK.glossaryCats.find((c) => c.id === e.cat);
+      const title = el('div', { class: 'quiz-title', text: `Karteikarten · ${cat ? cat.title : 'Alle Begriffe'}${first.has(e) ? ' · noch einmal' : ''}` });
+      const frage = el('h2', { class: 'quiz-q kk-frage', text: eCat.ask });
+      // Das Bild bleibt beim Umdrehen stehen (auch eine gedrehte oder laufende Figur) – die Lösung erscheint darunter
+      const bild = el('div', { class: 'kk-bild lex-img', html: SK.glossaryBildHtml(e) });
+      const loesung = el('article', { class: 'lex-card kk-loesung', hidden: true });
+      const footer = el('div', { class: 'quiz-footer kk-footer' }, el('button', { class: 'btn primary kk-um', type: 'button', text: 'Umdrehen', onclick: () => flip() }));
+      flip = () => {
+        if (flipped) return;
+        flipped = true;
+        loesung.innerHTML = SK.glossaryTextHtml(e);
+        loesung.hidden = false;
+        footer.innerHTML = '';
         footer.append(
           el('button', { class: 'btn kk-nein', type: 'button', text: 'Nicht gewusst', onclick: () => answer(false) }),
           el('button', { class: 'btn primary kk-ja', type: 'button', text: 'Gewusst', onclick: () => answer(true) })
         );
-      }
-      // Richtung wechseln: gilt ab dieser Karte und bleibt gespeichert
-      const wechsel = el('button', {
-        type: 'button',
-        class: 'gfx-btn kk-richtung',
-        text: dir === 'ja' ? 'Japanisch → Deutsch' : 'Deutsch → Japanisch',
-        title: 'Richtung wechseln',
-        'aria-label': `Richtung: ${dir === 'ja' ? 'Japanisch nach Deutsch' : 'Deutsch nach Japanisch'} – wechseln`,
-        onclick: () => {
-          dir = dir === 'ja' ? 'de' : 'ja';
-          store.data.settings = Object.assign({}, store.data.settings, { karten: dir });
-          store.save();
-          flipped = false;
-          render();
-        },
-      });
-      app.append(head, el('section', { class: 'quiz-card kk' }, el('div', { class: 'kk-kopf' }, title, wechsel), card, sag), footer);
-      const focus = footer.querySelector('.btn.primary');
-      if (focus) focus.focus({ preventScroll: true });
+        footer.querySelector('.kk-ja').focus({ preventScroll: true });
+        // Lösung ins Bild holen, falls sie unter dem Rand liegt
+        if (loesung.getBoundingClientRect().bottom > window.innerHeight && loesung.scrollIntoView) loesung.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      };
+      app.append(head, el('section', { class: 'quiz-card kk' }, title, frage, bild, loesung), footer);
+      footer.querySelector('.kk-um').focus({ preventScroll: true });
       window.scrollTo(0, 0);
     }
     render();

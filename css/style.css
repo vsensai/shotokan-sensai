@@ -1058,65 +1058,31 @@ figure.gfx svg {
   flex: 1 1 8rem;
   text-align: center;
 }
-/* Karteikarten: Vorderseite groß zum Antippen, Rückseite ist die Karte aus dem Lexikon */
-.kk-kopf {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem;
-  margin-bottom: 0.7rem;
+/* Karteikarten: vorn nur das Bild aus dem Lexikon, nach dem Umdrehen darunter Name, Bedeutung und Stellen in den Kata */
+.kk-frage {
+  margin: 0.2rem 0 0.7rem;
 }
-.kk-card {
-  width: 100%;
-  font: inherit;
-  color: inherit;
+.kk-bild {
+  max-width: 26rem;
+  margin: 0 auto;
 }
-.kk-front {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.8rem;
-  min-height: 15rem;
-  padding: 1.2rem;
-  border: 2px dashed var(--line);
-  border-radius: var(--radius);
-  background: none;
-  cursor: pointer;
+.kk-bild.lex-img svg {
+  max-height: 260px;
 }
-.kk-wort {
-  font-size: 1.9rem;
-  font-weight: 800;
-  line-height: 1.2;
-  text-align: center;
-  overflow-wrap: anywhere;
-}
-.kk-wort.kk-de {
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-.kk-sag {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.7rem;
-}
-.kk-sag .lex-sag {
-  float: none;
-  width: 2.8rem;
-  height: 2.8rem;
-  margin: 0;
-}
-.kk-back .lex-grid {
-  display: block;
-  margin: 0;
-}
-.kk-back .lex-card {
+.kk-loesung.lex-card {
+  margin-top: 0.9rem;
+  padding: 0.9rem 0 0;
   border: 0;
+  border-top: 2px dashed var(--line);
+  border-radius: 0;
   box-shadow: none;
-  padding: 0;
+  background: none;
 }
-.kk-back .lex-card h4 {
-  font-size: 1.4rem;
+.kk-loesung.lex-card h4 {
+  font-size: 1.5rem;
+}
+.kk-loesung.lex-card > p {
+  font-size: 1rem;
 }
 .kk-footer {
   grid-template-columns: 1fr 1fr;

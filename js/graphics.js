@@ -181,13 +181,17 @@
   const plainSvg = (fn) => stripTags(fn());
   // Grafik mit Knöpfen. Gibt es eine 3D-Figur, wird nur sie gezeigt (ohne WebGL bleibt die Fläche leer);
   // bei Ständen ist das Fußbild die zweite Ansicht. svg darf eine Funktion sein (wird nur bei Bedarf erzeugt).
-  function box(key, svg) {
-    const make = () => (typeof svg === 'function' ? svg() : svg || '');
+  // plain: ohne Beschriftungen und ohne Titel in der Großansicht, die den Namen verraten (Karteikarten).
+  function box(key, svg, plain) {
+    const make = () => {
+      const s = typeof svg === 'function' ? svg() : svg || '';
+      return plain ? stripTags(s) : s;
+    };
     if (!key) return make();
     const [kind] = key.split(':');
     const btn = (act, t) => `<button type="button" class="gfx-btn" data-act="${act}" data-label="${t}" aria-pressed="false">${t}</button>`;
     if (SK.fig3d && SK.fig3d.known(key)) {
-      const f3 = SK.fig3d.html(key);
+      const f3 = SK.fig3d.html(key, plain ? { plain: true } : null);
       if (kind !== 'st') return `<div class="gfx-box" data-gfx="${esc(key)}">${f3}</div>`;
       if (!SK.fig3d.ok()) return make();
       return `<div class="gfx-box" data-gfx="${esc(key)}"><div class="gfx-view">${f3}</div><div class="gfx-view" hidden>${make()}</div><div class="gfx-tools">${btn('side', 'Fußbild')}</div></div>`;
