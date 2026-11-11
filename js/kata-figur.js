@@ -383,8 +383,8 @@
     ['Von der Seite', { yaw: -90, pitch: 12, dist: 6.4 }],
     ['Von oben', { yaw: 180, pitch: 78, dist: 7.2 }],
   ];
-  // Bildpunkte je Bild: in Bewegung wenige (flüssig), im Stand scharf
-  const PX_MOVE = 260000;
+  // Bildpunkte je Bild: in Bewegung nach der Einstellung „Bildqualität“ (Figur3D.quality, bei „automatisch“ nach der
+  // gemessenen Bildrate), im Stand scharf; PX_STILL nur bei „flüssig“ (wie früher)
   const PX_STILL = 1000000;
 
   // Liefert die Bühne: node (Leinwand, kleine Karte, Kamera-Knopf) und die Steuerung. Die Zeit t läuft in Sekunden wie in
@@ -506,7 +506,8 @@
       const zooming = Math.abs(zoom - zoomShown) > 0.003;
       zoomShown = zooming ? zoomShown + (zoom - zoomShown) * 0.25 : zoom;
       const fast = moving || !!drag || zooming;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2.5, Math.sqrt((fast ? PX_MOVE : PX_STILL) / (cw * ch)));
+      const still = E.quality.still();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2.5, Math.sqrt((fast ? E.quality.moving() : still == null ? PX_STILL : still) / (cw * ch)));
       const w = Math.max(120, Math.round(cw * dpr));
       const h = Math.max(120, Math.round(ch * dpr));
       if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
@@ -576,6 +577,7 @@
         if (t >= tEnd) moving = false;
       }
       draw();
+      if (moving) E.quality.tick(now, cv.width * cv.height);
       if (moving || rough || Math.abs(zoom - zoomShown) > 0.003) request();
     }
     function request() {
@@ -636,7 +638,7 @@
       // Zeitpunkt, zu dem die Bewegung der Ansage i fertig ist
       end: (i) => anim.ends[i],
       // ab Zeitpunkt a in Echtzeit laufen, bis b (ohne b: bis zum Schluss)
-      run(a, b) { t0 = t = a; tEnd = b == null ? anim.dur : b; clock = performance.now(); moving = tEnd > a; request(); },
+      run(a, b) { t0 = t = a; tEnd = b == null ? anim.dur : b; clock = performance.now(); moving = tEnd > a; E.quality.begin(); request(); },
       // Standbild zum Zeitpunkt a
       show(a) { t = a; moving = false; request(); },
       freeze() { moving = false; request(); },

@@ -439,11 +439,13 @@
   }
   // Großansicht: die Bühne füllt das Fenster, das Bild folgt ihrem Seitenverhältnis
   // budget: höchstens so viele Bildpunkte (beim Abspielen und Drehen, damit jedes Bild schnell fertig ist)
-  function sizeBig(stage, cap, budget) {
+  // low: so scharf mindestens (Pixelfaktor), auch wenn das Budget kleiner ist
+  function sizeBig(stage, cap, budget, low) {
     let r = dpr(cap);
     const cw = stage.clientWidth || 1;
     const ch = stage.clientHeight || 1;
     if (budget) r = Math.min(r, Math.sqrt(budget / (cw * ch)));
+    if (low) r = Math.max(r, dpr(low));
     return [Math.max(120, Math.round(cw * r)), Math.max(120, Math.round(ch * r))];
   }
   // Die Kamera skaliert mit der Bildhöhe (fester senkrechter Blickwinkel). Ist die Bühne höher als 5:4 (Handy hochkant),
@@ -542,6 +544,17 @@
     kick();
     return true;
   }
+  // Bildgröße nach der Einstellung „Bildqualität“ (Figur3D.quality): in Bewegung (Abspielen, Drehen) nach dem Budget,
+  // im Stand scharf – nie gröber als früher (Großansicht Faktor 2, Karte 2,5)
+  const Q = E.quality;
+  function size(stage, big, fast) {
+    if (Q.mode() === 'fluessig') return big ? (fast ? sizeBig(stage, 1.25, 260000) : sizeBig(stage, 2)) : sizeOf(stage, fast ? 1.75 : 2.5);
+    if (big) return fast ? sizeBig(stage, 2.5, Q.moving()) : sizeBig(stage, 2.5, Q.still(), 2);
+    if (!fast) return sizeOf(stage, 2.5);
+    const cw = stage.clientWidth || 260;
+    return sizeOf(stage, Math.max(0.5, Math.min(2.5, Math.sqrt(Q.moving() / (cw * cw * 0.8)))));
+  }
+  let qRun = false; // läuft gerade eine Bewegung (für die Messung der Bildrate)
   let raf = 0;
   let last = 0;
   function loop() {
@@ -563,9 +576,10 @@
       }
       if (L.dirty) {
         L.dirty = false;
+        if (L.st.playing) { if (!qRun) Q.begin(); qRun = true; Q.tick(now, L.cv.width * L.cv.height); } else qRun = false;
         const stage = L.cv.parentElement;
         const big = L.box.classList.contains('f3d-big');
-        const [w, h] = big ? (L.st.playing || L.drag ? sizeBig(stage, 1.25, 260000) : sizeBig(stage, 2)) : sizeOf(stage, L.st.playing || L.drag ? 1.75 : 2.5);
+        const [w, h] = size(stage, big, L.st.playing || L.drag);
         if (big) L.st.cam.fov = fovFor(w, h, L.e.partner ? 0.9 : 1.12);
         if (L.cv.width !== w || L.cv.height !== h) { L.cv.width = w; L.cv.height = h; }
         const st = Object.assign({}, L.st, { t: Math.min(L.st.t, L.e.t1) });
@@ -837,4 +851,5 @@
   }
 
   SK.fig3d = { ok, known, has, html, entry, paint, still, prefetch, openBig, spots, flaechen: () => Object.keys(FL).map((k) => ({ id: k, part: FL[k].part, r: spotR(FL[k], {}) })) }; // spots: Trefferflächen (auch für validate.js)
+  SK.figQuality = E.quality; // Einstellung „Bildqualität“ (Profil)
 })();

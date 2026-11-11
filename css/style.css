@@ -3721,6 +3721,25 @@ html.pe-fs {
   font-weight: 700;
 }
 
+/* Profil: Bildqualität der 3D-Figuren */
+.q-choice {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.q-choice .pe-switch {
+  align-items: flex-start;
+}
+
+.q-choice .pe-switch input {
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.q-hint {
+  font-weight: 400;
+}
+
 .pe-switch input {
   width: 1.3rem;
   height: 1.3rem;

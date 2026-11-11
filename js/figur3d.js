@@ -809,5 +809,64 @@ void main(){
     return fix ? (t) => fix(raw(t), t) : raw;
   }
 
-  window.Figur3D = { SOHLE_MAX, solve, prims, draw, camera, timeline, full, ok: supported, ready: () => renderer().ok, v: { add, sub, mul, mix, len, norm } };
+  /* ---------- Bildqualität: Auflösung beim Bewegen (Lexikon und Kata-Trainer) ---------- */
+  // Jeder Bildpunkt wird einzeln gerechnet; die Rechenzeit wächst mit ihrer Zahl. Einstellung (Profil):
+  //   auto     – die Auflösung folgt der gemessenen Bildrate dieses Geräts und wird für den nächsten Besuch gemerkt
+  //   fluessig – feste kleine Auflösung beim Bewegen (wie früher)
+  //   scharf   – immer volle Auflösung (kann auf schwachen Geräten ruckeln)
+  const Q_MODES = ['auto', 'fluessig', 'scharf'];
+  const Q_KEY = 'shotokan-sensai-bildqualitaet';
+  const Q_PX_KEY = 'shotokan-sensai-bildpunkte';
+  const Q_LOW = 260000; // feste Bildpunkte beim Bewegen in „fluessig“ (frühere Grenze)
+  const Q_MIN = 120000;
+  const Q_MAX = 2e7;
+  const qGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const qSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ohne Speicher */ } };
+  let qMode = Q_MODES.includes(qGet(Q_KEY)) ? qGet(Q_KEY) : 'auto';
+  let qPx = Math.min(Q_MAX, Math.max(Q_MIN, Number(qGet(Q_PX_KEY)) || 400000));
+  let qCeil = Infinity;
+  let qLast = 0;
+  const qGaps = [];
+  const quality = {
+    modes: Q_MODES,
+    mode: () => qMode,
+    set(m) {
+      if (!Q_MODES.includes(m)) return;
+      qMode = m;
+      qSet(Q_KEY, m);
+    },
+    // Bildpunkte je Bild, solange sich etwas bewegt
+    moving: () => (qMode === 'fluessig' ? Q_LOW : qMode === 'scharf' ? Infinity : qPx),
+    // Bildpunkte für ein Standbild: es wird nur einmal gerechnet und darf etwa eine halbe Sekunde dauern
+    // (gut zwölf Bilder in Bewegung). null: wie früher, ohne eigene Grenze
+    still: () => (qMode === 'fluessig' ? null : qMode === 'scharf' ? Infinity : Math.max(1e6, qPx * 12)),
+    // Beim Start einer Bewegung aufrufen: die Zeit bis zum ersten Bild zählt nicht mit
+    begin() { qLast = 0; },
+    // Bei jedem Bild einer laufenden Bewegung aufrufen (now: Zeit des Bildwechsels, used: tatsächlich gerechnete
+    // Bildpunkte). Gemessen wird der mittlere Abstand der Bilder über je zwölf Bilder, Hänger eingeschlossen: Der
+    // Browser nimmt erst ein paar Bilder ohne Wartezeit an und hält dann an, bis die Grafik nachkommt – der Median
+    // würde das übersehen. Unter 19 ms (60 Bilder/s) schärfer, über 26 ms gröber (stärker, je langsamer).
+    // Nach einem Rückschritt steigt die Auflösung erst langsam wieder an (kein Hin und Her).
+    tick(now, used) {
+      const gap = qLast ? now - qLast : 0;
+      qLast = now;
+      if (qMode !== 'auto' || !(gap > 0)) return;
+      qGaps.push([Math.min(gap, 3000), used]);
+      if (qGaps.length < 12) return;
+      const avg = qGaps.reduce((a, g) => a + g[0], 0) / qGaps.length;
+      const limited = qGaps.every((g) => g[1] >= qPx * 0.85); // nur steigern, wenn die Grenze das Bild bestimmt
+      qGaps.length = 0;
+      if (avg > 26) {
+        qPx = Math.max(Q_MIN, qPx * Math.min(0.8, Math.max(0.3, 22 / avg)));
+        qCeil = qPx;
+      } else if (avg < 19 && limited) {
+        qCeil *= 1.03;
+        if (qPx * 1.15 > qCeil) return;
+        qPx = Math.min(Q_MAX, qPx * 1.15);
+      } else return;
+      qSet(Q_PX_KEY, String(Math.round(qPx)));
+    },
+  };
+
+  window.Figur3D = { SOHLE_MAX, solve, prims, draw, camera, timeline, full, quality, ok: supported, ready: () => renderer().ok, v: { add, sub, mul, mix, len, norm } };
 })();

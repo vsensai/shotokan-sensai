@@ -188,6 +188,38 @@
 
   // 3D-Figuren: jede Pose rechenbar, Standfüße erreichen ihren Platz
   const F3 = window.Figur3D;
+  // Bildqualität: „automatisch“ wird bei langsamen Bildern gröber und bei schnellen wieder schärfer, Pausen zählen nicht;
+  // „flüssig“ hält die frühere Grenze. Einstellung und gelernter Wert werden danach zurückgesetzt.
+  {
+    const Q = F3.quality;
+    const keep = ['shotokan-sensai-bildqualitaet', 'shotokan-sensai-bildpunkte'].map((k) => [k, localStorage.getItem(k)]);
+    const mode = Q.mode();
+    Q.set('auto');
+    let t = 1e7;
+    const feed = (gap, n) => { for (let i = 0; i < n; i++) { t += gap; Q.tick(t, Q.moving()); } };
+    Q.begin();
+    feed(2000, 1);
+    const a = Q.moving();
+    feed(15, 11);
+    Q.begin();
+    feed(5000, 1);
+    feed(15, 1);
+    if (Q.moving() < a) errors.push('Bildqualität: eine Pause zwischen zwei Bewegungen macht die Auflösung gröber');
+    // drei Bilder sofort, dann ein langer Hänger: im Mittel langsam
+    for (let i = 0; i < 3; i++) { feed(17, 3); feed(400, 1); }
+    if (!(Q.moving() < a)) errors.push('Bildqualität: Hänger nach schnellen Bildern machen die Auflösung nicht gröber');
+    feed(40, 13);
+    const b = Q.moving();
+    if (!(b < a)) errors.push('Bildqualität: langsame Bilder machen die Auflösung nicht gröber');
+    feed(10, 12 * 12);
+    if (!(Q.moving() > b)) errors.push('Bildqualität: schnelle Bilder machen die Auflösung nicht wieder schärfer');
+    Q.set('fluessig');
+    if (Q.moving() !== 260000 || Q.still() !== null) errors.push('Bildqualität: „flüssig“ weicht von der früheren Grenze ab');
+    Q.set('scharf');
+    if (Q.moving() !== Infinity) errors.push('Bildqualität: „scharf“ begrenzt die Auflösung');
+    Q.set(mode);
+    keep.forEach(([k, v]) => { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); });
+  }
   Object.entries(SK.fig3dDefs || {}).forEach(([key, d]) => {
     const tl = F3.timeline(d.keys, d.fix);
     for (let i = 0; i <= 10; i++) {

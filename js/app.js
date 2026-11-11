@@ -1051,6 +1051,25 @@
           })
         )
       ),
+      ...(SK.fig3d.ok()
+        ? [el(
+          'section',
+          { class: 'card' },
+          el('h3', { text: '3D-Figuren: Bildqualität' }),
+          el('p', { class: 'muted small', text: 'Gilt für Bewegungen im Lexikon und im Kata-Trainer. Standbilder werden immer scharf gerechnet.' }),
+          el('div', { class: 'q-choice', role: 'radiogroup', 'aria-label': 'Bildqualität' },
+            ...[
+              ['auto', 'Automatisch', 'misst, wie schnell dieses Gerät rechnet, und wählt die schärfste Auflösung, die noch flüssig läuft (merkt sich das für den nächsten Besuch)'],
+              ['fluessig', 'Flüssig', 'geringere Auflösung in Bewegung, für schwache Geräte'],
+              ['scharf', 'Scharf', 'immer volle Auflösung – kann auf schwachen Geräten ruckeln'],
+            ].map(([v, name, hint]) => el(
+              'label',
+              { class: 'pe-switch' },
+              el('input', { type: 'radio', name: 'fig-quality', value: v, checked: SK.figQuality.mode() === v, onchange: () => SK.figQuality.set(v) }),
+              el('span', {}, name, el('span', { class: 'muted small q-hint', text: ` – ${hint}` }))
+            )))
+        )]
+        : []),
       ...(SK.poseEditor && SK.fig3d.ok()
         ? [el(
           'section',
