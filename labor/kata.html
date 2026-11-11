@@ -339,8 +339,6 @@
       // Anzeige: Zählzeit, Technik, Bodenkarte
       const mapCv = $('map');
       const mg = mapCv.getContext('2d');
-      const trail = [];
-      for (let t = 0; t <= anim.dur; t += 0.1) { const P = anim.pose(t); trail.push([P.pelvis[0], P.pelvis[2]]); }
       const ext = anim.lines.reduce((a, l) => [Math.min(a[0], l[0], l[2]), Math.max(a[1], l[0], l[2]), Math.min(a[2], l[1], l[3]), Math.max(a[3], l[1], l[3])], [1e9, -1e9, 1e9, -1e9]);
       function hud(P, J) {
         const i = anim.markAt(st.t);
@@ -362,11 +360,6 @@
         mg.strokeStyle = '#b9b2a6';
         mg.lineWidth = 3;
         anim.lines.forEach((l) => { mg.beginPath(); mg.moveTo(X(l[0]), Yf(l[1])); mg.lineTo(X(l[2]), Yf(l[3])); mg.stroke(); });
-        mg.strokeStyle = 'rgba(198,40,40,.35)';
-        mg.lineWidth = 2;
-        mg.beginPath();
-        trail.slice(0, Math.floor(st.t / 0.1) + 1).forEach((p, j) => (j ? mg.lineTo(X(p[0]), Yf(p[1])) : mg.moveTo(X(p[0]), Yf(p[1]))));
-        mg.stroke();
         // Füße und Blickrichtung
         ['L', 'R'].forEach((s) => {
           const a = J['heel' + s], b = J['toe' + s];
