@@ -435,8 +435,10 @@
       const P = anim.pose(t);
       const J = E.solve(P);
       const c = center(t);
-      // im Hochformat weiter weg, damit auch ein breiter Stand ganz ins Bild passt
-      const view = Object.assign({}, cam, { target: [c[0], 0.78, c[1]], dist: Math.max(cam.dist, (4.9 * h) / w) });
+      // im Hochformat weiter weg, damit auch ein breiter Stand ganz ins Bild passt; im Querformat (PC, Vollbild) näher
+      // heran, dort ist seitlich genug Platz und die Figur füllt die Höhe besser
+      const near = 1 - 0.2 * clamp((w / h - 1) / 0.5, 0, 1);
+      const view = Object.assign({}, cam, { target: [c[0], 0.78, c[1]], dist: Math.max(cam.dist * near, (4.9 * h) / w) });
       const decals = ['L', 'R'].filter((s) => grounded(J, s)).map((s) => ({ heel: J['heel' + s], toe: J['toe' + s], w: P.w[s === 'L' ? 0 : 1], a: 1, side: s }));
       ctx.clearRect(0, 0, w, h);
       E.draw(ctx, w, h, P, view, { mode: 0, style: 0, decals });

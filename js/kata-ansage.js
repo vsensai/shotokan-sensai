@@ -771,7 +771,11 @@
     let view = 'karte';
     const viewBtn = (v, text) => el('button', { type: 'button', 'data-view': v, 'aria-pressed': 'false', text, onclick: () => setView(v) });
     const viewSw = fig ? el('div', { class: 'ans-view', role: 'group', 'aria-label': 'Ansicht' }, viewBtn('karte', 'Karte'), viewBtn('figur', 'Figur')) : null;
-    const mapBox = el('div', { class: 'ans-map' }, map, fig && fig.node, chips, viewSw);
+    // Vollbild direkt auf dem Bild (wie der Knopf unten): ganze Seite, der Kasten nutzt dann die volle Breite
+    const fsCan = document.fullscreenEnabled;
+    const fsIcon = fsCan ? el('button', { class: 'ans-fs', type: 'button', 'aria-pressed': 'false', text: '⛶', onclick: () => toggleFs() }) : null;
+    const tools = fsIcon || viewSw ? el('div', { class: 'ans-tools' }, fsIcon, viewSw) : null;
+    const mapBox = el('div', { class: 'ans-map' }, map, fig && fig.node, chips, tools);
     const cHint = el('div', { class: 'ans-hint' });
     const cTech = el('div', { class: 'ans-tech muted' });
     const head = el('div', { class: 'ans-head' }, cKan, el('div', { class: 'ans-head-txt' }, cRo, cPos));
@@ -781,7 +785,19 @@
     const prevBtn = el('button', { class: 'btn', type: 'button', 'aria-label': 'Eine Ansage zurück', text: '◀' });
     const nextBtn = el('button', { class: 'btn', type: 'button', 'aria-label': 'Eine Ansage weiter', text: '▶' });
     const controls = el('div', { class: 'ans-controls' }, prevBtn, playBtn, nextBtn);
-    const fsBtn = document.fullscreenEnabled ? el('button', { class: 'btn', type: 'button', text: 'Vollbild' }) : null;
+    const fsBtn = fsCan ? el('button', { class: 'btn', type: 'button', text: 'Vollbild' }) : null;
+    function toggleFs() {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      else app.requestFullscreen().catch(() => {});
+    }
+    function fsUi() {
+      const on = !!document.fullscreenElement;
+      if (fsBtn) fsBtn.textContent = on ? 'Vollbild beenden' : 'Vollbild';
+      if (!fsIcon) return;
+      fsIcon.setAttribute('aria-pressed', String(on));
+      fsIcon.title = on ? 'Vollbild beenden (Esc)' : 'Vollbild (Taste F)';
+      fsIcon.setAttribute('aria-label', fsIcon.title);
+    }
     const order = SK.ansageKata();
     const pos = order.indexOf(k.id);
     const prevKata = order[(pos - 1 + order.length) % order.length];
@@ -915,6 +931,7 @@
     }
     let resizeTimer = 0;
     function onResize() {
+      fsUi();
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(reserve, 150);
     }
@@ -942,8 +959,11 @@
       view = fig && v === 'figur' ? 'figur' : 'karte';
       saveView(view);
       if (!fig) return;
+      const wasWide = wrap.classList.contains('ans-wide');
       viewSw.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
       map.hidden = view === 'figur';
+      // Die Figur darf auf großen Bildschirmen breiter werden als die Karte
+      if (wrap.classList.toggle('ans-wide', view === 'figur') !== wasWide && wrap.isConnected) reserve();
       fig.on(view === 'figur');
       if (view === 'karte') render(idx);
       else if (running) { fig.beat(BEATS[tempo]); fig.run((performance.now() - base) / 1000); }
@@ -1045,10 +1065,15 @@
       if (document.hidden && running) pause();
     }
     document.addEventListener('visibilitychange', onVisibility);
+    // Tastatur am PC: Leertaste Start/Pause, ← → eine Ansage zurück/weiter, F Vollbild
     function onKey(ev) {
-      if (ev.code !== 'Space' || lexDlg.open || /INPUT|SELECT|TEXTAREA|BUTTON/.test(ev.target.tagName)) return;
+      if (lexDlg.open || ev.ctrlKey || ev.metaKey || ev.altKey || /INPUT|SELECT|TEXTAREA/.test(ev.target.tagName)) return;
+      if (ev.code === 'Space' && ev.target.tagName !== 'BUTTON') playBtn.click();
+      else if (ev.code === 'ArrowLeft') prevBtn.click();
+      else if (ev.code === 'ArrowRight') nextBtn.click();
+      else if (ev.code === 'KeyF' && fsCan) toggleFs();
+      else return;
       ev.preventDefault();
-      playBtn.click();
     }
     document.addEventListener('keydown', onKey);
     SK.ansageCleanup = () => {
@@ -1071,10 +1096,7 @@
       if (d) jump(steps.findIndex((s) => s.n === Number(d.dataset.n)));
     });
     // Vollbild für die ganze Seite: Beim Wechsel zur nächsten Kata wird nur ihr Inhalt getauscht, das Vollbild bleibt.
-    if (fsBtn) fsBtn.addEventListener('click', () => {
-      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-      else app.requestFullscreen().catch(() => {});
-    });
+    if (fsBtn) fsBtn.addEventListener('click', toggleFs);
 
     // Wischen über den Kasten wechselt die Kata: nach links zur nächsten, nach rechts zur vorherigen. Gesten vom
     // Bildschirmrand gehören dem System (Zurück-Geste unter Android) und zählen nicht.
@@ -1106,19 +1128,19 @@
       stage.classList.add(`ans-in-${SK.ansageSlide}`);
       SK.ansageSlide = null;
     }
+    const wrap = el('div', { class: 'ans-wrap' }, stage, lexDlg, controls,
+      infoOut,
+      fold('optionen', 'Tempo, Bewegungen und Legende',
+        el('div', { class: 'ans-tempo' },
+          el('div', { class: 'ans-tempo-row' }, el('span', { class: 'muted small', text: '3× langsamer' }), tempoIn, el('span', { class: 'muted small', text: '3× schneller' })),
+          tempoOut),
+        track,
+        el('div', { class: 'ans-legend muted small' }, el('span', { class: 'lg-kiai', text: 'Kiai' }), el('span', { class: 'lg-slow', text: 'langsam' }), el('span', { class: 'lg-link', text: 'fließend zur nächsten' })),
+        el('div', { class: 'ans-legend muted small' }, el('span', { class: 'lg-heavy', text: 'viel Gewicht' }), el('span', { class: 'lg-light', text: 'wenig Gewicht' }), el('span', { class: 'lg-ghost', text: 'Fuß vorher' }), el('span', { class: 'lg-lift', text: 'Fuß angehoben' }), el('span', { class: 'lg-body', text: 'Körper zeigt' }), el('span', { class: 'lg-look', text: 'Blick' }), el('span', { class: 'lg-turn', text: 'Wendung' }), el('span', { class: 'lg-via', text: 'Fuß zieht heran und zurück' }))));
     app.innerHTML = '';
     app.append(
       el('h1', { class: 'visually-hidden', text: k.name }),
-      el('div', { class: 'ans-wrap' }, stage, lexDlg,
-        controls,
-        infoOut,
-        fold('optionen', 'Tempo, Bewegungen und Legende',
-          el('div', { class: 'ans-tempo' },
-            el('div', { class: 'ans-tempo-row' }, el('span', { class: 'muted small', text: '3× langsamer' }), tempoIn, el('span', { class: 'muted small', text: '3× schneller' })),
-            tempoOut),
-          track,
-          el('div', { class: 'ans-legend muted small' }, el('span', { class: 'lg-kiai', text: 'Kiai' }), el('span', { class: 'lg-slow', text: 'langsam' }), el('span', { class: 'lg-link', text: 'fließend zur nächsten' })),
-          el('div', { class: 'ans-legend muted small' }, el('span', { class: 'lg-heavy', text: 'viel Gewicht' }), el('span', { class: 'lg-light', text: 'wenig Gewicht' }), el('span', { class: 'lg-ghost', text: 'Fuß vorher' }), el('span', { class: 'lg-lift', text: 'Fuß angehoben' }), el('span', { class: 'lg-body', text: 'Körper zeigt' }), el('span', { class: 'lg-look', text: 'Blick' }), el('span', { class: 'lg-turn', text: 'Wendung' }), el('span', { class: 'lg-via', text: 'Fuß zieht heran und zurück' })))),
+      wrap,
       el('div', { class: 'actions ans-katanav' }, kataPrev, ...(fsBtn ? [fsBtn] : []), kataNext),
       el('p', { class: 'muted small' }, 'Mehr zur Kata: ', el('a', { href: `#/wissen/${k.id}-ueberblick`, text: `${k.name} im Kata-Wissen` }))
     );
@@ -1131,5 +1153,6 @@
     if (fig) setView(loadView());
     if (document.fonts) document.fonts.ready.then(reserve);
     ui();
+    fsUi();
   };
 })();

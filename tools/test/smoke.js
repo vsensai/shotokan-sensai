@@ -100,6 +100,8 @@
           if (app.querySelector('.ans-fig').hidden || !app.querySelector('.ans-map-svg').hidden || !(cv.width > 100)) throw new Error('Kata-Trainer: Figur erscheint nicht');
           const lit = () => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 3; i < d.length; i += 400) if (d[i]) n++; return n; };
           if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist leer');
+          if (!app.querySelector('.ans-wrap').classList.contains('ans-wide')) throw new Error('Kata-Trainer: Figur bekommt nicht die breite Ansicht');
+          if (document.fullscreenEnabled && !app.querySelector('.ans-map .ans-fs')) throw new Error('Kata-Trainer: Vollbild-Knopf auf dem Bild fehlt');
           app.querySelector('.ans-controls .btn:last-child').click();
           app.querySelector('.ans-fig-cam').click();
           app.querySelector('.ans-play').click();
@@ -108,6 +110,7 @@
           if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist beim Zählen leer');
           sw.querySelector('[data-view=karte]').click();
           if (!app.querySelector('.ans-fig').hidden || !app.querySelector('.ans-map-svg svg')) throw new Error('Kata-Trainer: zurück zur Karte klappt nicht');
+          if (app.querySelector('.ans-wrap').classList.contains('ans-wide')) throw new Error('Kata-Trainer: Karte bleibt in der breiten Ansicht');
           log.push(`Kata-Figur: ${app.querySelector('.ans-fig-cam').textContent}, ${cv.width}×${cv.height}`);
         }
       }

@@ -1701,6 +1701,11 @@ main:fullscreen {
   overflow: auto;
 }
 
+/* Im Vollbild nutzt der Kata-Trainer die ganze Breite */
+main:fullscreen .ans-wrap {
+  max-width: none;
+}
+
 .ans-stage.ans-in-next {
   animation: ans-in-next 0.25s ease-out;
 }
@@ -1843,6 +1848,7 @@ main:fullscreen {
 }
 
 .ans-fig-cam,
+.ans-fs,
 .ans-view button {
   font: inherit;
   font-size: 0.8rem;
@@ -1862,11 +1868,31 @@ main:fullscreen {
   border-radius: 999px;
 }
 
-.ans-view {
+/* Unten rechts auf dem Bild: Vollbild und Umschalter Karte | Figur */
+.ans-tools {
   position: absolute;
   right: 0.4rem;
   bottom: 0.4rem;
   display: flex;
+  gap: 0.4rem;
+}
+
+.ans-view {
+  display: flex;
+}
+
+.ans-fs {
+  border-radius: 999px;
+  min-width: 2rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ans-fs[aria-pressed="true"] {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
 }
 
 .ans-view button:first-child {
@@ -2276,6 +2302,11 @@ main:fullscreen {
   .ans-wrap {
     max-width: 820px;
     margin: 0 auto;
+  }
+
+  /* Figur statt Karte: Querformat nutzt die Breite des Bildschirms */
+  .ans-wrap.ans-wide {
+    max-width: none;
   }
 }
 
