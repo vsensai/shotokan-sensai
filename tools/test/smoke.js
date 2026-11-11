@@ -96,23 +96,26 @@
         if (!/Shuto/.test(app.querySelector('.ans-tech').textContent)) throw new Error('Kata-Trainer: Stelle nennt die Technik nicht');
         log.push(`Kommt vor in: ${link.getAttribute('href')} → ${pos.textContent}`);
       }
-      // Karteikarten: vorn nur das Bild (kein Name, keine Bedeutung), nach dem Umdrehen Name und Bedeutung. Eine Karte
-      // „nicht gewusst“ (kommt in der Runde wieder), alle anderen „gewusst“; zählt in den Karteikasten der Bildfrage (gl-…-c)
+      // Karteikarten (Bild → Name): vorn nur das Bild (kein Name, keine Bedeutung), auf der Rückseite Name und Bedeutung.
+      // Eine Karte „nicht gewusst“ (kommt in der Runde wieder), alle anderen „gewusst“; zählt im Karteikasten der Bildfrage (gl-…-c)
       {
         // Vergleich mit dem Stand davor: Zufallsmix und Begriffe-Quiz weiter oben können dieselben Fragen schon gestellt haben
         const before = JSON.parse(JSON.stringify(SK.store.data.srs));
         const answered0 = SK.store.data.answered;
         location.hash = '#/karten/geri';
         await wait();
+        const names = SK.glossary.filter((e) => e.cat === 'geri').flatMap((e) => [e.t, e.de]);
         let cards = 0;
         for (let guard = 0; guard < 100 && app.querySelector('.kk'); guard++) {
-          const card = app.querySelector('.kk');
-          const names = SK.glossary.filter((e) => e.cat === 'geri').flatMap((e) => [e.t, e.de]);
-          if (!card.querySelector('.kk-bild .f3d, .kk-bild svg')) throw new Error('Karteikarte ohne Bild');
-          if (names.some((t) => card.textContent.includes(t)) || card.querySelector('.kk-ja')) throw new Error(`Karteikarte verrät vorn die Lösung: ${card.textContent}`);
+          const karte = app.querySelector('.kk-karte');
+          const vorn = karte.querySelector('.kk-vorn');
+          const hinten = karte.querySelector('.kk-hinten');
+          if (karte.dataset.seite !== 'vorn' || vorn.classList.contains('kk-weg') || !hinten.classList.contains('kk-weg')) throw new Error('Karteikarte beginnt nicht mit der Vorderseite');
+          if (!vorn.querySelector('.kk-bild .f3d, .kk-bild svg')) throw new Error('Karteikarte ohne Bild');
+          if (names.some((t) => vorn.textContent.includes(t)) || app.querySelector('.kk-ja')) throw new Error(`Karteikarte verrät vorn die Lösung: ${vorn.textContent}`);
           app.querySelector('.kk-um').click();
-          const h4 = card.querySelector('.kk-loesung h4');
-          if (!h4 || !names.includes(h4.textContent.split(' (')[0].trim()) || !card.querySelector('.kk-loesung p')) throw new Error('Karteikarte ohne Lösung');
+          const h4 = hinten.querySelector('.kk-loesung h4');
+          if (karte.dataset.seite !== 'hinten' || !h4 || !names.includes(h4.textContent.split(' (')[0].trim()) || !hinten.querySelector('.kk-loesung p')) throw new Error('Karteikarte ohne Rückseite');
           app.querySelector(cards++ ? '.kk-ja' : '.kk-nein').click();
         }
         const head = app.querySelector('.result h2');
@@ -121,6 +124,29 @@
         if (!head || !/auf Anhieb gewusst/.test(head.textContent)) throw new Error('Karteikarten ohne Auswertung');
         if (cards !== 16 || changed.length !== 15 || bad !== 1 || !changed.every(([id]) => /^gl-.*-c$/.test(id)) || SK.store.data.answered !== answered0) throw new Error(`Karteikarten: ${cards} Karten, ${changed.length} im Karteikasten gezählt, ${bad} nicht gewusst`);
         log.push(`Karteikarten: ${head.textContent}`);
+        // Andere Richtung (Name → Bild): vorn nur der Name, hinten Bild und Bedeutung; zählt bei „Was ist …?“ (gl-…-a).
+        // Die Drehung selbst läuft als Animation – hier warten, bis die Rückseite wirklich sichtbar ist, und zurückdrehen.
+        location.hash = '#/karten/stand';
+        await wait();
+        app.querySelector('.kk-richtung').click();
+        const karte = app.querySelector('.kk-karte');
+        const vorn = karte.querySelector('.kk-vorn');
+        const hinten = karte.querySelector('.kk-hinten');
+        const wort = vorn.querySelector('.kk-wort');
+        const e = wort && SK.glossary.find((x) => x.t === wort.textContent);
+        if (!e || vorn.querySelector('.kk-bild') || vorn.textContent.includes(e.de)) throw new Error('Karteikarte Name → Bild: Vorderseite zeigt nicht nur den Namen');
+        if (!hinten.querySelector('.kk-bild') || !hinten.textContent.includes(e.de)) throw new Error('Karteikarte Name → Bild: Rückseite ohne Bild oder Bedeutung');
+        const sichtbar = (n) => !n.classList.contains('kk-weg');
+        const bis = async (test) => { for (let i = 0; i < 500 && !test(); i++) await wait(); return test(); };
+        app.querySelector('.kk-um').click();
+        if (!(await bis(() => sichtbar(hinten) && !sichtbar(vorn)))) throw new Error('Karteikarte dreht nicht um');
+        app.querySelector('.kk-footer .gfx-btn.kk-um').click();
+        if (!(await bis(() => sichtbar(vorn) && !sichtbar(hinten)))) throw new Error('Karteikarte dreht nicht zurück');
+        const srsA = `${SK.glossaryId(e)}-a`;
+        const vorher = JSON.stringify(SK.store.data.srs[srsA]);
+        app.querySelector('.kk-ja').click();
+        if (JSON.stringify(SK.store.data.srs[srsA]) === vorher) throw new Error('Karteikarte Name → Bild zählt nicht bei „Was ist …?“');
+        log.push(`Karteikarten Name → Bild: ${e.t} umgedreht und gezählt`);
       }
       location.hash = '#/review';
       await wait();

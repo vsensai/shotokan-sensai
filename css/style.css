@@ -1058,25 +1058,71 @@ figure.gfx svg {
   flex: 1 1 8rem;
   text-align: center;
 }
-/* Karteikarten: vorn nur das Bild aus dem Lexikon, nach dem Umdrehen darunter Name, Bedeutung und Stellen in den Kata */
+/* Karteikarten: eine Karte mit zwei Seiten, die übereinander liegen (Höhe = höhere Seite); „Umdrehen“ dreht sie um */
+.kk-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+.kk-karte {
+  display: grid;
+  min-height: 15rem;
+  cursor: pointer;
+}
+.kk-seite {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+.kk-seite.kk-weg {
+  visibility: hidden;
+}
 .kk-frage {
-  margin: 0.2rem 0 0.7rem;
+  margin: 0 0 0.7rem;
+}
+p.kk-frage {
+  text-align: center;
+  font-size: 0.9rem;
 }
 .kk-bild {
+  width: 100%;
   max-width: 26rem;
   margin: 0 auto;
 }
 .kk-bild.lex-img svg {
   max-height: 260px;
 }
-.kk-loesung.lex-card {
+.kk-wort {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.kk-sag {
+  display: flex;
+  justify-content: center;
   margin-top: 0.9rem;
-  padding: 0.9rem 0 0;
+}
+.kk-sag .lex-sag {
+  float: none;
+  width: 2.8rem;
+  height: 2.8rem;
+  margin: 0;
+}
+.kk-loesung.lex-card {
+  padding: 0;
   border: 0;
-  border-top: 2px dashed var(--line);
   border-radius: 0;
   box-shadow: none;
   background: none;
+}
+.kk-bild + .kk-loesung.lex-card {
+  margin-top: 0.8rem;
 }
 .kk-loesung.lex-card h4 {
   font-size: 1.5rem;
@@ -1089,6 +1135,10 @@ figure.gfx svg {
 }
 .kk-footer .btn:only-child {
   grid-column: 1 / -1;
+}
+.kk-footer .gfx-btn {
+  grid-column: 1 / -1;
+  justify-self: center;
 }
 .kk-nein {
   border-color: var(--bad);
