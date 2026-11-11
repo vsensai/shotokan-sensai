@@ -394,7 +394,9 @@
     const cv = el('canvas', { class: 'ans-fig-cv', role: 'img', 'aria-label': `${k.name} als 3D-Figur` });
     const mapCv = el('canvas', { class: 'ans-fig-map', width: '192', height: '192', 'aria-hidden': 'true' });
     const camBtn = el('button', { class: 'ans-fig-cam', type: 'button', title: 'Blickwinkel wechseln' });
-    const node = el('div', { class: 'ans-fig', hidden: true }, cv, mapCv, camBtn);
+    const zoomBtn = (d, text, label) => el('button', { type: 'button', 'data-zoom': String(d), text, 'aria-label': label, title: label, onclick: () => setZoom(zoom + d * ZOOM_STEP) });
+    const zoomBar = el('div', { class: 'ans-fig-zoom', role: 'group', 'aria-label': 'Zoom' }, zoomBtn(-1, '−', 'Weiter weg (ganzer Bereich)'), zoomBtn(1, '+', 'Näher heran (folgt der Figur)'));
+    const node = el('div', { class: 'ans-fig', hidden: true }, cv, mapCv, el('div', { class: 'ans-fig-bar' }, camBtn, zoomBar));
     const ctx = cv.getContext('2d');
     const mg = mapCv.getContext('2d');
     const anims = new Map();
@@ -410,6 +412,13 @@
     let rough = false;
     let raf = 0;
     let on = false;
+    // Zoom: 0 = ganzer Bereich der Kata (Kamera steht still über seiner Mitte), 1 = nah an der Figur (Kamera folgt ihr),
+    // darüber noch näher. zoomShown läuft dem Wert weich nach.
+    let zoom = 0;
+    let zoomShown = 0;
+    let area = null;
+    const pts = new Map();
+    let pinch = 0;
 
     // Blickpunkt: Hüfte der Figur, über gut eine Sekunde geglättet (rein aus dem Zeitpunkt – auch beim Springen ruhig)
     function center(at) {
@@ -422,12 +431,79 @@
       }
       return [x, z];
     }
+    // Bereich, den die Figur in der Kata durchläuft: Linien der Bodenkarte und Weg der Hüfte, mit Rand für Arme und
+    // Füße am Boden, dazu Kopfhöhe über dem Weg. c, r: Mitte und Radius (für den Boden).
+    function areaOf(a) {
+      const flat = [];
+      a.lines.forEach((l) => flat.push([l[0], l[1]], [l[2], l[3]]));
+      const path = [];
+      for (let u = 0; u <= a.dur; u += 0.5) { const P = a.pose(u); path.push([P.pelvis[0], P.pelvis[2]]); }
+      const pts3 = [];
+      [...flat, ...path].forEach(([x, z]) => [[0.45, 0], [-0.45, 0], [0, 0.45], [0, -0.45]].forEach(([dx, dz]) => pts3.push([x + dx, 0, z + dz])));
+      path.forEach(([x, z]) => pts3.push([x, 1.85, z]));
+      const xs = pts3.map((p) => p[0]);
+      const zs = pts3.map((p) => p[2]);
+      const c = [(Math.min(...xs) + Math.max(...xs)) / 2, (Math.min(...zs) + Math.max(...zs)) / 2];
+      const r = Math.max(...pts3.map((p) => Math.hypot(p[0] - c[0], p[2] - c[1])));
+      return { c, r, pts3, key: '', fit: null };
+    }
+    // Übersicht: Blickpunkt und Abstand, bei denen der ganze Bereich möglichst groß und mittig ins Bild passt
+    function overview(v, w, h) {
+      const key = `${w}x${h}:${v.yaw.toFixed(1)}:${v.pitch.toFixed(1)}`;
+      if (area.key === key) return area.fit;
+      let target = [area.c[0], 0.9, area.c[1]];
+      let dist = 10;
+      const extent = (d) => {
+        const C = E.camera(Object.assign({}, v, { target, dist: d }), w, h);
+        let x0 = 1e9;
+        let x1 = -1e9;
+        let y0 = 1e9;
+        let y1 = -1e9;
+        for (const p of area.pts3) {
+          const q = [p[0] - C.ro[0], p[1] - C.ro[1], p[2] - C.ro[2]];
+          if (q[0] * C.cw[0] + q[1] * C.cw[1] + q[2] * C.cw[2] < 0.3) return null;
+          const [x, y] = C.project(p);
+          x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+        }
+        return { C, x0, x1, y0, y1 };
+      };
+      for (let pass = 0; pass < 3; pass++) {
+        let lo = 1.5;
+        let hi = 80;
+        for (let i = 0; i < 22; i++) {
+          const m = (lo + hi) / 2;
+          const e = extent(m);
+          if (e && e.x1 - e.x0 <= w * 0.94 && e.y1 - e.y0 <= h * 0.9) hi = m; else lo = m;
+        }
+        dist = hi;
+        // Bild des Bereichs in die Mitte schieben
+        const e = extent(dist);
+        if (!e) break;
+        const k = (2 * dist) / (e.C.f * h);
+        const sx = ((e.x0 + e.x1) / 2 - w / 2) * k;
+        const sy = (h / 2 - (e.y0 + e.y1) / 2) * k;
+        target = target.map((t, i) => t + e.C.cu[i] * sx + e.C.cv[i] * sy);
+      }
+      area.key = key;
+      area.fit = { target, dist };
+      return area.fit;
+    }
+    const ZOOM_MAX = 1.6;
+    const ZOOM_STEP = 0.25;
+    function setZoom(z) {
+      zoom = clamp(z, 0, ZOOM_MAX);
+      zoomBar.querySelector('[data-zoom="-1"]').disabled = zoom <= 0;
+      zoomBar.querySelector('[data-zoom="1"]').disabled = zoom >= ZOOM_MAX;
+      request();
+    }
     const grounded = (J, s) => J['ankle' + s][1] < 0.09;
     function draw() {
       const cw = cv.clientWidth;
       const ch = cv.clientHeight;
       if (!on || !anim || !cw || !ch) return;
-      const fast = moving || !!drag;
+      const zooming = Math.abs(zoom - zoomShown) > 0.003;
+      zoomShown = zooming ? zoomShown + (zoom - zoomShown) * 0.25 : zoom;
+      const fast = moving || !!drag || zooming;
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5, Math.sqrt((fast ? PX_MOVE : PX_STILL) / (cw * ch)));
       const w = Math.max(120, Math.round(cw * dpr));
       const h = Math.max(120, Math.round(ch * dpr));
@@ -438,7 +514,17 @@
       // im Hochformat weiter weg, damit auch ein breiter Stand ganz ins Bild passt; im Querformat (PC, Vollbild) näher
       // heran, dort ist seitlich genug Platz und die Figur füllt die Höhe besser
       const near = 1 - 0.2 * clamp((w / h - 1) / 0.5, 0, 1);
-      const view = Object.assign({}, cam, { target: [c[0], 0.78, c[1]], dist: Math.max(cam.dist * near, (4.9 * h) / w) });
+      const close = Math.max(cam.dist * near, (4.9 * h) / w);
+      // Zwischen Übersicht und Nähe: Blickpunkt wandert von der Mitte des Bereichs zur Figur, der Abstand gleichmäßig
+      // (im Verhältnis) vom ganzen Bereich bis nah heran
+      const u = smooth(Math.min(zoomShown, 1));
+      const ov = overview(cam, w, h);
+      const all = Math.max(close, ov.dist);
+      const near3 = [c[0], 0.78, c[1]];
+      // Boden: in der Übersicht über den ganzen Bereich, nah nur um die Figur
+      const off = Math.hypot(ov.target[0] - area.c[0], ov.target[2] - area.c[1]);
+      const floor = [lerp(area.r + off, 1.1, u), lerp(area.r + off + 1.2, 2.3, u)];
+      const view = Object.assign({}, cam, { target: ov.target.map((x, i) => lerp(x, near3[i], u)), dist: all * Math.pow(close / all, zoomShown), floor });
       const decals = ['L', 'R'].filter((s) => grounded(J, s)).map((s) => ({ heel: J['heel' + s], toe: J['toe' + s], w: P.w[s === 'L' ? 0 : 1], a: 1, side: s }));
       ctx.clearRect(0, 0, w, h);
       E.draw(ctx, w, h, P, view, { mode: 0, style: 0, decals });
@@ -485,7 +571,7 @@
         if (t >= tEnd) moving = false;
       }
       draw();
-      if (moving || rough) request();
+      if (moving || rough || Math.abs(zoom - zoomShown) > 0.003) request();
     }
     function request() {
       if (!raf && on) raf = requestAnimationFrame(frame);
@@ -498,19 +584,38 @@
       request();
     }
     camBtn.addEventListener('click', () => setCam(camIdx + 1));
-    // Drehen mit Finger oder Maus: waagerecht dreht, senkrecht neigt (am Handy scrollt senkrecht die Seite)
-    cv.addEventListener('pointerdown', (ev) => { drag = [ev.clientX, ev.clientY]; cv.setPointerCapture(ev.pointerId); });
+    // Drehen mit Finger oder Maus: waagerecht dreht, senkrecht neigt (am Handy scrollt senkrecht die Seite).
+    // Zwei Finger zoomen, ebenso Mausrad, − + und Doppelklick (wechselt zwischen ganzem Bereich und Nähe).
+    const spread = () => { const [a, b] = [...pts.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
+    cv.addEventListener('pointerdown', (ev) => {
+      pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
+      cv.setPointerCapture(ev.pointerId);
+      if (pts.size === 2) { pinch = spread(); drag = null; } else if (pts.size === 1) drag = [ev.clientX, ev.clientY];
+    });
     cv.addEventListener('pointermove', (ev) => {
+      if (pts.has(ev.pointerId)) pts.set(ev.pointerId, [ev.clientX, ev.clientY]);
+      if (pts.size === 2 && pinch > 10) {
+        const d = spread();
+        setZoom(zoom + Math.log(d / pinch) * 1.6);
+        pinch = d;
+        return;
+      }
       if (!drag) return;
       cam.yaw -= (ev.clientX - drag[0]) * 0.45;
       cam.pitch = clamp(cam.pitch + (ev.clientY - drag[1]) * 0.35, -2, 86);
       drag = [ev.clientX, ev.clientY];
       request();
     });
-    const drop = () => { drag = null; request(); };
+    const drop = (ev) => { pts.delete(ev.pointerId); pinch = 0; drag = null; request(); };
     cv.addEventListener('pointerup', drop);
     cv.addEventListener('pointercancel', drop);
+    cv.addEventListener('wheel', (ev) => {
+      ev.preventDefault();
+      setZoom(zoom - clamp(ev.deltaY * (ev.deltaMode ? 30 : 1), -120, 120) * 0.003);
+    }, { passive: false });
+    cv.addEventListener('dblclick', () => setZoom(zoom < 0.5 ? 1 : 0));
     if (window.ResizeObserver) new ResizeObserver(() => request()).observe(node);
+    setZoom(0);
     setCam(0);
 
     return {
@@ -521,6 +626,7 @@
       beat(b) {
         if (!anims.has(b)) anims.set(b, build(k, { beat: b }));
         anim = anims.get(b);
+        if (!area) area = areaOf(anim);
       },
       // Zeitpunkt, zu dem die Bewegung der Ansage i fertig ist
       end: (i) => anim.ends[i],
@@ -530,6 +636,7 @@
       show(a) { t = a; moving = false; request(); },
       freeze() { moving = false; request(); },
       time: () => t,
+      zoom: (z) => (z == null ? zoom : setZoom(z)),
     };
   }
 

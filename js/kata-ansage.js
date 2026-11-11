@@ -547,14 +547,17 @@
   SK.ansageBeats = BEATS;
   const fmtNum = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
   const tempoName = (beat) => (beat === 2 ? 'Training' : beat > 2 ? `${fmtNum(beat / 2)}× langsamer` : `${fmtNum(2 / beat)}× schneller`);
-  // Ansicht im Kata-Trainer: Bodenkarte oder Figur (nur wo es die Figur gibt)
-  const VIEW_KEY = 'shotokan-sensai-ansage-ansicht';
+  // Ansicht im Kata-Trainer: Bodenkarte, beides nebeneinander oder Figur (nur wo es die Figur gibt).
+  // Ohne gespeicherte Wahl: am PC (breiter Bildschirm) beides, sonst die Karte.
+  const VIEWS = ['karte', 'beide', 'figur'];
+  const VIEW_KEY = 'shotokan-sensai-ansage-ansicht2';
   function loadView() {
+    let v = null;
     try {
-      return localStorage.getItem(VIEW_KEY) === 'figur' ? 'figur' : 'karte';
-    } catch (e) {
-      return 'karte';
-    }
+      v = localStorage.getItem(VIEW_KEY);
+    } catch (e) { /* ohne Speicher */ }
+    if (VIEWS.includes(v)) return v;
+    return window.matchMedia && matchMedia('(min-width: 1100px)').matches ? 'beide' : 'karte';
   }
   function saveView(v) {
     try {
@@ -770,7 +773,7 @@
     const fig = SK.kataFigur && SK.kataFigur.can(k) ? SK.kataFigur.stage(k) : null;
     let view = 'karte';
     const viewBtn = (v, text) => el('button', { type: 'button', 'data-view': v, 'aria-pressed': 'false', text, onclick: () => setView(v) });
-    const viewSw = fig ? el('div', { class: 'ans-view', role: 'group', 'aria-label': 'Ansicht' }, viewBtn('karte', 'Karte'), viewBtn('figur', 'Figur')) : null;
+    const viewSw = fig ? el('div', { class: 'ans-view', role: 'group', 'aria-label': 'Ansicht' }, viewBtn('karte', 'Karte'), viewBtn('beide', 'Beides'), viewBtn('figur', 'Figur')) : null;
     // Vollbild direkt auf dem Bild (wie der Knopf unten): ganze Seite, der Kasten nutzt dann die volle Breite
     const fsCan = document.fullscreenEnabled;
     const fsIcon = fsCan ? el('button', { class: 'ans-fs', type: 'button', 'aria-pressed': 'false', text: '⛶', onclick: () => toggleFs() }) : null;
@@ -928,6 +931,8 @@
       controls.style.bottom = `${bottom}px`;
       const rest = stage.offsetHeight - mapBox.offsetHeight + controls.offsetHeight + 16;
       mapBox.style.height = `${Math.round(Math.max(240, Math.min(view - top - bottom - rest, mapBox.clientWidth * 1.6)))}px`;
+      // Karte und Figur nebeneinander, im Hochformat (Handy) übereinander
+      mapBox.classList.toggle('ans-tall', mapBox.clientWidth < mapBox.clientHeight * 1.15);
     }
     let resizeTimer = 0;
     function onResize() {
@@ -943,7 +948,7 @@
       if (!s) return;
       fill(s);
       stage.classList.toggle('kiai', !!s.kiai);
-      if (view === 'karte') map.innerHTML = SK.embusenSvg(k, s.pose, i ? s.prev : null, mapBox.clientWidth / mapBox.clientHeight || null);
+      if (view !== 'figur') map.innerHTML = SK.embusenSvg(k, s.pose, i ? s.prev : null, map.clientWidth / map.clientHeight || mapBox.clientWidth / mapBox.clientHeight || null);
       const firstMove = steps.findIndex((x) => x.kind === 'move');
       const cur = s.kind === 'move' ? s.n : i < firstMove ? 0 : Infinity;
       track.querySelectorAll('.ans-dot').forEach((d) => {
@@ -953,24 +958,27 @@
       });
     }
 
-    // Ansicht Karte ↔ Figur. Die Figur läuft nach derselben Uhr wie die Ansage: zählt sie, bewegt sich die Figur mit;
+    // Ansicht Karte, beides oder Figur. Die Figur läuft nach derselben Uhr wie die Ansage: zählt sie, bewegt sich die Figur mit;
     // steht sie, zeigt die Figur die Endstellung der aktuellen Ansage – beim Weiterschalten von Hand deren Bewegung einmal.
     function setView(v) {
-      view = fig && v === 'figur' ? 'figur' : 'karte';
-      saveView(view);
+      view = fig && VIEWS.includes(v) ? v : 'karte';
       if (!fig) return;
+      saveView(view);
       const wasWide = wrap.classList.contains('ans-wide');
       viewSw.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
       map.hidden = view === 'figur';
-      // Die Figur darf auf großen Bildschirmen breiter werden als die Karte
-      if (wrap.classList.toggle('ans-wide', view === 'figur') !== wasWide && wrap.isConnected) reserve();
-      fig.on(view === 'figur');
-      if (view === 'karte') render(idx);
-      else if (running) { fig.beat(BEATS[tempo]); fig.run((performance.now() - base) / 1000); }
+      mapBox.classList.toggle('ans-both', view === 'beide');
+      // Mit Figur darf der Kasten auf großen Bildschirmen breiter werden als die Karte allein
+      if (wrap.classList.toggle('ans-wide', view !== 'karte') !== wasWide && wrap.isConnected) reserve();
+      else fit();
+      fig.on(view !== 'karte');
+      if (view !== 'figur') render(idx);
+      if (view === 'karte') return;
+      if (running) { fig.beat(BEATS[tempo]); fig.run((performance.now() - base) / 1000); }
       else figShow();
     }
     function figShow(move) {
-      if (view !== 'figur') return;
+      if (view === 'karte') return;
       fig.beat(BEATS[tempo]);
       if (move) fig.run(steps[idx].t, fig.end(idx));
       else fig.show(fig.end(idx));
@@ -1012,7 +1020,7 @@
       base = performance.now() - steps[from].t * 1000;
       speak(steps[from], BEATS[tempo]);
       render(from);
-      if (view === 'figur') { fig.beat(BEATS[tempo]); fig.run(steps[from].t); }
+      if (view !== 'karte') { fig.beat(BEATS[tempo]); fig.run(steps[from].t); }
       // nach einem Sprung folgt die nächste Ansage mit dem normalen Abstand
       if (from + 1 < steps.length) schedule(from + 1);
       else timers.push(setTimeout(finish, 1500));
@@ -1024,7 +1032,7 @@
       clearTimers();
       if (tts) tts.cancel();
       running = false;
-      if (view === 'figur') fig.freeze();
+      if (view !== 'karte') fig.freeze();
       ui();
     }
     function finish() {

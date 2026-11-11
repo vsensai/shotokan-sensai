@@ -325,6 +325,7 @@ uniform int uN, uMode, uStyle, uTint;
 uniform vec3 uPel, uUp, uFwd, uLeft, uHead, uHFwd, uHUp, uPFwd, uPLeft;
 uniform vec4 uBound;
 uniform vec2 uBase;
+uniform vec2 uFloorR;
 uniform vec4 uDec[6], uDecP[6];
 uniform vec4 uHit[2]; // Trefferflächen: Mittelpunkt (Welt) und Radius, Radius 0 = keine
 uniform vec4 uHitI[2]; // Glied der Trefferfläche: erster und letzter+1 Index der Körperformen
@@ -525,7 +526,7 @@ vec4 floorCol(vec3 ro, vec3 rd){
   if (rd.y >= -0.001) return vec4(0.0);
   float t = -ro.y / rd.y; vec3 p = ro + rd * t;
   float r = length(p.xz - uBase);
-  float fade = 1.0 - smoothstep(1.1, 2.3, r);
+  float fade = 1.0 - smoothstep(uFloorR.x, uFloorR.y, r);
   if (fade <= 0.0) return vec4(0.0);
   vec3 c;
   if (uStyle == 1) c = vec3(0.985, 0.975, 0.955);
@@ -633,7 +634,7 @@ void main(){
     gl.enableVertexAttribArray(loc);
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const U = {};
-    ['uRes', 'uRo', 'uCw', 'uCu', 'uCv', 'uF', 'uA', 'uB', 'uM', 'uN', 'uMode', 'uStyle', 'uTint', 'uPel', 'uUp', 'uFwd', 'uLeft', 'uHead', 'uHFwd', 'uHUp', 'uPFwd', 'uPLeft', 'uBound', 'uBase', 'uDec', 'uDecP', 'uHit', 'uHitI'].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
+    ['uRes', 'uRo', 'uCw', 'uCu', 'uCv', 'uF', 'uA', 'uB', 'uM', 'uN', 'uMode', 'uStyle', 'uTint', 'uPel', 'uUp', 'uFwd', 'uLeft', 'uHead', 'uHFwd', 'uHUp', 'uPFwd', 'uPLeft', 'uBound', 'uBase', 'uFloorR', 'uDec', 'uDecP', 'uHit', 'uHitI'].forEach((n) => (U[n] = gl.getUniformLocation(pr, n)));
     GL = { ok: true, gl, cv, U };
     return GL;
   }
@@ -708,6 +709,8 @@ void main(){
     gl.uniform3fv(U.uPLeft, J.lp);
     gl.uniform4fv(U.uBound, bounds(P));
     gl.uniform2f(U.uBase, cam.target[0], cam.target[2]);
+    // Boden um den Blickpunkt, blendet zwischen den beiden Radien aus (cam.floor: größerer Boden, z. B. ganze Kata)
+    gl.uniform2f(U.uFloorR, ...(cam.floor || [1.1, 2.3]));
     const dec = new Float32Array(24);
     const decp = new Float32Array(24);
     (opt.decals || []).slice(0, 6).forEach((d, i) => { dec.set([d.heel[0], d.heel[2], d.toe[0], d.toe[2]], i * 4); decp.set([d.w, d.a, d.side === 'R' ? 1 : 0, 1], i * 4); });

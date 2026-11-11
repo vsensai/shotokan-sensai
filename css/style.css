@@ -1849,6 +1849,7 @@ main:fullscreen .ans-wrap {
 
 .ans-fig-cam,
 .ans-fs,
+.ans-fig-zoom button,
 .ans-view button {
   font: inherit;
   font-size: 0.8rem;
@@ -1862,10 +1863,66 @@ main:fullscreen .ans-wrap {
 }
 
 .ans-fig-cam {
+  border-radius: 999px;
+}
+
+/* Oben links auf der Figur: Blickwinkel und Zoom */
+.ans-fig-bar {
   position: absolute;
   left: 0.4rem;
   top: 0.4rem;
-  border-radius: 999px;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ans-fig-zoom {
+  display: flex;
+}
+
+.ans-fig-zoom button {
+  min-width: 2rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ans-fig-zoom button:first-child {
+  border-radius: 999px 0 0 999px;
+  border-right: 0;
+}
+
+.ans-fig-zoom button:last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+.ans-fig-zoom button:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+/* Karte und Figur nebeneinander (Karte links, schmaler), im Hochformat übereinander */
+.ans-both .ans-map-svg {
+  position: absolute;
+  inset: 0 calc(60% + 4px) 0 0;
+  height: auto;
+}
+
+.ans-both .ans-fig {
+  left: 40%;
+}
+
+.ans-both.ans-tall .ans-map-svg {
+  inset: 0 0 calc(55% + 4px) 0;
+}
+
+.ans-both.ans-tall .ans-fig {
+  left: 0;
+  top: 45%;
+}
+
+/* die kleine Karte auf der Figur braucht es neben der großen nicht */
+.ans-both .ans-fig-map {
+  display: none;
 }
 
 /* Unten rechts auf dem Bild: Vollbild und Umschalter Karte | Figur */
@@ -1895,9 +1952,12 @@ main:fullscreen .ans-wrap {
   color: #fff;
 }
 
+.ans-view button:not(:last-child) {
+  border-right: 0;
+}
+
 .ans-view button:first-child {
   border-radius: 999px 0 0 999px;
-  border-right: 0;
 }
 
 .ans-view button:last-child {
