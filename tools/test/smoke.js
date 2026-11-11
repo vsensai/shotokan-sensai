@@ -115,12 +115,15 @@
           await frame();
           if (app.querySelector('.ans-fig').hidden || app.querySelector('.ans-map-svg').hidden || !app.querySelector('.ans-map-svg svg') || !app.querySelector('.ans-both')) throw new Error('Kata-Trainer: Karte und Figur nebeneinander klappt nicht');
           if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist neben der Karte leer');
-          // Zoom: Start mit dem ganzen Bereich (− gesperrt), + geht näher heran
+          // Zoom: Start mit dem ganzen Bereich, − geht noch weiter weg (bis zur Grenze), + wieder näher
           const zm = app.querySelector('.ans-fig-zoom [data-zoom="-1"]');
           const zp = app.querySelector('.ans-fig-zoom [data-zoom="1"]');
-          if (!zm.disabled || zp.disabled) throw new Error('Kata-Trainer: Zoom beginnt nicht mit dem ganzen Bereich');
+          if (zm.disabled || zp.disabled) throw new Error('Kata-Trainer: Zoom lässt sich am Anfang nicht in beide Richtungen ändern');
+          for (let i = 0; i < 20 && !zm.disabled; i++) zm.click();
+          if (!zm.disabled) throw new Error('Kata-Trainer: Zoom − hat keine Grenze');
           zp.click();
           if (zm.disabled) throw new Error('Kata-Trainer: Zoom + wirkt nicht');
+          if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist weit weg leer');
           sw.querySelector('[data-view=karte]').click();
           log.push(`Kata-Figur: ${app.querySelector('.ans-fig-cam').textContent}, ${cv.width}×${cv.height}`);
         }

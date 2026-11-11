@@ -412,8 +412,9 @@
     let rough = false;
     let raf = 0;
     let on = false;
-    // Zoom: 0 = ganzer Bereich der Kata (Kamera steht still über seiner Mitte), 1 = nah an der Figur (Kamera folgt ihr),
-    // darüber noch näher. zoomShown läuft dem Wert weich nach.
+    // Zoom: 0 = ganzer Bereich der Kata (Kamera steht still über seiner Mitte), darunter noch weiter weg, 1 = nah an der
+    // Figur (Kamera folgt ihr), darüber noch näher.
+    // zoomShown läuft dem Wert weich nach.
     let zoom = 0;
     let zoomShown = 0;
     let area = null;
@@ -488,11 +489,12 @@
       area.fit = { target, dist };
       return area.fit;
     }
+    const ZOOM_MIN = -2;
     const ZOOM_MAX = 1.6;
     const ZOOM_STEP = 0.25;
     function setZoom(z) {
-      zoom = clamp(z, 0, ZOOM_MAX);
-      zoomBar.querySelector('[data-zoom="-1"]').disabled = zoom <= 0;
+      zoom = clamp(z, ZOOM_MIN, ZOOM_MAX);
+      zoomBar.querySelector('[data-zoom="-1"]').disabled = zoom <= ZOOM_MIN;
       zoomBar.querySelector('[data-zoom="1"]').disabled = zoom >= ZOOM_MAX;
       request();
     }
@@ -517,14 +519,17 @@
       const close = Math.max(cam.dist * near, (4.9 * h) / w);
       // Zwischen Übersicht und Nähe: Blickpunkt wandert von der Mitte des Bereichs zur Figur, der Abstand gleichmäßig
       // (im Verhältnis) vom ganzen Bereich bis nah heran
-      const u = smooth(Math.min(zoomShown, 1));
+      const u = smooth(clamp(zoomShown));
       const ov = overview(cam, w, h);
       const all = Math.max(close, ov.dist);
       const near3 = [c[0], 0.78, c[1]];
       // Boden: in der Übersicht über den ganzen Bereich, nah nur um die Figur
+      // unter 0 noch weiter weg (bis 4× so weit wie die Übersicht), der Boden wächst mit
+      const far = Math.pow(2, Math.max(0, -zoomShown));
       const off = Math.hypot(ov.target[0] - area.c[0], ov.target[2] - area.c[1]);
-      const floor = [lerp(area.r + off, 1.1, u), lerp(area.r + off + 1.2, 2.3, u)];
-      const view = Object.assign({}, cam, { target: ov.target.map((x, i) => lerp(x, near3[i], u)), dist: all * Math.pow(close / all, zoomShown), floor });
+      const floor = [lerp(area.r + off, 1.1, u), lerp((area.r + off) * far + 1.2, 2.3, u)];
+      const dist = zoomShown < 0 ? all * far : all * Math.pow(close / all, zoomShown);
+      const view = Object.assign({}, cam, { target: ov.target.map((x, i) => lerp(x, near3[i], u)), dist, floor });
       const decals = ['L', 'R'].filter((s) => grounded(J, s)).map((s) => ({ heel: J['heel' + s], toe: J['toe' + s], w: P.w[s === 'L' ? 0 : 1], a: 1, side: s }));
       ctx.clearRect(0, 0, w, h);
       E.draw(ctx, w, h, P, view, { mode: 0, style: 0, decals });
