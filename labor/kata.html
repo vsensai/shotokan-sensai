@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kata-Labor</title>
+  <style>
+    :root {
+      --red: #c62828;
+      --ink: #1f2328;
+      --muted: #6b6f76;
+      --line: #e3ddd4;
+      --card: #fffdf9;
+      --bg: #f4efe7;
+      --stage: #ece5d9;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --ink: #ece7e0;
+        --muted: #a39e97;
+        --line: #3a3530;
+        --card: #24211e;
+        --bg: #181614;
+        --stage: #2c2824;
+        color-scheme: dark;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --ink: #ece7e0;
+      --muted: #a39e97;
+      --line: #3a3530;
+      --card: #24211e;
+      --bg: #181614;
+      --stage: #2c2824;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding-block: 22px 40px;
+      padding-left: max(16px, env(safe-area-inset-left, 0px));
+      padding-right: max(16px, env(safe-area-inset-right, 0px));
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.5rem, 4vw, 2.1rem);
+      letter-spacing: -0.02em;
+    }
+
+    h1 span {
+      color: var(--red);
+    }
+
+    .lead {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .stage {
+      position: relative;
+      background: var(--stage);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      touch-action: pan-y;
+      cursor: grab;
+    }
+
+    .stage canvas.fig {
+      display: block;
+      width: 100%;
+      aspect-ratio: 5 / 4;
+    }
+
+    .now {
+      position: absolute;
+      left: 12px;
+      top: 10px;
+      right: 150px;
+      pointer-events: none;
+    }
+
+    .now .count {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font-weight: 800;
+      font-size: clamp(1.2rem, 4.2vw, 1.9rem);
+      color: #1f2328;
+    }
+
+    .now .kan {
+      color: var(--red);
+    }
+
+    .now .kiai {
+      font-size: 0.6em;
+      background: var(--red);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .now .tech {
+      margin-top: 2px;
+      font-size: clamp(0.78rem, 2.4vw, 0.95rem);
+      font-weight: 600;
+      color: #3c4046;
+      text-shadow: 0 0 6px #ece5d9, 0 0 6px #ece5d9;
+    }
+
+    :root[data-theme="dark"] .now .count,
+    :root[data-theme="dark"] .now .tech {
+      color: #ece7e0;
+      text-shadow: 0 0 6px #2c2824, 0 0 6px #2c2824;
+    }
+
+    @media (prefers-color-scheme: dark) {
+
+      :root:not([data-theme="light"]) .now .count,
+      :root:not([data-theme="light"]) .now .tech {
+        color: #ece7e0;
+        text-shadow: 0 0 6px #2c2824, 0 0 6px #2c2824;
+      }
+    }
+
+    canvas.map {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      width: 128px;
+      height: 128px;
+      background: rgba(255, 253, 249, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      pointer-events: none;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .row b {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 600;
+      min-width: 64px;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 600;
+      min-height: 40px;
+      padding: 6px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    button[aria-pressed="true"] {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    button.play {
+      min-width: 112px;
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+
+    input[type=range] {
+      flex: 1 1 200px;
+      min-width: 0;
+      accent-color: var(--red);
+      height: 40px;
+    }
+
+    .time {
+      font-variant-numeric: tabular-nums;
+      color: var(--muted);
+      font-size: 0.9rem;
+      min-width: 86px;
+      text-align: right;
+    }
+
+    .note {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .note b {
+      color: var(--ink);
+    }
+
+    .note ul {
+      margin: 6px 0 0;
+      padding-left: 20px;
+    }
+
+    .fallback {
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--muted);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <h1>Kata-<span>Labor</span></h1>
+    <p class="lead"><b id="kname">Heian Shodan</b> als durchgehende 3D-Bewegung – ein Versuch. Die Füße folgen der Bodenkarte der Kata-Ansage, Arme und Hüfte kommen aus den Technik-Abläufen des Lexikons, die Übergänge sind gerechnet.</p>
+
+    <div class="stage" id="stage">
+      <canvas class="fig" id="fig"></canvas>
+      <div class="now" aria-live="off">
+        <div class="count"><span class="kan" id="kan"></span><span id="ro"></span><span class="kiai" id="kiai" hidden>Kiai</span></div>
+        <div class="tech" id="tech"></div>
+      </div>
+      <canvas class="map" id="map" width="256" height="256" aria-label="Bodenkarte: Standort und Blickrichtung"></canvas>
+    </div>
+
+    <div class="row">
+      <button class="play" id="play">▶ Abspielen</button>
+      <button id="prev" aria-label="Vorige Bewegung">⏮</button>
+      <button id="next" aria-label="Nächste Bewegung">⏭</button>
+      <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Zeitpunkt in der Kata">
+      <span class="time" id="time"></span>
+    </div>
+    <div class="row" role="group" aria-label="Geschwindigkeit">
+      <b>Tempo</b>
+      <button data-speed="1" aria-pressed="true">normal</button>
+      <button data-speed="0.5" aria-pressed="false">½</button>
+      <button data-speed="0.25" aria-pressed="false">¼ Zeitlupe</button>
+    </div>
+    <div class="row" role="group" aria-label="Kamera">
+      <b>Kamera</b>
+      <button data-cam="hinten" aria-pressed="true">Von hinten</button>
+      <button data-cam="vorne" aria-pressed="false">Von vorne</button>
+      <button data-cam="seite" aria-pressed="false">Seite</button>
+      <button data-cam="oben" aria-pressed="false">Oben</button>
+      <button id="mit" aria-pressed="false" title="Kamera dreht mit dem Körper mit">dreht mit</button>
+    </div>
+
+    <div class="note" id="note"></div>
+  </div>
+
+  <script src="../js/core.js"></script>
+  <script src="../js/graphics.js"></script>
+  <script src="../js/graphics-tech.js"></script>
+  <script src="../js/graphics-ashi.js"></script>
+  <script src="../js/figur3d.js"></script>
+  <script src="../js/figur-posen.js"></script>
+  <script src="../data/kata-intro.js"></script>
+  <script src="../data/kata-heian.js"></script>
+  <script src="../js/kata-ansage.js"></script>
+  <script src="kata-figur.js"></script>
+  <script>
+    (function () {
+      'use strict';
+      const F = window.Figur3D;
+      const $ = (id) => document.getElementById(id);
+      const q = new URLSearchParams(location.search);
+      const stage = $('stage');
+      if (!F.ok()) {
+        stage.innerHTML = '<div class="fallback">Dieser Browser kann kein WebGL 2 – die Figur lässt sich hier nicht zeigen.</div>';
+        return;
+      }
+      const kata = SK.kata[q.get('kata') || 'heian-shodan'];
+      const anim = SK.kataFigur.build(kata, { beat: Number(q.get('beat')) || 2 });
+      $('kname').textContent = kata.name;
+
+      // Kamera: yaw 0 = von vorne (die Figur schaut am Anfang zur Kamera), 180 = von hinten (links bleibt links)
+      const CAMS = { hinten: { yaw: 158, pitch: 20, dist: 6.2 }, vorne: { yaw: -22, pitch: 16, dist: 6.2 }, seite: { yaw: -90, pitch: 12, dist: 6.4 }, oben: { yaw: 180, pitch: 78, dist: 7.2 } };
+      const st = { t: Math.min(anim.dur, Number(q.get('t')) || 0), playing: false, speed: 1, cam: Object.assign({ fov: 30 }, CAMS[q.get('cam')] || CAMS.hinten), mit: false, dirty: true, drag: false };
+      const cv = $('fig');
+      const ctx = cv.getContext('2d');
+
+      // Blickpunkt: Hüfte der Figur, über gut eine Sekunde geglättet (rein aus dem Zeitpunkt – auch beim Spulen ruhig)
+      function center(t) {
+        let x = 0, z = 0, yaw = 0, n = 0;
+        for (let i = -3; i <= 3; i++) {
+          const P = anim.pose(Math.max(0, Math.min(anim.dur, t + i * 0.22)));
+          x += P.pelvis[0]; z += P.pelvis[2]; yaw += P.yaw; n++;
+        }
+        return { x: x / n, z: z / n, yaw: yaw / n };
+      }
+
+      const grounded = (J, s) => J['ankle' + s][1] < 0.09;
+      function render() {
+        const playing = st.playing || st.drag;
+        const cssW = cv.clientWidth;
+        // beim Abspielen weniger Bildpunkte (flüssig), im Stand scharf
+        const maxPx = playing ? 300000 : 1100000;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2.5, Math.sqrt(maxPx / (cssW * cssW * 0.8)));
+        const w = Math.max(160, Math.round(cssW * dpr));
+        const h = Math.round(w * 0.8);
+        if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+        const P = anim.pose(st.t);
+        const J = F.solve(P);
+        const c = center(st.t);
+        const cam = Object.assign({}, st.cam, { target: [c.x, 0.78, c.z], yaw: st.cam.yaw + (st.mit ? c.yaw : 0) });
+        const decals = ['L', 'R'].filter((s) => grounded(J, s)).map((s) => ({ heel: J['heel' + s], toe: J['toe' + s], w: P.w[s === 'L' ? 0 : 1], a: 1, side: s }));
+        ctx.clearRect(0, 0, w, h);
+        F.draw(ctx, w, h, P, cam, { mode: 0, style: 0, decals });
+        hud(P, J);
+      }
+
+      // Anzeige: Zählzeit, Technik, Bodenkarte
+      const mapCv = $('map');
+      const mg = mapCv.getContext('2d');
+      const trail = [];
+      for (let t = 0; t <= anim.dur; t += 0.1) { const P = anim.pose(t); trail.push([P.pelvis[0], P.pelvis[2]]); }
+      const ext = anim.lines.reduce((a, l) => [Math.min(a[0], l[0], l[2]), Math.max(a[1], l[0], l[2]), Math.min(a[2], l[1], l[3]), Math.max(a[3], l[1], l[3])], [1e9, -1e9, 1e9, -1e9]);
+      function hud(P, J) {
+        const i = anim.markAt(st.t);
+        const m = anim.marks[i];
+        $('kan').textContent = m ? m.kan : '型';
+        $('ro').textContent = m ? (m.n ? `${m.n} · ${m.ro}` : m.ro) : kata.name;
+        $('tech').textContent = m ? m.text : 'Musubi-dachi';
+        $('kiai').hidden = !(m && m.kiai && st.t >= m.t1 - 0.15);
+        $('seek').value = Math.round((st.t / anim.dur) * 1000);
+        $('time').textContent = `${st.t.toFixed(1)} / ${anim.dur.toFixed(0)} s`;
+        // Karte: vorne ist oben, links ist links (Welt-x zeigt nach links)
+        const S = 256;
+        const span = Math.max(ext[1] - ext[0], ext[3] - ext[2]) + 1.4;
+        const k = S / span;
+        const X = (x) => S / 2 - (x - (ext[0] + ext[1]) / 2) * k;
+        const Yf = (z) => S / 2 - (z - (ext[2] + ext[3]) / 2) * k;
+        mg.clearRect(0, 0, S, S);
+        mg.lineCap = 'round';
+        mg.strokeStyle = '#b9b2a6';
+        mg.lineWidth = 3;
+        anim.lines.forEach((l) => { mg.beginPath(); mg.moveTo(X(l[0]), Yf(l[1])); mg.lineTo(X(l[2]), Yf(l[3])); mg.stroke(); });
+        mg.strokeStyle = 'rgba(198,40,40,.35)';
+        mg.lineWidth = 2;
+        mg.beginPath();
+        trail.slice(0, Math.floor(st.t / 0.1) + 1).forEach((p, j) => (j ? mg.lineTo(X(p[0]), Yf(p[1])) : mg.moveTo(X(p[0]), Yf(p[1]))));
+        mg.stroke();
+        // Füße und Blickrichtung
+        ['L', 'R'].forEach((s) => {
+          const a = J['heel' + s], b = J['toe' + s];
+          mg.strokeStyle = grounded(J, s) ? '#1f2328' : '#9a948a';
+          mg.lineWidth = 9;
+          mg.beginPath(); mg.moveTo(X(a[0]), Yf(a[2])); mg.lineTo(X(b[0]), Yf(b[2])); mg.stroke();
+        });
+        const hx = X(J.head[0]), hy = Yf(J.head[2]);
+        mg.fillStyle = '#c62828';
+        mg.beginPath();
+        mg.moveTo(hx - J.hf[0] * 26, hy - J.hf[2] * 26);
+        mg.lineTo(hx + J.hl[0] * 9, hy + J.hl[2] * 9);
+        mg.lineTo(hx - J.hl[0] * 9, hy - J.hl[2] * 9);
+        mg.fill();
+      }
+
+      /* ---------- Bedienung ---------- */
+      const playBtn = $('play');
+      const setPlay = (on) => {
+        st.playing = on;
+        if (on && st.t >= anim.dur - 0.05) st.t = 0;
+        playBtn.textContent = on ? '❚❚ Pause' : '▶ Abspielen';
+        st.dirty = true;
+      };
+      playBtn.onclick = () => setPlay(!st.playing);
+      const jump = (dir) => {
+        // vor: Beginn der nächsten Zählzeit; zurück: Beginn der laufenden, kurz nach deren Beginn der vorigen
+        const i = anim.markAt(st.t + (dir > 0 ? 0 : -0.3));
+        st.t = anim.marks[Math.max(0, Math.min(anim.marks.length - 1, dir > 0 ? i + 1 : i))].t;
+        st.dirty = true;
+      };
+      $('prev').onclick = () => jump(-1);
+      $('next').onclick = () => jump(1);
+      $('seek').oninput = (e) => { st.t = (e.target.value / 1000) * anim.dur; setPlay(false); };
+      document.querySelectorAll('[data-speed]').forEach((b) => (b.onclick = () => {
+        st.speed = Number(b.dataset.speed);
+        document.querySelectorAll('[data-speed]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      }));
+      document.querySelectorAll('[data-cam]').forEach((b) => (b.onclick = () => {
+        Object.assign(st.cam, CAMS[b.dataset.cam]);
+        document.querySelectorAll('[data-cam]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        st.dirty = true;
+      }));
+      $('mit').onclick = (e) => { st.mit = !st.mit; e.target.setAttribute('aria-pressed', String(st.mit)); st.dirty = true; };
+      // Drehen mit Finger oder Maus (waagerecht ziehen dreht, senkrecht neigt)
+      let last = null;
+      stage.addEventListener('pointerdown', (e) => { last = [e.clientX, e.clientY]; stage.setPointerCapture(e.pointerId); st.drag = true; });
+      stage.addEventListener('pointermove', (e) => {
+        if (!last) return;
+        st.cam.yaw -= (e.clientX - last[0]) * 0.45;
+        st.cam.pitch = Math.max(-2, Math.min(86, st.cam.pitch + (e.clientY - last[1]) * 0.35));
+        last = [e.clientX, e.clientY];
+        st.dirty = true;
+      });
+      const up = () => { last = null; st.drag = false; st.dirty = true; };
+      stage.addEventListener('pointerup', up);
+      stage.addEventListener('pointercancel', up);
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+        if (e.key === ' ') { e.preventDefault(); setPlay(!st.playing); }
+        if (e.key === 'ArrowRight') jump(1);
+        if (e.key === 'ArrowLeft') jump(-1);
+      });
+
+      const warn = anim.warn.concat(q.has('check') ? SK.kataFigur.check(anim) : []);
+      $('note').innerHTML = `<b>Was hier noch geschätzt ist:</b> Das Buch zeigt nur die Endstellungen. Ausholen, Weg der Füße und Tempo der einzelnen Bewegung sind gerechnet – bitte mit Karate-Augen prüfen.
+        <ul><li>Ziehen dreht die Kamera, ⏮ ⏭ springen zur vorigen und nächsten Zählzeit, Leertaste startet und hält an.</li>
+        <li>Die kleine Karte zeigt Standort, Füße und Blickrichtung auf dem Embusen.</li></ul>${warn.length ? `<p><b>Hinweise des Rechners:</b></p><ul>${warn.map((x) => `<li>${SK.util.esc(x)}</li>`).join('')}</ul>` : ''}`;
+
+      // Für Tests und Vorschau-Bilder
+      window.kataLab = { anim, st, render, set(t, cam) { st.t = t; if (cam) Object.assign(st.cam, cam); render(); } };
+
+      let prevNow = performance.now();
+      function loop(now) {
+        // Echtzeit: Dauert ein Bild länger (schwacher Grafikchip), läuft die Kata trotzdem in ihrem Tempo – nur mit weniger Bildern
+        const dt = Math.min(0.25, (now - prevNow) / 1000);
+        prevNow = now;
+        if (st.playing) {
+          st.t += dt * st.speed;
+          if (st.t >= anim.dur) { st.t = anim.dur; setPlay(false); }
+          st.dirty = true;
+        }
+        if (st.dirty) { st.dirty = false; render(); }
+        requestAnimationFrame(loop);
+      }
+      window.addEventListener('resize', () => (st.dirty = true));
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+
+</html>
