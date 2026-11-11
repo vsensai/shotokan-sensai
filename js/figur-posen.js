@@ -719,14 +719,18 @@
   D['tc:namigaeshi'] = M({ keys: [{ t: 0, p: KB }, { t: 0.1, p: KB }, { t: 0.16, p: M(NG1, { look: -80 }), e: 'fl' }, { t: 0.2, p: M(NG2, { look: -80 }), e: 'kime' }, { t: 0.34, p: M(NG2, { look: -80 }) }, { t: 0.38, p: NG1, e: 'fl' }, { t: 0.44, p: KB, e: 'kime' }, { t: 0.56, p: KB }], best: 0.2, dur: 1.8 }, M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'front' }));
   // Nidan-geri wie in Kanku Dai 65: aus Migi Zenkutsu-dachi, beide Fäuste vor der Brust (Ende von 64). Das hintere (linke)
   // Bein schwingt vor und tritt zuerst (Mae-geri Chudan), das rechte Bein stößt dabei ab. In der Luft wechseln die Beine:
-  // der linke Fuß schnappt zurück, der rechte tritt am höchsten Punkt Jodan. Der linke Fuß landet zuerst, der rechte setzt
+  // der linke Fuß schnappt zurück, der rechte tritt am höchsten Punkt weit nach vorn. Der linke Fuß landet zuerst, der rechte setzt
   // vorn ab in Migi Zenkutsu-dachi – im selben Augenblick trifft der Migi Uraken Tate-mawashi-uchi (Hände und Füße enden
   // zugleich); die linke Hand greift nach vorn und zieht zur Hüfte.
   // Damit der Sprung nicht schwebt, folgt die Hüfte einer gerechneten Bahn (ND_BAHN, Zeiten in Sekunden): tief anlaufen,
   // mit dem Standbein beschleunigen, ab dem Absprung eine Wurfparabel (Erdbeschleunigung), nach der Landung abfedern.
   // Die Schlüsselbilder liegen auf dieser Bahn; dazwischen setzt ND_FIX die Hüfte genau darauf und nimmt die Füße mit,
   // die in der Luft sind. Der Absprungfuß rollt bis zuletzt über den Ballen ab, der Landefuß setzt mit dem Ballen auf.
+  // Abgespielt wird 1,3-mal langsamer (Zeitlupe zum Mitsehen), und beim zweiten Tritt steht das Bild kurz (ND_HALT);
+  // beides im Bewegungs-Editor eingestellt. Die Bahn rechnet weiter in echten Sekunden (ND_DUR).
   const ND_DUR = 2.3;
+  const ND_LUPE = 1.3;
+  const ND_HALT = 0.05; // Halten beim zweiten Tritt (Sekunden der Bahn, abgespielt 0,065 s)
   const ND_WEG = 2.0; // so weit wandert der Stand nach vorn (in Kanku Dai 64 → 65 rund zwei Standlängen)
   const ND_G = 9.81;
   const ND_T = { los: 0.35, tief: 0.58, ab: 0.78 }; // Halten bis „los“, Gewicht vor bis „tief“, Absprung bei „ab“
@@ -782,6 +786,10 @@
   const ND_ARME = { hR: [-0.1, -0.15, 0.28], hL: [0.1, -0.15, 0.28], eR: [-0.5, -0.8, 0.1], eL: [0.5, -0.8, 0.1] };
   const ND_BILD = (s, o) => M(ND_START, ND_ARME, { pelvis: ND_BAHN(s), w: [0, 0] }, o);
   const ND_S = { vorbei: ND_T.tief, knie: ND_T.ab - 0.1, wechsel: ND_T.ab + 0.13, knie2: ND_T.ab + 0.2, tritt: ND_T.oben + 0.03, zurueck: ND_T.oben + 0.14, schritt: ND_T.auf + 0.08 };
+  const ND_TRITT = ND_BILD(ND_S.tritt, { lean: -10, yaw: 12, hR: [-0.14, -0.2, 0.24], hL: [0.14, -0.2, 0.24], L: ND_FUSS(ND_S.tritt, 'L', 0.04, -0.52, { pitch: -60, kp: [0, 0.3, 1], tu: 0 }), R: ND_FUSS(ND_S.tritt, 'R', 0.905, -0.116, { yaw: -8, pitch: 48, kp: [0.1, 0.8, -0.5], tu: 1 }) });
+  // Zeit im Ablauf (mit Halten) ↔ Zeit der Bahn: nach dem Tritt liegt alles um ND_HALT später
+  const ND_NACH = (s) => (s > ND_S.tritt ? s + ND_HALT : s);
+  const ND_VOR = (a) => (a <= ND_S.tritt ? a : Math.max(ND_S.tritt, a - ND_HALT));
   const ND_KEYS = [
     { s: 0, p: ND_START },
     { s: ND_T.los, p: ND_START },
@@ -790,12 +798,13 @@
     // linkes Knie hoch, das rechte Bein streckt sich
     { s: ND_S.knie, p: ND_BILD(ND_S.knie, { lean: 3, yaw: -12, R: ND_R_STAND(ND_S.knie), L: ND_FUSS(ND_S.knie, 'L', 0.26, -0.4, { pitch: -50, kp: [0, 0.7, 1], tu: 1 }), w: [0, 1] }) },
     // erster Tritt (links, Chudan) im Absprung: rechter Fuß drückt über den Ballen ab
-    { s: ND_T.ab, p: ND_BILD(ND_T.ab, { lean: -4, yaw: -14, R: ND_R_STAND(ND_T.ab), L: ND_FUSS(ND_T.ab, 'L', 0.79, 0.03, { pitch: 36, kp: [0, 1, 0.3], tu: 1 }), w: [0, 1] }) },
+    { s: ND_T.ab, p: ND_BILD(ND_T.ab, { lean: -4, yaw: -14, R: ND_R_STAND(ND_T.ab), L: ND_FUSS(ND_T.ab, 'L', 0.885, 0.03, { pitch: 36, kp: [0, 1, 0.3], tu: 1 }), w: [0, 1] }) },
     // Beinwechsel in der Luft: links schnappt zurück, rechtes Knie schwingt hoch
     { s: ND_S.wechsel, p: ND_BILD(ND_S.wechsel, { lean: -2, yaw: -4, L: ND_FUSS(ND_S.wechsel, 'L', 0.36, -0.36, { pitch: -35, kp: [0, 0.7, 1], tu: 1 }), R: ND_FUSS(ND_S.wechsel, 'R', 0.02, -0.6, { pitch: -65, kp: [0, 0.4, 1], tu: 1 }) }) },
     { s: ND_S.knie2, p: ND_BILD(ND_S.knie2, { lean: -4, yaw: 4, L: ND_FUSS(ND_S.knie2, 'L', 0.2, -0.5, { pitch: -50, kp: [0, 0.5, 1], tu: 0.5 }), R: ND_FUSS(ND_S.knie2, 'R', 0.27, -0.36, { pitch: -50, kp: [0, 0.7, 1], tu: 1 }) }) },
-    // zweiter Tritt (rechts, Jodan) am höchsten Punkt, das linke Bein ist angezogen
-    { s: ND_S.tritt, p: ND_BILD(ND_S.tritt, { lean: -10, yaw: 12, hR: [-0.14, -0.2, 0.24], hL: [0.14, -0.2, 0.24], L: ND_FUSS(ND_S.tritt, 'L', 0.04, -0.52, { pitch: -60, kp: [0, 0.3, 1], tu: 0 }), R: ND_FUSS(ND_S.tritt, 'R', 0.64, 0.5, { yaw: -8, pitch: 48, kp: [0.1, 0.8, -0.5], tu: 1 }) }) },
+    // zweiter Tritt (rechts) am höchsten Punkt, weit nach vorn gestreckt, das linke Bein ist angezogen; das Bild steht kurz
+    { s: ND_S.tritt, p: ND_TRITT },
+    { a: ND_S.tritt + ND_HALT, p: ND_TRITT }, // a: Zeit im Ablauf (schon mit Halten)
     // rechtes Bein schnappt zurück (Knie bleibt hoch), das linke streckt sich zum Boden; die rechte Faust steigt vor dem
     // Gesicht hoch, die linke Hand greift nach vorn
     { s: ND_S.zurueck, p: ND_BILD(ND_S.zurueck, { lean: -3, yaw: 18, hR: [0.04, 0.08, 0.2], eR: [-0.6, -0.5, 0.5], pR: [0.6, 0, -0.8], hL: [0.06, -0.12, 0.42], oL: 1, pL: [-1, 0, 0], L: ND_FUSS(ND_S.zurueck, 'L', -0.12, -0.72, { yaw: 16, pitch: -45, kp: [0.2, 0.2, 1], tu: 0 }), R: ND_FUSS(ND_S.zurueck, 'R', 0.38, -0.24, { pitch: -35, kp: [0, 0.7, 1], tu: 1 }) }) },
@@ -804,15 +813,15 @@
     // rechter Fuß greift flach nach vorn, die Faust schlägt im senkrechten Kreis herab, die linke Hand zieht zurück
     { s: ND_S.schritt, p: ND_BILD(ND_S.schritt, { lean: 2, yaw: 36, chest: -12, hR: [-0.12, 0.3, 0.3], eR: [-0.3, -0.3, 0.7], pR: [0.4, 0.2, -0.9], hL: [0.14, -0.2, 0.3], L: ND_L_STAND(ND_S.schritt), R: { x: ND_ENDE.R.x, y: 0.17, z: ND_ENDE.R.z - 0.1, yaw: -4, pitch: 4, kp: [0, 0.4, 1], tu: 0.4 }, w: [1, 0] }) },
     { s: ND_T.ende, p: ND_ENDE, e: 'kime' },
-  ].map((k, i) => Object.assign({ t: k.s / ND_DUR, p: k.p }, i > 1 ? { e: k.e || 'fl' } : {})); // nach dem Halten fließend durch alle Bilder
+  ].map((k, i) => Object.assign({ t: (k.a != null ? k.a : ND_NACH(k.s)) / ND_DUR, p: k.p }, i > 1 ? { e: k.e || 'fl' } : {})); // nach dem Halten fließend durch alle Bilder
   const ND_FIX = (P, t) => {
-    const s = t * ND_DUR;
+    const s = ND_VOR(t * ND_DUR);
     if (s <= ND_T.los || s >= ND_T.ende) return P;
     const b = ND_BAHN(s);
     const mit = (F) => ({ x: F.x + b[0] - P.pelvis[0], y: F.y + b[1] - P.pelvis[1], z: F.z + b[2] - P.pelvis[2] });
     return M(P, { pelvis: b, R: s <= ND_T.ab ? ND_R_STAND(s) : mit(P.R), L: s >= ND_T.auf ? ND_L_STAND(s) : mit(P.L) });
   };
-  D['tc:nidan-geri'] = M({ keys: ND_KEYS, fix: ND_FIX, best: ND_S.tritt / ND_DUR, dur: ND_DUR, eff: 'toeR', cam: { yaw: -70, pitch: 10 } }, hit('toeR', 'zweiter Tritt'));
+  D['tc:nidan-geri'] = M({ keys: ND_KEYS, fix: ND_FIX, best: ND_S.tritt / ND_DUR, dur: ND_DUR * ND_LUPE, eff: 'toeR', cam: { yaw: -70, pitch: 10 } }, hit('toeR', 'zweiter Tritt'));
 
   /* ---------- Fußfeger ---------- */
   // Fußfeger (Ashi-barai): weiter unten bei „Mit Partner“
