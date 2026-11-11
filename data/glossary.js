@@ -448,6 +448,10 @@
   // Textteile einer Karte: Kopf (Aussprache, Name, Bedeutung) und Stellen in den Kata – auch für die Rückseite der Karteikarten
   const kopfHtml = (e) => `${SK.glossarySagHtml(e)}<h4>${SK.util.esc(e.t)}${altName(e) ? ` <span class="lex-alt">(${SK.util.esc(altName(e))})</span>` : ''}</h4><p>${SK.util.esc(e.de)}</p>`;
   SK.glossaryTextHtml = (e) => `${kopfHtml(e)}${vorHtml(e)}`;
+  // Kurzbeschreibung unter dem Bild auf der Vorderseite der Karteikarten, weil ein Bild allein nicht immer eindeutig ist:
+  // der Anfang der Quiz-Bedeutung (die den Namen nicht verrät) – ohne Klammern, bis zum ersten Doppelpunkt oder
+  // Gedankenstrich. „Vorwärtsstellung: vorderes Knie gebeugt, …“ → „Vorwärtsstellung“.
+  SK.glossaryKurz = (e) => e.qde.replace(/\s*\([^)]*\)/g, '').split(/: | – |; /)[0].trim();
   // Bild einer Karte ohne Beschriftungen, die den Namen verraten (Vorderseite der Karteikarten)
   SK.glossaryBildHtml = (e) => (e.img ? G.box(e.img.key, e.img, true) : '');
 

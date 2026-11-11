@@ -108,6 +108,10 @@
     const qids = new Set(SK.questions.map((q) => q.id));
     SK.glossary.forEach((e) => {
       if (!e.kana || !/^[\u3041-\u3096ー、]+$/.test(e.kana)) errors.push(`Lexikon „${e.t}“: Lesung für die Aussprache fehlt – Wortteil in LESUNG (data/glossary.js) ergänzen`);
+      // Kurzbeschreibung der Karteikarten: vorhanden, kürzer als ein Absatz, und sie verrät den Namen nicht
+      const kurz = SK.glossaryKurz(e);
+      if (!kurz || kurz.length > 130) errors.push(`Lexikon „${e.t}“: Kurzbeschreibung für die Karteikarten fehlt oder ist zu lang (${kurz.length} Zeichen)`);
+      if (e.t.toLowerCase().split(/[^a-zäöüß]+/).some((w) => w.length >= 4 && !['dachi', 'zuki', 'geri', 'uchi', 'kamae', 'barai', 'ashi'].includes(w) && kurz.toLowerCase().includes(w))) errors.push(`Lexikon „${e.t}“: Kurzbeschreibung verrät den Namen („${kurz}“)`);
       ['a', 'b'].concat(e.img ? ['c'] : []).forEach((x) => { if (!qids.has(`${SK.glossaryId(e)}-${x}`)) errors.push(`Lexikon „${e.t}“: Frage ${SK.glossaryId(e)}-${x} fehlt${x === 'c' ? ' (Karteikarten; zwei Begriffe mit demselben Bild?)' : ''}`); });
     });
   }

@@ -96,7 +96,7 @@
         if (!/Shuto/.test(app.querySelector('.ans-tech').textContent)) throw new Error('Kata-Trainer: Stelle nennt die Technik nicht');
         log.push(`Kommt vor in: ${link.getAttribute('href')} → ${pos.textContent}`);
       }
-      // Karteikarten (Bild → Name): vorn nur das Bild (kein Name, keine Bedeutung), auf der Rückseite Name und Bedeutung.
+      // Karteikarten (Bild → Name): vorn das Bild mit Kurzbeschreibung (kein Name), auf der Rückseite Name und Bedeutung.
       // Eine Karte „nicht gewusst“ (kommt in der Runde wieder), alle anderen „gewusst“; zählt im Karteikasten der Bildfrage (gl-…-c)
       {
         // Vergleich mit dem Stand davor: Zufallsmix und Begriffe-Quiz weiter oben können dieselben Fragen schon gestellt haben
@@ -104,7 +104,8 @@
         const answered0 = SK.store.data.answered;
         location.hash = '#/karten/geri';
         await wait();
-        const names = SK.glossary.filter((e) => e.cat === 'geri').flatMap((e) => [e.t, e.de]);
+        const geri = SK.glossary.filter((e) => e.cat === 'geri');
+        const names = geri.map((e) => e.t);
         let cards = 0;
         for (let guard = 0; guard < 100 && app.querySelector('.kk'); guard++) {
           const karte = app.querySelector('.kk-karte');
@@ -113,6 +114,9 @@
           if (karte.dataset.seite !== 'vorn' || vorn.classList.contains('kk-weg') || !hinten.classList.contains('kk-weg')) throw new Error('Karteikarte beginnt nicht mit der Vorderseite');
           if (!vorn.querySelector('.kk-bild .f3d, .kk-bild svg')) throw new Error('Karteikarte ohne Bild');
           if (names.some((t) => vorn.textContent.includes(t)) || app.querySelector('.kk-ja')) throw new Error(`Karteikarte verrät vorn die Lösung: ${vorn.textContent}`);
+          const hinweis = vorn.querySelector('.kk-hinweis');
+          const begriff = geri.find((e) => e.t === hinten.querySelector('.kk-loesung h4').textContent.split(' (')[0].trim());
+          if (!hinweis || !begriff || hinweis.textContent !== SK.glossaryKurz(begriff)) throw new Error('Karteikarte ohne Kurzbeschreibung unter dem Bild');
           app.querySelector('.kk-um').click();
           const h4 = hinten.querySelector('.kk-loesung h4');
           if (karte.dataset.seite !== 'hinten' || !h4 || !names.includes(h4.textContent.split(' (')[0].trim()) || !hinten.querySelector('.kk-loesung p')) throw new Error('Karteikarte ohne Rückseite');

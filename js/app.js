@@ -568,8 +568,9 @@
 
   // ---------- Karteikarten ----------
   // Eine Karte mit zwei Seiten, „Umdrehen“ dreht sie wirklich um (und wieder zurück). Zwei Richtungen:
-  //   Bild → Name: vorn nur das Bild bzw. die Bewegung aus dem Lexikon (ohne Namen und Beschreibung), hinten Name,
-  //                Bedeutung und die Stellen in den Kata. Zählt im Karteikasten der Bildfrage (gl-…-c).
+  //   Bild → Name: vorn das Bild bzw. die Bewegung aus dem Lexikon mit einer Kurzbeschreibung (SK.glossaryKurz, ohne
+  //                Namen – Bilder allein sind nicht immer eindeutig), hinten Name, Bedeutung und die Stellen in den Kata.
+  //                Zählt im Karteikasten der Bildfrage (gl-…-c).
   //   Name → Bild: vorn nur der Name, hinten Bild, Bedeutung und Stellen. Zählt bei „Was ist …?“ (gl-…-a).
   // Nach dem ersten Umdrehen selbst einschätzen. Jede Karte zählt beim ersten Mal; nicht gewusste Karten kommen in derselben
   // Runde noch einmal, bis sie sitzen (zählt dann nicht erneut). Trefferquote und „gestellt“ (Zufallsmix) bleiben
@@ -674,7 +675,7 @@
       const text = () => el('article', { class: 'lex-card kk-loesung', html: SK.glossaryTextHtml(e) });
       // Beide Seiten liegen übereinander (die Karte ist so hoch wie die höhere), sichtbar ist immer nur eine
       const vorn = dir === 'bild'
-        ? el('div', { class: 'kk-seite kk-vorn' }, el('h2', { class: 'quiz-q kk-frage', text: eCat.ask }), bild())
+        ? el('div', { class: 'kk-seite kk-vorn' }, el('h2', { class: 'quiz-q kk-frage', text: eCat.ask }), bild(), el('p', { class: 'kk-hinweis muted', text: SK.glossaryKurz(e) }))
         : el('div', { class: 'kk-seite kk-vorn' }, el('p', { class: 'kk-frage muted', text: 'Wie sieht das aus, was bedeutet es?' }), el('div', { class: 'kk-wort', lang: 'ja-Latn', text: e.t }), e.kana ? el('div', { class: 'kk-sag', html: SK.glossarySagHtml(e) }) : '');
       const hinten = dir === 'bild'
         ? el('div', { class: 'kk-seite kk-hinten kk-weg' }, text())
