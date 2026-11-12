@@ -231,9 +231,9 @@
     const pl = seg.feet.L.k > seg.feet.R.k ? seg.feet.L : seg.feet.R;
     seg.pelMid = mix(A.low.pel, B.low.pel, 0.5);
     if (pl.k > 0) seg.pelMid = mix(seg.pelMid, mix(pl.sp, pl.near, 0.5), pl.k);
-    // Fumikomi (hoch): Der Körper dreht erst in die Richtung des Schritts, das Knie kommt gerade nach vorne hoch, und erst
-    // mit dem Aufsetzen dreht alles in den neuen Stand ein – nicht gleichmäßig über den ganzen Schritt (das Knie schwänge
-    // sonst seitlich herum wie bei einem Mawashi-geri)
+    // Fumikomi (hoch) in drei Teilen: Erst drehen beide Füße und der Körper auf der Stelle in die Richtung des Schritts.
+    // Dann der Schritt mit hohem Knie – beide Knie zeigen geradeaus, keines klappt zur Seite. Erst kurz vor dem
+    // Aufstampfen dreht alles zusammen, auch beide Füße, in den neuen Stand ein. Der Blick bleibt dabei, wo er hingehört.
     if (o.hoch) {
       const s = ['L', 'R'].find((q) => seg.feet[q].moved);
       if (s && !both) {
@@ -244,8 +244,16 @@
         if (turn >= 0 ? rel < -1e-6 : rel > 1e-6) rel += turn >= 0 ? 360 : -360;
         if (Math.abs(rel) > Math.abs(turn)) rel = Math.abs(rel) - Math.abs(turn) < 360 - Math.abs(rel) ? turn : 0;
         const yawMid = A.byaw + rel;
-        seg.yawAt = (u) => (u < 0.3 ? lerp(A.byaw, yawMid, smooth(u / 0.3)) : u < 0.68 ? yawMid : lerp(yawMid, B.byaw, smooth((u - 0.68) / 0.32)));
-        seg.knee = { s, kp: [dir[0] / len(dir), 0.3, dir[1] / len(dir)] };
+        // p1: bis hier das Eindrehen in die Schrittrichtung (entfällt, wenn der Körper schon so steht); p3: ab hier die Drehung in den Stand
+        const p1 = Math.abs(rel) > 5 ? 0.24 : 0;
+        const p3 = 0.74;
+        seg.yawAt = (u) => (u < p1 ? lerp(A.byaw, yawMid, smooth(u / p1)) : u < p3 ? yawMid : lerp(yawMid, B.byaw, smooth((u - p3) / (1 - p3))));
+        seg.feet[s].u0 = p1;
+        // die Hüfte geht genau mit dem Fuß mit – liefe sie schon beim Eindrehen los, hinge das hintere Bein weit zurück
+        seg.share = { L: s === 'L' ? 1 : 0, R: s === 'R' ? 1 : 0 };
+        const fw = [dir[0] / len(dir), dir[1] / len(dir)];
+        seg.knee = { w: (u) => ramp(0, Math.max(p1, 0.12), u) * (1 - ramp(p3, 1, u)), L: [fw[0], s === 'L' ? 0.3 : 0.15, fw[1]], R: [fw[0], s === 'R' ? 0.3 : 0.15, fw[1]] };
+        seg.lookAbs = [A.byaw + A.up.look, B.byaw + B.up.look];
       }
     }
     // Gibt nur eines der beiden Bilder die Sohle eines Fußes vor, bekommt das andere die dort von selbst gerechnete –
@@ -278,7 +286,8 @@
     P.hR = clear(P.hR);
     P.yaw = byaw + up.yaw;
     // Kopf: dreht in die neue Richtung voraus, der Körper folgt
-    P.look = byaw + up.look + clamp(B.byaw - byaw, -LEAD, LEAD) * ramp(0, 0.22, u);
+    if (seg.lookAbs) P.look = lerp(seg.lookAbs[0], seg.lookAbs[1], eb);
+    else P.look = byaw + up.look + clamp(B.byaw - byaw, -LEAD, LEAD) * ramp(0, 0.22, u);
     const prog = (s) => { const pl = seg.feet[s]; return seg.ease(clamp((u - pl.u0) / (pl.u1 - pl.u0))); };
     let pel = via(A.low.pel, seg.pelMid, B.low.pel, seg.share ? seg.share.L * prog('L') + seg.share.R * prog('R') : eb);
     ['L', 'R'].forEach((s) => {
@@ -305,7 +314,7 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee.s === s ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee.kp, up) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb);
