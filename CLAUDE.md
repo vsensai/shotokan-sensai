@@ -32,6 +32,7 @@
 
 ## Kata als Figur (Kata-Trainer, Ansicht „Figur“)
 - `js/kata-figur.js` rechnet die ganze Kata als Bewegung: Füße aus `ansage` (Bodenkarte), Arme und Hüfte aus den Abläufen in `js/figur-posen.js`. Neue Technik einer Kata: in `TECH` dem Lexikon-Ablauf zuordnen, neuer Stand in `STAND`; fehlt die Pose, sie in `js/figur-posen.js` ergänzen.
+- Braucht eine Kata einen Ablauf, den das Lexikon so nicht hat (z. B. Tritt in anderer Höhe), kommt er in `SK.fig3dKata` am Ende von `js/figur-posen.js` – nicht in `SK.fig3dDefs`, sonst erschiene er im Lexikon. Fußtritte stehen in `TRITT` (`js/kata-figur.js`).
 - Eine Kata erst in `KATA` freigeben, wenn der Nutzer den Ablauf in `labor/kata.html?kata=<id>` gesehen und abgenommen hat. `validate.html` prüft freigegebene Kata (rechenbar, Füße erreichen ihren Platz, nichts springt).
 
 ## Buchwissen (ohne PDF)

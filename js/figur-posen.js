@@ -1090,6 +1090,25 @@
     D[id].hit = M(h, Object.assign({ fl, sides: sides || h.at.slice(-1) }, FLAECHE_FEIN[id] ? { adj: FLAECHE_FEIN[id] } : {}));
   });
 
+  /* ---------- Abläufe nur für die Kata als Figur (js/kata-figur.js) – stehen nicht im Lexikon ---------- */
+  const KATA = {};
+  // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
+  // Bewegungs-Editor, MG_KIME)
+  KATA['mae-geri-chudan'] = M(D['mv:mae-geri'], { keys: D['mv:mae-geri'].keys.map((k) => (k.e === 'kime' ? { t: k.t, e: k.e, p: MG_KIME } : k)) });
+  // Chudan-zuki zur Seite im Kokutsu-dachi (Heian Nidan 3, 6): die vordere Faust stößt in Standrichtung auf die Mittellinie,
+  // die andere geht an die Hüfte; die Hüfte bleibt seitlich wie im Stand
+  KATA['kokutsu-zuki'] = TWIST(T(M(S.kk, { hL: L(H.hip), hR: H.hip }), M(S.kk, { hL: stretch(punch(S.kk, 'L', CH), 'L'), hR: H.hip })), 'L');
+  // Gyaku-zuki nach dem Mae-geri (Heian Nidan 18, 21): wie im Lexikon, Faust auf Chudan
+  KATA['gyaku-zuki'] = D['mv:gyaku-zuki'];
+  // Morote-uke im Zenkutsu-dachi (Heian Nidan 22): Arme wie im Lexikon, die Hüfte aber nur so weit seitlich wie im Zenkutsu-dachi
+  KATA['morote-uke-zk'] = M(D['tc:morote-uke'], { keys: D['tc:morote-uke'].keys.map((k) => ({ t: k.t, e: k.e, p: M(k.p, { yaw: S.zk.yaw }) })) });
+
+  // Yoko-geri-keage zusammen mit Uraken (Heian Nidan 7): Ablauf wie im Lexikon, der Tritt aber nur bis Brusthöhe – auf
+  // Kopfhöhe (Lexikon) träfe das Bein den Arm, der gleichzeitig darüber zur selben Seite schlägt
+  const YA_KATA = YGK(BAL(M(YA_CH, { pelvis: [0.3, 0.83, 0], yaw: 18, roll: 15, R: { x: -0.62, z: 0.12, y: 1.1, yaw: 0, pitch: 10, sole: [-0.8, -0.6, 0], kp: [-0.8, 0.4, 0.2] } }), 'L'));
+  KATA['yoko-geri-keage'] = M(D['tc:yoko-geri-keage'], { keys: D['tc:yoko-geri-keage'].keys.map((k) => (k.e === 'kime' ? { t: k.t, e: k.e, p: YA_KATA } : k)) });
+
   SK.fig3dDefs = D;
+  SK.fig3dKata = KATA;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };
 })();
