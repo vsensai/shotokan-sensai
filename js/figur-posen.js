@@ -781,12 +781,15 @@
   const UW_FUSS = UM_FOLGT(UW_KEYS);
   const UW_FIX = (P, t) => UW_FUSS(t < UW_KEYS[2].t ? M(P, { R: { y: 0.075, pitch: 0 } }) : P, t);
   D['tc:ushiro-mawashi-geri'] = M({ keys: UW_KEYS, fix: UW_FIX, best: 0.393, dur: 2.4, eff: 'heelR', cam: { yaw: 40, pitch: 5 }, marks: ['turn'] }, hit('heelR', 'Sohle / Ferse'));
-  // Hiza-geri: beide Hände greifen vorn auf Kopfhöhe und ziehen herab, das Knie stößt zwischen den Händen nach oben
-  const HZ_CH = BAL(M(S.zk, { pelvis: [0, 0.84, 0.5], hL: [0.12, -0.05, 0.42], hR: [-0.12, -0.05, 0.42], R: { x: -0.08, z: 0.35, y: 0.42, pitch: -70, kp: [0, 0.6, 1] }, w: [1, 0] }), 'L');
-  const HZ_E0 = BAL(M(S.zk, { pelvis: [0, 0.86, 0.5], lean: 8, R: { x: -0.07, z: 0.62, y: 0.6, pitch: -65, kp: [0, 1, 0.6] }, w: [1, 0] }), 'L');
-  const HZ_K = E.solve(HZ_E0).kneeR;
-  const HZ_EXT = M(HZ_E0, { hL: chestAt(HZ_E0, V.add(HZ_K, [0.13, 0.1, 0.02])), hR: chestAt(HZ_E0, V.add(HZ_K, [-0.13, 0.1, 0.02])), eL: [0.5, -0.5, 0.3], eR: [-0.5, -0.5, 0.3] });
-  D['tc:hiza-geri'] = K(M(S.zk, { hL: [0.08, 0.06, 0.48], hR: [-0.08, 0.06, 0.48] }), HZ_CH, HZ_EXT, M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'side3' }));
+  // Hiza-geri: beide offenen Hände greifen vorn auf Kopfhöhe und ziehen herab, das Knie stößt zwischen den Händen nach oben.
+  // Ablauf im Bewegungs-Editor eingestellt (5 Bilder, 1,83 s): Pause, Knie anheben und greifen (0,1 s halten), Kniestoß
+  // (Kernbild, Kime, 0,15 s halten), Knie zurück, Stand.
+  const HZ_A = { pelvis: [0, 0.7, 0.1], yaw: -16, L: { x: 0.12, z: 0.62, yaw: 4 }, R: { x: -0.13, z: -0.5, yaw: -32 }, hL: [0.209, 0.066, 0.449], hR: [-0.014, -0.153, 0.442], eR: [-0.07, -0.489, 0.34], w: [0.7, 0.3] };
+  const HZ_CH = { pelvis: [0.146, 0.84, 0.612], yaw: -1, L: { x: 0.208, z: 0.622, y: 0.077, yaw: 4 }, R: { x: 0.066, z: 0.462, y: 0.42, yaw: -32, pitch: -70, kp: [0, 0.6, 1] }, hL: [0.153, 0.042, 0.521], hR: [-0.073, 0.074, 0.522], oL: 1, oR: 1, pL: [-1, 0, 0], pR: [1, 0, 0], w: [1, 0] };
+  const HZ_HIT = { pelvis: [0.141, 0.86, 0.596], yaw: -38, lean: 8, L: { x: 0.182, z: 0.616, y: 0.082, yaw: 4 }, R: { x: 0.021, z: 0.794, y: 0.599, yaw: -32, pitch: -65, kp: [-0.048, 0.331, 0.942] }, hL: [0.311, -0.352, 0.268], hR: [0.045, -0.29, 0.435], eL: [0.004, -0.593, -0.092], eR: [-0.5, -0.5, 0.3], oL: 1, oR: 1, pL: [-1, 0, 0], pR: [1, 0, 0], w: [1, 0] };
+  // Knie zurück: wie das Anheben, die Hände tiefer
+  const HZ_AB = M(HZ_CH, { hL: [0.168, -0.09, 0.52], hR: [-0.1, -0.084, 0.531] });
+  D['tc:hiza-geri'] = M({ keys: [{ t: 0, p: HZ_A }, { t: 0.121, p: HZ_A }, { t: 0.296, p: HZ_CH }, { t: 0.346, p: HZ_CH }, { t: 0.543, p: HZ_HIT, e: 'kime' }, { t: 0.618, p: HZ_HIT }, { t: 0.738, p: HZ_AB }, { t: 0.917, p: HZ_A }], best: 0.543, dur: 2 }, M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'side3' }));
   // Mawashi-hiza-geri: Kniestoß im Bogen. Anfang wie der Mawashi-geri (dessen Bilder): aus Hidari Zenkutsu-dachi zieht das
   // rechte Knie seitlich hoch, das Bein schwenkt um die Hüfte nach vorn, der Standfuß dreht auf dem Ballen mit. Statt den
   // Unterschenkel auszuschnappen, bleibt das Bein fest gebeugt (Ferse am Gesäß, Fuß und Zehen zum Schienbein angezogen)
@@ -1017,7 +1020,7 @@
 
   /* ---------- Körperwaffen mit ganzer Figur ---------- */
   D['wp:hiji'] = STILL(MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { view: 'side3', marks: ['ring:elbowR'] }));
-  D['wp:hiza'] = STILL(D['tc:hiza-geri'].keys[3].p, M(hit('kneeR', 'Knie'), { view: 'side3', marks: ['ring:kneeR'] }));
+  D['wp:hiza'] = STILL(HZ_HIT, M(hit('kneeR', 'Knie'), { view: 'side3', marks: ['ring:kneeR'] }));
   D['wp:zenwan'] = STILL(M(MZK, { hL: L(H.hip), hR: [-0.2, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm'), { view: 'front3', marks: ['arm:R'] }));
 
   /* ---------- Übersichten ---------- */
