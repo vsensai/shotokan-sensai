@@ -482,9 +482,9 @@ ${easeGuide()}
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
       return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${nr(i)} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${nr(holdOf(i))}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${nr(i)}</span></button>`;
-    }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
-    // beim Abspielen (auch angehalten) bleibt der Balken an seiner Stelle
-    if (S.play) headAt(S.play.u || 0);
+    }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden><span class="pe-hk" data-hk="1" title="Ziehen: die Bewegung vor- und zurückspulen"></span></span><span class="pe-dlab" hidden></span>`;
+    // Balken: beim Abspielen (auch angehalten) an seiner Stelle, sonst beim gewählten Bild
+    headAt(S.play ? S.play.u || 0 : (S.tm[S.k].t - S.tm[0].t) / (S.tm[n - 1].t - S.tm[0].t || 1));
     // Touch: so breit, dass auch die zwei dichtesten Punkte mindestens 28 px auseinanderliegen (höchstens 2400 px)
     if (d.classList.contains('pe-coarse')) {
       let minF = 1;
@@ -539,6 +539,19 @@ ${easeGuide()}
     tr.addEventListener('pointerdown', (ev) => {
       if (!S) return;
       const touch = ev.pointerType === 'touch';
+      // Griff am Balken: die Bewegung vor- und zurückspulen (bleibt dort angehalten, ▶ spielt von da weiter)
+      if (ev.target.closest('[data-hk]')) {
+        ev.preventDefault();
+        g = { seek: true, id: ev.pointerId };
+        tr.setPointerCapture(ev.pointerId);
+        if (S.play && !S.play.paused) S.play.paused = true;
+        const b = tr.getBoundingClientRect();
+        const u = S.play ? S.play.u : (ev.clientX - b.left) / b.width;
+        if (!S.play) newRun().paused = true;
+        frames();
+        seek(u);
+        return;
+      }
       // Touch neben den Punkten oder auf dem Griff: die Zeitleiste seitlich wischen
       if (touch && !ev.target.closest('[data-mk]')) return;
       if (S.play) S.play = null;
@@ -573,6 +586,11 @@ ${easeGuide()}
     // Touch: solange ein Punkt gezogen wird, darf die Zeitleiste nicht scrollen
     tr.addEventListener('pointermove', (ev) => {
       if (!g || !S || ev.pointerId !== g.id) return;
+      if (g.seek) {
+        const b = tr.getBoundingClientRect();
+        seek((ev.clientX - b.left) / b.width);
+        return;
+      }
       if (!g.armed) {
         // Touch vor dem Halten bewegt: das ist Wischen (Scrollen), kein Ziehen
         if (Math.abs(ev.clientX - g.x0) > 8 || Math.abs(ev.clientY - g.y0) > 8) { clearTimeout(g.timer); g = null; }
@@ -600,6 +618,7 @@ ${easeGuide()}
       const was = g;
       g = null;
       if (!S) return;
+      if (was.seek) { S.fast = false; frames(); draw(); return; }
       // Touch nur angetippt: Bild wählen
       if (was.touch && !was.armed && ev.type === 'pointerup' && was.i !== S.k) { goFrame(was.i); return; }
       S.drag = null;
@@ -765,7 +784,28 @@ ${easeGuide()}
   function headAt(u) {
     const ph = S.dlg.querySelector('.pe-head');
     // Zeitleiste reicht vom ersten bis zum letzten Bild: der Balken steht beim Anteil der abgelaufenen Bewegung
-    if (ph) { ph.hidden = false; ph.style.left = `${clamp(u, 0, 1) * 100}%`; }
+    if (ph) { ph.hidden = false; ph.style.left = `${clamp(u, 0, 1) * 100}%`; ph.classList.toggle('idle', !S.play); }
+  }
+  // Abspielen vorbereiten: die Bewegung mit allen Änderungen, am Anfang
+  function newRun() {
+    keep();
+    const K = effKeys();
+    const tl = E.timeline(K, S.e.d.fix);
+    const t0 = K[0].t;
+    const t1 = K[K.length - 1].t;
+    return (S.play = { tl, t0, t1, u: 0, pose: tl(t0) });
+  }
+  // Spulen: Balken an die Stelle u (0 = erstes, 1 = letztes Bild), dort angehalten
+  function seek(u) {
+    const run = S.play || newRun();
+    run.paused = true;
+    run.u = clamp(u, 0, 1);
+    run.pose = run.tl(run.t0 + (run.t1 - run.t0) * run.u);
+    headAt(run.u);
+    const lab = S.dlg.querySelector('.pe-dlab');
+    if (lab) { lab.hidden = false; lab.classList.add('seek'); lab.textContent = `${(run.u * (run.t1 - run.t0) * S.dur).toFixed(2)} s`; lab.style.left = `${run.u * 100}%`; }
+    S.fast = true;
+    draw();
   }
   function stop() {
     if (!S.play) return;
@@ -784,15 +824,7 @@ ${easeGuide()}
       draw();
       return;
     }
-    let run = old;
-    if (!run) {
-      keep();
-      const K = effKeys();
-      const tl = E.timeline(K, S.e.d.fix);
-      const t0 = K[0].t;
-      const t1 = K[K.length - 1].t;
-      run = S.play = { tl, t0, t1, u: 0, pose: tl(t0) };
-    }
+    const run = old || newRun();
     run.paused = false;
     // am Ende angehalten: wieder von vorn
     if (run.u >= 1) run.u = 0;

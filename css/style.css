@@ -3015,7 +3015,7 @@ main:fullscreen .ans-wrap {
   position: relative;
   flex: 1 0 auto;
   min-width: 0;
-  height: 46px;
+  height: 58px;
   margin: 0 0 0 12px;
   touch-action: none;
 }
@@ -3267,14 +3267,47 @@ main:fullscreen .ans-wrap {
   z-index: 2;
 }
 
+/* beim Spulen: Zeit über dem Balken, ganz sichtbar */
+.pe-dlab.seek {
+  top: 0;
+}
+
 .pe-head {
   position: absolute;
   top: 6px;
   width: 2px;
-  height: 34px;
+  height: 38px;
   margin-left: -1px;
   background: var(--ink);
   pointer-events: none;
+}
+
+/* ohne Abspielen: Balken blass beim gewählten Bild, der Griff bleibt greifbar */
+.pe-head.idle {
+  background: var(--muted);
+}
+
+/* Griff unten am Balken: ziehen spult die Bewegung vor und zurück */
+.pe-hk {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  background: var(--ink);
+  pointer-events: auto;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
+/* größere Fläche zum Treffen (vor allem mit dem Finger) */
+.pe-hk::before {
+  content: "";
+  position: absolute;
+  inset: -8px -12px;
 }
 
 /* Seitenleiste mit Reitern */
