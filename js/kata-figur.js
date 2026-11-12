@@ -551,7 +551,7 @@
 
   /* ---------- Bühne für den Kata-Trainer ---------- */
   // Freigegebene Kata: Ablauf von Hand durchgesehen, alle Stände und Techniken haben eine Figur (validate.js prüft das)
-  const KATA = ['heian-shodan'];
+  const KATA = ['heian-shodan', 'heian-nidan'];
   const can = (k) => KATA.includes(k.id) && !!k.ansage && E.ok();
   // Kamera: yaw 0 = von vorne (die Figur schaut am Anfang zur Kamera), 180 = von hinten (links bleibt links)
   const CAMS = [
