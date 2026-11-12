@@ -1108,6 +1108,39 @@
   const YA_KATA = YGK(BAL(M(YA_CH, { pelvis: [0.3, 0.83, 0], yaw: 18, roll: 15, R: { x: -0.62, z: 0.12, y: 1.1, yaw: 0, pitch: 10, sole: [-0.8, -0.6, 0], kp: [-0.8, 0.4, 0.2] } }), 'L'));
   KATA['yoko-geri-keage'] = M(D['tc:yoko-geri-keage'], { keys: D['tc:yoko-geri-keage'].keys.map((k) => (k.e === 'kime' ? { t: k.t, e: k.e, p: YA_KATA } : k)) });
 
+  // Heian Sandan 2, 3, 5, 6 im Heisoku-dachi: ein Arm Chudan Uchi-uke, der andere zugleich Gedan-uke. Ausholen über Kreuz –
+  // die Uchi-uke-Faust unten an der anderen Hüfte, die Gedan-Faust oben an der anderen Schulter – dann fahren beide auseinander
+  const UG = M(S.heisoku, { oL: 0, oR: 0 });
+  KATA['uchi-gedan-uke'] = T(M(UG, { hR: [0.13, -0.3, 0.2], eR: [-0.5, -0.6, 0.5], hL: [-0.13, 0.08, 0.2], eL: [0.4, -0.8, 0.5] }),
+    M(UG, { hR: [-0.22, 0.0, 0.3], eR: DOWN_FWD, hL: stretch([0.22, -0.52, 0.2], 'L') }));
+  // Heian Sandan 9 im Kiba-dachi: Kentsui Chudan Uchi-mawashi-uchi zur linken Seite – die Faust holt vor der rechten
+  // Schulter aus und schlägt im waagerechten Bogen nach außen, Arm fast gestreckt, Handrücken oben (die Kleinfingerseite trifft)
+  KATA['kentsui-uchi-mawashi'] = T(M(KB, { look: 90, hL: [-0.14, -0.06, 0.2], eL: [0.6, -0.5, 0.6], pL: [0, -1, 0] }),
+    M(KB, { look: 90, hL: stretch([0.6, -0.13, 0.06], 'L'), pL: [0, -1, 0] }));
+  // Heian Sandan 11: Ryoken Ryokoshi-kamae – beide Fäuste auf den Hüften, Ellbogen zur Seite
+  KATA['ryokoshi-kamae'] = STILL(M(UG, { hL: [0.2, -0.36, 0.05], eL: [1, -0.15, -0.1], hR: [-0.2, -0.36, 0.05], eR: [-1, -0.15, -0.1] }));
+  // Heian Sandan 12, 14, 16: Furi-enpi aus dem Ryokoshi-kamae – die Fäuste bleiben an den Hüften, mit dem Aufsetzen des
+  // Fußes (Fumikomi) schwingt der rechte Ellbogen von hinten seitlich nach vorn außen (Werte wie tc:furi-enpi)
+  const FK = M(KB, { look: -90, hL: [0.2, -0.36, 0.05], eL: [1, -0.15, -0.1] });
+  KATA['furi-enpi'] = { keys: [
+    { t: 0, p: M(FK, { hR: [-0.21, -0.33, 0.03], eR: [-0.6, -0.8, -0.3] }) }, { t: 0.25, p: M(FK, { hR: [-0.21, -0.33, 0.03], eR: [-0.6, -0.8, -0.3] }) },
+    { t: 0.32, p: M(FK, { hR: [-0.14, -0.25, 0.17], eR: [-0.7, 0.1, 0.75] }), e: 'in' },
+    { t: 0.37, p: M(FK, { hR: [-0.2, -0.3, 0.08], eR: [-1, -0.15, 0.2] }), e: 'kime' },
+  ] };
+  // Heian Sandan 13, 15, 17: Uraken Tate-mawashi-uchi zur rechten Seite – die Faust steigt von der Hüfte vor der Brust
+  // hoch und schlägt im senkrechten Bogen über Kopfhöhe nach außen herab; Treffer in Schulterhöhe, Ellbogen leicht gebeugt
+  // und unten, Handrücken zum Ziel
+  KATA['uraken-tate'] = FLOW([
+    M(FK, { hR: [-0.2, -0.3, 0.08], eR: [-1, -0.15, 0.2] }),
+    M(FK, { hR: [-0.1, -0.06, 0.2], eR: [-1, -0.3, 0.2], pR: [0.3, 0, -1] }),
+    M(FK, { hR: [-0.3, 0.24, 0.1], eR: [-1, 0, 0], pR: [0.7, 0.5, -0.5] }),
+    M(FK, { hR: [-0.63, -0.03, 0.05], eR: [-0.4, -1, 0], pR: [1, 0, 0] }),
+  ], { eff: 'fistR' });
+  // Heian Sandan 19, 20 im Kiba-dachi: die rechte Faust stößt über die linke Schulter nach hinten oben (Koho-tsukiage),
+  // zugleich schlägt der linke Ellbogen nach hinten (Ushiro-enpi) – die linke Faust zieht dabei weit zurück an die Hüfte
+  KATA['tsukiage-enpi'] = T(M(KB, { hL: [0.22, -0.3, 0.2], eL: [0.4, -1, 0.2], hR: H.hip }),
+    M(KB, { hR: [0.2, 0.1, -0.03], eR: [-0.4, -0.5, 1], pR: [0, 0, 1], hL: [0.22, -0.33, -0.08], eL: [0.25, -0.2, -1] }));
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };

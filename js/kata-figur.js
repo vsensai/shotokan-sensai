@@ -7,6 +7,8 @@
    Fußtritte (TRITT) kommen ganz aus dem Ablauf des Lexikons, an den Standfuß der Bodenkarte gelegt; danach bleibt das
    Knie angezogen, bis die nächste Bewegung den Fuß absetzt. Stände, die die Skizze länger zeichnet, als die Beine der
    Figur reichen, werden gekürzt (MAXLEN). Abläufe, die nur die Kata braucht, stehen in SK.fig3dKata (figur-posen.js).
+   Aus den Daten der Kata kommen außerdem: langsame Bewegungen (slow), Stampfen mit hohem Knie (Hinweis „Fumikomi“ in seq)
+   und gleichzeitiges Gleiten beider Füße (Fußarbeit „Yori-ashi“ in ansage).
    Ergebnis: pose(t) für jeden Zeitpunkt (Sekunden), im Takt der Kata-Ansage (SK.ansageTimeline).
    Welt wie in figur3d.js: x = links (bei Blick nach vorne), y = oben, z = vorne; Karte: x rechts, y vorne, Winkel im Uhrzeigersinn. */
 (function () {
@@ -23,6 +25,8 @@
   const HIP = 0.09; // Hüftgelenk seitlich neben der Beckenmitte
   const PASS = 0.15; // Abstand der Fußmitten, wenn ein Fuß am Standfuß vorbeigleitet
   const LIFT = 0.025; // so hoch hebt der gleitende Fuß ab (Suri-ashi: fast gar nicht)
+  const HOCH = 0.38; // so hoch kommt der Fuß beim Stampfen (Fumikomi): Knie hoch, dann fällt er hart auf seinen Platz
+  const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
   const STRIKE = 0.22; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
   const LEAD = 75; // so weit dreht der Kopf dem Körper voraus (Grad)
   const BOW = 30; // Verbeugung (Grad)
@@ -56,6 +60,8 @@
   const via = (a, m, b, u) => { const c = sub(mul(m, 2), mul(add(a, b), 0.5)); const v = 1 - u; return add(add(mul(a, v * v), mul(c, 2 * u * v)), mul(b, u * u)); };
   // Schritt: weich anlaufen, zügig durch, am Ende zum Stehen (etwas später als ein gleichmäßiges Hin und Her)
   const stepEase = (u) => smooth(Math.pow(clamp(u), 1.2));
+  // Stampfen: Fuß in der ersten Hälfte hoch, kurz oben halten, im letzten guten Viertel immer schneller hinunter
+  const stomp = (u) => (u < 0.5 ? smooth(u / 0.5) : u < 0.72 ? 1 : 1 - ((u - 0.72) / 0.28) ** 2);
 
   /* ---------- Stände und Techniken ---------- */
   const STAND = [[/ashi-zenkutsu/i, 'ashizk'], [/zenkutsu/i, 'zk'], [/kokutsu/i, 'kk'], [/kiba/i, 'kb'], [/hachiji/i, 'hachiji'], [/musubi/i, 'musubi'], [/heisoku/i, 'heisoku'], [/ashi-dachi/i, 'ashidachi']];
@@ -64,7 +70,8 @@
   // direkt: ohne Ausholen aus der vorigen Haltung (Stoß); dur: eigene Dauer der ganzen Bewegung (Sekunden),
   // lang: der Ablauf selbst füllt fast die ganze Bewegung (großer Kreis, fließende Folge);
   // erst: bei zwei Techniken („… + …“) gilt die Seite der zuerst genannten (sonst die der zuletzt genannten);
-  // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind
+  // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind.
+  // Ein dritter Eintrag beschränkt die Zuordnung auf Stände, auf die er passt (der erste passende Eintrag gilt)
   const TECH = [
     [/gedan-barai/i, { def: 'mv:gedan-barai', side: 'L', from: 0.25 }],
     [/oi-zuki/i, { def: 'mv:oi-zuki', side: 'R', from: 0.38, direkt: true }],
@@ -78,8 +85,15 @@
     [/mae-geri-keage/i, { tritt: 'mae', dur: 0.8 }],
     [/^(saken|uken) chudan-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],
     [/shihon-nukite/i, { def: 'tc:nukite', side: 'R', from: 0.25, direkt: true }],
+    [/uchi-uke \+ .*gedan-uke/i, { def: 'uchi-gedan-uke', side: 'R', from: 0.25, erst: true }],
     [/chudan uchi-uke/i, { def: 'mv:uchi-uke', side: 'R', from: 0.25 }],
-    [/morote-uke/i, { def: 'morote-uke-zk', side: 'L', from: 0.25 }],
+    [/morote-uke/i, { def: 'morote-uke-zk', side: 'L', from: 0.25 }, /zenkutsu/i],
+    [/morote-uke/i, { def: 'tc:morote-uke', side: 'L', from: 0.25 }],
+    [/kentsui .*uchi-mawashi-uchi/i, { def: 'kentsui-uchi-mawashi', side: 'L', from: 0.25 }],
+    [/ryokoshi-kamae/i, { def: 'ryokoshi-kamae', side: 'R', from: 0 }],
+    [/furi-enpi/i, { def: 'furi-enpi', side: 'R', from: 0.25 }],
+    [/uraken .*tate-mawashi-uchi/i, { def: 'uraken-tate', side: 'R', from: 0.513 }],
+    [/koho-tsukiage/i, { def: 'tsukiage-enpi', side: 'R', from: 0.25, erst: true }],
   ];
   // Fußtritte: Ablauf im Lexikon bzw. der Kata, side: Bein, das dort tritt; a … b: Zeitspanne im Ablauf vom angezogenen
   // Knie über den Treffer zurück zum angezogenen Knie; an: Anteil der Bewegung bis das Knie angezogen ist;
@@ -187,11 +201,21 @@
   function segment(A, B, o) {
     const seg = Object.assign({ A, B, ease: stepEase }, o);
     const both = ['L', 'R'].every((s) => len(sub(B.low[s].c, A.low[s].c)) > 1e-6);
-    // beide Füße wechseln den Platz (Yoi, Schluss): nacheinander, erst der linke
+    // beide Füße wechseln den Platz (Yoi, Schluss): nacheinander, erst der linke – außer die Bewegung nennt den ersten
+    // (first) oder beide gleiten zugleich (gleich: Yori-ashi)
     const first = o.first || 'L';
+    // Schritte einer Kata-Bewegung (teilen): der längere Weg bekommt mehr Zeit (mindestens 30 % je Fuß), und die Hüfte
+    // wandert mit den Füßen mit statt gleichmäßig voraus – sonst stünde sie mitten in der Bewegung weit neben beiden Füßen
+    const way = { L: len(sub(B.low.L.c, A.low.L.c)), R: len(sub(B.low.R.c, A.low.R.c)) };
+    const cut = both && o.teilen ? clamp(way[first] / (way.L + way.R), 0.3, 0.7) : 0.5;
+    // … rückt dabei ein Fuß nur wenig nach (unter einem halben Meter und weniger als ein Drittel des anderen Wegs – der
+    // Drehfuß einer Wendung), geschieht das während des Schritts und nicht davor
+    const nach = both && o.teilen && Math.min(way.L, way.R) < 0.5 && 3 * Math.min(way.L, way.R) < Math.max(way.L, way.R);
+    const gleich = o.gleich || nach;
+    if (both && o.teilen && !gleich) seg.share = { L: way.L / (way.L + way.R), R: way.R / (way.L + way.R) };
     seg.feet = {};
     ['L', 'R'].forEach((s) => {
-      const [u0, u1] = both ? (s === first ? [0, 0.5] : [0.5, 1]) : [0, 1];
+      const [u0, u1] = both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
       seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1);
     });
     // Hüfte: beim Vorbeigleiten über dem Standbein (zwischen den Füßen), sonst gerade hinüber
@@ -229,7 +253,8 @@
     P.yaw = byaw + up.yaw;
     // Kopf: dreht in die neue Richtung voraus, der Körper folgt
     P.look = byaw + up.look + clamp(B.byaw - byaw, -LEAD, LEAD) * ramp(0, 0.22, u);
-    let pel = via(A.low.pel, seg.pelMid, B.low.pel, eb);
+    const prog = (s) => { const pl = seg.feet[s]; return seg.ease(clamp((u - pl.u0) / (pl.u1 - pl.u0))); };
+    let pel = via(A.low.pel, seg.pelMid, B.low.pel, seg.share ? seg.share.L * prog('L') + seg.share.R * prog('R') : eb);
     ['L', 'R'].forEach((s) => {
       const fa = A.low[s];
       const fb = B.low[s];
@@ -238,7 +263,9 @@
       const ef = pl.moved ? seg.ease(uf) : eb;
       let c = pl.moved ? via(fa.c, pl.mid, fb.c, ef) : fa.c;
       let rel = lerp(fa.rel, fb.rel, ef);
-      let y = lerp(fa.y, fb.y, ef) + (pl.moved ? LIFT * Math.pow(Math.sin(Math.PI * uf), 2) : 0);
+      // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
+      const up = pl.moved && seg.hoch ? stomp(uf) : 0;
+      let y = lerp(fa.y, fb.y, ef) + (pl.moved ? (seg.hoch ? HOCH * up : LIFT * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
       const v = seg.via && seg.via.s === s ? seg.via : null;
       if (v) {
         const hu = hump(u);
@@ -252,7 +279,7 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef), tu: lerp(fa.tu, fb.tu, ef), kp: rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb);
@@ -440,9 +467,10 @@
       }
       // eine Bewegung der Kata
       const m = st.pose;
-      const tech = (TECH.find(([rx]) => rx.test(st.tech)) || [])[1];
+      const tech = (TECH.find(([rx, , stand]) => rx.test(st.tech) && (!stand || stand.test(st.stance))) || [])[1];
       const side = sideOf(st.tech, tech && tech.erst);
-      const d = Math.min((tech && tech.dur) || (m.via ? 0.9 : 0.62 + 0.0016 * Math.abs(m.turn || 0)), 0.85 * gap);
+      // langsame Bewegung (laut Buch): ruhig und gleichmäßig über einen guten Teil der Zeit, ohne Kime
+      const d = st.slow ? SLOW * gap : Math.min((tech && tech.dur) || (m.via ? 0.9 : 0.62 + 0.0016 * Math.abs(m.turn || 0)), 0.85 * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
       const look = m.look == null ? null : wrap(m.body - m.look);
       const mark = (t1) => marks.push({ t: st.t, t1, n: st.n, kan: st.kan, ro: st.ro, text: `${st.stance} · ${st.tech}`, kiai: st.kiai });
@@ -479,7 +507,8 @@
       } else {
         const tr = track(tech, side);
         end = tr(1);
-        if (tech.direkt) {
+        if (st.slow) arms = calm(cur.up, end);
+        else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen
           const tl = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: cur.up }, { t: 1, p: end, e: 'kime' }]);
           arms = (u) => upper(tl(u));
@@ -496,7 +525,17 @@
         arms = (u) => M(raw(u), { look: lerp(from, look, ramp(0, 0.3, u)) });
       }
       const nk = key(m, st.stance, cur, end);
-      const seg = segment(cur, nk, { t0: st.t, t1: st.t + d, arms });
+      const o = { t0: st.t, t1: st.t + d, arms };
+      if (st.slow) o.ease = smooth;
+      // Wechseln beide Füße den Platz, geht zuerst der, mit dem die Füße dazwischen näher beieinander stehen (Heian Sandan 19:
+      // erst der rechte neben den linken, dann der linke hinaus); beim Yori-ashi gleiten beide zugleich
+      const gap2 = (a, b) => len(sub(a.low.L.c, b.low.R.c));
+      if (gap2(cur, nk) < gap2(nk, cur) - 1e-6) o.first = 'R';
+      o.teilen = true;
+      if (/yori-ashi/i.test(m.h || '')) o.gleich = true;
+      // Fumikomi: der Fuß, der den Platz wechselt, kommt mit dem Knie hoch und stampft auf
+      if (/fumikomi/i.test(st.note || '')) o.hoch = true;
+      const seg = segment(cur, nk, o);
       if (m.via) {
         const s = m.via[0] ? 'R' : 'L';
         seg.via = { s, c: [-m.via[1] * SCALE, m.via[2] * SCALE], rel: wrap(-m.via[3] + m.body) };
@@ -537,9 +576,10 @@
       if (prev) {
         ['fistL', 'fistR', 'ankleL', 'ankleR', 'pel', 'head'].forEach((q) => {
           const v = Math.hypot(J[q][0] - prev[q][0], J[q][1] - prev[q][1], J[q][2] - prev[q][2]) * fps;
-          // Fäuste und ein Fuß in der Luft (Tritt) dürfen schnell sein, alles andere nicht
+          // Fäuste und ein Fuß in der Luft (Tritt) dürfen schnell sein, alles andere nicht. Ein Fuß am Boden etwas mehr als
+          // Hüfte und Kopf: der größte Schritt im schnellsten Takt (Heian Sandan 9, gut 2 m in 0,3 s) kommt auf 14 m/s
           const fast = q.startsWith('fist') || (q.startsWith('ankle') && Math.max(J[q][1], prev[q][1]) > 0.15);
-          if (v > (fast ? 28 : 12)) out.push(`${t.toFixed(2)} s: ${q} springt (${v.toFixed(1)} m/s)`);
+          if (v > (fast ? 28 : q.startsWith('ankle') ? 16 : 12)) out.push(`${t.toFixed(2)} s: ${q} springt (${v.toFixed(1)} m/s)`);
         });
       }
       low = Math.max(low, 0.6 - P.pelvis[1]);
