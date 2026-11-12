@@ -781,7 +781,20 @@
   const HZ_K = E.solve(HZ_E0).kneeR;
   const HZ_EXT = M(HZ_E0, { hL: chestAt(HZ_E0, V.add(HZ_K, [0.13, 0.1, 0.02])), hR: chestAt(HZ_E0, V.add(HZ_K, [-0.13, 0.1, 0.02])), eL: [0.5, -0.5, 0.3], eR: [-0.5, -0.5, 0.3] });
   D['tc:hiza-geri'] = K(M(S.zk, { hL: [0.08, 0.06, 0.48], hR: [-0.08, 0.06, 0.48] }), HZ_CH, HZ_EXT, M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'side3' }));
-  D['tc:mawashi-hiza-geri'] = K(ZK_KAMAE, M(ZK_KAMAE, { pelvis: [0, 0.84, 0.22], yaw: 10, R: { x: -0.5, z: 0.0, y: 0.5, yaw: -40, pitch: -40, kp: [-1, 0.6, 0] }, w: [1, 0] }), M(ZK_KAMAE, { pelvis: [0, 0.86, 0.26], yaw: 45, R: { x: -0.08, z: 0.22, y: 0.55, yaw: 20, pitch: -50, kp: [0.3, 0.6, 1] }, w: [1, 0] }), M(hit('kneeR', 'Knie'), { eff: 'kneeR', view: 'front3' }));
+  // Mawashi-hiza-geri: Kniestoß im Bogen. Anfang wie der Mawashi-geri (dessen Bilder): aus Hidari Zenkutsu-dachi zieht das
+  // rechte Knie seitlich hoch, das Bein schwenkt um die Hüfte nach vorn, der Standfuß dreht auf dem Ballen mit. Statt den
+  // Unterschenkel auszuschnappen, bleibt das Bein fest gebeugt (Ferse am Gesäß, Fuß und Zehen zum Schienbein angezogen)
+  // und die Hüfte dreht weit ein: das Knie stößt im schräg ansteigenden Bogen von der Seite ins Ziel vor dem Körper –
+  // dort steht das Bild kurz. Der Oberkörper kippt leicht vom Ziel weg, die Deckung bleibt. Derselbe Weg zurück.
+  const MH_HIT = (() => {
+    const p = E.full(M(MW_MID, { pelvis: [0.1, 0.8, 0.62], yaw: 105, look: 5, L: { yaw: 100 }, R: { x: -0.28, y: 0.9, z: 0.91, kp: [0.3, 0.2, 1], tu: 1 } }));
+    // Fuß rechtwinklig angezogen: Zehen in Richtung der Kniescheibe, Sohle in Richtung des Unterschenkels
+    const [a, n] = UM_BEIN(E.solve(p), p.R.kp);
+    return M(p, { R: { yaw: (Math.atan2(n[0], n[2]) * 180) / Math.PI, pitch: (Math.asin(n[1]) * 180) / Math.PI, sole: a } });
+  })();
+  const MH_KEYS = [{ t: 0, p: MW_A }, { t: 0.1, p: MW_A }, { t: 0.175, p: MW_UP, e: 'fl' }, { t: 0.25, p: MW_CH, e: 'fl' }, { t: 0.31, p: MH_HIT, e: 'kime' }, { t: 0.41, p: MH_HIT },
+    { t: 0.48, p: MW_CH, e: 'fl' }, { t: 0.57, p: MW_UP, e: 'fl' }, { t: 0.69, p: MW_A, e: 'fl' }];
+  D['tc:mawashi-hiza-geri'] = M({ keys: MH_KEYS, fix: UM_FOLGT(MH_KEYS), best: 0.31, dur: 2, eff: 'kneeR', cam: { yaw: -16, pitch: 14 } }, hit('kneeR', 'Knie'));
   // Fumikomi wie in Heian Sandan 12: Füße geschlossen, das linke Bein trägt, rechtes Knie hoch vor den Körper,
   // dann stampft der Fuß mit der Fußkante zur rechten Seite, der Körper senkt sich mit in Kiba-dachi (Blick zur Seite)
   const FU0 = M(KB, { look: -90, pelvis: [0.35, 0.88, 0], L: { x: 0.42, kp: [0.3, 0, 1] }, R: { x: 0.26, z: 0, yaw: -5, kp: [-0.3, 0, 1] } });
