@@ -720,19 +720,23 @@
   };
   const UM_IN = (v, B) => B.map((e) => UM_DOT(v, e));
   const UM_AUS = (l, B) => V.norm(V.add(V.add(V.mul(B[0], l[0]), V.mul(B[1], l[1])), V.mul(B[2], l[2])));
-  const UM_LOKAL = UM_KEYS.map((k) => {
-    const p = E.full(k.p);
-    const J = E.solve(p);
-    const B = UM_BEIN(J, p.R.kp);
-    return { dir: UM_IN(J.dirR, B), sole: UM_IN(J.soleR, B) };
-  });
-  const UM_FIX = (P, t) => {
+  // (als Baustein für eine Bilderfolge: auch Ushiro-mawashi-geri unten)
+  const UM_FOLGT = (keys) => {
+    const lokal = keys.map((k) => {
+      const p = E.full(k.p);
+      const J = E.solve(p);
+      const B = UM_BEIN(J, p.R.kp);
+      return { dir: UM_IN(J.dirR, B), sole: UM_IN(J.soleR, B) };
+    });
+    return (P, t) => UM_FUSS_NACH(keys, lokal, P, t);
+  };
+  const UM_FUSS_NACH = (keys, lokal, P, t) => {
     const k = Math.max(0, Math.min(1, (P.R.y - 0.12) / 0.2));
     if (!k) return P;
     let i = 1;
-    while (i < UM_KEYS.length - 1 && UM_KEYS[i].t < t) i++;
-    const u = Math.max(0, Math.min(1, (t - UM_KEYS[i - 1].t) / (UM_KEYS[i].t - UM_KEYS[i - 1].t || 1)));
-    const [A, Z] = [UM_LOKAL[i - 1], UM_LOKAL[i]];
+    while (i < keys.length - 1 && keys[i].t < t) i++;
+    const u = Math.max(0, Math.min(1, (t - keys[i - 1].t) / (keys[i].t - keys[i - 1].t || 1)));
+    const [A, Z] = [lokal[i - 1], lokal[i]];
     const J = E.solve(P);
     const B = UM_BEIN(J, P.R.kp);
     const dir = UM_AUS(V.mix(A.dir, Z.dir, u), B);
@@ -741,9 +745,36 @@
     const d = V.norm(V.mix(J.dirR, dir, k));
     return M(P, { R: { yaw: (Math.atan2(d[0], d[2]) * 180) / Math.PI, pitch: (Math.asin(Math.max(-1, Math.min(1, d[1]))) * 180) / Math.PI, sole: V.norm(V.mix(J.soleR, sole, k)) } });
   };
-  D['tc:ura-mawashi-geri'] = M({ keys: UM_KEYS, fix: UM_FIX, best: 0.406, dur: 2.4, eff: 'heelR', cam: { yaw: 40, pitch: 5 } }, hit('heelR', 'Sohle / Ferse'));
-  // Ushiro-mawashi-geri: noch der frühere, einfache Ablauf (eigene Angaben, unabhängig vom Ura-mawashi-geri oben)
-  D['tc:ushiro-mawashi-geri'] = M({ best: 0.72, dur: 1.8, eff: 'heelR', view: 'front3' }, hit('heelR', 'Sohle / Ferse'), { keys: [{ t: 0, p: KAMAE_K }, { t: 0.1, p: KAMAE_K }, { t: 0.32, p: M(KAMAE_K, { yaw: -150, look: -170, L: { yaw: -140 }, R: { x: -0.4, z: -0.2, y: 0.4, yaw: -150, pitch: -40, kp: [0, 0.3, -1] }, w: [1, 0] }) }, { t: 0.56, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.7, z: 0.42, y: 1.12, yaw: 30, pitch: 10, sole: [-0.31, 0.95, -0.02], kp: [-0.4, 1, 0.3] } }) }, { t: 0.72, p: M(Y_CH, { look: 0, pelvis: [0.14, 0.84, 0], R: { x: -0.1, z: 0.86, y: 1.08, yaw: 0, pitch: 10, sole: [1, 0, 0], kp: [-0.4, 1, 0.3] } }), e: 'kime' }], marks: ['turn'] });
+  D['tc:ura-mawashi-geri'] = M({ keys: UM_KEYS, fix: UM_FOLGT(UM_KEYS), best: 0.406, dur: 2.4, eff: 'heelR', cam: { yaw: 40, pitch: 5 } }, hit('heelR', 'Sohle / Ferse'));
+  // Ushiro-mawashi-geri: derselbe Hakentritt aus einer Körperdrehung wie beim Ushiro-geri. Aus Hidari Zenkutsu-dachi dreht
+  // der Körper rechts herum (im Uhrzeigersinn) auf dem Ballen des vorderen linken Fußes, bis der Rücken zum Ziel zeigt; der
+  // Kopf schnellt voraus und sucht das Ziel über die rechte Schulter. Das rechte Knie zieht dabei vor dem Körper hoch
+  // (weg vom Ziel), dann stößt das Bein aus der Drehung seitlich hinaus – links neben das Ziel – und der Unterschenkel hakt
+  // mit der weiterlaufenden Drehung zurück ins Ziel. Treffer und alles danach sind die Bilder des Ura-mawashi-geri: die
+  // Drehung läuft in derselben Richtung weiter, das Bein geht über das angezogene Knie zurück – nach einer ganzen Drehung
+  // steht die Figur wieder im Ausgangsstand. Winkel laufen dabei stetig weiter (−40° … −400°), damit nichts zurückdreht.
+  const UW_RUM = (p) => { const f = E.full(p); return M(p, { yaw: f.yaw - 360, look: -360, L: { yaw: f.L.yaw - 360 } }); };
+  const UW_ARME = { hL: [0.14, -0.12, 0.26], hR: [-0.14, -0.14, 0.24], eL: [0.5, -1, 0.2], eR: [-0.3, -1, 0.1] };
+  // Vierteldrehung: beide Füße drehen am Boden mit, das Gewicht geht aufs linke Bein, der Blick hält noch das Ziel
+  const UW_1 = M(MW_A, UW_ARME, { pelvis: [0.05, 0.72, 0.24], yaw: -110, chest: -10, lean: 6, look: -70, L: { yaw: -70 }, R: { x: -0.1, z: -0.34, yaw: -120 }, w: [0.8, 0.2] });
+  // Rücken zum Ziel: rechtes Knie hoch vor dem Körper (weg vom Ziel), Oberkörper leicht vorgeneigt, Blick über die rechte Schulter
+  const UW_2 = (() => {
+    const p = E.full(M(MW_A, UW_ARME, { pelvis: [0.11, 0.8, 0.58], yaw: -185, chest: -18, lean: 14, look: -280, L: { yaw: -150 }, R: { x: 0.24, y: 0.42, z: 0.5, kp: [0.2, 0.2, -1] }, w: [1, 0] }));
+    // Fuß locker gestreckt: Zehen 40° von der Richtung der Kniescheibe zum Unterschenkel hin
+    const [a, n] = UM_BEIN(E.solve(p), p.R.kp);
+    const f = (40 * Math.PI) / 180;
+    const d = V.add(V.mul(n, Math.cos(f)), V.mul(a, Math.sin(f)));
+    return M(p, { R: { yaw: (Math.atan2(d[0], d[2]) * 180) / Math.PI - 360, pitch: (Math.asin(d[1]) * 180) / Math.PI, sole: V.sub(V.mul(a, Math.cos(f)), V.mul(n, Math.sin(f))) } });
+  })();
+  // Bein stößt seitlich hinaus (Stellung des Fußes wie im gestreckten Bild des Ura-mawashi-geri), der Körper ist noch nicht
+  // ganz herum
+  const UW_3 = M(UM_EXT, { yaw: -215, chest: -15, lean: 12, roll: 20, look: -340, L: { yaw: -205 } });
+  const UW_KEYS = [{ t: 0, p: MW_A }, { t: 0.1, p: MW_A }, { t: 0.165, p: UW_1, e: 'fl' }, { t: 0.235, p: UW_2, e: 'fl' }, { t: 0.31, p: UW_3, e: 'fl' },
+    { t: 0.393, p: UW_RUM(UM_HIT), e: 'kime' }, { t: 0.476, p: UW_RUM(UM_HIT) }, { t: 0.52, p: UW_RUM(UM_EXT), e: 'fl' }, { t: 0.59, p: UW_RUM(UM_CH), e: 'fl' }, { t: 0.681, p: UW_RUM(UM_UP), e: 'fl' }, { t: 0.791, p: UW_RUM(MW_A), e: 'fl' }];
+  // Bis zur Vierteldrehung bleibt der rechte Fuß flach am Boden (das fließende Überblenden zöge ihn sonst kurz unter den Boden)
+  const UW_FUSS = UM_FOLGT(UW_KEYS);
+  const UW_FIX = (P, t) => UW_FUSS(t < UW_KEYS[2].t ? M(P, { R: { y: 0.075, pitch: 0 } }) : P, t);
+  D['tc:ushiro-mawashi-geri'] = M({ keys: UW_KEYS, fix: UW_FIX, best: 0.393, dur: 2.4, eff: 'heelR', cam: { yaw: 40, pitch: 5 }, marks: ['turn'] }, hit('heelR', 'Sohle / Ferse'));
   // Hiza-geri: beide Hände greifen vorn auf Kopfhöhe und ziehen herab, das Knie stößt zwischen den Händen nach oben
   const HZ_CH = BAL(M(S.zk, { pelvis: [0, 0.84, 0.5], hL: [0.12, -0.05, 0.42], hR: [-0.12, -0.05, 0.42], R: { x: -0.08, z: 0.35, y: 0.42, pitch: -70, kp: [0, 0.6, 1] }, w: [1, 0] }), 'L');
   const HZ_E0 = BAL(M(S.zk, { pelvis: [0, 0.86, 0.5], lean: 8, R: { x: -0.07, z: 0.62, y: 0.6, pitch: -65, kp: [0, 1, 0.6] }, w: [1, 0] }), 'L');
