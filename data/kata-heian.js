@@ -226,7 +226,7 @@
         { f: [[0.32, 1.03, 92, 0.5], [0.31, 0.48, 88, 0.5]], body: 90, look: 180, turn: -180, h: 'Rechtes Knie hoch, Fumikomi Richtung Start' },
         { f: [[0.32, 1.03, 92, 0.5], [0.31, 0.48, 88, 0.5]], body: 90, look: 180, h: 'Füße bleiben stehen' },
         { f: [[0.34, -0.13, 195, 0.7], [0.19, 0.45, 201, 0.3]], body: 180, turn: 90, h: 'Linker Fuß tritt Richtung Start vor – über die Grundlinie hinaus' },
-        { f: [[-0.47, 0.15, 3, 0.5], [0.24, 0.15, 359, 0.5]], body: 0, turn: 180, h: 'Rechter Fuß tritt neben den linken, linker Fuß gleitet nach links – Kiba-dachi zur Vorderseite' },
+        { f: [[-0.47, 0.15, 3, 0.5], [0.24, 0.15, 359, 0.5]], body: 0, turn: -180, h: 'Rechter Fuß tritt neben den linken, linker Fuß gleitet nach links – Kiba-dachi zur Vorderseite' },
         { f: [[-0.24, 0.16, 3, 0.5], [0.42, 0.15, 359, 0.5]], body: 0, h: 'Yori-ashi nach rechts: beide Füße gleiten, der Stand bleibt' },
       ],
       naore: { f: [[-0.23, 0.14, 334, 0.5], [0.19, 0.11, 29, 0.5]], body: 0, h: 'Linker Fuß bleibt, rechter Fuß zieht heran' },

@@ -222,7 +222,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
 | 16 | Kiba-dachi | Migi Furi-enpi (Migi Ashi Fumikomi) | Rechtes Knie hoch, Fumikomi Richtung Start | rechts, Blick Start, Wendung ½ links herum | 36 |
 | 17 | Kiba-dachi | Migi Uraken Migi Sokumen Tate-mawashi-uchi | Füße bleiben stehen | rechts, Blick Start | 36 |
 | 18 | Hidari Zenkutsu-dachi | Hidari Chudan Oi-zuki | Linker Fuß tritt Richtung Start vor – über die Grundlinie hinaus | Start, Wendung ¼ rechts herum | 37 |
-| 19 | Kiba-dachi | Uken Hidari Kata-ue Koho-tsukiage + Hidari Ushiro-enpi | Rechter Fuß tritt neben den linken, linker Fuß gleitet nach links – Kiba-dachi zur Vorderseite | vorne, Wendung ½ rechts herum | 37 |
+| 19 | Kiba-dachi | Uken Hidari Kata-ue Koho-tsukiage + Hidari Ushiro-enpi | Rechter Fuß tritt neben den linken, linker Fuß gleitet nach links – Kiba-dachi zur Vorderseite | vorne, Wendung ½ links herum | 37 |
 | 20 | Kiba-dachi | Saken Migi Kata-ue Koho-tsukiage + Migi Ushiro-enpi (Migi-e Yori-ashi) – **Kiai** | Yori-ashi nach rechts: beide Füße gleiten, der Stand bleibt | vorne | 38 |
 <!-- /ablauf -->
 

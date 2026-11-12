@@ -27,6 +27,7 @@
   const LIFT = 0.025; // so hoch hebt der gleitende Fuß ab (Suri-ashi: fast gar nicht)
   const HOCH = 0.38; // so hoch kommt der Fuß beim Stampfen (Fumikomi): Knie hoch, dann fällt er hart auf seinen Platz
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
+  const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
   const STRIKE = 0.22; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
   const LEAD = 75; // so weit dreht der Kopf dem Körper voraus (Grad)
   const BOW = 30; // Verbeugung (Grad)
@@ -71,6 +72,7 @@
   // lang: der Ablauf selbst füllt fast die ganze Bewegung (großer Kreis, fließende Folge);
   // erst: bei zwei Techniken („… + …“) gilt die Seite der zuerst genannten (sonst die der zuletzt genannten);
   // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind.
+  // schnapp: nach dem Treffer schnappt der Arm gleich zurück in die Haltung, aus der der Ablauf beginnt (Uraken).
   // Ein dritter Eintrag beschränkt die Zuordnung auf Stände, auf die er passt (der erste passende Eintrag gilt)
   const TECH = [
     [/gedan-barai/i, { def: 'mv:gedan-barai', side: 'L', from: 0.25 }],
@@ -92,7 +94,7 @@
     [/kentsui .*uchi-mawashi-uchi/i, { def: 'kentsui-uchi-mawashi', side: 'L', from: 0.25 }],
     [/ryokoshi-kamae/i, { def: 'ryokoshi-kamae', side: 'R', from: 0 }],
     [/furi-enpi/i, { def: 'furi-enpi', side: 'R', from: 0.25 }],
-    [/uraken .*tate-mawashi-uchi/i, { def: 'uraken-tate', side: 'R', from: 0.513 }],
+    [/uraken .*tate-mawashi-uchi/i, { def: 'uraken-tate', side: 'R', from: 0.513, schnapp: true }],
     [/koho-tsukiage/i, { def: 'tsukiage-enpi', side: 'R', from: 0.25, erst: true }],
   ];
   // Fußtritte: Ablauf im Lexikon bzw. der Kata, side: Bein, das dort tritt; a … b: Zeitspanne im Ablauf vom angezogenen
@@ -213,15 +215,39 @@
     const nach = both && o.teilen && Math.min(way.L, way.R) < 0.5 && 3 * Math.min(way.L, way.R) < Math.max(way.L, way.R);
     const gleich = o.gleich || nach;
     if (both && o.teilen && !gleich) seg.share = { L: way.L / (way.L + way.R), R: way.R / (way.L + way.R) };
+    // Yori-ashi (gleich): der Fuß in Laufrichtung geht voraus, der andere stößt ab und zieht sofort nach – die Wege
+    // überlappen, die Hüfte geht mit beiden mit. Gleiten beide genau zugleich, sieht es aus, als schwebe die Figur
+    let lead = null;
+    if (both && o.gleich) {
+      lead = dot(sub(B.low.L.c, A.low.L.c), sub(A.low.L.c, A.low.R.c)) > 0 ? 'L' : 'R';
+      seg.share = { L: 0.5, R: 0.5 };
+    }
     seg.feet = {};
     ['L', 'R'].forEach((s) => {
-      const [u0, u1] = both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
+      const [u0, u1] = lead ? (s === lead ? [0, 0.72] : [0.28, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
       seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1);
     });
     // Hüfte: beim Vorbeigleiten über dem Standbein (zwischen den Füßen), sonst gerade hinüber
     const pl = seg.feet.L.k > seg.feet.R.k ? seg.feet.L : seg.feet.R;
     seg.pelMid = mix(A.low.pel, B.low.pel, 0.5);
     if (pl.k > 0) seg.pelMid = mix(seg.pelMid, mix(pl.sp, pl.near, 0.5), pl.k);
+    // Fumikomi (hoch): Der Körper dreht erst in die Richtung des Schritts, das Knie kommt gerade nach vorne hoch, und erst
+    // mit dem Aufsetzen dreht alles in den neuen Stand ein – nicht gleichmäßig über den ganzen Schritt (das Knie schwänge
+    // sonst seitlich herum wie bei einem Mawashi-geri)
+    if (o.hoch) {
+      const s = ['L', 'R'].find((q) => seg.feet[q].moved);
+      if (s && !both) {
+        const dir = sub(B.low[s].c, A.low[s].c);
+        const turn = B.byaw - A.byaw;
+        // Schrittrichtung als Winkel innerhalb der Drehung (liegt sie außerhalb: das nähere Ende)
+        let rel = wrap(Math.atan2(dir[0], dir[1]) / RAD - A.byaw);
+        if (turn >= 0 ? rel < -1e-6 : rel > 1e-6) rel += turn >= 0 ? 360 : -360;
+        if (Math.abs(rel) > Math.abs(turn)) rel = Math.abs(rel) - Math.abs(turn) < 360 - Math.abs(rel) ? turn : 0;
+        const yawMid = A.byaw + rel;
+        seg.yawAt = (u) => (u < 0.3 ? lerp(A.byaw, yawMid, smooth(u / 0.3)) : u < 0.68 ? yawMid : lerp(yawMid, B.byaw, smooth((u - 0.68) / 0.32)));
+        seg.knee = { s, kp: [dir[0] / len(dir), 0.3, dir[1] / len(dir)] };
+      }
+    }
     // Gibt nur eines der beiden Bilder die Sohle eines Fußes vor, bekommt das andere die dort von selbst gerechnete –
     // sonst schlüge die Sohle beim Überblenden um (wie in Figur3D.timeline)
     ['L', 'R'].forEach((s) => {
@@ -244,7 +270,7 @@
   function poseAt(seg, u) {
     const { A, B } = seg;
     const eb = seg.ease(u);
-    const byaw = lerp(A.byaw, B.byaw, eb);
+    const byaw = seg.yawAt ? seg.yawAt(u) : lerp(A.byaw, B.byaw, eb);
     const up = seg.arms(u);
     const P = { w: [lerp(A.low.w[0], B.low.w[0], eb), lerp(A.low.w[1], B.low.w[1], eb)] };
     UP.forEach((k) => (P[k] = up[k]));
@@ -279,7 +305,7 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee.s === s ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee.kp, up) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb);
@@ -470,7 +496,9 @@
       const tech = (TECH.find(([rx, , stand]) => rx.test(st.tech) && (!stand || stand.test(st.stance))) || [])[1];
       const side = sideOf(st.tech, tech && tech.erst);
       // langsame Bewegung (laut Buch): ruhig und gleichmäßig über einen guten Teil der Zeit, ohne Kime
-      const d = st.slow ? SLOW * gap : Math.min((tech && tech.dur) || (m.via ? 0.9 : 0.62 + 0.0016 * Math.abs(m.turn || 0)), 0.85 * gap);
+      const yori = /yori-ashi/i.test(m.h || '');
+      const d = st.slow ? SLOW * gap
+        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : 0.62 + 0.0016 * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
       const look = m.look == null ? null : wrap(m.body - m.look);
       const mark = (t1) => marks.push({ t: st.t, t1, n: st.n, kan: st.kan, ro: st.ro, text: `${st.stance} · ${st.tech}`, kiai: st.kiai });
@@ -532,7 +560,7 @@
       const gap2 = (a, b) => len(sub(a.low.L.c, b.low.R.c));
       if (gap2(cur, nk) < gap2(nk, cur) - 1e-6) o.first = 'R';
       o.teilen = true;
-      if (/yori-ashi/i.test(m.h || '')) o.gleich = true;
+      if (yori) o.gleich = true;
       // Fumikomi: der Fuß, der den Platz wechselt, kommt mit dem Knie hoch und stampft auf
       if (/fumikomi/i.test(st.note || '')) o.hoch = true;
       const seg = segment(cur, nk, o);
@@ -543,8 +571,16 @@
       segs.push(seg);
       mark(st.t + d);
       cur = nk;
+      if (tech && tech.schnapp) {
+        // kurz stehen lassen, dann zurück – das zählt nicht mehr zur Bewegung (ends: der Treffer)
+        const t0 = st.t + d + Math.min(0.1, 0.08 * gap);
+        const back = track(tech, side)(0);
+        const rest = { low: nk.low, byaw: nk.byaw, up: look == null ? back : M(back, { look }) };
+        segs.push(Object.assign(segment(nk, rest, { t0, t1: t0 + Math.min(0.28, 0.3 * gap), arms: calm(nk.up, rest.up) }), { nach: true }));
+        cur = rest;
+      }
     });
-    steps.forEach((st, i) => segs.forEach((sg) => { if (sg.t0 >= st.t - 1e-9 && (i + 1 >= steps.length || sg.t0 < steps[i + 1].t - 1e-9)) ends[i] = Math.max(ends[i], sg.t1); }));
+    steps.forEach((st, i) => segs.forEach((sg) => { if (!sg.nach && sg.t0 >= st.t - 1e-9 && (i + 1 >= steps.length || sg.t0 < steps[i + 1].t - 1e-9)) ends[i] = Math.max(ends[i], sg.t1); }));
     const dur = segs[segs.length - 1].t1 + 1;
     function pose(t) {
       let i = 0;
