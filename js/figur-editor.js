@@ -231,7 +231,7 @@
         R('Fuß kippen (+ Sohle nach innen)', -180, 180, 1, () => footRoll(F, s), (v) => setFootRoll(F, s, v), '°'),
         R('Knie eindrehen (+ nach innen)', -180, 180, 1, () => legTwist(P, s), (v) => setLegTwist(P, s, v), '°'),
         R('Zehen hochziehen', 0, 1, 0.05, () => F.tu, (v) => (F.tu = v), ''),
-        R('Höhe', 0.075, 1.2, 0.005, () => F.y, (v) => (F.y = v), 'm'),
+        R('Höhe', 0.075, 2.2, 0.005, () => F.y, (v) => (F.y = v), 'm'),
         R('vor/zurück', F.z - 1, F.z + 1, 0.005, () => F.z, (v) => (F.z = v), 'm'),
         R('seitlich (+ links)', F.x - 1, F.x + 1, 0.005, () => F.x, (v) => (F.x = v), 'm'),
       ];
@@ -268,7 +268,7 @@
 <p class="pe-helptext" hidden>${HELP}</p>
 <span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-grip" title="Ziehen: Bild höher oder niedriger" aria-hidden="true"></div>
-<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-trackwrap"><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><span class="pe-trackpad" aria-hidden="true"></span></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
+<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb" data-pe="stop" aria-label="Stopp" title="Stopp: Abspielen beenden und zum gewählten Bild zurück">■</button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-trackwrap"><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><span class="pe-trackpad" aria-hidden="true"></span></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
 </div>
 <div class="pe-side">
 <div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="treffer" title="Rot markierte Trefferfläche: welche Fläche, welche Seite, genaue Lage und Größe">Treffer</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Text der ganzen Bewegung zum Kopieren, Import">Ausgabe</button></div>
@@ -347,6 +347,13 @@ ${easeGuide()}
       ev.preventDefault();
       const seg = (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
       setSeg(S.k, clamp(Math.round((seg + (ev.key === 'ArrowRight' ? 0.05 : -0.05)) * 20) / 20, 0.05, 3));
+    });
+    // Leertaste (PC): abspielen bzw. anhalten
+    d.addEventListener('keydown', (ev) => {
+      if (!S || S.keys.length < 2 || ev.key !== ' ' || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+      if (ev.target.closest('input, textarea, select, button')) return;
+      ev.preventDefault();
+      play();
     });
     d.querySelector('.pe-te').addEventListener('change', (ev) => { S.tm[S.k].e = ev.target.value; timing(); });
     // Handy gedreht (Hoch-/Querformat): Einstellungen wandern unter bzw. neben die Figur, die Figur neu einpassen.
@@ -447,11 +454,13 @@ ${easeGuide()}
     if (n < 2) return;
     fillSrc(d.querySelector('.pe-cpsrc'));
     const pb = d.querySelector('[data-pe="play"]');
-    pb.textContent = S.play ? '■' : '▶';
-    pb.setAttribute('aria-label', S.play ? 'Anhalten' : 'Bewegung abspielen');
-    pb.title = S.play ? 'Anhalten' : `Bewegung mit allen Änderungen abspielen${S.speed < 1 ? ' – in Zeitlupe' : ''}`;
+    const run = S.play && !S.play.paused;
+    pb.textContent = run ? '❚❚' : '▶';
+    pb.setAttribute('aria-label', run ? 'Pause' : S.play ? 'Weiter abspielen' : 'Bewegung abspielen');
+    pb.title = run ? 'Pause: an dieser Stelle anhalten (▶ spielt weiter)' : S.play ? 'Ab hier weiter abspielen' : `Bewegung mit allen Änderungen abspielen${S.speed < 1 ? ' – in Zeitlupe' : ''}`;
     d.querySelector('[data-pe="slow"]').setAttribute('aria-pressed', String(S.speed < 1));
-    pb.setAttribute('aria-pressed', String(!!S.play));
+    pb.setAttribute('aria-pressed', String(!!run));
+    d.querySelector('[data-pe="stop"]').disabled = !S.play;
     d.querySelector('[data-pe="fprev"]').disabled = !showList().some((j) => j < S.k);
     d.querySelector('[data-pe="fnext"]').disabled = !showList().some((j) => j > S.k);
     d.querySelectorAll('[data-pe="fbest"]').forEach((b) => {
@@ -474,6 +483,8 @@ ${easeGuide()}
       const hold = i && holdOf(i) !== i;
       return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${nr(i)} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${nr(holdOf(i))}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${nr(i)}</span></button>`;
     }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden></span><span class="pe-dlab" hidden></span>`;
+    // beim Abspielen (auch angehalten) bleibt der Balken an seiner Stelle
+    if (S.play) headAt(S.play.u || 0);
     // Touch: so breit, dass auch die zwei dichtesten Punkte mindestens 28 px auseinanderliegen (höchstens 2400 px)
     if (d.classList.contains('pe-coarse')) {
       let minF = 1;
@@ -750,28 +761,57 @@ ${easeGuide()}
   }
 
   /* ---------- Abspielen: die Bewegung mit den geänderten Bildern ---------- */
-  function play() {
-    if (S.play) { S.play = null; frames(); draw(); return; }
-    keep();
-    const K = effKeys();
-    const tl = E.timeline(K, S.e.d.fix);
-    const t0 = K[0].t;
-    const t1 = K[K.length - 1].t;
-    const dur = (S.dur * (t1 - t0 || 1)) / (S.speed || 1);
-    const start = performance.now();
-    const run = S.play = { pose: tl(t0) };
+  // ▶ spielt ab, ❚❚ hält an der Stelle an (▶ spielt von dort weiter), ■ beendet und zeigt wieder das gewählte Bild
+  function headAt(u) {
+    const ph = S.dlg.querySelector('.pe-head');
+    // Zeitleiste reicht vom ersten bis zum letzten Bild: der Balken steht beim Anteil der abgelaufenen Bewegung
+    if (ph) { ph.hidden = false; ph.style.left = `${clamp(u, 0, 1) * 100}%`; }
+  }
+  function stop() {
+    if (!S.play) return;
+    S.play = null;
+    S.fast = false;
     frames();
+    draw();
+  }
+  function play() {
+    const old = S.play;
+    if (old && !old.paused) {
+      old.paused = true;
+      S.fast = false;
+      frames();
+      headAt(old.u);
+      draw();
+      return;
+    }
+    let run = old;
+    if (!run) {
+      keep();
+      const K = effKeys();
+      const tl = E.timeline(K, S.e.d.fix);
+      const t0 = K[0].t;
+      const t1 = K[K.length - 1].t;
+      run = S.play = { tl, t0, t1, u: 0, pose: tl(t0) };
+    }
+    run.paused = false;
+    // am Ende angehalten: wieder von vorn
+    if (run.u >= 1) run.u = 0;
+    // Zeitlupe wirkt auch beim Weiterspielen
+    const dur = (S.dur * (run.t1 - run.t0 || 1)) / (S.speed || 1);
+    const u0 = run.u;
+    const start = performance.now();
+    frames();
+    headAt(u0);
     const step = (now) => {
-      if (!S || S.play !== run) return;
-      const u = Math.min(1, (now - start) / 1000 / dur);
-      run.pose = tl(t0 + (t1 - t0) * u);
-      const ph = S.dlg.querySelector('.pe-head');
-      // Zeitleiste reicht vom ersten bis zum letzten Bild: der Balken steht beim Anteil der abgelaufenen Bewegung
-      if (ph) { ph.hidden = false; ph.style.left = `${clamp(u, 0, 1) * 100}%`; }
+      if (!S || S.play !== run || run.paused) return;
+      const u = clamp(u0 + (now - start) / 1000 / dur, 0, 1);
+      run.u = u;
+      run.pose = run.tl(run.t0 + (run.t1 - run.t0) * u);
+      headAt(u);
       S.fast = true;
       draw();
       if (u < 1) requestAnimationFrame(step);
-      else setTimeout(() => { if (S && S.play === run) { S.play = null; S.fast = false; frames(); draw(); } }, 600);
+      else setTimeout(() => { if (S && S.play === run && !run.paused) stop(); }, 600);
     };
     requestAnimationFrame(step);
   }
@@ -869,7 +909,9 @@ ${easeGuide()}
     if (S.undo.length > 60) S.undo.shift();
   }
   // fast: während des Ziehens (kleineres Bild, Ausgabe erst danach)
-  function changed(fast) {
+  // view: nur die Ansicht gedreht/gezoomt – ein angehaltenes Abspielen bleibt dann stehen, sonst endet es
+  function changed(fast, view) {
+    if (S.play && !view) S.play = null;
     S.fast = fast;
     sync();
     draw();
@@ -1208,6 +1250,7 @@ ${easeGuide()}
       draw();
     }
     if (a === 'play') return play();
+    if (a === 'stop') return stop();
     if (a === 'slow') {
       S.speed = S.speed < 1 ? 1 : 0.25;
       frames();
@@ -1444,13 +1487,13 @@ ${easeGuide()}
       S.fast = true;
       draw();
       clearTimeout(S.wheelT);
-      S.wheelT = setTimeout(() => S && changed(false), 200);
+      S.wheelT = setTimeout(() => S && changed(false, true), 200);
     }, { passive: false });
     stage.addEventListener('pointerdown', (ev) => {
       if (!S || !S.C) return;
       // Werkzeugleiste und Hilfe im Bild sind Knöpfe, kein Ziehen
       if (ev.target.closest('button, .pe-helptext')) return;
-      if (S.play) { S.play = null; frames(); }
+      if (S.play && !S.play.paused) { S.play = null; frames(); }
       stage.setPointerCapture && stage.setPointerCapture(ev.pointerId);
       // rechte/mittlere Maustaste oder Umschalt: verschieben statt drehen
       pts.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, pan: ev.button === 1 || ev.button === 2 || ev.shiftKey });
@@ -1464,7 +1507,7 @@ ${easeGuide()}
       const [px, py] = xy(ev);
       const reach = 26 * (S.scale || 1);
       let best = null;
-      (S.hide ? [] : spots()).forEach((s) => {
+      (S.hide || S.play ? [] : spots()).forEach((s) => {
         const d = Math.hypot(s.q[0] - px, s.q[1] - py) - (s.p.id === S.sel ? 8 * (S.scale || 1) : 0);
         if (d < reach && (!best || d < best.d)) best = Object.assign({ d }, s);
       });
@@ -1517,8 +1560,9 @@ ${easeGuide()}
       if (pts.size) return;
       // nur angetippt: kein Schritt zum Rückgängigmachen
       if (grab && !grab.moved) S.undo.pop();
+      const moved = !!(grab && grab.moved);
       grab = null;
-      if (S) changed(false);
+      if (S) changed(false, !moved);
     };
     stage.addEventListener('pointerup', up);
     stage.addEventListener('pointercancel', up);
