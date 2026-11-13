@@ -46,6 +46,9 @@
   // bleibt mit höchstens 1,24 m darunter und damit unverändert.
   const MAXLEN = 1.25;
   const RENOJI = 0.55; // längster Renoji-dachi (Meter zwischen den Fußmitten)
+  // Kürzester Zenkutsu-dachi: die Skizze zeichnet einzelne sehr kurz (Heian Godan 8–11: 0,81 m). Betrifft außerdem leicht
+  // Heian Nidan 11, Sandan 10 und Yondan 20–21 (je Fuß höchstens 3 cm)
+  const MINZK = 0.95;
 
   /* ---------- Rechnen ---------- */
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -462,7 +465,7 @@
     return { low: Object.assign({}, K.low, { L: foot(K.low.L), R: foot(K.low.R) }), byaw, up: M(K.up, { yaw: K.up.yaw - d, look: K.up.look - d }) };
   }
 
-  // Zu lange Stände kürzen (MAXLEN): Jeder Fuß hat einen Platz, solange er stehen bleibt. Ist ein Stand zu lang, rücken
+  // Zu lange Stände kürzen (MAXLEN), zu kurze Zenkutsu-dachi verlängern (MINZK): Jeder Fuß hat einen Platz, solange er stehen bleibt. Ist ein Stand zu lang, rücken
   // seine beiden Plätze aufeinander zu, jeder um die Hälfte – so verteilt sich die Kürzung auf die Stände davor und danach,
   // statt dass ein Fuß allein weit neben der Karte landet. Rei, Yoi und Naore zählen nicht (sie bekommen die Breite der Figur).
   function shorten(steps) {
@@ -487,6 +490,14 @@
         // Renoji-dachi ist ein kurzer Stand: der vordere, leichte Fuß steht nicht so weit weg (nur er rückt heran)
         const reno = /renoji/i.test(st.stance);
         const max = reno ? RENOJI : MAXLEN;
+        // ein zu kurzer Zenkutsu-dachi wird länger: beide Plätze rücken je zur Hälfte auseinander
+        if (/zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance) && l < MINZK - 1e-4) {
+          const push = mul(d, (0.5 * (MINZK - l)) / l);
+          pts[node[j][0]] = sub(a, push);
+          pts[node[j][1]] = add(b, push);
+          over = changed = true;
+          return;
+        }
         if (l <= max + 1e-4) return;
         const cut = mul(d, (l - max) / l);
         const part = reno ? (f[0][3] < f[1][3] ? [1, 0] : [0, 1]) : [0.5, 0.5];
@@ -703,7 +714,11 @@
       if (tech && tech.halten) {
         // Oberkörper bleibt im Raum stehen: die Hüftdrehung gleicht die Wendung der Füße aus
         end = M(cur.up, { yaw: cur.up.yaw + (m.turn != null ? m.turn : wrap(m.body + cur.byaw)) });
-        arms = calm(cur.up, end);
+        // … und zwar im selben Takt wie die Füße, sonst pendelt die Hüfte dazwischen hin und her
+        const base = cur.up;
+        const y1 = end.yaw;
+        const ease = st.slow ? smooth : stepEase;
+        arms = (u) => M(base, { yaw: lerp(base.yaw, y1, ease(u)) });
       } else if (!tech) {
         warn.push(`${st.n}: keine Figur-Technik für „${st.tech}“ – Fäuste an der Hüfte`);
         end = M(cur.up, { hL: [-H.hip[0], H.hip[1], H.hip[2]], hR: H.hip, yaw: 0, chest: 0, lean: 0 });
@@ -751,6 +766,8 @@
       // Fumikomi: der Fuß, der den Platz wechselt, kommt mit dem Knie hoch und stampft auf
       if (/fumikomi/i.test(st.note || '')) o.hoch = true;
       const seg = segment(cur, nk, o);
+      // bleibt der Oberkörper stehen, bleibt auch der Blick, wo er ist
+      if (tech && tech.halten && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
       if (m.via) {
         const s = m.via[0] ? 'R' : 'L';
         seg.via = { s, c: [-m.via[1] * SCALE, m.via[2] * SCALE], rel: wrap(-m.via[3] + m.body) };

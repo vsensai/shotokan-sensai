@@ -1169,12 +1169,12 @@
   ], { eff: 'fistR' });
 
   /* Heian Godan */
-  // 9 → 10: Ryosho Juji Chudan Osae-uke – die offenen Hände drücken vor dem Bauch nach unten und liegen am Ende
+  // 9 → 10: Ryosho Juji Chudan Osae-uke – die offenen Hände drücken rechts vor der Hüfte nach unten und liegen am Ende
   // aufeinander, Handballen auf Handballen: die rechte unten, Handrücken nach unten, Fingerspitzen nach vorn; die linke
   // darauf, Handrücken nach oben, Fingerspitzen nach rechts
   KATA['juji-osae-uke'] = T(M(S.zks, HANDS_HIP), M(S.zks, { oL: 1, oR: 1,
-    hR: [0.0, -0.23, 0.28], eR: [-1, -0.5, -0.1], pR: [0, 1, 0], fR: [0, 0, 1],
-    hL: [0.035, -0.195, 0.31], eL: [1, -0.3, 0.1], pL: [0, -1, 0], fL: [-1, 0, 0] }));
+    hR: [-0.15, -0.23, 0.24], eR: [-1, -0.5, -0.3], pR: [0, 1, 0], fR: [0, 0, 1],
+    hL: [-0.115, -0.195, 0.27], eL: [1, -0.4, 0.3], pL: [0, -1, 0], fL: [-1, 0, 0] }));
   // 13: Gedan-barai zur rechten Seite im Kiba-dachi – die Faust holt an der linken Schulter aus und fegt über das rechte Knie
   KATA['gedan-barai-kiba'] = T(M(KB, { look: -90, hR: [0.13, 0.08, 0.2], eR: [-0.4, -0.8, 0.5], hL: [0.3, -0.25, 0.25] }),
     M(KB, { look: -90, hR: stretch([-0.5, -0.5, 0.06], 'R') }));
