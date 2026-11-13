@@ -1182,9 +1182,10 @@
   // wehrt seitlich ab, die linke Faust stützt am rechten Ellbogen
   KATA['morote-uke-seite'] = T(M(S.kosa, { look: -90, hR: [0.15, -0.3, 0.15], eR: [-0.5, -0.6, 0.5], hL: L(H.hip) }),
     M(S.kosa, { look: -90, hR: [-0.5, -0.02, 0.1], eR: [-0.3, -1, 0], hL: [-0.24, -0.16, 0.16], eL: [0.6, -0.7, 0.4] }));
-  // 18: Uken Uho-tsukiage im Renoji-dachi – die rechte Faust stößt nach rechts oben, der Oberkörper bleibt aufrecht
+  // 18: Uken Uho-tsukiage im Renoji-dachi – die rechte Faust stößt nach rechts oben, der Oberkörper bleibt aufrecht. Die
+  // linke Faust geht mit hoch und liegt am rechten Ellbogen: die Armhaltung des Morote-uke davor, nur beide nach oben
   KATA['uho-tsukiage'] = T(M(S.renoji, { yaw: 0, hR: H.hip, hL: L(H.hip) }),
-    M(S.renoji, { yaw: 0, hR: stretch([-0.3, 0.62, 0.04], 'R'), hL: L(H.hip) }));
+    M(S.renoji, { yaw: 0, hR: stretch([-0.3, 0.62, 0.04], 'R'), hL: [-0.16, 0.22, 0.09], eL: [0.5, -0.7, 0.5] }));
 
   // 21, 23, erster Teil vor dem Manji-uke: Angriff im Zenkutsu-dachi, Hüfte gerade nach vorn – die rechte Handkante
   // schlägt nach vorn unten (Shuto Gedan-uchikomi), die linke offene Hand wehrt am rechten Ohr ab (Jodan Nagashi-uke).
