@@ -8,7 +8,9 @@
    Knie angezogen, bis die nächste Bewegung den Fuß absetzt. Stände, die die Skizze länger zeichnet, als die Beine der
    Figur reichen, werden gekürzt (MAXLEN). Abläufe, die nur die Kata braucht, stehen in SK.fig3dKata (figur-posen.js).
    Aus den Daten der Kata kommen außerdem: langsame Bewegungen (slow), Stampfen mit hohem Knie (Hinweis „Fumikomi“ in seq),
-   Gleiten beider Füße (Fußarbeit „Yori-ashi“ in ansage), der Sprungschritt und der Sprung („Sprung…“, „Tobikomi“). Steht die
+   Gleiten beider Füße (Fußarbeit „Yori-ashi“ in ansage), der Sprungschritt und der Sprung („Sprung…“, „Tobikomi“), der
+   Kreuzschritt zur Seite (Stand „… Ashi-mae Kosa“: der Fuß kreuzt vorn, die Hüfte bleibt tief), das Namigaeshi (Hinweis
+   „Namigaeshi“ mit Zwischenschritt via) und die Yoi-Haltung der Kata (YOI). Steht die
    Figur auf einem Bein (Ashi-dachi) und die nächste Bewegung tritt, ist das Bild das angezogene Knie dieses Tritts.
    Ergebnis: pose(t) für jeden Zeitpunkt (Sekunden), im Takt der Kata-Ansage (SK.ansageTimeline).
    Welt wie in figur3d.js: x = links (bei Blick nach vorne), y = oben, z = vorne; Karte: x rechts, y vorne, Winkel im Uhrzeigersinn. */
@@ -49,6 +51,12 @@
   // Kürzester Zenkutsu-dachi: die Skizze zeichnet einzelne sehr kurz (Heian Godan 8–11: 0,81 m). Betrifft außerdem leicht
   // Heian Nidan 11, Sandan 10 und Yondan 20–21 (je Fuß höchstens 3 cm)
   const MINZK = 0.95;
+  // Tekki: Der Kiba-dachi ist das Kennzeichen der Kata, die Skizze zeichnet ihn aber 1,3 bis 1,5 m breit (die Beine der Figur
+  // stünden fast gestreckt). Für diese Kata gilt deshalb eine eigene größte Breite; die Heian-Kata behalten MAXLEN.
+  const KIBA = { 'tekki-shodan': 1.0 };
+  const KOSA = 0.3; // Kreuzschritt (Ashi-mae Kosa): so weit stehen die Fußmitten höchstens auseinander (Meter)
+  const KREUZ = 0.24; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
+  const NAMI = 0.4; // Namigaeshi: so hoch kommt der Fuß (Meter)
 
   /* ---------- Rechnen ---------- */
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -76,7 +84,7 @@
   const stomp = (u) => (u < 0.5 ? smooth(u / 0.5) : u < 0.72 ? 1 : 1 - ((u - 0.72) / 0.28) ** 2);
 
   /* ---------- Stände und Techniken ---------- */
-  const STAND = [[/renoji/i, 'renoji'], [/hizakutsu/i, 'hizaShomen'], [/kosa-dachi/i, 'kosa'], [/ashi-zenkutsu/i, 'ashizk'], [/zenkutsu/i, 'zk'], [/kokutsu/i, 'kk'], [/kiba/i, 'kb'], [/hachiji/i, 'hachiji'], [/musubi/i, 'musubi'], [/heisoku/i, 'heisoku'], [/ashi-dachi/i, 'ashidachi']];
+  const STAND = [[/ashi-mae kosa$/i, 'kosamae'], [/renoji/i, 'renoji'], [/hizakutsu/i, 'hizaShomen'], [/kosa-dachi/i, 'kosa'], [/ashi-zenkutsu/i, 'ashizk'], [/zenkutsu/i, 'zk'], [/kokutsu/i, 'kk'], [/kiba/i, 'kb'], [/hachiji/i, 'hachiji'], [/musubi/i, 'musubi'], [/heisoku/i, 'heisoku'], [/ashi-dachi/i, 'ashidachi']];
   // Technik → Ablauf im Lexikon (SK.fig3dDefs) oder eigener Ablauf der Kata (SK.fig3dKata, ohne „xx:“ davor).
   // side: Seite, die dort arbeitet (andere Seite = gespiegelt); from: Zeitpunkt im Ablauf, an dem ausgeholt ist;
   // direkt: ohne Ausholen aus der vorigen Haltung (Stoß); dur: eigene Dauer der ganzen Bewegung (Sekunden),
@@ -87,9 +95,23 @@
   // halten: der Oberkörper bleibt im Raum, wie er ist, auch wenn die Füße drehen (Jotai sonomama);
   // vor: die Bewegung hat einen ersten Teil in einem anderen Stand (stand) mit eigener Technik – die Füße stehen dabei schon
   // an ihrem Platz, danach wechselt nur der Stand (Heian Godan 21, 23: Angriff im Zenkutsu-dachi, dann Gewicht zurück).
-  // Ein dritter Eintrag beschränkt die Zuordnung auf Stände oder Hinweise der Kata (note), auf die er passt (der erste
-  // passende Eintrag gilt)
+  // bleibt: die Arme bleiben, wie sie sind – nur Blick oder Füße wechseln (Tekki: Kao Migi-muki, Kreuzschritt);
+  // Ein dritter Eintrag beschränkt die Zuordnung auf Stände, Hinweise der Kata (note) oder den Namen der Kata, auf die er
+  // passt (der erste passende Eintrag gilt)
   const TECH = [
+    // Tekki Shodan
+    [/^kao (migi|hidari)-muki \(/i, { bleibt: true }],
+    [/fuß kreuzt langsam/i, { bleibt: true }],
+    [/sokumen chudan-zuki \+ .*kagi-zuki/i, { def: 'zuki-kagi-zuki', side: 'L', from: 0.25, direkt: true, erst: true }],
+    [/kagi-zuki/i, { def: 'tc:kagi-zuki', side: 'R', from: 0.25, direkt: true }],
+    [/sokumen chudan kake-uke/i, { def: 'kake-uke-seite', side: 'L', from: 0.25 }, /fumikomi/i],
+    // 16, langsam: aus dem Stoß davor gleich zum Ausholen vor der Brust (das Lexikon beginnt mit den Fäusten an den Hüften)
+    [/sokumen chudan kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.38 }, /tekki/i],
+    [/sokumen .*mae-enpi/i, { def: 'mae-enpi-seite', side: 'R', from: 0.25 }, /kiba/i],
+    [/chudan uchi-uke/i, { def: 'uchi-uke-kiba', side: 'R', from: 0.25 }, /kiba/i],
+    [/uraken jodan-uchi \+ .*suihei-kamae/i, { def: 'nagashi-uraken', side: 'L', from: 0.16, lang: true, dur: 1.15, erst: true }],
+    [/(hidari|migi) zenwan \1 sokumen chudan-uke/i, { def: 'zenwan-uke-gleich', side: 'L', from: 0.25, direkt: true, erst: true }],
+    [/zenwan .*sokumen chudan-uke/i, { def: 'zenwan-uke-gegen', side: 'L', from: 0.25, direkt: true, erst: true }],
     [/gedan-barai/i, { def: 'gedan-barai-kiba', side: 'R', from: 0.25 }, /kiba/i],
     [/gedan-barai/i, { def: 'mv:gedan-barai', side: 'L', from: 0.25 }],
     [/oi-zuki/i, { def: 'mv:oi-zuki', side: 'R', from: 0.38, direkt: true }],
@@ -150,6 +172,8 @@
     mikazuki: { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true },
   };
   const defOf = (id) => D[id] || (SK.fig3dKata || {})[id];
+  // Yoi-Haltung der Kata (Text „yoi“ in den Kata-Daten) → Haltung in SK.fig3dKata
+  const YOI = [[/linke handfläche auf dem rücken der rechten hand/i, 'yoi-kafukubu']];
   // Arme, Hüftdrehung (yaw, bezogen auf die Körperrichtung), Oberkörper und Kopf (look, bezogen auf die Körperrichtung)
   const UP = ['hL', 'hR', 'eL', 'eR', 'oL', 'oR', 'pL', 'pR', 'fL', 'fR', 'qL', 'qR', 'sL', 'sR', 'chest', 'lean', 'roll', 'nod', 'tilt', 'look', 'yaw'];
   const upper = (p) => { const f = E.full(p); const o = {}; UP.forEach((k) => (o[k] = f[k])); return o; };
@@ -177,7 +201,9 @@
     const feet = m.f.map((x) => ({ c: [-x[0] * SCALE, x[1] * SCALE], yaw: -x[2], w: x[3] }));
     // welcher Fuß steht vorne? Passt das nicht zum Stand der Figur (meist links vorne, Kosa-dachi rechts): spiegeln
     const ahead = dot(sub(feet[1].c, feet[0].c), fwd(byaw));
-    if ((c.L.z - c.R.z > 0.1 && ahead > 0.05) || (c.R.z - c.L.z > 0.1 && ahead < -0.05)) c = E.full(mirror(c));
+    // Kreuzschritt (Füße nebeneinander, die Beine gekreuzt): der Name sagt, welches Bein vorne kreuzt (Figur: das linke)
+    if (key === 'kosamae') { if (/^migi/i.test(stance)) c = E.full(mirror(c)); }
+    else if ((c.L.z - c.R.z > 0.1 && ahead > 0.05) || (c.R.z - c.L.z > 0.1 && ahead < -0.05)) c = E.full(mirror(c));
     const ank = feet.map((ft) => sub(ft.c, mul(fwd(ft.yaw), FOOT_MID)));
     const cr = [c.R.x, c.R.z];
     const a = cdiv(sub(ank[0], ank[1]), sub([c.L.x, c.L.z], cr));
@@ -242,7 +268,7 @@
   /* ---------- Ein Abschnitt: von Stellung A nach Stellung B ---------- */
   // Wie gleitet der Fuß s von A nach B? Liegt der Standfuß auf dem Weg, führt die Bahn dicht an ihm vorbei (Füße kommen
   // zusammen); gleitet der Fuß nur von ihm weg (Ausfallschritt zur Seite), geht er gerade.
-  function footPlan(A, B, s, o, u0, u1) {
+  function footPlan(A, B, s, o, u0, u1, kreuz) {
     const a = A.low[s].c;
     const b = B.low[s].c;
     const moved = len(sub(b, a)) > 1e-6;
@@ -257,8 +283,12 @@
     // Seite, auf der der Fuß vorbeigeht: wie die gerade Bahn; läuft sie genau über den Standfuß, die eigene Körperseite
     const yawMid = lerp(A.byaw, B.byaw, 0.5);
     const own = mul([Math.cos(yawMid * RAD), -Math.sin(yawMid * RAD)], s === 'L' ? 1 : -1);
-    const n = len(off) > 0.03 ? mul(off, 1 / len(off)) : own;
-    plan.near = add(sp, mul(n, PASS));
+    let n = len(off) > 0.03 ? mul(off, 1 / len(off)) : own;
+    let pass = PASS;
+    // Kreuzschritt zur Seite (kreuz: +1 vorne, −1 hinten vorbei): die Bahn läuft genau über den Standfuß – der Fuß geht
+    // vor bzw. hinter ihm vorbei, mit Abstand für die ganze Fußlänge
+    if (kreuz && len(off) <= 0.03) { n = mul(fwd(yawMid), kreuz); pass = KREUZ; plan.gerade = true; }
+    plan.near = add(sp, mul(n, pass));
     plan.mid = mix(plan.mid, plan.near, k);
     plan.k = k;
     plan.sp = sp;
@@ -298,12 +328,13 @@
     seg.feet = {};
     ['L', 'R'].forEach((s) => {
       const [u0, u1] = lead ? (s === lead ? [0, o.tobi ? 0.85 : 0.72] : [o.tobi ? 0.15 : 0.28, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
-      seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1);
+      seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz);
     });
     // Hüfte: beim Vorbeigleiten über dem Standbein (zwischen den Füßen), sonst gerade hinüber
     const pl = seg.feet.L.k > seg.feet.R.k ? seg.feet.L : seg.feet.R;
     seg.pelMid = mix(A.low.pel, B.low.pel, 0.5);
-    if (pl.k > 0) seg.pelMid = mix(seg.pelMid, mix(pl.sp, pl.near, 0.5), pl.k);
+    // (beim Kreuzschritt zur Seite bleibt sie auf der Linie)
+    if (pl.k > 0 && !pl.gerade) seg.pelMid = mix(seg.pelMid, mix(pl.sp, pl.near, 0.5), pl.k);
     // Fumikomi (hoch) in drei Teilen: Erst drehen beide Füße und der Körper auf der Stelle in die Richtung des Schritts.
     // Dann der Schritt mit hohem Knie – beide Knie zeigen geradeaus, keines klappt zur Seite. Erst kurz vor dem
     // Aufstampfen dreht alles zusammen, auch beide Füße, in den neuen Stand ein. Der Blick bleibt dabei, wo er hingehört.
@@ -326,6 +357,10 @@
         seg.share = { L: s === 'L' ? 1 : 0, R: s === 'R' ? 1 : 0 };
         const fw = [dir[0] / len(dir), dir[1] / len(dir)];
         seg.knee = { w: (u) => ramp(0, Math.max(p1, 0.12), u) * (1 - ramp(p3, 1, u)), L: [fw[0], s === 'L' ? 0.3 : 0.15, fw[1]], R: [fw[0], s === 'R' ? 0.3 : 0.15, fw[1]] };
+        // Stampfen zur Seite, ohne dass der Körper dreht (Tekki): das Knie kommt vor dem Körper hoch, nur leicht zur Seite des
+        // Schritts geneigt; das Knie des Standbeins bleibt, wie es im Stand ist
+        const vorn = fwd(A.byaw);
+        if (!p1 && Math.abs(turn) < 5 && Math.abs(dot(fw, vorn)) < 0.5) seg.knee = { w: seg.knee.w, [s]: [vorn[0] + 0.45 * fw[0], 0.5, vorn[1] + 0.45 * fw[1]] };
         seg.lookAbs = [A.byaw + A.up.look, B.byaw + B.up.look];
       }
     }
@@ -347,6 +382,8 @@
 
   // Bewegung auf der Stelle mit Zwischenschritt (via der Ansage): hin bis u = 0,45, dann zurück an den Platz
   const hump = (u) => (u < 0.45 ? smooth(u / 0.45) : 1 - stepEase((u - 0.45) / 0.55));
+  // Namigaeshi: der Fuß wird hochgerissen, steht kurz oben und fällt dann immer schneller zurück auf seinen Platz
+  const welle = (u) => (u < 0.28 ? smooth(u / 0.28) : u < 0.52 ? 1 : 1 - ((u - 0.52) / 0.48) ** 2);
 
   function poseAt(seg, u) {
     const { A, B } = seg;
@@ -375,7 +412,19 @@
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
       let y = lerp(fa.y, fb.y, ef) + (pl.moved ? (seg.hoch ? HOCH * up : (seg.hop || LIFT) * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
       const v = seg.via && seg.via.s === s ? seg.via : null;
-      if (v) {
+      let wl = null;
+      if (v && seg.welle) {
+        // Namigaeshi: der Fuß schnellt im Bogen nach innen hoch (Sohle nach innen oben, Knie bleibt außen) und stampft zurück;
+        // die Hüfte geht dabei ein wenig zum Standbein und bleibt auf ihrer Höhe
+        const hu = welle(u);
+        const sg = s === 'L' ? 1 : -1;
+        c = mix(fa.c, v.c, hu);
+        rel = lerp(fa.rel, v.rel, hu);
+        y += NAMI * hu;
+        const zum = sub(seg.A.low[s === 'L' ? 'R' : 'L'].c, fa.c);
+        pel = add(pel, mul(zum, (0.1 * hu) / len(zum)));
+        wl = (F) => ({ pitch: F.pitch - 10 * hu, tu: Math.max(F.tu, hu), kp: mix3(F.kp, rotY([sg, 0.5, 0.6], byaw), hu), sole: hu > 0.02 ? mix3([0, -1, 0], rotY([-sg, 0.5, 0], byaw), hu) : F.sole });
+      } else if (v) {
         const hu = hump(u);
         c = mix(fa.c, v.c, hu);
         rel = lerp(fa.rel, v.rel, hu);
@@ -387,7 +436,8 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      if (wl) Object.assign(P[s], wl(P[s]));
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
@@ -468,7 +518,7 @@
   // Zu lange Stände kürzen (MAXLEN), zu kurze Zenkutsu-dachi verlängern (MINZK): Jeder Fuß hat einen Platz, solange er stehen bleibt. Ist ein Stand zu lang, rücken
   // seine beiden Plätze aufeinander zu, jeder um die Hälfte – so verteilt sich die Kürzung auf die Stände davor und danach,
   // statt dass ein Fuß allein weit neben der Karte landet. Rei, Yoi und Naore zählen nicht (sie bekommen die Breite der Figur).
-  function shorten(steps) {
+  function shorten(steps, id) {
     const node = [];
     const pts = [];
     steps.forEach((st, j) => node.push([0, 1].map((i) => {
@@ -489,7 +539,9 @@
         const l = len(d) * SCALE;
         // Renoji-dachi ist ein kurzer Stand: der vordere, leichte Fuß steht nicht so weit weg (nur er rückt heran)
         const reno = /renoji/i.test(st.stance);
-        const max = reno ? RENOJI : MAXLEN;
+        // Tekki: schmalerer Kiba-dachi; der Kreuzschritt bleibt dabei so eng, wie er ist (sonst rückten nur die Plätze im
+        // Kiba-dachi zusammen und die Kreuzschritte würden dafür weit)
+        const max = reno ? RENOJI : /ashi-mae kosa$/i.test(st.stance) ? KOSA : (KIBA[id] && /kiba/i.test(st.stance) ? KIBA[id] : MAXLEN);
         // ein zu kurzer Zenkutsu-dachi wird länger: beide Plätze rücken je zur Hälfte auseinander
         if (/zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance) && l < MINZK - 1e-4) {
           const push = mul(d, (0.5 * (MINZK - l)) / l);
@@ -515,7 +567,7 @@
   // opt.beat: Abstand zweier Zählzeiten in Sekunden (2 = Training, wie in der Kata-Ansage)
   function build(k, opt) {
     const beat = (opt && opt.beat) || 2;
-    const steps = shorten(SK.ansageTimeline(k, beat, true));
+    const steps = shorten(SK.ansageTimeline(k, beat, true), k.id);
     const warn = [];
     const segs = [];
     const marks = [];
@@ -542,7 +594,9 @@
     // breit. Sie bekommen die Breite der Figur: Yoi und Naore um den Fuß herum, der in die Kata hinein bzw. aus ihr heraus
     // stehen bleibt, die Verbeugung davor und danach mittig darüber
     const n = steps.length;
-    const fix = [[2, 3, 'hachiji'], [1, 2, 'musubi'], [0, 2, 'musubi'], [n - 2, n - 3, 'hachiji'], [n - 1, n - 2, 'musubi']];
+    // Yoi im Heisoku-dachi (Tekki): Füße geschlossen statt schulterbreit
+    const yoiSt = /heisoku/i.test(steps[2].stance || '') ? 'heisoku' : 'hachiji';
+    const fix = [[2, 3, yoiSt], [1, 2, 'musubi'], [0, 2, 'musubi'], [n - 2, n - 3, yoiSt], [n - 1, n - 2, 'musubi']];
     const fixed = {};
     fix.forEach(([j, ref, st]) => {
       const m = steps[j].pose;
@@ -561,9 +615,11 @@
     Object.keys(fixed).forEach((j) => (steps[j] = Object.assign({}, steps[j], { pose: fixed[j] })));
 
     const musubi = upper(S.musubi);
-    const yoiUp = upper(S.hachiji);
+    // Hände im Yoi: Fäuste vor den Oberschenkeln, außer die Kata nennt eine eigene Haltung (YOI)
+    const yoiDef = (YOI.find(([rx]) => rx.test(k.yoi || '')) || [])[1];
+    const yoiUp = upper(yoiDef ? defOf(yoiDef).keys[0].p : S.hachiji);
     let cur = key(steps[0].pose, 'Musubi-dachi', null, musubi);
-    const techOf = (st) => (TECH.find(([rx, , nur]) => rx.test(st.tech) && (!nur || nur.test(`${st.stance} ${st.note || ''}`))) || [])[1];
+    const techOf = (st) => (TECH.find(([rx, , nur]) => rx.test(st.tech) && (!nur || nur.test(`${st.stance} ${st.note || ''} · ${k.name}`))) || [])[1];
     steps.forEach((st, i) => {
       const next = steps[i + 1];
       const gap = next ? next.t - st.t : 3;
@@ -719,6 +775,9 @@
         const y1 = end.yaw;
         const ease = st.slow ? smooth : stepEase;
         arms = (u) => M(base, { yaw: lerp(base.yaw, y1, ease(u)) });
+      } else if (tech && tech.bleibt) {
+        end = cur.up;
+        arms = () => end;
       } else if (!tech) {
         warn.push(`${st.n}: keine Figur-Technik für „${st.tech}“ – Fäuste an der Hüfte`);
         end = M(cur.up, { hL: [-H.hip[0], H.hip[1], H.hip[2]], hR: H.hip, yaw: 0, chest: 0, lean: 0 });
@@ -765,12 +824,25 @@
       if (tobi) o.tobi = true;
       // Fumikomi: der Fuß, der den Platz wechselt, kommt mit dem Knie hoch und stampft auf
       if (/fumikomi/i.test(st.note || '')) o.hoch = true;
+      // Kreuzschritt zur Seite: der Fuß kreuzt vor dem Standfuß; aus dem Kreuzschritt heraus geht der hintere Fuß hinten vorbei
+      const kosa = /ashi-mae kosa$/i;
+      if (kosa.test(st.stance)) o.kreuz = 1;
+      else if (steps[i - 1] && kosa.test(steps[i - 1].stance || '')) o.kreuz = -1;
+      // Namigaeshi: der Fuß des Zwischenschritts (via) wird hochgerissen
+      if (/namigaeshi/i.test(st.note || '')) o.welle = true;
       const seg = segment(cur, nk, o);
       // bleibt der Oberkörper stehen, bleibt auch der Blick, wo er ist
       if (tech && tech.halten && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
       if (m.via) {
         const s = m.via[0] ? 'R' : 'L';
         seg.via = { s, c: [-m.via[1] * SCALE, m.via[2] * SCALE], rel: wrap(-m.via[3] + m.body) };
+        // Namigaeshi: der Fuß kommt knapp bis zur Mitte zwischen beiden Füßen, etwas vor der Standlinie – aus dem Stand der
+        // Figur gerechnet (der Punkt der Skizze gälte nur für ihren breiteren Stand)
+        if (o.welle) {
+          seg.welle = true;
+          const a = cur.low[s].c;
+          seg.via.c = add(mix(a, cur.low[other(s)].c, 0.45), mul(fwd(nk.byaw), 0.16));
+        }
       }
       segs.push(seg);
       mark(st.t + d);

@@ -1193,6 +1193,39 @@
   KATA['nagashi-shuto-gedan'] = T(M(S.zks, { oL: 1, oR: 1, hL: [0.12, -0.1, 0.42], pL: [0, -1, 0], hR: [-0.22, 0.28, 0.02], eR: [-0.8, -0.5, 0.3], pR: [0, 0, 1] }),
     M(S.zks, { oL: 1, oR: 1, hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], hR: stretch([0.04, -0.46, 0.42], 'R'), pR: [1, 0, 0] }));
 
+  /* Tekki Shodan */
+  // Kreuzschritt (Hidari Ashi-mae Kosa: 1, 21; gespiegelt 7): die Füße stehen nebeneinander auf der Linie, der linke rechts
+  // vom rechten – das linke Bein kreuzt vorn, das rechte trägt. Beide Knie gebeugt, die Hüfte bleibt fast auf der Höhe des
+  // Kiba-dachi (Tekki: nicht aufrichten)
+  S.kosamae = { pelvis: [-0.15, 0.73, -0.02], L: { x: -0.35, z: 0, yaw: 0, kp: [-0.15, 0.1, 1] }, R: { x: -0.05, z: 0, yaw: 0, kp: [-0.35, 0, 1] }, w: [0.1, 0.9] };
+  // Yoi: Heisoku-dachi, die offenen Hände vor dem Unterbauch – die rechte am Körper, die linke Handfläche auf ihrem Rücken,
+  // Fingerspitzen schräg nach unten zur Mitte
+  KATA['yoi-kafukubu'] = STILL(M(S.heisoku, { oL: 1, oR: 1, hR: [-0.09, -0.47, 0.14], fR: [0.55, -0.83, 0], pR: [0, 0, -1], eR: [-1, -0.4, 0.1],
+    hL: [0.09, -0.45, 0.16], fL: [-0.55, -0.83, 0], pL: [0, 0, -1], eL: [1, -0.4, 0.1] }));
+  // 2: Kake-uke zur Seite, schnell und groß zusammen mit dem Fumikomi – Ausholen und Ende wie im Lexikon (dort langsam, wie
+  // Tekki 16 und Heian Godan 14)
+  KATA['kake-uke-seite'] = T(KU2, KU3);
+  // 3, 17: Mae-enpi zur Seite in die offene Hand – die Hand steht vom Kake-uke noch seitlich draußen, der Oberkörper dreht
+  // zu ihr ein und der Ellbogen schlägt in ihre Handfläche (Arme zur Brust wie beim Mae-enpi in Heian Yondan); die Beine
+  // bleiben im Kiba-dachi nach vorn
+  KATA['mae-enpi-seite'] = T(KU3, M(KB, { look: 90, chest: 50, hR: MAE_ENPI.hR, eR: MAE_ENPI.eR, oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }));
+  // 8, 22: Chudan Uchi-uke im Kiba-dachi, Körper gerade nach vorn (Ende wie der Beginn des Uchi-nagashi-uke im Lexikon)
+  KATA['uchi-uke-kiba'] = T(M(KB, { hL: [0.1, -0.15, 0.4], hR: [0.12, -0.2, 0.25], eR: [-0.5, -0.6, 0.5] }), UN1);
+  // 9, 23: erst Uchi-nagashi-uke Jodan links mit Gedan-uke rechts (Ablauf des Lexikons), dann schlägt die linke Faust als
+  // Uraken nach vorn auf Gesichtshöhe (Faust gerade, Handrücken zum Ziel); der rechte Unterarm kommt waagerecht vor die
+  // Brust, die rechte Faust liegt unter dem linken Ellbogen (Suihei-kamae)
+  const TK_URAKEN = M(KB, { hL: [0.08, 0.07, 0.42], eL: [0.2, -1, 0.1], pL: [0, 0.3, -1], hR: [0.075, -0.2, 0.2], eR: [-1, -0.1, 0.3], pR: [0, -1, 0] });
+  KATA['nagashi-uraken'] = { keys: D['tc:uchi-nagashi-uke'].keys.concat([{ t: 0.58, p: UN2 }, { t: 0.78, p: TK_URAKEN, e: 'kime' }]) };
+  // 11, 25: Unterarm-Abwehr zur eigenen Seite – die Arme bleiben, wie sie nach dem Uraken stehen (Faust unter dem Ellbogen),
+  // der Oberkörper dreht zur Seite und der Unterarm steht dabei aufrecht
+  KATA['zenwan-uke-gleich'] = T(TK_URAKEN, M(TK_URAKEN, { look: 90, chest: 45, hL: [0.12, 0.06, 0.36] }));
+  // 13, 27: derselbe Unterarm wehrt zur anderen Seite ab – der Oberkörper dreht dorthin
+  KATA['zenwan-uke-gegen'] = T(TK_URAKEN, M(TK_URAKEN, { look: -90, chest: -45, hL: [0.03, 0.06, 0.38] }));
+  // 15, 29: aus dem Koshi-kamae an der rechten Hüfte stößt die linke Faust zur linken Seite (Chudan), zugleich die rechte
+  // als Kagi-zuki vor der Brust in dieselbe Richtung
+  KATA['zuki-kagi-zuki'] = TWIST(T(M(KB, { look: 90, hR: H.hip, hL: [-0.11, -0.33, 0.04], pL: [0, -1, 0] }),
+    M(KB, { look: 90, hL: stretch([0.74, -0.1, 0.04], 'L'), hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3] })), 'L');
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };
