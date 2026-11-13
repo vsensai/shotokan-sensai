@@ -1141,6 +1141,33 @@
   KATA['tsukiage-enpi'] = T(M(KB, { hL: [0.22, -0.3, 0.2], eL: [0.4, -1, 0.2], hR: H.hip }),
     M(KB, { hR: [0.2, 0.1, -0.03], eR: [-0.4, -0.5, 1], pR: [0, 0, 1], hL: [0.22, -0.33, -0.08], eL: [0.25, -0.2, -1] }));
 
+  /* Heian Yondan */
+  // Hizakutsu nach vorn gedreht (Bewegung 11) als Stand für die Kata – die Beine aus dem Lexikon-Bild
+  S.hizaShomen = { pelvis: HZ.pelvis, yaw: 0, L: HZ.L, R: HZ.R, w: HZ.w };
+  // 1, 2: Haiwan-uke mit offenen Händen
+  KATA['haiwan-uke-offen'] = M(D['tc:haiwan-uke'], { keys: D['tc:haiwan-uke'].keys.map((k) => ({ t: k.t, e: k.e, p: M(k.p, { oL: 1, oR: 1 }) })) });
+  // 3: Gedan Kosa-uke – beide Fäuste stoßen von der rechten Hüfte gekreuzt nach unten vor, rechtes Handgelenk über dem linken
+  KATA['gedan-kosa-uke'] = T(M(S.zks, { hR: H.hip, hL: [-0.11, -0.33, 0.04], pL: [0, -1, 0] }),
+    M(S.zks, { lean: 6, hL: [-0.04, -0.47, 0.36], hR: [0.04, -0.44, 0.38], eL: [1, -0.3, 0.2], eR: [-1, -0.3, 0.2] }));
+  // 7, 10: Mae-enpi in die offene Hand (Sasho-ni Migi Mae-enpi) – die linke Hand steht offen vorn (sie hat gegriffen und
+  // zieht heran), der rechte Ellbogen schlägt in ihre Handfläche
+  KATA['mae-enpi-hand'] = T(M(S.zks, { oL: 1, hL: [0.1, -0.02, 0.6], pL: [-1, 0, 0], hR: H.hip }),
+    M(MAE_ENPI, { oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }));
+  // 11: Die linke Handkante fegt erst nach unten (Gedan-barai) und steigt dann zum Jodan-uke über die Stirn; dabei schlägt
+  // der rechte Shuto vom Ohr im Bogen außen herum zum Hals (Endhaltung wie das Lexikon-Bild des Hizakutsu)
+  const HZS = M(S.hizaShomen, { oL: 1, oR: 1 });
+  const HZ_0 = M(HZS, { hL: [-0.12, 0.08, 0.2], hR: [-0.25, -0.2, 0.1] });
+  KATA['jodan-uke-shuto-uchi'] = { keys: [{ t: 0, p: HZ_0 }, { t: 0.25, p: HZ_0 },
+    { t: 0.6, p: M(HZS, { hL: stretch([0.2, -0.5, 0.25], 'L'), hR: [-0.28, 0.2, -0.05], pR: [0, -1, 0] }) },
+    { t: 1, p: M(HZS, { hL: HZ.hL, eL: HZ.eL, pL: HZ.pL, fL: HZ.fL, hR: HZ.hR, eR: HZ.eR, pR: HZ.pR, fR: HZ.fR }), e: 'kime' }] };
+  // 13: Uraken Tate-mawashi-uchi nach vorn im Kosa-dachi – die rechte Faust kommt über den Kopf und schlägt im senkrechten
+  // Bogen nach vorn herab (Handrücken zum Ziel, Ellbogen unten), die linke Hand hat gegriffen und zieht an die Hüfte
+  KATA['uraken-tate-mae'] = FLOW([
+    M(S.kosa, { hL: [0.1, -0.05, 0.45], hR: [-0.02, 0.1, 0.16], eR: [-1, -0.2, 0.3] }),
+    M(S.kosa, { hL: [0.16, -0.2, 0.25], hR: [-0.12, 0.32, 0.18], eR: [-0.7, 0, 0.8], pR: [0, -0.6, -0.8] }),
+    M(S.kosa, { hL: L(H.hip), hR: [-0.1, 0.04, 0.5], eR: [-0.2, -1, 0.2], pR: [0, 0, -1] }),
+  ], { eff: 'fistR' });
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };

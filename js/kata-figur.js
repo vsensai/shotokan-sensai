@@ -7,8 +7,9 @@
    Fußtritte (TRITT) kommen ganz aus dem Ablauf des Lexikons, an den Standfuß der Bodenkarte gelegt; danach bleibt das
    Knie angezogen, bis die nächste Bewegung den Fuß absetzt. Stände, die die Skizze länger zeichnet, als die Beine der
    Figur reichen, werden gekürzt (MAXLEN). Abläufe, die nur die Kata braucht, stehen in SK.fig3dKata (figur-posen.js).
-   Aus den Daten der Kata kommen außerdem: langsame Bewegungen (slow), Stampfen mit hohem Knie (Hinweis „Fumikomi“ in seq)
-   und gleichzeitiges Gleiten beider Füße (Fußarbeit „Yori-ashi“ in ansage).
+   Aus den Daten der Kata kommen außerdem: langsame Bewegungen (slow), Stampfen mit hohem Knie (Hinweis „Fumikomi“ in seq),
+   Gleiten beider Füße (Fußarbeit „Yori-ashi“ in ansage) und der Sprungschritt („Sprungschritt“ in ansage). Steht die
+   Figur auf einem Bein (Ashi-dachi) und die nächste Bewegung tritt, ist das Bild das angezogene Knie dieses Tritts.
    Ergebnis: pose(t) für jeden Zeitpunkt (Sekunden), im Takt der Kata-Ansage (SK.ansageTimeline).
    Welt wie in figur3d.js: x = links (bei Blick nach vorne), y = oben, z = vorne; Karte: x rechts, y vorne, Winkel im Uhrzeigersinn. */
 (function () {
@@ -65,7 +66,7 @@
   const stomp = (u) => (u < 0.5 ? smooth(u / 0.5) : u < 0.72 ? 1 : 1 - ((u - 0.72) / 0.28) ** 2);
 
   /* ---------- Stände und Techniken ---------- */
-  const STAND = [[/ashi-zenkutsu/i, 'ashizk'], [/zenkutsu/i, 'zk'], [/kokutsu/i, 'kk'], [/kiba/i, 'kb'], [/hachiji/i, 'hachiji'], [/musubi/i, 'musubi'], [/heisoku/i, 'heisoku'], [/ashi-dachi/i, 'ashidachi']];
+  const STAND = [[/hizakutsu/i, 'hizaShomen'], [/kosa-dachi/i, 'kosa'], [/ashi-zenkutsu/i, 'ashizk'], [/zenkutsu/i, 'zk'], [/kokutsu/i, 'kk'], [/kiba/i, 'kb'], [/hachiji/i, 'hachiji'], [/musubi/i, 'musubi'], [/heisoku/i, 'heisoku'], [/ashi-dachi/i, 'ashidachi']];
   // Technik → Ablauf im Lexikon (SK.fig3dDefs) oder eigener Ablauf der Kata (SK.fig3dKata, ohne „xx:“ davor).
   // side: Seite, die dort arbeitet (andere Seite = gespiegelt); from: Zeitpunkt im Ablauf, an dem ausgeholt ist;
   // direkt: ohne Ausholen aus der vorigen Haltung (Stoß); dur: eigene Dauer der ganzen Bewegung (Sekunden),
@@ -73,17 +74,20 @@
   // erst: bei zwei Techniken („… + …“) gilt die Seite der zuerst genannten (sonst die der zuletzt genannten);
   // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind.
   // schnapp: nach dem Treffer schnappt der Arm gleich zurück in die Haltung, aus der der Ablauf beginnt (Uraken).
-  // Ein dritter Eintrag beschränkt die Zuordnung auf Stände, auf die er passt (der erste passende Eintrag gilt)
+  // Ein dritter Eintrag beschränkt die Zuordnung auf Stände oder Hinweise der Kata (note), auf die er passt (der erste
+  // passende Eintrag gilt)
   const TECH = [
     [/gedan-barai/i, { def: 'mv:gedan-barai', side: 'L', from: 0.25 }],
     [/oi-zuki/i, { def: 'mv:oi-zuki', side: 'R', from: 0.38, direkt: true }],
     [/age-uke/i, { def: 'mv:age-uke', side: 'R', from: 0.25 }],
     [/kentsui tate-mawashi-uchi/i, { def: 'tc:tettsui-uchi', side: 'R', from: 0.15, lang: true, dur: 1.0 }],
     [/shuto .*uke/i, { def: 'tc:shuto-uke', side: 'L', from: 0.25 }],
+    [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25 }, /offenen händen/i],
     [/haiwan/i, { def: 'tc:haiwan-uke', side: 'L', from: 0.25 }],
     [/soto-nagashi-uke/i, { def: 'tc:soto-nagashi-uke', side: 'L', from: 0.513, lang: true, dur: 0.55, erst: true }],
     [/sokumen chudan-zuki/i, { def: 'kokutsu-zuki', side: 'L', from: 0.25, direkt: true }],
     [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'tc:uraken-uchi', side: 'R', from: 0.513, dur: 1.3 }],
+    [/jodan mae-geri-keage/i, { tritt: 'mae-jodan', dur: 0.8 }],
     [/mae-geri-keage/i, { tritt: 'mae', dur: 0.8 }],
     [/^(saken|uken) chudan-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],
     [/shihon-nukite/i, { def: 'tc:nukite', side: 'R', from: 0.25, direkt: true }],
@@ -94,8 +98,15 @@
     [/kentsui .*uchi-mawashi-uchi/i, { def: 'kentsui-uchi-mawashi', side: 'L', from: 0.25 }],
     [/ryokoshi-kamae/i, { def: 'ryokoshi-kamae', side: 'R', from: 0 }],
     [/furi-enpi/i, { def: 'furi-enpi', side: 'R', from: 0.25 }],
-    [/uraken .*tate-mawashi-uchi/i, { def: 'uraken-tate', side: 'R', from: 0.513, schnapp: true }],
+    [/uraken .*sokumen tate-mawashi-uchi/i, { def: 'uraken-tate', side: 'R', from: 0.513, schnapp: true }],
+    [/uraken tate-mawashi-uchi/i, { def: 'uraken-tate-mae', side: 'R', from: 0.513 }],
     [/koho-tsukiage/i, { def: 'tsukiage-enpi', side: 'R', from: 0.25, erst: true }],
+    [/gedan kosa-uke/i, { def: 'gedan-kosa-uke', side: 'L', from: 0.25 }],
+    [/koshi-kamae/i, { def: 'tc:koshi-kamae', side: 'R', from: 0 }],
+    [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25 }],
+    [/jodan-uke \+ .*shuto/i, { def: 'jodan-uke-shuto-uchi', side: 'R', from: 0.25, lang: true, dur: 0.9 }],
+    [/kakiwake-uke/i, { def: 'tc:kakiwake-uke', side: 'L', from: 0.22 }],
+    [/hiza-tsuchi/i, { tritt: 'hiza', dur: 0.75 }],
   ];
   // Fußtritte: Ablauf im Lexikon bzw. der Kata, side: Bein, das dort tritt; a … b: Zeitspanne im Ablauf vom angezogenen
   // Knie über den Treffer zurück zum angezogenen Knie; an: Anteil der Bewegung bis das Knie angezogen ist;
@@ -106,6 +117,9 @@
   const TRITT = {
     mae: { def: 'mae-geri-chudan', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
     'yoko-keage': { def: 'yoko-geri-keage', side: 'R', a: 0.32, b: 0.68, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.5 },
+    'mae-jodan': { def: 'mv:mae-geri', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
+    // Kniestoß: vom Greifen (Knie angehoben) bis zum Treffer – dort bleibt das Knie oben; die Arme kommen aus dem Ablauf selbst
+    hiza: { def: 'tc:hiza-geri', side: 'R', a: 0.346, b: 0.543, an: 0.5, anMin: 0.4, kurz: 0.2, huefte: 1, arme: true },
   };
   const defOf = (id) => D[id] || (SK.fig3dKata || {})[id];
   // Arme, Hüftdrehung (yaw, bezogen auf die Körperrichtung), Oberkörper und Kopf (look, bezogen auf die Körperrichtung)
@@ -133,9 +147,9 @@
     let c = E.full(S[key || 'hachiji']);
     const byaw = -m.body;
     const feet = m.f.map((x) => ({ c: [-x[0] * SCALE, x[1] * SCALE], yaw: -x[2], w: x[3] }));
-    // welcher Fuß steht vorne? Die Stände der Figur haben den linken vorne – sonst spiegeln
+    // welcher Fuß steht vorne? Passt das nicht zum Stand der Figur (meist links vorne, Kosa-dachi rechts): spiegeln
     const ahead = dot(sub(feet[1].c, feet[0].c), fwd(byaw));
-    if (c.L.z - c.R.z > 0.1 && ahead > 0.05) c = E.full(mirror(c));
+    if ((c.L.z - c.R.z > 0.1 && ahead > 0.05) || (c.R.z - c.L.z > 0.1 && ahead < -0.05)) c = E.full(mirror(c));
     const ank = feet.map((ft) => sub(ft.c, mul(fwd(ft.yaw), FOOT_MID)));
     const cr = [c.R.x, c.R.z];
     const a = cdiv(sub(ank[0], ank[1]), sub([c.L.x, c.L.z], cr));
@@ -222,6 +236,12 @@
       lead = dot(sub(B.low.L.c, A.low.L.c), sub(A.low.L.c, A.low.R.c)) > 0 ? 'L' : 'R';
       seg.share = { L: 0.5, R: 0.5 };
     }
+    // Sprungschritt (sprung: der Fuß, der zuerst landet): wie das Yori-ashi mit Vor- und Nachziehen, aber weit und in der Luft
+    if (both && o.sprung) {
+      lead = o.sprung;
+      seg.share = { L: 0.5, R: 0.5 };
+      seg.hop = 0.1;
+    }
     seg.feet = {};
     ['L', 'R'].forEach((s) => {
       const [u0, u1] = lead ? (s === lead ? [0, 0.72] : [0.28, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
@@ -300,7 +320,7 @@
       let rel = lerp(fa.rel, fb.rel, ef);
       // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
-      let y = lerp(fa.y, fb.y, ef) + (pl.moved ? (seg.hoch ? HOCH * up : LIFT * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
+      let y = lerp(fa.y, fb.y, ef) + (pl.moved ? (seg.hoch ? HOCH * up : (seg.hop || LIFT) * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
       const v = seg.via && seg.via.s === s ? seg.via : null;
       if (v) {
         const hu = hump(u);
@@ -468,6 +488,7 @@
     const musubi = upper(S.musubi);
     const yoiUp = upper(S.hachiji);
     let cur = key(steps[0].pose, 'Musubi-dachi', null, musubi);
+    const techOf = (st) => (TECH.find(([rx, , nur]) => rx.test(st.tech) && (!nur || nur.test(`${st.stance} ${st.note || ''}`))) || [])[1];
     steps.forEach((st, i) => {
       const next = steps[i + 1];
       const gap = next ? next.t - st.t : 3;
@@ -502,12 +523,13 @@
       }
       // eine Bewegung der Kata
       const m = st.pose;
-      const tech = (TECH.find(([rx, , stand]) => rx.test(st.tech) && (!stand || stand.test(st.stance))) || [])[1];
+      const tech = techOf(st);
       const side = sideOf(st.tech, tech && tech.erst);
       // langsame Bewegung (laut Buch): ruhig und gleichmäßig über einen guten Teil der Zeit, ohne Kime
       const yori = /yori-ashi/i.test(m.h || '');
+      const sprung = /sprungschritt/i.test(m.h || '');
       const d = st.slow ? SLOW * gap
-        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : 0.62 + 0.0016 * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
+        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : sprung ? 0.75 : 0.62 + 0.0016 * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
       const look = m.look == null ? null : wrap(m.body - m.look);
       const mark = (t1) => marks.push({ t: st.t, t1, n: st.n, kan: st.kan, ro: st.ro, text: `${st.stance} · ${st.tech}`, kiai: st.kiai });
@@ -515,23 +537,53 @@
         // Fußtritt: erst an den Platz und das Knie anziehen (Standfuß rückt, falls nötig, zuerst), dann Tritt und zurück
         // zum angezogenen Knie – dort bleibt das Bein, bis die nächste Bewegung es absetzt
         const tr = TRITT[tech.tritt];
-        const dK = Math.min(tech.dur, 0.92 * gap);
-        const tK = Math.min(Math.max((1 - tr.an) * dK, tr.kurz), (1 - tr.anMin) * dK);
         const ko = sideOf(st.tech);
+        const s = other(ko);
+        // Hat die Bewegung davor das Knie schon angezogen (eigene Zählzeit, z. B. Heian Yondan 5 → 6), folgt gleich der Tritt
+        const ready = cur.knie === tech.tritt + ko;
+        const dK = ready ? Math.min(tech.dur * (1 - tr.an), 0.92 * gap) : Math.min(tech.dur, 0.92 * gap);
+        const tK = ready ? dK : Math.min(Math.max((1 - tr.an) * dK, tr.kurz), (1 - tr.anMin) * dK);
+        const byaw = ready ? cur.byaw : turnOf(m, cur, st.stance);
+        const ft = m.f[s === 'L' ? 0 : 1];
+        const K = ready ? cur.K : kicker(tr, ko, s, [-ft[0] * SCALE, ft[1] * SCALE], wrap(-ft[2] - byaw), byaw);
+        // Arme: aus dem Ablauf des Tritts selbst (arme), aus der Technik der Bewegung oder so, wie sie sind
+        const before = ready ? cur.arme : cur.up;
+        let hand = () => before;
+        if (tr.arme) hand = (w) => upper(K.at(w).p);
+        else if (tech.def) {
+          const tk = track(tech, side);
+          const pre = E.timeline([{ t: 0, p: before }, { t: 0.35, p: tk(0) }]);
+          hand = ready ? (w) => (w < 0.35 ? upper(pre(w)) : tk((w - 0.35) / 0.65)) : tk;
+        }
+        const mit = tr.mit || 1;
+        const upAt = (u) => K.body(hand(Math.min(1, u / mit)), K.at(u).p, look);
+        const tA = st.t + dK - tK;
+        if (!ready) {
+          const knee = { low: K.low(0), byaw, up: upAt(0) };
+          segs.push(segment(cur, knee, { t0: st.t, t1: tA, arms: calm(cur.up, knee.up), first: s }));
+        }
+        segs.push({ t0: tA, t1: st.t + dK, at: (u) => K.pose(u, upAt(u)) });
+        mark(st.t + dK);
+        cur = { low: K.low(1), byaw, up: upAt(1) };
+        return;
+      }
+      // Knie anziehen als eigene Bewegung: Stand auf einem Bein, und die nächste Bewegung tritt mit dem angehobenen Bein –
+      // das Bild ist das angezogene Knie dieses Tritts, die Arme kommen aus der Technik dieser Bewegung (Koshi-kamae)
+      const nx = steps[i + 1];
+      const nt = nx && nx.kind === 'move' && /ashi-dachi/i.test(st.stance) ? techOf(nx) : null;
+      if (nt && nt.tritt && !TRITT[nt.tritt].arme) {
+        const tr = TRITT[nt.tritt];
+        const ko = sideOf(nx.tech);
         const s = other(ko);
         const byaw = turnOf(m, cur, st.stance);
         const ft = m.f[s === 'L' ? 0 : 1];
         const K = kicker(tr, ko, s, [-ft[0] * SCALE, ft[1] * SCALE], wrap(-ft[2] - byaw), byaw);
-        const before = cur.up;
-        const hand = tech.def ? track(tech, side) : () => before;
-        const mit = tr.mit || 1;
-        const upAt = (u) => K.body(hand(u / mit), K.at(u).p, look);
-        const knee = { low: K.low(0), byaw, up: upAt(0) };
-        const tA = st.t + dK - tK;
-        segs.push(segment(cur, knee, { t0: st.t, t1: tA, arms: calm(cur.up, knee.up), first: s }));
-        segs.push({ t0: tA, t1: st.t + dK, at: (u) => K.pose(u, upAt(u)) });
-        mark(st.t + dK);
-        cur = { low: K.low(1), byaw, up: upAt(1) };
+        if (!tech) warn.push(`${st.n}: keine Figur-Technik für „${st.tech}“ – Arme bleiben`);
+        const arme = tech ? track(tech, side)(1) : cur.up;
+        const knee = { low: K.low(0), byaw, up: K.body(arme, K.at(0).p, look), knie: nt.tritt + ko, K, arme };
+        segs.push(segment(cur, knee, { t0: st.t, t1: st.t + d, arms: calm(cur.up, knee.up), first: s }));
+        mark(st.t + d);
+        cur = knee;
         return;
       }
       const uS = tech && tech.lang ? 0.1 : clamp(1 - STRIKE / d, 0.3, 0.8);
@@ -544,7 +596,11 @@
       } else {
         const tr = track(tech, side);
         end = tr(1);
-        if (st.slow) arms = calm(cur.up, end);
+        if (st.slow) {
+          // langsam: ruhig in die Ausholhaltung, dann der Ablauf über den Rest (Haltungen ohne Ablauf: einfach hinein)
+          const pre = E.timeline([{ t: 0, p: cur.up }, { t: 0.35, p: tr(0) }]);
+          arms = defOf(tech.def).keys.length > 1 ? (u) => (u < 0.35 ? upper(pre(u)) : tr((u - 0.35) / 0.65)) : calm(cur.up, end);
+        }
         else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen
           const tl = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: cur.up }, { t: 1, p: end, e: 'kime' }]);
@@ -570,6 +626,8 @@
       if (gap2(cur, nk) < gap2(nk, cur) - 1e-6) o.first = 'R';
       o.teilen = true;
       if (yori) o.gleich = true;
+      // Sprungschritt: beide Füße sind unterwegs, der tragende landet zuerst
+      if (sprung) o.sprung = nk.low.w[0] > nk.low.w[1] ? 'L' : 'R';
       // Fumikomi: der Fuß, der den Platz wechselt, kommt mit dem Knie hoch und stampft auf
       if (/fumikomi/i.test(st.note || '')) o.hoch = true;
       const seg = segment(cur, nk, o);
@@ -621,10 +679,11 @@
       if (prev) {
         ['fistL', 'fistR', 'ankleL', 'ankleR', 'pel', 'head'].forEach((q) => {
           const v = Math.hypot(J[q][0] - prev[q][0], J[q][1] - prev[q][1], J[q][2] - prev[q][2]) * fps;
-          // Fäuste und ein Fuß in der Luft (Tritt) dürfen schnell sein, alles andere nicht. Ein Fuß am Boden etwas mehr als
+          // Fäuste und ein Fuß in der Luft (Tritt) dürfen schnell sein, alles andere nicht (Tritt im schnellsten Takt, wenn das
+          // Knie schon in der Zählzeit davor angezogen wurde – Heian Yondan 6, 9: gut 30 m/s). Ein Fuß am Boden etwas mehr als
           // Hüfte und Kopf: der größte Schritt im schnellsten Takt (Heian Sandan 9, gut 2 m in 0,3 s) kommt auf 14 m/s
           const fast = q.startsWith('fist') || (q.startsWith('ankle') && Math.max(J[q][1], prev[q][1]) > 0.15);
-          if (v > (fast ? 28 : q.startsWith('ankle') ? 16 : 12)) out.push(`${t.toFixed(2)} s: ${q} springt (${v.toFixed(1)} m/s)`);
+          if (v > (fast ? (q.startsWith('ankle') ? 34 : 28) : q.startsWith('ankle') ? 16 : 12)) out.push(`${t.toFixed(2)} s: ${q} springt (${v.toFixed(1)} m/s)`);
         });
       }
       low = Math.max(low, 0.6 - P.pelvis[1]);
