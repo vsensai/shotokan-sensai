@@ -655,25 +655,45 @@
       }
       if (tech && tech.vor) {
         // Bewegung in zwei Teilen: erst die Technik im Stand davor (Füße schon am Platz), kurz stehen, dann der Stand der
-        // Bewegung mit ihrer Technik – die Füße bleiben, nur Gewicht, Hüfte und Fußrichtung wechseln
-        const total = Math.min(1.5, 0.85 * gap);
-        const d1 = 0.5 * total;
-        const t2 = st.t + 0.6 * total;
-        const b = m.body * RAD;
-        const front = (m.f[1][0] - m.f[0][0]) * Math.sin(b) + (m.f[1][1] - m.f[0][1]) * Math.cos(b) > 0 ? 1 : 0;
-        const m1 = { f: m.f.map((x, q) => [x[0], x[1], q === front ? m.body : m.body + (q === 1 ? 35 : -35), q === front ? 0.7 : 0.3]), body: m.body, turn: m.turn };
+        // Bewegung mit ihrer Technik – die Füße bleiben, nur Gewicht, Hüfte und Fußrichtung wechseln.
+        // Steht die Figur davor im Heisoku-dachi (Heian Godan 22 → 23), kommt noch ein Teil davor: Wendung auf der Stelle
+        // um eine halbe Drehung, die Arme kreuzen vor der Brust und stehen danach spiegelbildlich – das Ausholen
+        const pv = steps[i - 1];
+        const wende = /heisoku/i.test(pv.stance || '') && m.turn;
+        // Anteile der Zeit: [Wendung, stehen,] erster Teil, stehen, zweiter Teil
+        const total = Math.min(wende ? 2.35 : 1.5, 0.85 * gap);
+        const [w0, w1, w2, w3] = wende ? [0.3, 0.36, 0.68, 0.74] : [0, 0, 0.5, 0.6];
+        const at = (w) => st.t + w * total;
         const part = (from, tk, dd) => {
           const u0 = clamp(1 - STRIKE / dd, 0.3, 0.8);
           const pre = E.timeline([{ t: 0, p: from }, { t: u0, p: tk(0) }]);
           return (u) => (u < u0 ? upper(pre(u)) : tk((u - u0) / (1 - u0)));
         };
+        // Blick: Schaut die Figur vor und nach einem Teil in dieselbe Richtung, bleibt der Kopf dort stehen (er liefe sonst
+        // der Drehung der Füße voraus und wieder zurück)
+        const steady = (sg) => { const l = [sg.A.byaw + sg.A.up.look, sg.B.byaw + sg.B.up.look]; if (Math.abs(l[1] - l[0]) < 20) sg.lookAbs = l; return sg; };
+        let k0 = cur;
+        if (wende) {
+          // Drehfuß ist das Bein, das am Ende trägt; der andere Fuß geht um ihn herum auf die andere Seite
+          const pf = pv.pose.f;
+          const piv = m.f[0][3] >= m.f[1][3] ? 0 : 1;
+          const body = (((pv.pose.body + 2 * m.turn) % 360) + 360) % 360;
+          const m0 = { f: [0, 1].map((q) => (q === piv ? [pf[q][0], pf[q][1], body, 0.5] : [2 * pf[piv][0] - pf[q][0], 2 * pf[piv][1] - pf[q][1], body, 0.5])), body, turn: 2 * m.turn };
+          const mir = upper(flip(cur.up));
+          const cross = E.timeline([{ t: 0, p: cur.up }, { t: 0.5, p: M(cur.up, { hL: [-0.1, -0.08, 0.22], hR: [0.1, -0.1, 0.25], eL: [0.7, -0.7, 0.2], eR: [-0.7, -0.7, 0.2], yaw: 0, look: (cur.up.look + mir.look) / 2 }) }, { t: 1, p: mir }]);
+          k0 = key(m0, 'Heisoku-dachi', cur, mir);
+          segs.push(steady(segment(cur, k0, { t0: st.t, t1: at(w0), arms: (u) => upper(cross(u)), teilen: true })));
+        }
+        const b = m.body * RAD;
+        const front = (m.f[1][0] - m.f[0][0]) * Math.sin(b) + (m.f[1][1] - m.f[0][1]) * Math.cos(b) > 0 ? 1 : 0;
+        const m1 = { f: m.f.map((x, q) => [x[0], x[1], q === front ? m.body : m.body + (q === 1 ? 35 : -35), q === front ? 0.7 : 0.3]), body: m.body, turn: wende ? -m.turn : m.turn };
         const tk1 = track(tech.vor, side);
-        const k1 = key(m1, tech.vor.stand, cur, tk1(1));
-        segs.push(segment(cur, k1, { t0: st.t, t1: st.t + d1, arms: part(cur.up, tk1, d1), teilen: true }));
+        const k1 = key(m1, tech.vor.stand, k0, tk1(1));
+        segs.push(steady(segment(k0, k1, { t0: at(w1), t1: at(w2), arms: part(k0.up, tk1, (w2 - w1) * total), teilen: true })));
         const tk2 = track(tech, side);
         const k2 = key(Object.assign({}, m, { turn: null }), st.stance, k1, tk2(1));
-        segs.push(segment(k1, k2, { t0: t2, t1: st.t + total, arms: part(k1.up, tk2, st.t + total - t2), teilen: true }));
-        mark(st.t + total);
+        segs.push(steady(segment(k1, k2, { t0: at(w3), t1: at(1), arms: part(k1.up, tk2, (1 - w3) * total), teilen: true })));
+        mark(at(1));
         cur = k2;
         return;
       }
