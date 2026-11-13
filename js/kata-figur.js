@@ -599,7 +599,11 @@
         if (st.slow) {
           // langsam: ruhig in die Ausholhaltung, dann der Ablauf über den Rest (Haltungen ohne Ablauf: einfach hinein)
           const pre = E.timeline([{ t: 0, p: cur.up }, { t: 0.35, p: tr(0) }]);
-          arms = defOf(tech.def).keys.length > 1 ? (u) => (u < 0.35 ? upper(pre(u)) : tr((u - 0.35) / 0.65)) : calm(cur.up, end);
+          // Die Hüfte dreht dabei in einem Zug von der alten in die neue Stellung, im Gleichschritt mit der Wendung – nähme
+          // sie die Hüftstellung der Ausholhaltung mit, drehte sie erst kräftig gegen die Wendung und dann zurück
+          const y0 = cur.up.yaw;
+          const y1 = end.yaw;
+          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < 0.35 ? upper(pre(u)) : tr((u - 0.35) / 0.65), { yaw: lerp(y0, y1, smooth(u)) }) : calm(cur.up, end);
         }
         else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen
