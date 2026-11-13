@@ -389,9 +389,19 @@
       };
       playBtn.onclick = () => setPlay(!st.playing);
       const jump = (dir) => {
-        // vor: Beginn der nächsten Zählzeit; zurück: Beginn der laufenden, kurz nach deren Beginn der vorigen
-        const i = anim.markAt(st.t + (dir > 0 ? 0 : -0.3));
-        st.t = anim.marks[Math.max(0, Math.min(anim.marks.length - 1, dir > 0 ? i + 1 : i))].t;
+        const last = anim.marks.length - 1;
+        if (st.playing) {
+          // beim Abspielen – vor: Beginn der nächsten Zählzeit; zurück: Beginn der laufenden, kurz nach deren Beginn der vorigen
+          const i = anim.markAt(st.t + (dir > 0 ? 0 : -0.3));
+          st.t = anim.marks[Math.max(0, Math.min(last, dir > 0 ? i + 1 : i))].t;
+        } else {
+          // im Stand: die fertige Stellung der nächsten bzw. vorigen Zählzeit – die Zahl gehört zu dem Bild, das steht
+          // (am Beginn einer Zählzeit stünde noch die Stellung davor, z. B. Yoi unter „1 · Ichi“)
+          const i = Math.max(0, anim.markAt(st.t));
+          const done = st.t >= anim.marks[i].t1 - 0.01;
+          const j = dir > 0 ? (done ? i + 1 : i) : (st.t > anim.marks[i].t1 + 0.01 ? i : i - 1);
+          st.t = j < 0 ? 0 : anim.marks[Math.min(last, j)].t1;
+        }
         st.dirty = true;
       };
       $('prev').onclick = () => jump(-1);

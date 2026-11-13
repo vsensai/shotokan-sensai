@@ -35,6 +35,12 @@
   const BODY = [0.2, 0.19]; // Rumpf vor der Brustmitte: halbe Breite und Tiefe, in die keine Hand eintaucht (Meter)
   const LEVEL = 0.035; // so weit darf die Hüfte dabei von der Höhe des Standes abweichen (Meter)
   const STRAIGHT = 0.9; // ab dieser Streckung gilt ein Bein im Stand der Figur als gestrecktes Bein (Zenkutsu-dachi hinten)
+  // Zenkutsu-dachi: das hintere Bein ist fast durchgedrückt (nie ganz). Ist der Stand der Karte kürzer als der der Figur,
+  // schiebt sich die Hüfte dafür nach vorne – aber nur so weit, dass das vordere Hüftgelenk noch FRONT Meter hinter dem
+  // vorderen Knöchel bleibt (das Knie soll nicht über die Zehen hinaus)
+  const REAR = 0.98;
+  const FRONT = 0.26;
+  const RISE = 0.06; // so viel höher darf die Hüfte dafür in einem sehr kurzen Stand stehen (Meter)
   // Längster Stand der Figur (Meter zwischen den Fußmitten). Die Fußskizzen zeichnen einzelne Stände deutlich länger, als die
   // Beine der Figur reichen (Heian Nidan 1–6, 15, 25: 1,3 bis 1,5 m) – die Hüfte sänke dort bis auf Kniehöhe. Heian Shodan
   // bleibt mit höchstens 1,24 m darunter und damit unverändert.
@@ -178,7 +184,7 @@
     const J = E.solve(c);
     const ext = {};
     ['L', 'R'].forEach((s) => (ext[s] = Math.hypot(...J['hip' + s].map((v, i) => v - J['ankle' + s][i])) / 0.88));
-    return { pel: add(ank[1], cmul(a, sub([c.pelvis[0], c.pelvis[2]], cr))), h: c.pelvis[1], ext, ank: { L: ank[0], R: ank[1] }, L: foot(c.L, feet[0]), R: foot(c.R, feet[1]), w: [feet[0].w, feet[1].w] };
+    return { key, pel: add(ank[1], cmul(a, sub([c.pelvis[0], c.pelvis[2]], cr))), h: c.pelvis[1], ext, ank: { L: ank[0], R: ank[1] }, L: foot(c.L, feet[0]), R: foot(c.R, feet[1]), w: [feet[0].w, feet[1].w] };
   }
   // Hüfthöhe einer Stellung: Ein Bein, das im Stand der Figur (fast) gestreckt ist, bleibt es auch – ist der Stand der Karte
   // kürzer oder länger als der der Figur, steht die Hüfte entsprechend höher oder tiefer (sonst knickt das hintere Bein ein)
@@ -193,6 +199,29 @@
     // … aber nur in Grenzen: die Skizzen sind mal gestaucht, mal gestreckt, die Hüfte soll trotzdem auf einer Höhe bleiben
     const want = Math.min(top(s, Math.max(low.ext[s], 0.97)), top(o, 0.99));
     return low.h > 0.85 ? want : clamp(want, low.h - LEVEL, low.h + LEVEL);
+  }
+
+  // Zenkutsu-dachi: hinteres Bein strecken (REAR), indem die Hüfte entlang der Standlinie nach vorne rückt. yaw: Hüftdrehung
+  function rearLeg(low, yaw) {
+    if (low.key !== 'zk') return;
+    const lp = [Math.cos(yaw * RAD), -Math.sin(yaw * RAD)];
+    const s = low.ext.L > low.ext.R ? 'L' : 'R';
+    const o = s === 'L' ? 'R' : 'L';
+    const hip = (q) => add(low.pel, mul(lp, q === 'L' ? HIP : -HIP));
+    const line = sub(low.ank[o], low.ank[s]);
+    const axis = mul(line, 1 / len(line));
+    const need2 = (REAR * 0.88) ** 2 - (low.h - low[s].y) ** 2;
+    const v = sub(hip(s), low.ank[s]);
+    const c = dot(v, v) - need2;
+    if (need2 <= 0 || c >= 0) return;
+    const b = dot(v, axis);
+    const room = dot(sub(low.ank[o], hip(o)), axis) - FRONT;
+    const x = Math.max(0, Math.min(-b + Math.sqrt(b * b - c), room, 0.25));
+    low.pel = add(low.pel, mul(axis, x));
+    // reicht das bei einem sehr kurzen Stand nicht (Heian Godan 8–11: knapp 0,8 m), steht die Hüfte etwas höher
+    const r2 = dot(sub(hip(s), low.ank[s]), sub(hip(s), low.ank[s]));
+    const top = low[s].y + Math.sqrt(Math.max(0, (REAR * 0.88) ** 2 - r2));
+    if (top > low.h) low.h = Math.min(top, low.h + RISE);
   }
 
   // Hand nicht durch den Rumpf: Wechselt eine Hand zwischen zwei Haltungen die Seite (Hüfte → Ohr der anderen Seite), führt
@@ -483,6 +512,7 @@
       const byaw = turnOf(m, prev, stance);
       const low = lower(m, stance, warn);
       low.h = height(low, byaw + up.yaw);
+      rearLeg(low, byaw + up.yaw);
       return { low, byaw, up };
     };
     // Übergang der Haltung in d Sekunden (ruhig)
