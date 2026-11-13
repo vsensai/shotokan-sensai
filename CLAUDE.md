@@ -35,6 +35,25 @@
 - Braucht eine Kata einen Ablauf, den das Lexikon so nicht hat (z. B. Tritt in anderer Höhe), kommt er in `SK.fig3dKata` am Ende von `js/figur-posen.js` – nicht in `SK.fig3dDefs`, sonst erschiene er im Lexikon. Fußtritte stehen in `TRITT` (`js/kata-figur.js`).
 - Eine Kata erst in `KATA` freigeben, wenn der Nutzer den Ablauf in `labor/kata.html?kata=<id>` gesehen und abgenommen hat. `validate.html` prüft freigegebene Kata (rechenbar, Füße erreichen ihren Platz, nichts springt).
 
+### Neue Kata als Figur – so sind Heian Shodan bis Godan entstanden
+Werkzeug: `node tools/kata-figur.js` (`ablauf`, `pruefen`, `stand`, `vergleich`, `bogen` – Hilfe ohne Argumente). Es ist kein Test; die Tests laufen weiter nur über `tools/test/run.js`.
+1. **Probelauf, noch nichts ändern:** `node tools/kata-figur.js ablauf <id>` zeigt jede Bewegung und alle Warnungen (fehlende Technik, fehlender Stand). Dazu die Hinweise des Buches in `docs/buch-register.md` und die Fußarbeit in `ansage` lesen. Dem Nutzer kurz melden: was passt schon, was läuft unvollständig, was fehlt – und fragen, ob es losgehen soll.
+2. **Vor dem Bauen den Stand festhalten:** `node tools/kata-figur.js stand tools/out/vorher.json` (alle freigegebenen Kata).
+3. **Bauen:** Zuerst im Lexikon suchen (`js/figur-posen.js` – viele Abläufe sind schon „wie in Heian …“ gebaut), sonst einen Ablauf in `SK.fig3dKata` ergänzen. Zuordnen in `TECH`/`STAND`/`TRITT` (`js/kata-figur.js`, die Optionen stehen dort im Kommentar: `direkt`, `lang`, `erst`, `schnapp`, `halten`, `vor`, dritter Eintrag für Stand/Hinweis). Aus den Daten kommen: `slow`, Hinweis „Fumikomi“, Fußarbeit „Yori-ashi“, „Sprungschritt“, „Tobikomi“, `look`, `via`. Stand auf einem Bein vor einem Tritt = angezogenes Knie dieses Tritts.
+4. **Prüfen:** `node tools/kata-figur.js pruefen <id>` (alle neun Tempi ohne Meldung) und `vergleich tools/out/vorher.json` – freigegebene Kata sollen zahlengleich bleiben; ändert eine allgemeine Regel sie doch, dem Nutzer sagen, welche Kata, welche Bewegungen und um wie viel. Mit `bogen` die Endstellungen und die schwierigen Übergänge aus zwei Blickrichtungen ansehen, bevor der Nutzer sie sieht.
+5. **Ins Labor:** Version `patch`, validate, smoke, pushen. Dem Nutzer den Link `labor/kata.html?kata=<id>` geben, was neu gebaut ist und was er sich besonders ansehen soll (alles, was geraten oder vereinfacht ist). Das Labor zeigt unter der Figur den Stand (Version, Uhrzeit) – daran sieht er, ob die Änderung schon angekommen ist.
+6. **Korrekturen des Nutzers einarbeiten** (er prüft als Karateka; meist mehrere Runden), jeweils wieder Schritt 4 und 5. Ist eine Angabe der Kata-Daten falsch (z. B. Drehrichtung), dort korrigieren und die Regeln unter „Kata-Ansage ändern“ beachten.
+7. **Freigeben erst auf sein Wort:** Kata in `KATA` eintragen, in `tools/test/smoke.js` die „nicht freigegebene Kata“ auf die nächste umstellen, Version `minor`.
+
+Was der Nutzer bisher korrigiert hat (gilt auch für die nächsten Kata):
+- Zenkutsu-dachi: hinteres Bein fast durchgedrückt (`REAR`), nicht zu kurz (`MINZK`).
+- Schritt mit Fumikomi: erst drehen beide Füße in die Laufrichtung, dann Schritt mit hohem Knie und geraden Knien, erst kurz vor dem Aufstampfen dreht alles in den Stand.
+- Yori-ashi: vorderer Fuß geht voraus, der andere zieht sofort nach – nicht beide gleichzeitig (sieht aus wie Schweben).
+- Langsame Bewegungen: die Hüfte dreht in einem Zug, keine Gegenbewegung; bleibt der Oberkörper stehen, bewegt sich die Hüfte nicht.
+- Eine Technik endet dort, wo sie in der Kata endet (Mikazuki-geri: Fuß bleibt an der Hand; Uraken in Heian Sandan schnappt zurück).
+- Bewegungen mit Vorstufe (Angriff im Zenkutsu-dachi vor dem Manji-uke, Wendung auf der Stelle) nicht weglassen, auch wenn die Daten sie nur als Hinweis „Teil 1“ führen.
+- Drehrichtungen und Zählung genau prüfen; die Zahl gehört zur fertigen Stellung.
+
 ## Buchwissen (ohne PDF)
 - Bei Fragen zum Buch oder neuen Kata-Inhalten zuerst `docs/buch-register.md` lesen: Seitenzählung, Kapitel, Zusammenfassungen der allgemeinen Kapitel, Hinweise des Buches je Bewegung und Ablauftabellen aller zehn Kata. Nur Fakten und eigene Worte ins Repo, keine Abschriften aus dem Buch.
 - Die Ablauftabellen im Register werden aus den App-Daten erzeugt: nach Änderungen an `seq` oder `ansage` in `data/kata-*.js` `node tools/register-tabellen.js` laufen lassen.
