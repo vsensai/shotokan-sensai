@@ -1168,6 +1168,21 @@
     M(S.kosa, { hL: L(H.hip), hR: [-0.1, 0.04, 0.5], eR: [-0.2, -1, 0.2], pR: [0, 0, -1] }),
   ], { eff: 'fistR' });
 
+  /* Heian Godan */
+  // 9 → 10: Ryosho Juji Chudan Osae-uke – die gekreuzten offenen Hände drehen ein und drücken vor dem Bauch nach unten
+  KATA['juji-osae-uke'] = T(M(S.zks, HANDS_HIP), M(S.zks, { oL: 1, oR: 1, hL: [-0.03, -0.22, 0.3], hR: [0.03, -0.2, 0.33], eL: [1, -0.4, 0.2], eR: [-1, -0.4, 0.2], pL: [0, -1, 0], pR: [0, -1, 0] }));
+  // 13: Gedan-barai zur rechten Seite im Kiba-dachi – die Faust holt an der linken Schulter aus und fegt über das rechte Knie
+  KATA['gedan-barai-kiba'] = T(M(KB, { look: -90, hR: [0.13, 0.08, 0.2], eR: [-0.4, -0.8, 0.5], hL: [0.3, -0.25, 0.25] }),
+    M(KB, { look: -90, hR: stretch([-0.5, -0.5, 0.06], 'R') }));
+  // 17: Morote-uke zur rechten Seite im Kosa-dachi (der Körper steht quer, Blick über die rechte Schulter): der rechte Arm
+  // wehrt seitlich ab, die linke Faust stützt am rechten Ellbogen
+  KATA['morote-uke-seite'] = T(M(S.kosa, { look: -90, hR: [0.15, -0.3, 0.15], eR: [-0.5, -0.6, 0.5], hL: L(H.hip) }),
+    M(S.kosa, { look: -90, hR: [-0.5, -0.02, 0.1], eR: [-0.3, -1, 0], hL: [-0.24, -0.16, 0.16], eL: [0.6, -0.7, 0.4] }));
+  // 18: Uken Uho-tsukiage im Renoji-dachi – die rechte Faust stößt nach rechts oben, der Oberkörper neigt sich leicht nach
+  // rechts: eine gerade Linie von der rechten Faust bis zu den linken Zehen
+  KATA['uho-tsukiage'] = T(M(S.renoji, { yaw: 0, hR: H.hip, hL: L(H.hip) }),
+    M(S.renoji, { yaw: 0, roll: -10, hR: stretch([-0.34, 0.6, 0.04], 'R'), hL: L(H.hip) }));
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };
