@@ -54,13 +54,17 @@
   // Tekki: Der Kiba-dachi ist das Kennzeichen der Kata, die Skizze zeichnet ihn aber 1,3 bis 1,5 m breit (die Beine der Figur
   // stünden fast gestreckt). Für diese Kata gilt deshalb eine eigene größte Breite; die Heian-Kata behalten MAXLEN.
   const KIBA = { 'tekki-shodan': 1.0 };
-  const KOSA = 0.3; // Kreuzschritt (Ashi-mae Kosa): so weit stehen die Fußmitten höchstens auseinander (Meter)
   const KREUZ = 0.28; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
-  // Kreuzschritt: der kreuzende Fuß steht so weit vor dem Standfuß, dass das Bein ganz vor dem anderen steht (aus dem Stand
-  // der Figur). Die Skizze zeichnet beide Füße auf eine Linie; die Figur setzt den kreuzenden Fuß davor, und der Kiba-dachi
-  // danach steht auf der Linie dieses Fußes – mit jedem Kreuzschritt rückt die Kata also um dieses Stück nach vorn
+  // Kreuzschritt (Ashi-mae Kosa): die Füße stehen dicht nebeneinander, der kreuzende ein Stück weiter vorn – so eng, wie es
+  // geht, ohne dass die Hosenbeine ineinander geraten (aus dem Stand der Figur, S.kosamae). KOSA: so weit stehen die
+  // Fußmitten seitlich höchstens auseinander. KVOR: so weit steht der kreuzende Fuß vor dem Standfuß. Die Skizze zeichnet
+  // beide Füße auf eine Linie; die Figur setzt den kreuzenden Fuß davor, und der Kiba-dachi danach steht auf der Linie
+  // dieses Fußes – mit jedem Kreuzschritt rückt die Kata also um dieses Stück nach vorn
+  const KOSA = S.kosamae ? Math.abs(S.kosamae.L.x - S.kosamae.R.x) : 0.3;
   const KVOR = S.kosamae ? Math.abs(S.kosamae.L.z - S.kosamae.R.z) : 0;
   const KOSAST = /ashi-mae kosa$/i;
+  const KZURUECK = 0.12; // … und so weit geht der Fuß dabei nach hinten (Meter, auf halbem Weg)
+  const KKNIE = [0, 1]; // Stampfen aus dem Kreuzschritt: Richtung des Knies (Anteil nach vorn, zur Seite des Schritts)
   const NAMI = 0.4; // Namigaeshi: so hoch kommt der Fuß (Meter)
 
   /* ---------- Rechnen ---------- */
@@ -363,9 +367,13 @@
         const fw = [dir[0] / len(dir), dir[1] / len(dir)];
         seg.knee = { w: (u) => ramp(0, Math.max(p1, 0.12), u) * (1 - ramp(p3, 1, u)), L: [fw[0], s === 'L' ? 0.3 : 0.15, fw[1]], R: [fw[0], s === 'R' ? 0.3 : 0.15, fw[1]] };
         // Stampfen zur Seite, ohne dass der Körper dreht (Tekki): das Knie kommt vor dem Körper hoch, nur leicht zur Seite des
-        // Schritts geneigt; das Knie des Standbeins bleibt, wie es im Stand ist
+        // Schritts geneigt; das Knie des Standbeins bleibt, wie es im Stand ist. Aus dem Kreuzschritt heraus (kreuz −1) steht
+        // das andere Bein dicht davor: dann geht das Knie mehr zur Seite hoch als nach vorn, sonst stieße es durch dieses Bein
         const vorn = fwd(A.byaw);
-        if (!p1 && Math.abs(turn) < 5 && Math.abs(dot(fw, vorn)) < 0.5) seg.knee = { w: seg.knee.w, [s]: [vorn[0] + 0.45 * fw[0], 0.5, vorn[1] + 0.45 * fw[1]] };
+        const [vk, sk] = o.kreuz < 0 ? KKNIE : [1, 0.45];
+        if (!p1 && Math.abs(turn) < 5 && Math.abs(dot(fw, vorn)) < 0.5) seg.knee = { w: seg.knee.w, [s]: [vk * vorn[0] + sk * fw[0], 0.5, vk * vorn[1] + sk * fw[1]] };
+        // … und der Fuß löst sich zuerst nach hinten vom vorderen Bein, statt an dessen Schienbein entlang hochzukommen
+        if (o.kreuz < 0) seg.feet[s].mid = add(seg.feet[s].mid, mul(vorn, -KZURUECK));
         seg.lookAbs = [A.byaw + A.up.look, B.byaw + B.up.look];
       }
     }

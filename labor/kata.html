@@ -329,7 +329,7 @@
         const P = anim.pose(st.t);
         const J = F.solve(P);
         const c = center(st.t);
-        const cam = Object.assign({}, st.cam, { target: [c.x, 0.78, c.z], yaw: st.cam.yaw + (st.mit ? c.yaw : 0) });
+        const cam = Object.assign({}, st.cam, { target: [c.x, st.cam.h || 0.78, c.z], yaw: st.cam.yaw + (st.mit ? c.yaw : 0) });
         const decals = ['L', 'R'].filter((s) => grounded(J, s)).map((s) => ({ heel: J['heel' + s], toe: J['toe' + s], w: P.w[s === 'L' ? 0 : 1], a: 1, side: s }));
         ctx.clearRect(0, 0, w, h);
         F.draw(ctx, w, h, P, cam, { mode: 0, style: 0, decals });

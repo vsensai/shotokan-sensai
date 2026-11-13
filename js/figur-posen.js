@@ -1198,11 +1198,11 @@
   // eine Fußlänge weiter vorn und rechts vom rechten. Das rechte Bein trägt, sein Knie zeigt wie im Kiba-dachi nach außen;
   // das linke kreuzt mit dem Knie nach vorn vor dem rechten Schienbein. Beide Knie gebeugt, die Hüfte bleibt fast auf der
   // Höhe des Kiba-dachi (Tekki: nicht aufrichten). Der Abstand nach vorn (L.z) gilt auch für die Füße der Kata (KVOR).
-  S.kosamae = { pelvis: [-0.08, 0.73, 0.05], L: { x: -0.3, z: 0.22, yaw: 0, kp: [-0.2, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [-1, 0, 0.35] }, w: [0.1, 0.9] };
+  S.kosamae = { pelvis: [-0.08, 0.73, 0.04], L: { x: -0.18, z: 0.18, yaw: 0, kp: [-0.2, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [-1, 0, -0.3] }, w: [0.1, 0.9] };
   // Yoi: Heisoku-dachi, beide Arme gestreckt, die offenen Hände mittig vor dem Körper genau übereinander – die rechte am
   // Körper, die linke Handfläche auf ihrem Rücken, Fingerspitzen nach unten
-  KATA['yoi-kafukubu'] = STILL(M(S.heisoku, { oL: 1, oR: 1, hR: stretch([0, -0.54, 0.12], 'R'), fR: [0, -1, 0], pR: [0, 0, -1],
-    hL: stretch([0, -0.54, 0.145], 'L'), fL: [0, -1, 0], pL: [0, 0, -1] }));
+  KATA['yoi-kafukubu'] = STILL(M(S.heisoku, { oL: 1, oR: 1, hR: stretch([0, -0.54, 0.17], 'R'), fR: [0, -1, 0], pR: [0, 0, -1],
+    hL: stretch([0, -0.54, 0.195], 'L'), fL: [0, -1, 0], pL: [0, 0, -1] }));
   // Ausholen zum Kake-uke: die offene Hand oben vor der Brust, die Faust des anderen Arms darunter – mit so viel Abstand,
   // dass die Arme übereinander liegen, ohne ineinander zu geraten (im Lexikon, KU2, liegen sie dichter)
   const TK_KAKE = M(KU2, { hL: [-0.13, -0.02, 0.3], hR: [0.13, -0.2, 0.27] });
