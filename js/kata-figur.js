@@ -55,7 +55,12 @@
   // stünden fast gestreckt). Für diese Kata gilt deshalb eine eigene größte Breite; die Heian-Kata behalten MAXLEN.
   const KIBA = { 'tekki-shodan': 1.0 };
   const KOSA = 0.3; // Kreuzschritt (Ashi-mae Kosa): so weit stehen die Fußmitten höchstens auseinander (Meter)
-  const KREUZ = 0.24; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
+  const KREUZ = 0.28; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
+  // Kreuzschritt: der kreuzende Fuß steht so weit vor dem Standfuß, dass das Bein ganz vor dem anderen steht (aus dem Stand
+  // der Figur). Die Skizze zeichnet beide Füße auf eine Linie; die Figur setzt den kreuzenden Fuß davor, und der Kiba-dachi
+  // danach steht auf der Linie dieses Fußes – mit jedem Kreuzschritt rückt die Kata also um dieses Stück nach vorn
+  const KVOR = S.kosamae ? Math.abs(S.kosamae.L.z - S.kosamae.R.z) : 0;
+  const KOSAST = /ashi-mae kosa$/i;
   const NAMI = 0.4; // Namigaeshi: so hoch kommt der Fuß (Meter)
 
   /* ---------- Rechnen ---------- */
@@ -84,7 +89,7 @@
   const stomp = (u) => (u < 0.5 ? smooth(u / 0.5) : u < 0.72 ? 1 : 1 - ((u - 0.72) / 0.28) ** 2);
 
   /* ---------- Stände und Techniken ---------- */
-  const STAND = [[/ashi-mae kosa$/i, 'kosamae'], [/renoji/i, 'renoji'], [/hizakutsu/i, 'hizaShomen'], [/kosa-dachi/i, 'kosa'], [/ashi-zenkutsu/i, 'ashizk'], [/zenkutsu/i, 'zk'], [/kokutsu/i, 'kk'], [/kiba/i, 'kb'], [/hachiji/i, 'hachiji'], [/musubi/i, 'musubi'], [/heisoku/i, 'heisoku'], [/ashi-dachi/i, 'ashidachi']];
+  const STAND = [[KOSAST, 'kosamae'], [/renoji/i, 'renoji'], [/hizakutsu/i, 'hizaShomen'], [/kosa-dachi/i, 'kosa'], [/ashi-zenkutsu/i, 'ashizk'], [/zenkutsu/i, 'zk'], [/kokutsu/i, 'kk'], [/kiba/i, 'kb'], [/hachiji/i, 'hachiji'], [/musubi/i, 'musubi'], [/heisoku/i, 'heisoku'], [/ashi-dachi/i, 'ashidachi']];
   // Technik → Ablauf im Lexikon (SK.fig3dDefs) oder eigener Ablauf der Kata (SK.fig3dKata, ohne „xx:“ davor).
   // side: Seite, die dort arbeitet (andere Seite = gespiegelt); from: Zeitpunkt im Ablauf, an dem ausgeholt ist;
   // direkt: ohne Ausholen aus der vorigen Haltung (Stoß); dur: eigene Dauer der ganzen Bewegung (Sekunden),
@@ -105,8 +110,8 @@
     [/sokumen chudan-zuki \+ .*kagi-zuki/i, { def: 'zuki-kagi-zuki', side: 'L', from: 0.25, direkt: true, erst: true }],
     [/kagi-zuki/i, { def: 'tc:kagi-zuki', side: 'R', from: 0.25, direkt: true }],
     [/sokumen chudan kake-uke/i, { def: 'kake-uke-seite', side: 'L', from: 0.25 }, /fumikomi/i],
-    // 16, langsam: aus dem Stoß davor gleich zum Ausholen vor der Brust (das Lexikon beginnt mit den Fäusten an den Hüften)
-    [/sokumen chudan kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.38 }, /tekki/i],
+    [/sokumen chudan kake-uke/i, { def: 'kake-uke-langsam', side: 'L', from: 0 }, /tekki/i],
+    [/koshi-kamae/i, { def: 'koshi-kamae-tekki', side: 'R', from: 0 }, /tekki/i],
     [/sokumen .*mae-enpi/i, { def: 'mae-enpi-seite', side: 'R', from: 0.25 }, /kiba/i],
     [/chudan uchi-uke/i, { def: 'uchi-uke-kiba', side: 'R', from: 0.25 }, /kiba/i],
     [/uraken jodan-uchi \+ .*suihei-kamae/i, { def: 'nagashi-uraken', side: 'L', from: 0.16, lang: true, dur: 1.15, erst: true }],
@@ -285,9 +290,9 @@
     const own = mul([Math.cos(yawMid * RAD), -Math.sin(yawMid * RAD)], s === 'L' ? 1 : -1);
     let n = len(off) > 0.03 ? mul(off, 1 / len(off)) : own;
     let pass = PASS;
-    // Kreuzschritt zur Seite (kreuz: +1 vorne, −1 hinten vorbei): die Bahn läuft genau über den Standfuß – der Fuß geht
-    // vor bzw. hinter ihm vorbei, mit Abstand für die ganze Fußlänge
-    if (kreuz && len(off) <= 0.03) { n = mul(fwd(yawMid), kreuz); pass = KREUZ; plan.gerade = true; }
+    // Kreuzschritt zur Seite (kreuz: +1 vorne, −1 hinten vorbei): der Fuß geht vor bzw. hinter dem Standfuß vorbei, mit
+    // Abstand für die ganze Fußlänge
+    if (kreuz) { n = mul(fwd(yawMid), kreuz); pass = KREUZ; plan.gerade = true; }
     plan.near = add(sp, mul(n, pass));
     plan.mid = mix(plan.mid, plan.near, k);
     plan.k = k;
@@ -541,7 +546,7 @@
         const reno = /renoji/i.test(st.stance);
         // Tekki: schmalerer Kiba-dachi; der Kreuzschritt bleibt dabei so eng, wie er ist (sonst rückten nur die Plätze im
         // Kiba-dachi zusammen und die Kreuzschritte würden dafür weit)
-        const max = reno ? RENOJI : /ashi-mae kosa$/i.test(st.stance) ? KOSA : (KIBA[id] && /kiba/i.test(st.stance) ? KIBA[id] : MAXLEN);
+        const max = reno ? RENOJI : KOSAST.test(st.stance) ? KOSA : (KIBA[id] && /kiba/i.test(st.stance) ? KIBA[id] : MAXLEN);
         // ein zu kurzer Zenkutsu-dachi wird länger: beide Plätze rücken je zur Hälfte auseinander
         if (/zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance) && l < MINZK - 1e-4) {
           const push = mul(d, (0.5 * (MINZK - l)) / l);
@@ -567,7 +572,23 @@
   // opt.beat: Abstand zweier Zählzeiten in Sekunden (2 = Training, wie in der Kata-Ansage)
   function build(k, opt) {
     const beat = (opt && opt.beat) || 2;
-    const steps = shorten(SK.ansageTimeline(k, beat, true), k.id);
+    let steps = shorten(SK.ansageTimeline(k, beat, true), k.id);
+    // Kreuzschritt: der kreuzende (leichte) Fuß kommt um KVOR vor den Standfuß; alles danach steht um dasselbe Stück weiter vorn
+    let vor = [0, 0];
+    steps = steps.map((st) => {
+      if (!st.pose) return st;
+      const f = st.pose.f.map((x) => [x[0] + vor[0], x[1] + vor[1]].concat(x.slice(2)));
+      const via = st.pose.via ? [st.pose.via[0], st.pose.via[1] + vor[0], st.pose.via[2] + vor[1], st.pose.via[3]] : st.pose.via;
+      if (st.kind === 'move' && KOSAST.test(st.stance) && KVOR) {
+        const b = st.pose.body * RAD;
+        const d = [(Math.sin(b) * KVOR) / SCALE, (Math.cos(b) * KVOR) / SCALE];
+        const ic = st.pose.f[0][3] < st.pose.f[1][3] ? 0 : 1;
+        f[ic][0] += d[0];
+        f[ic][1] += d[1];
+        vor = add(vor, d);
+      }
+      return Object.assign({}, st, { pose: Object.assign({}, st.pose, { f }, via ? { via } : {}) });
+    });
     const warn = [];
     const segs = [];
     const marks = [];
@@ -825,9 +846,8 @@
       // Fumikomi: der Fuß, der den Platz wechselt, kommt mit dem Knie hoch und stampft auf
       if (/fumikomi/i.test(st.note || '')) o.hoch = true;
       // Kreuzschritt zur Seite: der Fuß kreuzt vor dem Standfuß; aus dem Kreuzschritt heraus geht der hintere Fuß hinten vorbei
-      const kosa = /ashi-mae kosa$/i;
-      if (kosa.test(st.stance)) o.kreuz = 1;
-      else if (steps[i - 1] && kosa.test(steps[i - 1].stance || '')) o.kreuz = -1;
+      if (KOSAST.test(st.stance)) o.kreuz = 1;
+      else if (steps[i - 1] && KOSAST.test(steps[i - 1].stance || '')) o.kreuz = -1;
       // Namigaeshi: der Fuß des Zwischenschritts (via) wird hochgerissen
       if (/namigaeshi/i.test(st.note || '')) o.welle = true;
       const seg = segment(cur, nk, o);

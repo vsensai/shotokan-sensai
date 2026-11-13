@@ -53,6 +53,9 @@ Was der Nutzer bisher korrigiert hat (gilt auch für die nächsten Kata):
 - Eine Technik endet dort, wo sie in der Kata endet (Mikazuki-geri: Fuß bleibt an der Hand; Uraken in Heian Sandan schnappt zurück).
 - Bewegungen mit Vorstufe (Angriff im Zenkutsu-dachi vor dem Manji-uke, Wendung auf der Stelle) nicht weglassen, auch wenn die Daten sie nur als Hinweis „Teil 1“ führen.
 - Drehrichtungen und Zählung genau prüfen; die Zahl gehört zur fertigen Stellung.
+- Nichts darf ineinander verschmelzen: Arme, die übereinander liegen (Ausholen, Koshi-kamae), und gekreuzte Beine brauchen sichtbar Abstand – ein Arm liegt am Körper an, steckt aber nicht in ihm; beim Kreuzschritt steht das kreuzende Bein ganz vor dem anderen (Tekki Shodan).
+- Schlägt oder wehrt eine Technik zur Seite, dreht die Hüfte mit zur Seite der Technik, nicht nur der Oberkörper (Tekki Shodan 3, 11, 13).
+- Haltungen genau nach der Kata: Yoi in Tekki mit gestreckten Armen, die Handflächen mittig genau übereinander; im Koshi-kamae liegen die Fäuste genau übereinander.
 
 ## Buchwissen (ohne PDF)
 - Bei Fragen zum Buch oder neuen Kata-Inhalten zuerst `docs/buch-register.md` lesen: Seitenzählung, Kapitel, Zusammenfassungen der allgemeinen Kapitel, Hinweise des Buches je Bewegung und Ablauftabellen aller zehn Kata. Nur Fakten und eigene Worte ins Repo, keine Abschriften aus dem Buch.
