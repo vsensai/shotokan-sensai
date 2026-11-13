@@ -1178,10 +1178,15 @@
   // wehrt seitlich ab, die linke Faust stützt am rechten Ellbogen
   KATA['morote-uke-seite'] = T(M(S.kosa, { look: -90, hR: [0.15, -0.3, 0.15], eR: [-0.5, -0.6, 0.5], hL: L(H.hip) }),
     M(S.kosa, { look: -90, hR: [-0.5, -0.02, 0.1], eR: [-0.3, -1, 0], hL: [-0.24, -0.16, 0.16], eL: [0.6, -0.7, 0.4] }));
-  // 18: Uken Uho-tsukiage im Renoji-dachi – die rechte Faust stößt nach rechts oben, der Oberkörper neigt sich leicht nach
-  // rechts: eine gerade Linie von der rechten Faust bis zu den linken Zehen
+  // 18: Uken Uho-tsukiage im Renoji-dachi – die rechte Faust stößt nach rechts oben, der Oberkörper bleibt aufrecht
   KATA['uho-tsukiage'] = T(M(S.renoji, { yaw: 0, hR: H.hip, hL: L(H.hip) }),
-    M(S.renoji, { yaw: 0, roll: -10, hR: stretch([-0.34, 0.6, 0.04], 'R'), hL: L(H.hip) }));
+    M(S.renoji, { yaw: 0, hR: stretch([-0.3, 0.62, 0.04], 'R'), hL: L(H.hip) }));
+
+  // 21, 23, erster Teil vor dem Manji-uke: Angriff im Zenkutsu-dachi, Hüfte gerade nach vorn – die rechte Handkante
+  // schlägt nach vorn unten (Shuto Gedan-uchikomi), die linke offene Hand wehrt am rechten Ohr ab (Jodan Nagashi-uke).
+  // Von hier geht nur noch das Gewicht nach hinten in den Kokutsu-dachi, die Arme fahren zum Manji-uke auseinander.
+  KATA['nagashi-shuto-gedan'] = T(M(S.zks, { oL: 1, oR: 1, hL: [0.12, -0.1, 0.42], pL: [0, -1, 0], hR: [-0.22, 0.28, 0.02], eR: [-0.8, -0.5, 0.3], pR: [0, 0, 1] }),
+    M(S.zks, { oL: 1, oR: 1, hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], hR: stretch([0.04, -0.46, 0.42], 'R'), pR: [1, 0, 0] }));
 
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;

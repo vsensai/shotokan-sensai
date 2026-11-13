@@ -45,6 +45,7 @@
   // Beine der Figur reichen (Heian Nidan 1–6, 15, 25: 1,3 bis 1,5 m) – die Hüfte sänke dort bis auf Kniehöhe. Heian Shodan
   // bleibt mit höchstens 1,24 m darunter und damit unverändert.
   const MAXLEN = 1.25;
+  const RENOJI = 0.55; // längster Renoji-dachi (Meter zwischen den Fußmitten)
 
   /* ---------- Rechnen ---------- */
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -80,7 +81,9 @@
   // erst: bei zwei Techniken („… + …“) gilt die Seite der zuerst genannten (sonst die der zuletzt genannten);
   // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind.
   // schnapp: nach dem Treffer schnappt der Arm gleich zurück in die Haltung, aus der der Ablauf beginnt (Uraken);
-  // halten: der Oberkörper bleibt im Raum, wie er ist, auch wenn die Füße drehen (Jotai sonomama).
+  // halten: der Oberkörper bleibt im Raum, wie er ist, auch wenn die Füße drehen (Jotai sonomama);
+  // vor: die Bewegung hat einen ersten Teil in einem anderen Stand (stand) mit eigener Technik – die Füße stehen dabei schon
+  // an ihrem Platz, danach wechselt nur der Stand (Heian Godan 21, 23: Angriff im Zenkutsu-dachi, dann Gewicht zurück).
   // Ein dritter Eintrag beschränkt die Zuordnung auf Stände oder Hinweise der Kata (note), auf die er passt (der erste
   // passende Eintrag gilt)
   const TECH = [
@@ -99,7 +102,7 @@
     [/mae-geri-keage/i, { tritt: 'mae', dur: 0.8 }],
     [/^(saken|uken) chudan-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],
     [/shihon-nukite/i, { def: 'tc:nukite', side: 'R', from: 0.25, direkt: true }],
-    [/jodan uchi-uke \+ .*gedan-uke/i, { def: 'tc:manji-uke', side: 'L', from: 0.25 }],
+    [/jodan uchi-uke \+ .*gedan-uke/i, { def: 'tc:manji-uke', side: 'L', from: 0.25, vor: { stand: 'Zenkutsu-dachi', def: 'nagashi-shuto-gedan', side: 'L', from: 0.25 } }],
     [/uchi-uke \+ .*gedan-uke/i, { def: 'uchi-gedan-uke', side: 'R', from: 0.25, erst: true }],
     [/chudan uchi-uke/i, { def: 'mv:uchi-uke', side: 'R', from: 0.25 }],
     [/sokumen chudan morote-uke/i, { def: 'morote-uke-seite', side: 'R', from: 0.25 }],
@@ -122,7 +125,7 @@
     [/jodan kosa-uke/i, { def: 'tc:juji-uke', side: 'L', from: 0.25, direkt: true }],
     [/juji chudan osae-uke/i, { def: 'juji-osae-uke', side: 'L', from: 0.25, direkt: true }],
     [/kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.12 }],
-    [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 1.0 }],
+    [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 0.8 }],
     [/uho-tsukiage/i, { def: 'uho-tsukiage', side: 'R', from: 0.25, direkt: true }],
     [/jotai sonomama/i, { halten: true }],
   ];
@@ -139,8 +142,9 @@
     // Kniestoß: vom Greifen (Knie angehoben) bis zum Treffer – dort bleibt das Knie oben; die Arme kommen aus dem Ablauf selbst
     hiza: { def: 'tc:hiza-geri', side: 'R', a: 0.346, b: 0.543, an: 0.5, anMin: 0.4, kurz: 0.2, huefte: 1, arme: true },
     // Mikazuki-geri in die offene Hand (Heian Godan 15): der Ablauf steht im Kiba-dachi davor und dreht die Hüfte selbst
-    // ein – rahmen: vorne ist deshalb die Körperrichtung vor der Bewegung, erst danach gilt die neue
-    mikazuki: { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.43, an: 0.3, anMin: 0.25, kurz: 0.3, huefte: 1, arme: true, rahmen: true },
+    // ein – rahmen: vorne ist deshalb die Körperrichtung vor der Bewegung, erst danach gilt die neue. Die Technik endet
+    // mit dem Fuß an der Hand (b = Treffer); die nächste Bewegung setzt ihn von dort ab
+    mikazuki: { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true },
   };
   const defOf = (id) => D[id] || (SK.fig3dKata || {})[id];
   // Arme, Hüftdrehung (yaw, bezogen auf die Körperrichtung), Oberkörper und Kopf (look, bezogen auf die Körperrichtung)
@@ -480,10 +484,14 @@
         const [a, b] = node[j].map((q) => pts[q]);
         const d = sub(b, a);
         const l = len(d) * SCALE;
-        if (l <= MAXLEN + 1e-4) return;
-        const cut = mul(d, (0.5 * (l - MAXLEN)) / l);
-        pts[node[j][0]] = add(a, cut);
-        pts[node[j][1]] = sub(b, cut);
+        // Renoji-dachi ist ein kurzer Stand: der vordere, leichte Fuß steht nicht so weit weg (nur er rückt heran)
+        const reno = /renoji/i.test(st.stance);
+        const max = reno ? RENOJI : MAXLEN;
+        if (l <= max + 1e-4) return;
+        const cut = mul(d, (l - max) / l);
+        const part = reno ? (f[0][3] < f[1][3] ? [1, 0] : [0, 1]) : [0.5, 0.5];
+        pts[node[j][0]] = add(a, mul(cut, part[0]));
+        pts[node[j][1]] = sub(b, mul(cut, part[1]));
         over = changed = true;
       });
       if (!over) break;
@@ -643,6 +651,30 @@
         segs.push(segment(cur, knee, { t0: st.t, t1: st.t + d, arms: calm(cur.up, knee.up), first: s }));
         mark(st.t + d);
         cur = knee;
+        return;
+      }
+      if (tech && tech.vor) {
+        // Bewegung in zwei Teilen: erst die Technik im Stand davor (Füße schon am Platz), kurz stehen, dann der Stand der
+        // Bewegung mit ihrer Technik – die Füße bleiben, nur Gewicht, Hüfte und Fußrichtung wechseln
+        const total = Math.min(1.5, 0.85 * gap);
+        const d1 = 0.5 * total;
+        const t2 = st.t + 0.6 * total;
+        const b = m.body * RAD;
+        const front = (m.f[1][0] - m.f[0][0]) * Math.sin(b) + (m.f[1][1] - m.f[0][1]) * Math.cos(b) > 0 ? 1 : 0;
+        const m1 = { f: m.f.map((x, q) => [x[0], x[1], q === front ? m.body : m.body + (q === 1 ? 35 : -35), q === front ? 0.7 : 0.3]), body: m.body, turn: m.turn };
+        const part = (from, tk, dd) => {
+          const u0 = clamp(1 - STRIKE / dd, 0.3, 0.8);
+          const pre = E.timeline([{ t: 0, p: from }, { t: u0, p: tk(0) }]);
+          return (u) => (u < u0 ? upper(pre(u)) : tk((u - u0) / (1 - u0)));
+        };
+        const tk1 = track(tech.vor, side);
+        const k1 = key(m1, tech.vor.stand, cur, tk1(1));
+        segs.push(segment(cur, k1, { t0: st.t, t1: st.t + d1, arms: part(cur.up, tk1, d1), teilen: true }));
+        const tk2 = track(tech, side);
+        const k2 = key(Object.assign({}, m, { turn: null }), st.stance, k1, tk2(1));
+        segs.push(segment(k1, k2, { t0: t2, t1: st.t + total, arms: part(k1.up, tk2, st.t + total - t2), teilen: true }));
+        mark(st.t + total);
+        cur = k2;
         return;
       }
       const uS = tech && tech.lang ? 0.1 : clamp(1 - STRIKE / d, 0.3, 0.8);
