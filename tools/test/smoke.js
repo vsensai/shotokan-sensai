@@ -84,7 +84,7 @@
       }
       // Kata-Trainer, Ansicht „Figur“: nur bei freigegebenen Kata; umschalten, weiterschalten, zählen lassen, zurück zur Karte
       {
-        location.hash = '#/ansage/tekki-shodan';
+        location.hash = '#/ansage/bassai-dai';
         await wait();
         if (app.querySelector('.ans-view')) throw new Error('Kata-Trainer: Ansicht „Figur“ bei einer nicht freigegebenen Kata');
         location.hash = '#/ansage/heian-shodan';

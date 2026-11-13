@@ -35,7 +35,7 @@
 - Braucht eine Kata einen Ablauf, den das Lexikon so nicht hat (z. B. Tritt in anderer Höhe), kommt er in `SK.fig3dKata` am Ende von `js/figur-posen.js` – nicht in `SK.fig3dDefs`, sonst erschiene er im Lexikon. Fußtritte stehen in `TRITT` (`js/kata-figur.js`).
 - Eine Kata erst in `KATA` freigeben, wenn der Nutzer den Ablauf in `labor/kata.html?kata=<id>` gesehen und abgenommen hat. `validate.html` prüft freigegebene Kata (rechenbar, Füße erreichen ihren Platz, nichts springt).
 
-### Neue Kata als Figur – so sind Heian Shodan bis Godan entstanden
+### Neue Kata als Figur – so sind Heian Shodan bis Godan und Tekki Shodan entstanden
 Werkzeug: `node tools/kata-figur.js` (`ablauf`, `pruefen`, `stand`, `vergleich`, `bogen` – Hilfe ohne Argumente). Es ist kein Test; die Tests laufen weiter nur über `tools/test/run.js`.
 1. **Probelauf, noch nichts ändern:** `node tools/kata-figur.js ablauf <id>` zeigt jede Bewegung und alle Warnungen (fehlende Technik, fehlender Stand). Dazu die Hinweise des Buches in `docs/buch-register.md` und die Fußarbeit in `ansage` lesen. Dem Nutzer kurz melden: was passt schon, was läuft unvollständig, was fehlt – und fragen, ob es losgehen soll.
 2. **Vor dem Bauen den Stand festhalten:** `node tools/kata-figur.js stand tools/out/vorher.json` (alle freigegebenen Kata).
