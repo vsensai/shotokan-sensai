@@ -101,7 +101,8 @@
   // Technik → Ablauf im Lexikon (SK.fig3dDefs) oder eigener Ablauf der Kata (SK.fig3dKata, ohne „xx:“ davor).
   // side: Seite, die dort arbeitet (andere Seite = gespiegelt); from: Zeitpunkt im Ablauf, an dem ausgeholt ist;
   // direkt: ohne Ausholen aus der vorigen Haltung (Stoß); dur: eigene Dauer der ganzen Bewegung (Sekunden),
-  // lang: der Ablauf selbst füllt fast die ganze Bewegung (großer Kreis, fließende Folge);
+  // lang: der Ablauf selbst füllt fast die ganze Bewegung (großer Kreis, fließende Folge) – bei langsamen Bewegungen ganz,
+  // ohne den ruhigen Vorlauf in die Ausholhaltung (der Ablauf beginnt selbst mit der Haltung davor, Tekki 16);
   // erst: bei zwei Techniken („… + …“) gilt die Seite der zuerst genannten (sonst die der zuletzt genannten);
   // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind.
   // schnapp: nach dem Treffer schnappt der Arm gleich zurück in die Haltung, aus der der Ablauf beginnt (Uraken);
@@ -118,7 +119,7 @@
     [/sokumen chudan-zuki \+ .*kagi-zuki/i, { def: 'zuki-kagi-zuki', side: 'L', from: 0.25, direkt: true, erst: true }],
     [/kagi-zuki/i, { def: 'tc:kagi-zuki', side: 'R', from: 0.25, direkt: true }],
     [/sokumen chudan kake-uke/i, { def: 'kake-uke-seite', side: 'L', from: 0.25 }, /fumikomi/i],
-    [/sokumen chudan kake-uke/i, { def: 'kake-uke-langsam', side: 'L', from: 0 }, /tekki/i],
+    [/sokumen chudan kake-uke/i, { def: 'kake-uke-langsam', side: 'L', from: 0, lang: true }, /tekki/i],
     [/koshi-kamae/i, { def: 'koshi-kamae-tekki', side: 'R', from: 0 }, /tekki/i],
     [/sokumen .*mae-enpi/i, { def: 'mae-enpi-seite', side: 'R', from: 0.25 }, /kiba/i],
     [/chudan uchi-uke/i, { def: 'uchi-uke-kiba', side: 'R', from: 0.25 }, /kiba/i],
@@ -162,6 +163,7 @@
     [/mizunagare-no-kamae/i, { def: 'tc:mizunagare-no-kamae', side: 'R', from: 0 }],
     [/jodan kosa-uke/i, { def: 'tc:juji-uke', side: 'L', from: 0.25, direkt: true }],
     [/juji chudan osae-uke/i, { def: 'juji-osae-uke', side: 'L', from: 0.25, direkt: true }],
+    [/kake-uke/i, { def: 'kake-uke-heian', side: 'L', from: 0.12 }, /heian godan/i],
     [/kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.12 }],
     [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 0.8 }],
     [/uho-tsukiage/i, { def: 'uho-tsukiage', side: 'R', from: 0.25, direkt: true }],
@@ -827,7 +829,8 @@
           // sie die Hüftstellung der Ausholhaltung mit, drehte sie erst kräftig gegen die Wendung und dann zurück
           const y0 = cur.up.yaw;
           const y1 = end.yaw;
-          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < 0.35 ? upper(pre(u)) : tr((u - 0.35) / 0.65), { yaw: lerp(y0, y1, smooth(u)) }) : calm(cur.up, end);
+          const uP = tech.lang ? 0 : 0.35;
+          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : tr((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, smooth(u)) }) : calm(cur.up, end);
         }
         else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen

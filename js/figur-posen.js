@@ -483,14 +483,20 @@
   const GNU_HAND = (x, z) => ({ lean: 6, hL: aim(TNU, [x, -0.58, z]), pL: aim(TNU, [-1, 0, 0.2]), eL: aim(TNU, [0.4, -0.3, -0.2]) });
   D['tc:gedan-nagashi-uke'] = T_RUHIG(M(TNU, GNU_HAND(0.3, 0.4)), M(TNU, GNU_HAND(-0.06, 0.44)), M(hit('wristL', 'Faust und Unterarm wischen ab'), { eff: 'tipL', view: 'front3' }));
   D['tc:osae-uke'] = T(M(S.zks, { hL: L(H.hip), hR: [0.0, -0.1, 0.36], oR: 1, pR: [0, -1, 0] }), M(S.zks, { hL: L(H.hip), hR: [0.02, -0.36, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' }));
-  // Kake-uke wie in Heian Godan 14, direkt aus der Ausgangsstellung (Kiba-dachi, Fäuste an den Hüften, Blick nach links):
-  // beide Arme holen zusammen aus und liegen vor der Brust übereinander (linke offene Hand oben, rechte Faust darunter),
-  // dann langsam und kraftvoll wie beim Spannen eines Bogens: die rechte Faust zieht zur Hüfte, der linke Arm hakt
-  // ausgestreckt zur linken Seite (Chudan, Handgelenk außen, Handfläche nach vorn)
+  // Kake-uke (wie in Tekki Shodan 16), direkt aus der Ausgangsstellung (Kiba-dachi, Fäuste an den Hüften, Blick nach
+  // links): beide Arme holen zugleich aus – der rechte Unterarm kommt waagerecht vor die Brust, die Faust links; der linke
+  // Arm wird unter ihm eng am Körper nach rechts geschoben, bis er gestreckt ganz nach rechts zeigt (offene Hand). Dann
+  // langsam und kraftvoll wie beim Spannen eines Bogens: die rechte Faust zieht zur Hüfte, der linke Arm hakt ausgestreckt
+  // zur linken Seite (Chudan, Handgelenk außen, Handfläche nach vorn). Fließend durch die Zwischenbilder ('fl'); nur
+  // ausgeholt kommt der Arm kurz zur Ruhe
   const KU0 = M(KB, { look: 90 });
   const KU2 = M(KB, { look: 90, hL: [-0.13, -0.06, 0.3], oL: 1, pL: [0, 0, -1], fL: [-0.3, 1, 0], eL: [0.3, -1, 0.3], hR: [0.13, -0.17, 0.27], eR: [-0.4, -1, 0.3] });
   const KU3 = M(KB, { look: 90, hL: [0.705, -0.1, 0.18], oL: 1, pL: [0.1, 0, 1], fL: [0.15, 1, 0], hR: H.hip });
-  D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.12, p: KU0 }, { t: 0.38, p: KU2 }, { t: 0.45, p: KU2 }, { t: 0.88, p: KU3 }], best: 1, dur: 3.6, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
+  const KU_MITTE = M(KB, { look: 90, oL: 1, hL: [0.02, -0.33, 0.2], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [-0.02, -0.2, 0.27], eR: [-0.7, -0.5, 0.2] });
+  const KU_AUS = M(KB, { look: 90, oL: 1, hL: stretch([-0.36, -0.3, 0.22], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.18, -0.14, 0.28], eR: [-0.8, -0.15, 0.2] });
+  const KU_ZURUECK = M(KB, { look: 90, oL: 1, hL: [0.25, -0.1, 0.38], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.1, -0.28, 0.16], eR: [-0.6, -0.8, 0] });
+  D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.12, p: KU0 }, { t: 0.22, p: KU_MITTE, e: 'fl' }, { t: 0.36, p: KU_AUS, e: 'fl' }, { t: 0.4, p: KU_AUS },
+    { t: 0.62, p: KU_ZURUECK, e: 'fl' }, { t: 0.88, p: KU3, e: 'fl' }], best: 1, dur: 3.6, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
   // Sukui-uke wie in Bassai Dai 6: aus Migi Zenkutsu-dachi gleitet der rechte Fuß im Halbkreis am linken vorbei nach rechts,
   // Hüfte bleibt auf gleicher Höhe; Fuß und Faust gehen zusammen: die rechte Faust sinkt vor dem Körper nach links unten
   // und schöpft in einem Bogen tief nach rechts und etwas hoch – die Faust nie höher als der Ellbogen
@@ -1169,6 +1175,9 @@
   ], { eff: 'fistR' });
 
   /* Heian Godan */
+  // 14: Kake-uke wie bisher im Lexikon (bis der Nutzer entscheidet, ob er wie in Tekki ausholt): beide Arme holen zusammen
+  // aus und liegen vor der Brust übereinander (linke offene Hand oben, rechte Faust darunter), dann langsam zur Seite
+  KATA['kake-uke-heian'] = { keys: [{ t: 0, p: KU0 }, { t: 0.12, p: KU0 }, { t: 0.38, p: KU2 }, { t: 0.45, p: KU2 }, { t: 0.88, p: M(KU3, { hL: stretch(KU3.hL, 'L') }) }] };
   // 9 → 10: Ryosho Juji Chudan Osae-uke – die offenen Hände drücken rechts vor der Hüfte nach unten und liegen am Ende
   // aufeinander, Handballen auf Handballen: die rechte unten, Handrücken nach unten, Fingerspitzen nach vorn; die linke
   // darauf, Handrücken nach oben, Fingerspitzen nach rechts
@@ -1224,10 +1233,11 @@
   const TK_LINKS = M(KB, { look: 90, sL: 1, hL: stretch([0.74, -0.1, 0.04], 'L'), hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3] });
   const TK_AN = M(KB, { look: 90, hL: [0.17, -0.3, 0.2], eL: [0.5, -0.8, -0.2], pL: [0, -1, 0], hR: [0.12, -0.17, 0.3], eR: [-0.75, -0.2, 0.25] });
   const TK_MITTE = M(KB, { look: 90, oL: 1, hL: [-0.04, -0.31, 0.22], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [0.16, -0.15, 0.29], eR: [-0.8, -0.15, 0.2] });
-  const TK_RECHTS = M(KB, { look: 90, sL: 1, oL: 1, hL: stretch([-0.36, -0.3, 0.22], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.18, -0.14, 0.28], eR: [-0.8, -0.15, 0.2] });
-  const TK_ZURUECK = M(KB, { look: 90, oL: 1, hL: [0.25, -0.1, 0.38], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.1, -0.28, 0.16], eR: [-0.6, -0.8, 0] });
-  KATA['kake-uke-langsam'] = { keys: [{ t: 0, p: TK_LINKS }, { t: 0.06, p: TK_AN }, { t: 0.11, p: TK_MITTE }, { t: 0.17, p: TK_RECHTS },
-    { t: 0.21, p: TK_RECHTS }, { t: 0.36, p: TK_ZURUECK }, { t: 0.5, p: KU3 }] };
+  const TK_RECHTS = M(KU_AUS, { sL: 1 });
+  const TK_ZURUECK = KU_ZURUECK;
+  // Fließend durch die Zwischenbilder ('fl'); nur ganz rechts kommt der Arm kurz zur Ruhe, bevor er zurückzieht
+  KATA['kake-uke-langsam'] = { keys: [{ t: 0, p: TK_LINKS }, { t: 0.1, p: TK_AN, e: 'fl' }, { t: 0.14, p: TK_MITTE, e: 'fl' }, { t: 0.2, p: TK_RECHTS, e: 'fl' },
+    { t: 0.22, p: TK_RECHTS }, { t: 0.36, p: TK_ZURUECK, e: 'fl' }, { t: 0.5, p: KU3, e: 'fl' }] };
   // 3, 17: Mae-enpi zur Seite in die offene Hand – die Hand steht vom Kake-uke noch seitlich draußen, Hüfte und Oberkörper
   // drehen zu ihr ein und der Ellbogen schlägt in ihre Handfläche (Arme zur Brust wie beim Mae-enpi in Heian Yondan); die
   // Füße bleiben im Kiba-dachi
