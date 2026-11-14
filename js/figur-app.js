@@ -355,7 +355,9 @@
   // Seite (z. B. Kata) öffnet sich nach dem Start erst nach Sekunden. Gebrauchte Figuren rechnet er sofort.
   const PAUSE = 2500;
   const GAP = 150;
-  let lastUse = -Infinity;
+  // Der Seitenstart zählt als Bedienung: das erste Vorratsbild (richtet auch die 3D-Grafik ein, am längsten) kommt
+  // erst nach der Pause, nicht genau dann, wenn man gleich nach dem Laden das erste Mal tippt
+  let lastUse = performance.now();
   let lastDone = -Infinity;
   const used = () => (lastUse = performance.now());
   ['pointerdown', 'keydown'].forEach((t) => window.addEventListener(t, used, { passive: true, capture: true }));

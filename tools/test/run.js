@@ -6,6 +6,8 @@
  *   node tools/test/run.js validate   → nur validate.html
  *   node tools/test/run.js smoke      → nur smoke.html
  *
+ * Vorab prüft es index.html (tools/version.js): ?v= überall gleich, jedes Skript im Vorlade-Block.
+ *
  * Fertig ist ein Test, sobald er <html data-ergebnis="ok|fehler"> setzt. Ein JavaScript-Fehler
  * auf der Seite bricht sofort ab (sonst bliebe sie bei „läuft …“ stehen). Hartes Zeitlimit je
  * Test: 180 s. Exit-Code 0 nur, wenn alle Tests „ok“ melden.
@@ -51,10 +53,20 @@ async function runOne(browser, name) {
   }
 }
 
+// index.html: alle Dateien mit ?v=<Version> und jedes Skript im Vorlade-Block (tools/version.js ohne Argument).
+// Die Browser-Tests laufen über file:// und können index.html nicht selbst abrufen.
+function checkIndex() {
+  const r = require('child_process').spawnSync(process.execPath, [path.join(dir, '..', 'version.js')], { encoding: 'utf8' });
+  const ok = r.status === 0;
+  console.log(`== index.html: ${ok ? 'OK' : 'FEHLER'}`);
+  if (!ok) console.log(r.stderr.trim());
+  return ok;
+}
+
 (async () => {
+  let ok = checkIndex();
   // WebGL per Software, damit die 3D-Figuren auch ohne Grafikkarte rechnen
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader'] });
-  let ok = true;
   try {
     for (const n of names) ok = (await runOne(browser, n)) && ok;
   } finally {

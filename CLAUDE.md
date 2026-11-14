@@ -11,6 +11,7 @@
 - Tests immer über `tools/test/run.js` starten, kein eigenes Playwright-Skript: Es wartet auf die Fertig-Markierung `data-ergebnis`, bricht bei JavaScript-Fehlern sofort ab und hat ein festes Zeitlimit. Normal dauern validate unter 1 s und smoke etwa 15 s.
 - Bei jeder veröffentlichten Änderung die Version mit `node tools/version.js patch|minor|major` hochzählen (setzt Version, Datum, Uhrzeit und `?v=` in `index.html`). Die Version steht im Commit-Titel, z. B. „… (v1.11.1)“.
 - Neue Skripte in `index.html`, `tools/test/validate.html` und `tools/test/smoke.html` gleichermaßen eintragen.
+- Den Vorlade-Block im Kopf von `index.html` (`<link rel="preload">` für jedes Skript) erzeugt `node tools/version.js` – nicht von Hand pflegen. Ohne ihn lädt Chrome wegen der CSP-Zeile alle Skripte nacheinander und die App ist nach einem Update erst nach Sekunden bedienbar; `run.js` prüft ihn.
 - Die Startseite steht zusätzlich fest in `index.html` (für schnelles Laden): Änderungen an `viewStart()` in `js/app.js` dort mitziehen. Grafiken und Lektionstexte nicht beim Start erzeugen, sondern erst bei Bedarf (`learn: () => …`, `SK.util.lazy`).
 
 ## Kata-Ansage (Bodenkarte) ändern

@@ -14,6 +14,21 @@ const coreFile = path.join(root, 'js', 'core.js');
 const indexFile = path.join(root, 'index.html');
 const ASSET = /((?:href|src)=")((?:css|js|data|assets)\/[^"?]+)(?:\?v=[^"]*)?"/g;
 
+// Vorlade-Links für alle Skripte, direkt hinter der CSP-Zeile: Mit <meta http-equiv="Content-Security-Policy">
+// lädt Chrome die Skripte am Ende von <body> sonst nacheinander (jedes erst nach dem vorigen) – die App war beim
+// ersten Laden nach einem Update erst nach Sekunden bedienbar. Der Block wird bei jedem Versionswechsel neu erzeugt.
+const PRE_A = '  <!-- Vorladen (erzeugt von tools/version.js) -->\n';
+const PRE_E = '  <!-- /Vorladen -->\n';
+const CSP = /  <meta http-equiv="Content-Security-Policy"\n[^>]*>\n/;
+function preload(html) {
+  const links = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map((x) => `  <link rel="preload" href="${x[1]}" as="script">\n`).join('');
+  const block = PRE_A + links + PRE_E;
+  const i = html.indexOf(PRE_A);
+  if (i >= 0) return html.slice(0, i) + block + html.slice(html.indexOf(PRE_E, i) + PRE_E.length);
+  if (!CSP.test(html)) throw new Error('index.html: CSP-Zeile für den Vorlade-Block nicht gefunden');
+  return html.replace(CSP, (c) => c + block);
+}
+
 let core = fs.readFileSync(coreFile, 'utf8');
 let index = fs.readFileSync(indexFile, 'utf8');
 const m = /SK\.VERSION = '(\d+)\.(\d+)\.(\d+)';/.exec(core);
@@ -29,6 +44,10 @@ if (!arg) {
   console.log(`Version ${current}`);
   if (stale.length) {
     console.error(`index.html: ohne ?v=${current}: ${stale.join(', ')}\n→ node tools/version.js ${current}`);
+    process.exit(1);
+  }
+  if (preload(index) !== index) {
+    console.error(`index.html: Vorlade-Block passt nicht zu den Skripten\n→ node tools/version.js ${current}`);
     process.exit(1);
   }
   process.exit(0);
@@ -58,6 +77,7 @@ index = index
   .replace(ASSET, `$1$2?v=${next}"`)
   // Versionszeile der fest eingetragenen Startseite
   .replace(/(<p class="version">)Version [^<]*· /, `$1Version ${next} · Stand ${parts.day}.${parts.month}.${parts.year}, ${parts.hour}:${parts.minute} Uhr · `);
+index = preload(index);
 fs.writeFileSync(coreFile, core);
 fs.writeFileSync(indexFile, index);
 console.log(`Version ${current} → ${next} (Stand ${parts.day}.${parts.month}.${parts.year}, ${parts.hour}:${parts.minute} Uhr)`);
