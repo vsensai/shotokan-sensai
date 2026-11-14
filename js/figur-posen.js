@@ -1200,9 +1200,15 @@
   // Höhe des Kiba-dachi (Tekki: nicht aufrichten). Der Abstand nach vorn (L.z) gilt auch für die Füße der Kata (KVOR).
   S.kosamae = { pelvis: [-0.08, 0.73, 0.04], L: { x: -0.18, z: 0.18, yaw: 0, kp: [-0.2, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [-1, 0, -0.3] }, w: [0.1, 0.9] };
   // Yoi: Heisoku-dachi, beide Arme gestreckt, die offenen Hände mittig vor dem Körper genau übereinander – die rechte am
-  // Körper, die linke Handfläche auf ihrem Rücken, Fingerspitzen nach unten
-  KATA['yoi-kafukubu'] = STILL(M(S.heisoku, { oL: 1, oR: 1, hR: stretch([0, -0.54, 0.27], 'R'), fR: [0, -1, 0], pR: [0, 0, -1],
-    hL: stretch([0, -0.54, 0.295], 'L'), fL: [0, -1, 0], pL: [0, 0, -1] }));
+  // Körper, die linke Handfläche auf ihrem Rücken. Das Handgelenk bleibt gerade: die Finger zeigen in der Linie des Arms
+  // (Schulter → Hand) schräg nach unten zur Mitte, die Handfläche zum Körper
+  const yoiHand = (h, side) => {
+    const hs = stretch(h, side);
+    const f = V.norm(V.sub(hs, [side === 'L' ? 0.185 : -0.185, -0.035, 0]));
+    const p = V.norm(V.sub([0, 0, -1], V.mul(f, -f[2])));
+    return { ['h' + side]: hs, ['f' + side]: f, ['p' + side]: p };
+  };
+  KATA['yoi-kafukubu'] = STILL(M(S.heisoku, { oL: 1, oR: 1, ...yoiHand([0, -0.54, 0.27], 'R'), ...yoiHand([0, -0.54, 0.295], 'L') }));
   // Ausholen zum Kake-uke: die offene Hand oben vor der Brust, die Faust des anderen Arms darunter – mit so viel Abstand,
   // dass die Arme übereinander liegen, ohne ineinander zu geraten (im Lexikon, KU2, liegen sie dichter)
   const TK_KAKE = M(KU2, { hL: [-0.13, -0.02, 0.3], hR: [0.13, -0.2, 0.27] });
