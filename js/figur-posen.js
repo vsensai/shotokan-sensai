@@ -1216,16 +1216,16 @@
   const TK_KAKE = M(KU2, { hL: [-0.13, -0.02, 0.3], hR: [0.13, -0.2, 0.27] });
   // 2: Kake-uke zur Seite, schnell und groß zusammen mit dem Fumikomi – Ende wie im Lexikon
   KATA['kake-uke-seite'] = T(TK_KAKE, KU3);
-  // 16: derselbe Kake-uke langsam und kraftvoll. Zum Ausholen wird der linke Arm vom Stoß nach links (Ende von 15) eng am
-  // Körper vor der Brust nach rechts geschoben, bis er gestreckt ganz nach rechts zeigt – die Hand öffnet sich dabei, die
-  // rechte Faust bleibt vor dem Bauch unter ihm. Von dort zieht er langsam zur linken Seite in den Kake-uke. Der Blick
-  // bleibt links (das Lexikon beginnt mit den Fäusten an den Hüften, wie in Heian Godan 14)
-  const TK_R = { hR: [0.02, -0.3, 0.2], eR: [-0.5, -0.8, 0.3] };
+  // 16: derselbe Kake-uke langsam und kraftvoll. Zum Ausholen bewegen sich beide Arme zugleich: Der rechte Unterarm (vom
+  // Kagi-zuki) geht vor der Brust noch ein Stück weiter nach links, und der linke Arm wird vom Stoß nach links (Ende von
+  // 15) unter ihm eng am Körper nach rechts geschoben, bis er gestreckt ganz nach rechts zeigt – die Hand öffnet sich
+  // dabei. Von dort zieht er langsam zur linken Seite in den Kake-uke, die rechte Faust an die Hüfte. Der Blick bleibt
+  // links (das Lexikon beginnt mit den Fäusten an den Hüften, wie in Heian Godan 14)
   const TK_LINKS = M(KB, { look: 90, sL: 1, hL: stretch([0.74, -0.1, 0.04], 'L'), hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3] });
-  const TK_AN = M(KB, { look: 90, hL: [0.16, -0.1, 0.2], eL: [0.5, -0.8, -0.2], pL: [0, -1, 0], ...TK_R });
-  const TK_MITTE = M(KB, { look: 90, oL: 1, hL: [-0.04, -0.1, 0.22], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], ...TK_R });
-  const TK_RECHTS = M(KB, { look: 90, sL: 1, oL: 1, hL: stretch([-0.36, -0.1, 0.24], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], ...TK_R });
-  const TK_ZURUECK = M(KB, { look: 90, oL: 1, hL: [0.25, -0.1, 0.38], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [0.02, -0.28, 0.2], eR: [-0.4, -1, 0.3] });
+  const TK_AN = M(KB, { look: 90, hL: [0.17, -0.3, 0.2], eL: [0.5, -0.8, -0.2], pL: [0, -1, 0], hR: [0.12, -0.17, 0.3], eR: [-0.75, -0.2, 0.25] });
+  const TK_MITTE = M(KB, { look: 90, oL: 1, hL: [-0.04, -0.31, 0.22], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [0.16, -0.15, 0.29], eR: [-0.8, -0.15, 0.2] });
+  const TK_RECHTS = M(KB, { look: 90, sL: 1, oL: 1, hL: stretch([-0.36, -0.3, 0.22], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.18, -0.14, 0.28], eR: [-0.8, -0.15, 0.2] });
+  const TK_ZURUECK = M(KB, { look: 90, oL: 1, hL: [0.25, -0.1, 0.38], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.1, -0.28, 0.16], eR: [-0.6, -0.8, 0] });
   KATA['kake-uke-langsam'] = { keys: [{ t: 0, p: TK_LINKS }, { t: 0.06, p: TK_AN }, { t: 0.11, p: TK_MITTE }, { t: 0.17, p: TK_RECHTS },
     { t: 0.21, p: TK_RECHTS }, { t: 0.36, p: TK_ZURUECK }, { t: 0.5, p: KU3 }] };
   // 3, 17: Mae-enpi zur Seite in die offene Hand – die Hand steht vom Kake-uke noch seitlich draußen, Hüfte und Oberkörper
