@@ -1526,6 +1526,28 @@ details.unit>summary::-webkit-details-marker {
   display: block;
 }
 
+/* Etikett „Figur“ in der Kata-Übersicht: Kata läuft auch als animierte Figur */
+.fig-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.45rem;
+  padding: 0 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--muted);
+  vertical-align: 2px;
+  white-space: nowrap;
+}
+
+.fig-tag svg {
+  width: 13px;
+  height: 13px;
+}
+
 .program p {
   margin: 0.4rem 0;
 }

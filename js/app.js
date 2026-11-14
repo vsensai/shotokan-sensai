@@ -6,6 +6,8 @@
   const app = document.getElementById('app');
   const PASS_LESSON = 0.8;
   const ROUND = 10;
+  // Kleines Figur-Zeichen (Oi-zuki im Zenkutsu-dachi) für das Etikett „Figur“ in der Kata-Übersicht
+  const FIG_ICO = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="4" r="2.1" fill="currentColor" stroke="none"/><path d="M9.5 7.5 10.5 13M10 8.5h9M10 8.5l-3.5 2.5 1.5 2M10.5 13l4.5 2.5 2 5M10.5 13l-6 7.5"/></svg>';
 
   // ---------- Aufbau ----------
   const kataUnits = SK.buildKataContent();
@@ -1137,21 +1139,31 @@
     setTitle('Kata-Trainer');
     app.innerHTML = '';
     const list = el('div', { class: 'grade-list' });
+    let mitFigur = false;
     SK.ansageKata().forEach((id) => {
       const k = SK.kata[id];
       const g = SK.grades.find((x) => x.kata.includes(id));
+      // Etikett „Figur“: Kata läuft auch als animierte Figur (freigegeben in js/kata-figur.js, nur mit WebGL 2)
+      const fig = !!(SK.kataFigur && SK.kataFigur.can(k));
+      if (fig) mitFigur = true;
       list.append(
         el(
           'a',
           { class: 'grade', href: `#/ansage/${id}` },
           el('span', { class: g ? `belt ${g.cls}` : '' }),
-          el('span', {}, el('span', { class: 'grade-name', text: k.name }), el('span', { class: 'grade-sub muted small', text: `${k.moves} Bewegungen · Kiai bei ${k.kiai.join(' und ')}${g ? ` · Prüfung ${g.name}` : ''}` }))
+          el(
+            'span',
+            {},
+            el('span', { class: 'grade-name', text: k.name }),
+            fig ? el('span', { class: 'fig-tag', title: 'Mit animierter Figur', html: `${FIG_ICO}Figur` }) : null,
+            el('span', { class: 'grade-sub muted small', text: `${k.moves} Bewegungen · Kiai bei ${k.kiai.join(' und ')}${g ? ` · Prüfung ${g.name}` : ''}` })
+          )
         )
       );
     });
     app.append(
       el('h1', { text: 'Kata-Trainer' }),
-      el('p', { class: 'muted', text: 'Kata auswählen – die App zählt sie auf Japanisch im Rhythmus des Buches und zeigt dazu die Fußstellungen.' }),
+      el('p', { class: 'muted', text: `Kata auswählen – die App zählt sie auf Japanisch im Rhythmus des Buches und zeigt dazu die Fußstellungen.${mitFigur ? ' Bei Kata mit dem Zeichen „Figur“ läuft auf Wunsch auch eine animierte Figur mit.' : ''}` }),
       list
     );
     finishView();
