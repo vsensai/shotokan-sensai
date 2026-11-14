@@ -1217,8 +1217,12 @@
   // 2: Kake-uke zur Seite, schnell und groß zusammen mit dem Fumikomi – Ende wie im Lexikon
   KATA['kake-uke-seite'] = T(TK_KAKE, KU3);
   // 16: derselbe Kake-uke langsam und kraftvoll, aus dem Stoß davor gleich ins Ausholen (das Lexikon beginnt mit den
-  // Fäusten an den Hüften, wie in Heian Godan 14)
-  KATA['kake-uke-langsam'] = { keys: [{ t: 0, p: TK_KAKE }, { t: 0.07, p: TK_KAKE }, { t: 0.5, p: KU3 }] };
+  // Fäusten an den Hüften, wie in Heian Godan 14). Beim Ausholen streckt sich der linke Arm ganz durch, die offene Hand
+  // vor dem Körper (Handfläche zur Mitte, Finger nach oben); die rechte Faust bleibt unter ihm vor der Brust. Dann zieht
+  // der gestreckte Arm im Bogen zur Seite in den Kake-uke
+  const TK_LANG = M(KB, { oL: 1, hL: stretch([0.04, -0.12, 0.6], 'L'), pL: [-1, 0, 0], fL: [0, 1, 0.15], hR: [0.1, -0.24, 0.26], eR: [-0.4, -1, 0.3] });
+  const TK_BOGEN = M(KB, { look: 45, oL: 1, hL: stretch([0.55, -0.11, 0.5], 'L'), pL: [-0.5, 0, 0.8], fL: [0.1, 1, 0], hR: [0.02, -0.28, 0.2], eR: [-0.4, -1, 0.3] });
+  KATA['kake-uke-langsam'] = { keys: [{ t: 0, p: TK_LANG }, { t: 0.07, p: TK_LANG }, { t: 0.3, p: TK_BOGEN }, { t: 0.5, p: KU3 }] };
   // 3, 17: Mae-enpi zur Seite in die offene Hand – die Hand steht vom Kake-uke noch seitlich draußen, Hüfte und Oberkörper
   // drehen zu ihr ein und der Ellbogen schlägt in ihre Handfläche (Arme zur Brust wie beim Mae-enpi in Heian Yondan); die
   // Füße bleiben im Kiba-dachi
