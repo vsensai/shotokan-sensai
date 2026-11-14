@@ -290,6 +290,12 @@
     oL: 1, oR: 1, hL: [0.12, 0.3, 0.2], eL: [1, 0.2, 0.2], pL: [0, 0.4, 1], fL: [-1, 0.15, 0],
     hR: [-0.02, 0.0, 0.53], eR: [-1, -0.3, 0.1], pR: [0, 1, 0], fR: [0.8, 0, 0.6] };
   D['st:hizakutsu'] = { keys: [{ t: 0, p: HZ }], best: 0, still: true, view: 'front3', labels: true };
+  // Kokutsu-dachi im Bewegungs-Editor eingestellt (nur das Standbild im Lexikon, die Abläufe mit S.kk bleiben): tiefer,
+  // länger, vorderer Fuß flach am Boden (im Editor schwebte er 6 cm hoch),
+  // Knie über dem Fuß; Shuto-uke mit Handfläche der vorderen Hand nach vorn, hintere Hand Handfläche unten
+  const KK_ST = { pelvis: [-0.012, 0.674, -0.037], yaw: -65, L: { x: 0.075, z: 0.685, yaw: 0, kp: [0.052, 0.776, 0.628] }, R: { x: -0.02, z: -0.4, yaw: -90, kp: [-1, 0.1, 0.3] },
+    hL: [0.43, -0.14, 0.16], hR: [0.015, -0.28, 0.22], eL: [-0.116, -0.558, -0.188], eR: [-0.7, -0.6, 0.2], oL: 1, oR: 1, pL: [0, 0, 1], pR: [0, -1, 0], fL: [0.54, 0.8, 0.25], fR: [0.6, 0, 0.6], w: [0.3, 0.7] };
+  D['st:kokutsu'] = M(D['st:kokutsu'], { keys: [{ t: 0, p: KK_ST }] });
 
   /* ---------- Fauststöße ---------- */
   const ZKS_PUNCH = M(S.zks, { hL: L(H.hip), hR: H.chudan });
