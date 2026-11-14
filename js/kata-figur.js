@@ -163,8 +163,7 @@
     [/mizunagare-no-kamae/i, { def: 'tc:mizunagare-no-kamae', side: 'R', from: 0 }],
     [/jodan kosa-uke/i, { def: 'tc:juji-uke', side: 'L', from: 0.25, direkt: true }],
     [/juji chudan osae-uke/i, { def: 'juji-osae-uke', side: 'L', from: 0.25, direkt: true }],
-    [/kake-uke/i, { def: 'kake-uke-heian', side: 'L', from: 0.12 }, /heian godan/i],
-    [/kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.12 }],
+    [/kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.12, lang: true }],
     [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 0.8 }],
     [/uho-tsukiage/i, { def: 'uho-tsukiage', side: 'R', from: 0.25, direkt: true }],
     [/jotai sonomama/i, { halten: true }],
@@ -829,8 +828,23 @@
           // sie die Hüftstellung der Ausholhaltung mit, drehte sie erst kräftig gegen die Wendung und dann zurück
           const y0 = cur.up.yaw;
           const y1 = end.yaw;
+          // lang: der Ablauf beginnt gleich mit dem Ausholen – steht die Figur davor anders als der Ablauf beginnt (Heian
+          // Godan 14 nach dem Gedan-barai), wird der Unterschied im ersten Drittel weich ausgeblendet, statt erst in die
+          // Anfangshaltung des Ablaufs zu gehen
           const uP = tech.lang ? 0 : 0.35;
-          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : tr((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, smooth(u)) }) : calm(cur.up, end);
+          const t0 = upper(tr(0));
+          const c0 = upper(cur.up);
+          const vor = (a, f) => {
+            const o = {};
+            UP.forEach((k) => {
+              const [x, p, q] = [a[k], t0[k], c0[k]];
+              if (Array.isArray(x) && Array.isArray(p) && Array.isArray(q)) o[k] = x.map((v, i) => v + (q[i] - p[i]) * f);
+              else if (typeof x === 'number' && typeof p === 'number' && typeof q === 'number') o[k] = x + (q - p) * f;
+            });
+            return o;
+          };
+          const lauf = tech.lang ? (w) => { const a = tr(w); const f = 1 - smooth(clamp(w / 0.35)); return f > 0 ? M(a, vor(a, f)) : a; } : tr;
+          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, smooth(u)) }) : calm(cur.up, end);
         }
         else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen

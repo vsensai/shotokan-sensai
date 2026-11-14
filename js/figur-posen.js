@@ -1175,9 +1175,6 @@
   ], { eff: 'fistR' });
 
   /* Heian Godan */
-  // 14: Kake-uke wie bisher im Lexikon (bis der Nutzer entscheidet, ob er wie in Tekki ausholt): beide Arme holen zusammen
-  // aus und liegen vor der Brust übereinander (linke offene Hand oben, rechte Faust darunter), dann langsam zur Seite
-  KATA['kake-uke-heian'] = { keys: [{ t: 0, p: KU0 }, { t: 0.12, p: KU0 }, { t: 0.38, p: KU2 }, { t: 0.45, p: KU2 }, { t: 0.88, p: M(KU3, { hL: stretch(KU3.hL, 'L') }) }] };
   // 9 → 10: Ryosho Juji Chudan Osae-uke – die offenen Hände drücken rechts vor der Hüfte nach unten und liegen am Ende
   // aufeinander, Handballen auf Handballen: die rechte unten, Handrücken nach unten, Fingerspitzen nach vorn; die linke
   // darauf, Handrücken nach oben, Fingerspitzen nach rechts
