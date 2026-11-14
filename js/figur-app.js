@@ -350,6 +350,17 @@
   let lastScroll = 0;
   let waitTimer = 0;
   window.addEventListener('scroll', () => (lastScroll = performance.now()), { passive: true, capture: true });
+  // Vorrat (prefetch) hat Zeit: nach jedem Tippen, jeder Taste und jedem Seitenwechsel ruht er eine Weile, und zwischen
+  // zwei Vorratsbildern bleibt eine Lücke – sonst kommen Tippen und neue Seite erst zwischen zwei Bildern durch und eine
+  // Seite (z. B. Kata) öffnet sich nach dem Start erst nach Sekunden. Gebrauchte Figuren rechnet er sofort.
+  const PAUSE = 2500;
+  const GAP = 150;
+  let lastUse = -Infinity;
+  let lastDone = -Infinity;
+  const used = () => (lastUse = performance.now());
+  ['pointerdown', 'keydown'].forEach((t) => window.addEventListener(t, used, { passive: true, capture: true }));
+  window.addEventListener('hashchange', used);
+  const restWait = () => Math.max(lastUse + PAUSE, lastDone + GAP) - performance.now();
   // Reihenfolge: sichtbare Figuren (nach schnellem Scrollen warten sonst längst vorbeigescrollte davor),
   // dann alle anderen angeforderten, zuletzt die im Hintergrund vorgerechneten (prefetch).
   function pick() {
@@ -372,8 +383,18 @@
       waitTimer = setTimeout(() => { waitTimer = 0; pump(); }, 500);
       return;
     }
+    if (lowOnly && restWait() > 0) {
+      waitTimer = setTimeout(() => { waitTimer = 0; pump(); }, restWait());
+      return;
+    }
     busy = true;
     (lowOnly ? idle : requestAnimationFrame)(() => {
+      // Inzwischen getippt oder Seite gewechselt: Vorrat wartet weiter
+      if (queue.every((j) => j.low) && restWait() > 0) {
+        busy = false;
+        pump();
+        return;
+      }
       const job = queue.splice(pick(), 1)[0];
       try {
         const cv = document.createElement('canvas');
@@ -384,6 +405,7 @@
         if (!okDraw) throw new Error('kein WebGL');
         cv.toBlob((b) => {
           busy = false;
+          lastDone = performance.now();
           if (b) job.resolve(URL.createObjectURL(b));
           else job.reject(new Error('toBlob'));
           pump();
