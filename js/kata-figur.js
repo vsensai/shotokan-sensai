@@ -63,8 +63,12 @@
   const KOSA = S.kosamae ? Math.abs(S.kosamae.L.x - S.kosamae.R.x) : 0.3;
   const KVOR = S.kosamae ? Math.abs(S.kosamae.L.z - S.kosamae.R.z) : 0;
   const KOSAST = /ashi-mae kosa$/i;
-  const KZURUECK = 0.12; // … und so weit geht der Fuß dabei nach hinten (Meter, auf halbem Weg)
-  const KKNIE = [0, 1]; // Stampfen aus dem Kreuzschritt: Richtung des Knies (Anteil nach vorn, zur Seite des Schritts)
+  // Stampfen aus dem Kreuzschritt (Tekki 2, 8, 22): erst kommt das Knie vor dem Körper hoch, dann stampft der Fuß zur Seite
+  const KKNIE = [1, 0.8]; // Richtung des Knies (Anteil nach vorn, zur Seite des Schritts)
+  const KHOCH = 0.45; // so hoch kommt der Fuß dabei (Meter; sonst HOCH)
+  const KVORN = 0.16; // so weit kommt der Fuß auf halbem Weg vor die gerade Bahn (Meter), statt hinter dem Standfuß
+  // vorbeizugehen: die Hüfte rückt dabei mit vor, und nur ein Fuß vor der Hüfte bringt das Knie nach vorn hoch – bliebe er
+  // dahinter, zöge das Knie nach hinten
   const NAMI = 0.4; // Namigaeshi: so hoch kommt der Fuß (Meter)
 
   /* ---------- Rechnen ---------- */
@@ -367,13 +371,15 @@
         const fw = [dir[0] / len(dir), dir[1] / len(dir)];
         seg.knee = { w: (u) => ramp(0, Math.max(p1, 0.12), u) * (1 - ramp(p3, 1, u)), L: [fw[0], s === 'L' ? 0.3 : 0.15, fw[1]], R: [fw[0], s === 'R' ? 0.3 : 0.15, fw[1]] };
         // Stampfen zur Seite, ohne dass der Körper dreht (Tekki): das Knie kommt vor dem Körper hoch, nur leicht zur Seite des
-        // Schritts geneigt; das Knie des Standbeins bleibt, wie es im Stand ist. Aus dem Kreuzschritt heraus (kreuz −1) steht
-        // das andere Bein dicht davor: dann geht das Knie mehr zur Seite hoch als nach vorn, sonst stieße es durch dieses Bein
+        // Schritts geneigt; das Knie des Standbeins bleibt, wie es im Stand ist. Aus dem Kreuzschritt heraus (kreuz −1) kommt das
+        // Knie höher und gerade vor dem Körper hoch (KKNIE, KHOCH), erst dann stampft der Fuß zur Seite
         const vorn = fwd(A.byaw);
         const [vk, sk] = o.kreuz < 0 ? KKNIE : [1, 0.45];
         if (!p1 && Math.abs(turn) < 5 && Math.abs(dot(fw, vorn)) < 0.5) seg.knee = { w: seg.knee.w, [s]: [vk * vorn[0] + sk * fw[0], 0.5, vk * vorn[1] + sk * fw[1]] };
-        // … und der Fuß löst sich zuerst nach hinten vom vorderen Bein, statt an dessen Schienbein entlang hochzukommen
-        if (o.kreuz < 0) seg.feet[s].mid = add(seg.feet[s].mid, mul(vorn, -KZURUECK));
+        if (o.kreuz < 0) {
+          seg.feet[s].mid = add(mix(A.low[s].c, B.low[s].c, 0.5), mul(vorn, KVORN));
+          seg.hochY = KHOCH;
+        }
         seg.lookAbs = [A.byaw + A.up.look, B.byaw + B.up.look];
       }
     }
@@ -423,7 +429,7 @@
       let rel = lerp(fa.rel, fb.rel, ef);
       // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
-      let y = lerp(fa.y, fb.y, ef) + (pl.moved ? (seg.hoch ? HOCH * up : (seg.hop || LIFT) * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
+      let y = lerp(fa.y, fb.y, ef) + (pl.moved ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
       const v = seg.via && seg.via.s === s ? seg.via : null;
       let wl = null;
       if (v && seg.welle) {
