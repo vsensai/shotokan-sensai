@@ -489,7 +489,7 @@
   // Rechtes Bein von außen, Knie gehoben: S = Kniespitze, w1 = Richtung zur Hüfte, w2 = zum Fuß
   function hiza() {
     return bild('Bein', (z) => {
-      const [S, W1, W2, s] = [[200, 46], 168, 98, 1.1];
+      const [S, W1, W2, s] = [[164, 46], 168, 95, 1.1];
       const g = beuge(S, W1, W2, 15, s);
       const L = 106;
       const ober = glied(g.T1, [[g.c, 0], [40, -1.5], [80, -5], [130, -7], [260, -4]], [[260, 60], [150, 53], [100, 46], [68, 40], [46, 36], [28, 33]]);
@@ -506,7 +506,7 @@
         ${z.schein(linie(g.T2, falte), 10, '#7a4a35', 0.03, f.fuss)}${z.falte(linie(g.T2, falte), 1.3, 0.7)}
         ${z.falte(pfad(g.T1, 'M', g.c + 14, 6, 'Q', g.c + 7, g.r + 5, g.c + 9, g.r + 17), 1, 0.4)}
         ${z.falte(linie(g.T2, [[34, 14], [56, 19], [80, 17]]), 1, 0.2)}${z.schein(linie(g.T1, [[34, 10], [70, 8], [100, 7]]), 20, '#fff', 0.035, f.fuss)}${z.schein(linie(g.T2, [[34, 24], [56, 26], [84, 17]]), 15, '#fff', 0.035, f.fuss)}
-        ${z.glut(r1(gx), r1(gy), 23)}${stoff(z, g.T1, 96, -11, 60, 6)}
+        ${z.glut(r1(gx), r1(gy), 23)}${stoff(z, g.T1, 86, -11, 58, 6)}
         ${legende([['Knie']])}`;
     });
   }
