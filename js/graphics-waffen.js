@@ -1,4 +1,5 @@
 /* Körperwaffen: plastisch gezeichnete Hände, Füße, Arm und Bein – die Trefferfläche leuchtet rot.
+   Die Waffe selbst ist immer Haut: Ärmel und Hosenbein enden vor ihr (bei Ellbogen, Unterarm und Knie hochgeschoben).
    Alle Bilder im selben Format (240 × 240) und ohne SVG-Filter (Filter machen das Scrollen langsam):
    Rundung = Verlauf von oben nach unten und ein gestufter Schattenrand unten rechts. */
 (function () {
@@ -31,7 +32,6 @@
     f.s = s;
     return f;
   }
-  const FEST = lage();
   // Fingerglied als Kapsel, die sich verjüngt: Kreis a (Radius ra) bis Kreis b (Radius rb)
   function cap(T, a, b, ra, rb) {
     const [ax, ay] = T(a);
@@ -114,6 +114,11 @@
       fleck(d, clip, op) {
         return `<g${clip ? ` clip-path="url(#${clip})"` : ''} opacity="${op || 1}"><path d="${d}" fill="#e53935" stroke="#e53935" stroke-width="8" stroke-linejoin="round" opacity=".14"/><path d="${d}" fill="#e53935" stroke="#e53935" stroke-width="4" stroke-linejoin="round" opacity=".2"/><path d="${d}" fill="#e53935" opacity=".78"/></g>`;
       },
+      // weicher Schein entlang einer Linie, nur auf einer Ebene: Licht, Schatten oder flächige Markierung
+      schein(d, w, farbe, op, clip) {
+        const st = (k) => `<path d="${d}" stroke-width="${r1(w * k)}"/>`;
+        return `<g clip-path="url(#${clip})" fill="none" stroke="${farbe}" stroke-opacity="${op}" stroke-linecap="round" stroke-linejoin="round">${[1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3].map(st).join('')}</g>`;
+      },
       clipLetzte: () => z.letzte,
     };
     const inner = bauen(z);
@@ -152,14 +157,16 @@
   }
 
   /* ---------- Faust von der Daumenseite (rechte Faust, Handrücken oben, Stoßrichtung nach rechts) ---------- */
-  // ippon: Zeigefinger halb gebeugt nach vorne gestellt (Jishi-ippon-ken), sonst eingerollt
-  function faustSeite(z, T, ippon) {
+  // ippon: Zeigefinger halb gebeugt nach vorne gestellt (Jishi-ippon-ken), sonst eingerollt.
+  // arm = { ds, y }: Formen des Arms, die mit der Hand zu einer Fläche verschmelzen
+  function faustSeite(z, T, ippon, arm) {
     const G = ippon
       ? { mcp: [147, 68], pip: [188, 93], dip: [167, 113], tip: [149, 107], t: [[68, 108], [104, 124], [136, 131], [159, 128]] }
       : { mcp: [147, 68], pip: [153, 108], dip: [130, 116], tip: [118, 104], t: [[68, 108], [102, 122], [132, 127], [154, 121]] };
     const yy = (a, b) => spanne(T, 30, a, 205, b);
     const body = pfad(T, 'M', 30, 78, 'C', 56, 76, 86, 66, 118, 57, 'C', 132, 53, 142, 52, 150, 55, 'C', 158, 58, 161, 64, 161, 72, 'L', 161, 118, 'C', 161, 128, 152, 133, 142, 133, 'L', 96, 133, 'C', 70, 132, 48, 124, 30, 112, 'Z');
-    let out = z.teil([body], { y: yy(50, 140) });
+    let out = z.teil([body].concat(arm ? arm.ds : []), { y: arm ? arm.y : yy(50, 140) });
+    const flaeche = z.clipLetzte();
     // übrige Finger: Vorderseite der Faust hinter dem Zeigefinger
     out += z.teil([cap(T, [153, 82], [155, 124], 10.5, 10)], { ton: 'tief', y: yy(70, 136) });
     out += z.teil(kette(T, [G.mcp, G.pip, G.dip, G.tip], [13, 11.5, 9.5, 8.5]), { y: yy(54, 124), schatten: true });
@@ -178,7 +185,7 @@
     out += `<path d="${nagel}" fill="${NAGEL}" stroke="${TON.haut[4]}" stroke-width=".8"/><path d="${pfad(T, 'M', ...P(-6, -3.5), 'Q', ...P(0, -5), ...P(4, -3))}" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".9"/>`;
     out += z.falte(pfad(T, 'M', ...[a[0] - 5, a[1] - 6], 'Q', ...[a[0] - 2, a[1]], ...[a[0] - 5, a[1] + 6])) + z.falte(pfad(T, 'M', ...[a[0], a[1] - 6], 'Q', ...[a[0] + 3, a[1]], ...[a[0], a[1] + 6]));
     out += z.falte(pfad(T, 'M', 54, 98, 'Q', 76, 92, 94, 110), 1, 0.35) + z.falte(pfad(T, 'M', 56, 80, 'Q', 53, 86, 54, 92), 1, 0.4);
-    return { out, zeige };
+    return { out, zeige, flaeche };
   }
 
   // Jishi-ippon-ken (Hangetsu): das Mittelgelenk des Zeigefingers steht vor, der Daumen stützt den Finger von unten
@@ -331,6 +338,8 @@
   }
 
   /* ---------- Fuß: rechter Fuß von außen (Zehen rechts), dazu Sohle oder Fußrücken ---------- */
+  // gestreckt = Grad, um die das Fußgelenk gestreckt ist: ohne Beinstumpf – das Bein kommt als Form dazu (dazu, y)
+  // und schließt vorne bei (80, 58) an, 42 breit
   function fussSeite(z, T, o) {
     const opt = o || {};
     const yy = (a, b) => spanne(T, 30, a, 215, b);
@@ -339,7 +348,9 @@
     const Z = ([x, y]) => [178 + (x - 178) * Math.cos(w) - (y - 119) * Math.sin(w), 119 + (x - 178) * Math.sin(w) + (y - 119) * Math.cos(w)];
     let out = z.teil([cap(T, Z([176, 116]), Z([206, 117]), 8.5, 7)], { ton: 'tief', y: yy(opt.zehenHoch ? 90 : 106, 128) });
     out += z.teil([cap(T, Z([176, 117.5]), Z([198, 119.5]), 8, 6.3)], { ton: 'tief', y: yy(opt.zehenHoch ? 94 : 108, 128) });
-    out += z.teil([pfad(T, 'M', 48, 8, 'L', 84, 8, 'L', 86, 66, 'C', 94, 82, 116, 90, 142, 97, 'C', 158, 101, 170, 105, 180, 109, 'C', 187, 114, 187, 122, 180, 127, 'L', 66, 127, 'C', 44, 128, 35, 118, 35, 104, 'C', 35, 90, 44, 80, 48, 72, 'Z')], { y: yy(20, 130), schatten: true });
+    const ws = ((90 - (opt.gestreckt || 0)) * Math.PI) / 180;
+    const oben = opt.gestreckt ? ['M', 48, 72, 'L', 80, 58, 'C', 80 + 16 * Math.cos(ws), 58 + 16 * Math.sin(ws), 118, 91, 142, 97] : ['M', 48, 8, 'L', 84, 8, 'L', 86, 66, 'C', 94, 82, 116, 90, 142, 97];
+    out += z.teil([pfad(T, ...oben, 'C', 158, 101, 170, 105, 180, 109, 'C', 187, 114, 187, 122, 180, 127, 'L', 66, 127, 'C', 44, 128, 35, 118, 35, 104, 'C', 35, 90, 44, 80, 48, 72, 'Z')].concat(opt.dazu || []), { y: opt.y || yy(20, 130), schatten: true });
     const fuss = z.clipLetzte();
     out += z.teil([cap(T, Z([173, 120]), Z([189, 121.5]), 7, 5.6)], { y: yy(opt.zehenHoch ? 100 : 112, 128), schatten: true });
     out += z.falte(pfad(T, 'M', 60, 80, 'Q', 68, 68, 78, 78), 1.1, 0.5) + z.falte(pfad(T, 'M', 46, 96, 'Q', 42, 106, 46, 116), 1, 0.35) + z.falte(pfad(T, 'M', 166, 110, 'Q', 171, 118, 168, 126), 1, 0.4);
@@ -388,7 +399,7 @@
     });
   }
 
-  /* ---------- Arm und Bein im Gi ---------- */
+  /* ---------- Arm und Bein: gebeugt, Ärmel und Hosenbein über das Gelenk hochgeschoben ---------- */
   const zwischen = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
   // Lage, die den Punkt lokal auf ziel legt und die lokale x-Achse in Richtung nach dreht
   function lageAn(lokal, ziel, nach, s, flipY) {
@@ -397,67 +408,105 @@
     const [dx, dy] = T(lokal);
     return lage({ x: ziel[0] - dx, y: ziel[1] - dy, rot, s, flipY });
   }
-  const spann = (pts, r) => [r1(Math.min(...pts.map((p) => p[1])) - r), r1(Math.max(...pts.map((p) => p[1])) + r)];
-  // Spitze eines gebeugten Gelenks: vom Gelenk weg, entgegen der Mitte der beiden Glieder
-  function spitze(A, G, B, r) {
-    const u = (P) => { const l = Math.hypot(P[0] - G[0], P[1] - G[1]); return [(P[0] - G[0]) / l, (P[1] - G[1]) / l]; };
-    const [a, b] = [u(A), u(B)];
-    const l = Math.hypot(a[0] + b[0], a[1] + b[1]);
-    return [r1(G[0] - ((a[0] + b[0]) / l) * r), r1(G[1] - ((a[1] + b[1]) / l) * r)];
-  }
-  // Arm: Schulter, Ellbogen, Handgelenk – der Ärmel reicht bis zur Mitte des Unterarms, vorne die Faust
-  function arm(z, S, E, W, flipY) {
-    const ende = [W[0] + (W[0] - E[0]), W[1] + (W[1] - E[1])];
-    const F = lageAn([44, 95], W, ende, 0.47, flipY);
-    const M = zwischen(E, W, 0.58);
-    let out = z.teil([cap(FEST, S, E, 27, 23)], { ton: 'gitief', y: spann([S, E], 25) });
-    out += faustSeite(z, F, false).out;
-    out += z.teil([cap(FEST, zwischen(E, W, 0.4), W, 13, 9.5)], { y: spann([E, W], 11), schatten: true });
-    out += z.teil([cap(FEST, E, M, 23, 17)], { ton: 'gi', y: spann([E, M], 20), schatten: true });
-    // Saum des Ärmels quer zum Unterarm
-    const l = Math.hypot(W[0] - E[0], W[1] - E[1]);
-    const [nx, ny] = [-(W[1] - E[1]) / l, (W[0] - E[0]) / l];
-    const [c, d] = [zwischen(E, W, 0.58 + 9 / l), 14];
-    out += `<path d="M${r1(c[0] + nx * d)} ${r1(c[1] + ny * d)} L${r1(c[0] - nx * d)} ${r1(c[1] - ny * d)}" stroke="#aab4ba" stroke-width="1" fill="none"/>`;
+  // glatter Kurvenzug durch die Punkte, als Teile für pfad() (setzt am ersten Punkt an)
+  function zug(pts) {
+    const n = pts.length;
+    const ri = (i) => {
+      const [a, b] = [pts[Math.max(0, i - 1)], pts[Math.min(n - 1, i + 1)]];
+      const l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+      return [(b[0] - a[0]) / l, (b[1] - a[1]) / l];
+    };
+    const out = [];
+    for (let i = 0; i < n - 1; i++) {
+      const [p, q, u, v] = [pts[i], pts[i + 1], ri(i), ri(i + 1)];
+      const k = Math.hypot(q[0] - p[0], q[1] - p[1]) / 3;
+      out.push('C', p[0] + u[0] * k, p[1] + u[1] * k, q[0] - v[0] * k, q[1] - v[1] * k, q[0], q[1]);
+    }
     return out;
+  }
+  const linie = (T, pts) => pfad(T, 'M', ...pts[0], ...zug(pts));
+  // Glied als Fläche: Außenkante vom Gelenk weg, Innenkante zurück zum Gelenk
+  const glied = (T, aussen, innen) => pfad(T, 'M', ...aussen[0], ...zug(aussen), 'L', ...innen[0], ...zug(innen), 'Z');
+  // Zwei Glieder an einem gebeugten Gelenk. S = Scheitel (dort träfen sich die Außenkanten), w1/w2 = Richtung
+  // der Glieder vom Gelenk weg (Grad), r = Rundung der Gelenkspitze. In beiden Lagen läuft x an der Außenkante
+  // entlang, y zeigt in die Beuge.
+  function beuge(S, w1, w2, r, s) {
+    const d = ((w2 - w1) * Math.PI) / 180;
+    const cw = Math.sin(d) > 0;
+    const T1 = lage({ x: S[0], y: S[1], rot: w1, s, flipY: !cw });
+    const T2 = lage({ x: S[0], y: S[1], rot: w2, s, flipY: cw });
+    const c = r / Math.tan(Math.acos(Math.cos(d)) / 2);
+    return { T1, T2, cw, c, r, mitte: T1([c, r]), kreis: ellipse(T1, c, r, r, r) };
+  }
+  // Stoff, der über dem Gelenk endet (Ärmel, Hosenbein): von x0 bis über den Bildrand, Saum mit zwei Wülsten
+  function stoff(z, T, x0, y0, y1, weit) {
+    const d = pfad(T, 'M', 260, y0 - weit, 'L', x0 + 7, y0, 'Q', x0, y0, x0 - 0.5, y0 + 7, 'Q', x0 - 3.5, (y0 + y1) / 2, x0 - 0.5, y1 - 7, 'Q', x0, y1, x0 + 7, y1, 'L', 260, y1 + weit, 'Z');
+    const ys = [[x0, y0], [x0, y1], [200, y0 - weit], [200, y1 + weit]].map((p) => T(p)[1]);
+    const quer = (x, a, b, w, op) => z.falte(pfad(T, 'M', x, y0 + a, 'Q', x - 4, (y0 + y1) / 2, x, y1 - b), w, op, 'gi');
+    return z.teil([d], { ton: 'gi', y: [r1(Math.min(...ys)), r1(Math.max(...ys))], schatten: true }) +
+      quer(x0 + 9, 5, 5, 1.1, 0.75) + quer(x0 + 19, 9, 14, 1, 0.45) +
+      z.falte(pfad(T, 'M', x0 + 30, y0 + 16, 'Q', x0 + 52, y0 + 24, x0 + 80, y0 + 20), 1, 0.4, 'gi') +
+      z.falte(pfad(T, 'M', x0 + 34, y1 - 12, 'Q', x0 + 60, y1 - 20, x0 + 92, y1 - 12), 1, 0.35, 'gi');
+  }
+
+  // Rechter Arm, gebeugt. S = Ellbogenspitze, w1 = Richtung zur Schulter, w2 = zur Hand.
+  // o: y = Verlauf (oben, unten), fingerInnen = die Finger zeigen in die Beuge, falte = Beugefalte (Lage des Unterarms)
+  function arm(z, S, w1, w2, o) {
+    const g = beuge(S, w1, w2, 9, o.s || 1);
+    const L = 104;
+    const ober = glied(g.T1, [[g.c, 0], [45, -2], [90, -4.5], [140, -3], [260, 0]], [[260, 46], [150, 44], [122, 46], [98, 50], [78, 51], [60, 46], [44, 38], [30, 30]]);
+    const unter = glied(g.T2, [[g.c, 0], [36, -2.5], [70, -1], [L, 1]], [[L, 20], [86, 24], [64, 30.5], [42, 35], [26, 33], [15, 26]]);
+    const F = lageAn([46, 99], g.T2([L, 10.5]), g.T2([L + 40, 10.5]), 0.43 * (o.s || 1), o.fingerInnen ? g.cw : !g.cw);
+    const f = faustSeite(z, F, false, { ds: [ober, unter, g.kreis], y: o.y });
+    const haut = f.flaeche;
+    let out = f.out;
+    // Schatten und Falte in der Beuge, Muskellinien, Falte an der Ellbogenspitze
+    out += z.schein(linie(g.T2, o.falte), 10, '#7a4a35', 0.03, haut) + z.falte(linie(g.T2, o.falte), 1.3, 0.7);
+    out += z.falte(linie(g.T2, [[28, 8], [50, 10.5], [80, 10]]), 1, 0.22);
+    out += z.falte(linie(g.T1, [[50, 15], [80, 19], [118, 19]]), 1, 0.2) + z.schein(linie(g.T1, [[58, 36], [80, 40], [110, 38]]), 18, '#fff', 0.035, haut) + z.schein(linie(g.T2, [[30, 22], [60, 20], [92, 13]]), 15, '#fff', 0.035, haut);
+    out += z.falte(pfad(g.T1, 'M', g.c + 9, 5, 'Q', g.c + 4, g.r + 4, g.c + 6, g.r + 12), 1, 0.4);
+    return { out, haut, g, aermel: stoff(z, g.T1, o.aermel || 98, -8, 55, 5) };
   }
   function hiji() {
     return bild('Arm', (z) => {
-      const [S, E, W] = [[10, 156], [168, 136], [92, 60]];
-      const [gx, gy] = spitze(S, E, W, 17);
-      return `${titel('rechter Arm, gebeugt', 122)}
-        ${arm(z, S, E, W, true)}
-        ${z.falte('M150 118 Q143 132 148 150', 1.1, 0.6, 'gi')}${z.falte('M139 112 Q134 124 136 138', 1, 0.45, 'gi')}${z.falte('M100 146 Q114 140 128 143', 1, 0.4, 'gi')}
-        ${z.glut(gx, gy, 24)}
+      const S = [204, 180];
+      const a = arm(z, S, 180, 240, { y: [26, 214], fingerInnen: true, s: 1.14, falte: [[73, 28], [62, 31.5], [50, 34], [42, 35]] });
+      const [gx, gy] = zwischen(a.g.mitte, S, 0.4);
+      return `${titel('rechter Arm von der Seite', 12)}
+        ${a.out}${z.glut(r1(gx), r1(gy), 21)}${a.aermel}
         ${legende([['Ellbogen']])}`;
     });
   }
   function zenwan() {
     return bild('Arm', (z) => {
-      const [S, E, W] = [[36, 10], [64, 152], [166, 92]];
-      const [p, q] = [zwischen(E, W, 0.3), zwischen(E, W, 0.97)];
-      return `${titel('rechter Arm, gebeugt', 100)}
-        ${arm(z, S, E, W, false)}
-        ${z.falte('M44 132 Q60 126 78 134', 1.1, 0.55, 'gi')}${z.falte('M42 118 Q56 113 72 119', 1, 0.4, 'gi')}
-        ${z.band(`M${r1(p[0])} ${r1(p[1])} L${r1(q[0])} ${r1(q[1])}`, 11)}
+      const a = arm(z, [44, 194], -104, -23, { y: [70, 200], falte: [[40, 35], [32, 34.5], [24, 32]], s: 1.22, aermel: 84 });
+      return `${titel('rechter Arm von der Seite', 100)}
+        ${a.out}${z.schein(linie(a.g.T2, [[32, 16], [62, 15], [94, 11]]), 42, '#e53935', 0.14, a.haut)}${a.aermel}
         ${legende([['Unterarm']])}`;
     });
   }
+
+  // Rechtes Bein von außen, Knie gehoben: S = Kniespitze, w1 = Richtung zur Hüfte, w2 = zum Fuß
   function hiza() {
     return bild('Bein', (z) => {
-      const [H, K, A] = [[4, 136], [152, 66], [128, 166]];
-      const an = zwischen(K, A, 0.9);
-      const F = lageAn([66, 20], an, [an[0] + 100, an[1] + 24], 0.44, false);
-      const f = fussSeite(z, F, {});
-      const M = zwischen(K, A, 0.84);
-      const [gx, gy] = spitze(H, K, A, 19);
-      return `${titel('rechtes Bein, Knie angehoben')}
-        ${z.teil([cap(FEST, H, K, 31, 26)], { ton: 'gitief', y: spann([H, K], 28) })}
+      const [S, W1, W2, s] = [[200, 46], 168, 98, 1.1];
+      const g = beuge(S, W1, W2, 15, s);
+      const L = 106;
+      const ober = glied(g.T1, [[g.c, 0], [40, -1.5], [80, -5], [130, -7], [260, -4]], [[260, 60], [150, 53], [100, 46], [68, 40], [46, 36], [28, 33]]);
+      const unter = glied(g.T2, [[g.c, 0], [50, 0], [84, 1.5], [L, 3]], [[L + 2, 24.5], [L - 5, 19.5], [92, 21], [80, 28], [64, 35.5], [46, 38], [30, 35], [16, 28]]);
+      // Fuß gestreckt, die Zehen zeigen nach unten
+      const [vorn, streck] = [g.T2([L, 3]), 35];
+      const w = ((W2 - 90 + streck) * Math.PI) / 180;
+      const F = lageAn([80, 58], vorn, [vorn[0] + Math.cos(w), vorn[1] + Math.sin(w)], 0.37 * s, false);
+      const f = fussSeite(z, F, { gestreckt: streck, dazu: [ober, unter, g.kreis], y: [36, 262] });
+      const [gx, gy] = zwischen(g.mitte, S, 0.35);
+      const falte = [[76, 30.5], [64, 35.5], [52, 37.5], [42, 37.5]];
+      return `${titel('rechtes Bein von der Seite', 12)}
         ${f.out}
-        ${z.teil([cap(FEST, K, M, 25, 16)], { ton: 'gi', y: spann([K, M], 20), schatten: true })}
-        <path d="M${r1(M[0] - 13)} ${r1(M[1] + 4)} L${r1(M[0] + 15)} ${r1(M[1] + 10)}" stroke="#aab4ba" stroke-width="1" fill="none"/>
-        ${z.falte('M132 52 Q126 68 134 88', 1.1, 0.6, 'gi')}${z.falte('M120 54 Q115 68 120 84', 1, 0.45, 'gi')}${z.falte('M134 104 Q142 112 152 108', 1, 0.4, 'gi')}
-        ${z.glut(gx, gy, 26)}
+        ${z.schein(linie(g.T2, falte), 10, '#7a4a35', 0.03, f.fuss)}${z.falte(linie(g.T2, falte), 1.3, 0.7)}
+        ${z.falte(pfad(g.T1, 'M', g.c + 14, 6, 'Q', g.c + 7, g.r + 5, g.c + 9, g.r + 17), 1, 0.4)}
+        ${z.falte(linie(g.T2, [[34, 14], [56, 19], [80, 17]]), 1, 0.2)}${z.schein(linie(g.T1, [[34, 10], [70, 8], [100, 7]]), 20, '#fff', 0.035, f.fuss)}${z.schein(linie(g.T2, [[34, 24], [56, 26], [84, 17]]), 15, '#fff', 0.035, f.fuss)}
+        ${z.glut(r1(gx), r1(gy), 23)}${stoff(z, g.T1, 96, -11, 60, 6)}
         ${legende([['Knie']])}`;
     });
   }

@@ -33,8 +33,9 @@
 
 ## Körperwaffen
 - Alle Körperwaffen sind gezeichnet (`js/graphics-waffen.js`, Schlüssel `wp:…`) – keine 3D-Figur, auch nicht für Ellbogen, Knie und Unterarm, und keine „Kommt vor in …“-Stellen auf den Karten. `validate.html` prüft das.
-- Ein Stil für alle: Format 240 × 240, plastisch (Verlauf, Schattenrand, dünne Kontur), Trefferfläche rot leuchtend, oben die Blickrichtung, unten die Legende. Bausatz in der Datei: `bild`, `teil` (Ebene aus Kapseln/Pfaden), `glut`/`band`/`fleck` (Markierung), `legende`. Keine SVG-Filter (machen das Scrollen langsam).
-- Neue Körperwaffe: vorhandene Hand, Faust oder Fuß wiederverwenden (`faustSeite`, `faustOben`, `handOffen`, `fussSeite`, `arm`) und nur die Markierung ergänzen. Legende und Zeiger sind als Beschriftung markiert (`data-tag`), das Quizbild lässt sie weg.
+- Ein Stil für alle: Format 240 × 240, plastisch (Verlauf, Schattenrand, dünne Kontur), Trefferfläche rot leuchtend, oben die Blickrichtung, unten die Legende. Bausatz in der Datei: `bild`, `teil` (Ebene aus Kapseln/Pfaden), `glut`/`band`/`fleck`/`schein` (Markierung), `legende`. Keine SVG-Filter (machen das Scrollen langsam).
+- Die Waffe selbst ist immer Haut, der Gi nur ein Stück Stoff am Bildrand: bei Ellbogen, Unterarm und Knie sind Ärmel und Hosenbein über das Gelenk hochgeschoben. Arm und Bein haben natürliche Umrisse (`beuge`, `glied` mit Randpunkten, `stoff`) – keine geraden Rohre aus Kapseln, das hat dem Nutzer nicht gefallen.
+- Neue Körperwaffe: vorhandene Hand, Faust oder Fuß wiederverwenden (`faustSeite`, `faustOben`, `handOffen`, `fussSeite`, `arm` – gebeugter Arm mit Faust) und nur die Markierung ergänzen. Legende und Zeiger sind als Beschriftung markiert (`data-tag`), das Quizbild lässt sie weg.
 
 ## Kata als Figur (Kata-Trainer, Ansicht „Figur“)
 - `js/kata-figur.js` rechnet die ganze Kata als Bewegung: Füße aus `ansage` (Bodenkarte), Arme und Hüfte aus den Abläufen in `js/figur-posen.js`. Neue Technik einer Kata: in `TECH` dem Lexikon-Ablauf zuordnen, neuer Stand in `STAND`; fehlt die Pose, sie in `js/figur-posen.js` ergänzen.
