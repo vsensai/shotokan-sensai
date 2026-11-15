@@ -31,6 +31,11 @@
 - Bilder mit ganzer Figur kommen aus `js/figur-posen.js` (Schlüssel wie `tc:age-zuki`). Neue Technik mit Figur: nur die Pose dort ergänzen – keine SVG-Grafik als Rückfall (ohne WebGL 2 bleibt das Bild leer, die Startseite zeigt einen Hinweis). SVG-Grafiken nur, wo keine Figur passt (Fußbilder, Körperwaffen, Fußbewegungen, Schemabilder, Bodenkarte). `validate.html` meldet ein SVG neben einer 3D-Figur als Fehler.
 - Nach Änderungen an Posen `tools/test/gfx3d.html` mit WebGL (Playwright: `--use-angle=swiftshader`) ansehen; `validate.html` prüft, dass alle Posen rechenbar sind und Standfüße ihren Platz erreichen.
 
+## Körperwaffen
+- Alle Körperwaffen sind gezeichnet (`js/graphics-waffen.js`, Schlüssel `wp:…`) – keine 3D-Figur, auch nicht für Ellbogen, Knie und Unterarm, und keine „Kommt vor in …“-Stellen auf den Karten. `validate.html` prüft das.
+- Ein Stil für alle: Format 240 × 240, plastisch (Verlauf, Schattenrand, dünne Kontur), Trefferfläche rot leuchtend, oben die Blickrichtung, unten die Legende. Bausatz in der Datei: `bild`, `teil` (Ebene aus Kapseln/Pfaden), `glut`/`band`/`fleck` (Markierung), `legende`. Keine SVG-Filter (machen das Scrollen langsam).
+- Neue Körperwaffe: vorhandene Hand, Faust oder Fuß wiederverwenden (`faustSeite`, `faustOben`, `handOffen`, `fussSeite`, `arm`) und nur die Markierung ergänzen. Legende und Zeiger sind als Beschriftung markiert (`data-tag`), das Quizbild lässt sie weg.
+
 ## Kata als Figur (Kata-Trainer, Ansicht „Figur“)
 - `js/kata-figur.js` rechnet die ganze Kata als Bewegung: Füße aus `ansage` (Bodenkarte), Arme und Hüfte aus den Abläufen in `js/figur-posen.js`. Neue Technik einer Kata: in `TECH` dem Lexikon-Ablauf zuordnen, neuer Stand in `STAND`; fehlt die Pose, sie in `js/figur-posen.js` ergänzen.
 - Braucht eine Kata einen Ablauf, den das Lexikon so nicht hat (z. B. Tritt in anderer Höhe), kommt er in `SK.fig3dKata` am Ende von `js/figur-posen.js` – nicht in `SK.fig3dDefs`, sonst erschiene er im Lexikon. Fußtritte stehen in `TRITT` (`js/kata-figur.js`).

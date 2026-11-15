@@ -1030,11 +1030,6 @@
   D['tc:zanshin'] = STILL(M(S.zks, { hL: L(H.guardF), hR: H.guardR, look: 0 }), { partner: [{ t: 0, p: OPP(M(S.hachiji, { lean: -4 }), 1.7) }], view: 'side', marks: ['gaze'] });
   D['tc:bunkai'] = T_RUHIG(MZK, M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), { partner: [{ t: 0, p: OPP(M(ZK_G, {}), 1.75) }, { t: 0.22, p: OPP(ZK_G, 1.75) }, { t: 0.62, p: OPP(M(OI_MID, { pelvis: [0, 0.71, 0.45], hR: [0.0, 0.05, 0.5], hL: L(H.hip) }), 1.75) }], eff: 'fistR', view: 'side', hit: { at: 'elbowR', text: 'Age-uke' } });
 
-  /* ---------- Körperwaffen mit ganzer Figur ---------- */
-  D['wp:hiji'] = STILL(MAE_ENPI, M(hit('elbowR', 'Ellbogen'), { view: 'side3', marks: ['ring:elbowR'] }));
-  D['wp:hiza'] = STILL(HZ_HIT, M(hit('kneeR', 'Knie'), { view: 'side3', marks: ['ring:kneeR'] }));
-  D['wp:zenwan'] = STILL(M(MZK, { hL: L(H.hip), hR: [-0.2, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm'), { view: 'front3', marks: ['arm:R'] }));
-
   /* ---------- Übersichten ---------- */
   D['fig:levels'] = STILL(M(S.hachiji, { hL: L(H.side), hR: H.side, oL: 1, oR: 1, fL: [0, -1, 0], fR: [0, -1, 0], pL: [-1, 0, 0], pR: [1, 0, 0] }), { view: 'front', marks: ['levels'] });
   D['fig:targets'] = STILL(M(S.hachiji, { hL: [0.3, -0.5, 0.06], hR: [-0.3, -0.5, 0.06], oL: 1, oR: 1, fL: [0, -1, 0], fR: [0, -1, 0], pL: [-1, 0, 0], pR: [1, 0, 0] }), { view: 'front', marks: ['targets'] });
@@ -1072,7 +1067,6 @@
     'mv:mikazuki-geri': 'teisoku', 'tc:ura-mawashi-geri': 'teisoku', 'tc:ushiro-mawashi-geri': 'teisoku', 'tc:hiza-geri': 'hiza',
     'tc:mawashi-hiza-geri': 'hiza', 'tc:fumikomi': 'sokuto', 'tc:namigaeshi': 'teisoku', 'tc:nidan-geri': 'koshi:LR',
     'tc:teisoku-barai': 'teisoku', 'tc:haisoku-barai': 'haisoku', 'tc:komura-barai': 'wade',
-    'wp:hiji': 'ellbogen', 'wp:hiza': 'hiza', 'wp:zenwan': 'unterarm',
   };
   /* ---------- Gestreckte Arme am Ende: überall nur ein minimaler Knick im Ellbogen ---------- */
   // Arme, die am Ende fast gestreckt sind (ab 97 %), und die hier genannten Schlag-/Abwehrarme werden auf 99 % gebracht

@@ -180,10 +180,25 @@
   }));
 
   // Keine SVG-Grafik als Rückfall: wo es eine 3D-Figur gibt, gibt es kein SVG (ohne WebGL 2 bleibt das Bild leer).
-  // Ausnahmen, weil das SVG etwas anderes zeigt: Fußbilder der Stände (st:) und Körperwaffen, die das Quiz als SVG zeigt.
-  const SVG_NEBEN_3D = /^(st:|wp:(hiji|hiza|zenwan)$)/;
+  // Ausnahme, weil das SVG etwas anderes zeigt: Fußbilder der Stände (st:).
+  const SVG_NEBEN_3D = /^st:/;
   Object.keys(SK.fig3dDefs || {}).forEach((key) => {
     if (!SVG_NEBEN_3D.test(key) && SK.gfx.byKey(key)) errors.push(`${key}: SVG-Grafik neben der 3D-Figur – Rückfall-SVGs gibt es nicht mehr (CLAUDE.md, 3D-Figuren)`);
+  });
+
+  // Körperwaffen einheitlich: jede Karte mit gezeichnetem Bild im selben Format (js/graphics-waffen.js), keine 3D-Figur,
+  // keine Stellen in den Kata; die Legende ist als Beschriftung markiert (das Quizbild lässt sie weg)
+  SK.glossary.filter((e) => e.cat === 'waffe').forEach((e) => {
+    if (!e.img || !/^wp:/.test(e.img.key)) return errors.push(`Körperwaffe ${e.t}: kein gezeichnetes Bild (wp:…)`);
+    if (SK.fig3d.known(e.img.key)) errors.push(`Körperwaffe ${e.t}: 3D-Figur – Körperwaffen werden gezeichnet (CLAUDE.md)`);
+    const svg = e.img();
+    if (!svg.includes('viewBox="0 0 240 240"')) errors.push(`Körperwaffe ${e.t}: Bild nicht im Format 240 × 240`);
+    if (!svg.includes('<g data-tag="1">') || SK.gfx.plainSvg(e.img).includes('data-tag')) errors.push(`Körperwaffe ${e.t}: Legende fehlt oder bleibt im Quizbild stehen`);
+    if (SK.glossaryTextHtml(e).includes('lex-vor')) errors.push(`Körperwaffe ${e.t}: Karte zeigt Stellen in den Kata`);
+  });
+  Object.keys(SK.gfx.WEAPONS).forEach((k) => {
+    const ids = SK.gfx.WEAPONS[k]().match(/ id="[^"]+"/g) || [];
+    if (new Set(ids).size !== ids.length) errors.push(`Körperwaffe ${k}: doppelte Kennung im Bild`);
   });
 
   // 3D-Figuren: jede Pose rechenbar, Standfüße erreichen ihren Platz

@@ -368,7 +368,9 @@
   };
   // Aufklappbare Liste unten auf der Karte; aufeinanderfolgende Bewegungen als Bereich („3–6“). Jede Stelle führt
   // in den Kata-Trainer zu dieser Bewegung.
+  // Körperwaffen zeigen keine Stellen: ihre Karten sind einheitlich (Name, Bedeutung, gezeichnetes Bild)
   function vorHtml(e) {
+    if (e.cat === 'waffe') return '';
     const list = SK.glossaryVorkommen(e);
     if (!list.length) return '';
     const total = list.reduce((s, x) => s + x.ns.length, 0);
