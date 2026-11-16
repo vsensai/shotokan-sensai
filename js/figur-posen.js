@@ -1288,18 +1288,19 @@
   // bis sich beide Unterarme in ihrer Mitte kreuzen. Dann steigt die rechte Hand, bis ihr Handgelenk an den Fingerspitzen
   // der linken liegt. Erst jetzt bewegt sich die linke: Sie liegt am rechten Handgelenk, und beide werden zusammen nach
   // unten vor den Körper gezogen.
-  // Die Hüfte dreht bei langsamen Bewegungen in einem Zug aus dem Kokutsu-dachi nach vorn (kata-figur.js: yaw von −65° auf
-  // −15°, weich über die ganze Bewegung). Damit die linke Hand dabei im Raum stehen bleibt, sind ihre Stellen im Raum
-  // gerechnet (aus dem Bild des Shuto-uke) und für jedes Bild auf die Drehung der Brust umgerechnet
-  const TSR = M(S.ashizk, { yaw: -15, oL: 1, oR: 1 });
+  // Die Hüfte dreht gleich mit dem Beginn der Armbewegung aus dem Kokutsu-dachi ganz nach vorn (Shomen: beide Hände
+  // greifen in der Mitte; kata-figur.js: yaw von −65° auf 0°, weich in den ersten 40 % – drehung: 0.4), so hat der rechte
+  // Arm Platz vor dem Körper. Damit die linke Hand dabei im Raum stehen bleibt, sind ihre Stellen im Raum gerechnet (aus
+  // dem Bild des Shuto-uke) und für jedes Bild auf die Drehung der Brust umgerechnet
+  const TSR = M(S.ashizk, { yaw: 0, oL: 1, oR: 1 });
   const TS_J0 = E.solve(E.full(KK_SHUTO));
-  const TS_YAW = (t) => -65 + 50 * t * t * (3 - 2 * t);
+  const TS_YAW = (t) => { const u = Math.min(1, t / 0.4); return -65 + 65 * u * u * (3 - 2 * u); };
   const TS_W = (v) => V.add(V.add(V.mul(TS_J0.lc, v[0]), V.mul(TS_J0.up, v[1])), V.mul(TS_J0.fc, v[2])); // Brust (Shuto) → Raum
   // Punkt bzw. Richtung, im Raum relativ zur Brust des Shuto-uke gegeben, in Brustkoordinaten des Bildes zur Zeit t
   const TS_AT = (t, w, dir) => { const pk = M(TSR, { yaw: TS_YAW(t) }); const J = E.solve(E.full(pk)); return chestAt(pk, dir ? w : V.add(J.chest, w), dir); };
   const TS_REL = (q) => V.sub(q, TS_J0.chest);
   // Mitte des linken Unterarms und Richtung von der Brust dorthin (waagerecht): dort kreuzt der rechte Unterarm darunter
-  const TS_MITTE = V.mix(TS_J0.elbowL, TS_J0.wristL, 0.5);
+  const TS_MITTE = V.mix(TS_J0.elbowL, TS_J0.wristL, 0.6);
   const TS_RAUS = V.norm([TS_MITTE[0] - TS_J0.chest[0], 0, TS_MITTE[2] - TS_J0.chest[2]]);
   // linke Hand wie im Shuto-uke, im Raum still (rein: so weit ist sie zur Mitte gerückt). Die Fingerspitzen des Shuto-uke
   // liegen weiter weg, als der rechte Arm reicht – während die rechte Hand hochsteigt, kommt die linke ihr deshalb ein
@@ -1308,14 +1309,15 @@
   const TS_LINKS = (t, rein = 0) => ({ hL: TS_AT(t, TS_REL(V.sub(TS_J0.wristL, V.mul(TS_RAUS, rein)))), eL: TS_AT(t, TS_W(KK_SHUTO.eL), true), fL: TS_AT(t, TS_W(KK_SHUTO.fL), true), pL: TS_AT(t, TS_W(KK_SHUTO.pL), true) });
   const TS_KREUZ = V.add(TS_MITTE, [0, -0.05, 0]);
   const TS_SPITZE = V.add(TS_J0.tipL, V.mul(TS_RAUS, 0.02 - TS_REIN));
-  const TS_R = (t, q, f, pp) => ({ hR: TS_AT(t, TS_REL(q)), fR: TS_AT(t, f, true), pR: TS_AT(t, pp, true) });
+  // (der rechte Ellbogen bleibt dabei vor dem Körper, damit der Unterarm nicht in den Bauch gerät)
+  const TS_R = (t, q, f, pp) => ({ hR: TS_AT(t, TS_REL(q)), eR: [-0.45, -0.6, 0.65], fR: TS_AT(t, f, true), pR: TS_AT(t, pp, true) });
   const TS_GRIFF = { eL: [0.8, -1, 0], fL: [-0.4, 0.2, 1], pL: [-1, 0, 0.2] };
   const TS_HOCH = TS_R(0.62, TS_SPITZE, [0, 1, 0], TS_RAUS);
   // die rechte Hand steht im Raum still, während die linke an ihr Handgelenk greift (Abstand in Brustkoordinaten wie am Ende)
   const TS_GRIF2 = TS_R(0.72, TS_SPITZE, [0, 1, 0], TS_RAUS);
   KATA['tsukami-uke-ryosho'] = { keys: [
     { t: 0, p: KK_SHUTO },
-    { t: 0.2, p: M(TSR, TS_LINKS(0.2), TS_R(0.2, V.add(V.mix(TS_J0.wristR, TS_KREUZ, 0.45), [0, -0.05, 0]), TS_RAUS, [0, 1, 0])), e: 'fl' },
+    { t: 0.2, p: M(TSR, TS_LINKS(0.2), TS_R(0.2, V.add(V.add(V.mix(TS_J0.wristR, TS_KREUZ, 0.4), [0, -0.05, 0]), V.mul(V.norm([TS_J0.fc[0], 0, TS_J0.fc[2]]), 0.08)), TS_RAUS, [0, 1, 0])), e: 'fl' },
     { t: 0.4, p: M(TSR, TS_LINKS(0.4), TS_R(0.4, TS_KREUZ, TS_RAUS, [0, 1, 0])), e: 'fl' },
     { t: 0.52, p: M(TSR, TS_LINKS(0.52, TS_REIN / 2), TS_R(0.52, V.add(V.mix(TS_KREUZ, TS_SPITZE, 0.5), V.mul(TS_RAUS, 0.04)), [0, 1, 0], TS_RAUS)), e: 'fl' },
     { t: 0.62, p: M(TSR, TS_LINKS(0.62, TS_REIN), TS_HOCH), e: 'io' },

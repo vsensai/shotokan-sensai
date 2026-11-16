@@ -128,6 +128,7 @@
   // davor läuft, zeit Sekunden lang (höchstens knapp die halbe Zählzeit). 'wende': auf der Stelle zur Blickrichtung drehen,
   // die Füße bleiben an ihren alten Plätzen (Bassai Dai 25); 'tritt': Tritt auf dem Standbein der Bewegung, auf halbem Weg
   // der Drehung (Bassai Dai 28: Mikazuki-geri, dann erst der Ellbogen);
+  // drehung: langsame Bewegung, deren Hüfte schon nach diesem Anteil fertig gedreht ist (sonst über die ganze Bewegung);
   // heran: der Fuß, der den Platz wechselt, zieht erst zum Standfuß heran und geht von dort hinaus (Halbkreis, Bassai Dai 6);
   // Ein dritter Eintrag beschränkt die Zuordnung auf Stände, Hinweise der Kata (note) oder den Namen der Kata, auf die er
   // passt (der erste passende Eintrag gilt)
@@ -138,7 +139,7 @@
     [/chudan soto-uke/i, { def: 'sukui-soto-uke', side: 'R', from: 0, lang: true, dur: 1.15, heran: true }, /sukui-uke/i],
     [/chudan soto-uke/i, { def: 'mv:soto-uke', side: 'R', from: 0.25 }],
     [/tate-shuto/i, { def: 'tc:tate-shuto-uke', side: 'L', from: 0.12, lang: true }],
-    [/ryosho chudan tsukami-uke/i, { def: 'tsukami-uke-ryosho', side: 'L', from: 0, lang: true }],
+    [/ryosho chudan tsukami-uke/i, { def: 'tsukami-uke-ryosho', side: 'L', from: 0, lang: true, drehung: 0.4 }],
     [/tsukamiyose \+ .*gedan-kekomi/i, { tritt: 'kekomi-gedan', def: 'tsukamiyose', side: 'R', from: 0, dur: 1.0 }],
     [/morote jodan age-uke/i, { def: 'morote-age-uke', side: 'L', from: 0.25 }],
     [/hasami-uchi/i, { def: 'tc:hasami-uchi', side: 'L', from: 0.563, lang: true, dur: 0.8 }],
@@ -956,7 +957,9 @@
             return o;
           };
           const lauf = tech.lang ? (w) => { const a = tr(w); const f = 1 - smooth(clamp(w / 0.35)); return f > 0 ? M(a, vor(a, f)) : a; } : tr;
-          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, smooth(u)) }) : calm(cur.up, end);
+          // (drehung: die Hüfte ist schon nach diesem Anteil der Bewegung fertig gedreht – Bassai Dai 18)
+          const dr = tech.drehung || 1;
+          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, smooth(u / dr)) }) : calm(cur.up, end);
         }
         else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen
