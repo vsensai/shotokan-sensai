@@ -772,7 +772,11 @@
       // Bleiben beide Füße in die Kata hinein stehen (Kanku Dai: Yoi, 1 und 2 im selben Stand), gilt ihr Platz dort
       if (j === 2 && [0, 1].every((i) => m.f[i][0] === r.f[i][0] && m.f[i][1] === r.f[i][1])) return;
       let l;
-      if (pin === 0) l = m.f[0].slice(0, 2);
+      // Naore mit Drehung auf einem Fuß (Kanku Dai: „auf dem rechten Fuß“): die Skizze zeichnet ihn danach ein Stück
+      // daneben – er bleibt, wo er in der letzten Bewegung steht, und der andere Fuß schwingt herum
+      const dreh = j === n - 2 && pin == null && /auf dem (linken|rechten) fuß/i.exec(m.h || '');
+      if (dreh) l = /^l/i.test(dreh[1]) ? r.f[0].slice(0, 2) : sub(r.f[1], u);
+      else if (pin === 0) l = m.f[0].slice(0, 2);
       else if (pin === 1) l = sub(m.f[1], u);
       // Beginnt die Kata mit einem Sprungschritt (Bassai Dai 1), bleibt das Yoi an seinem eigenen Platz – sonst stünde es
       // schon dort, wo der Sprung landet, und die Figur spränge nicht nach vorn
