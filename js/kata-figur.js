@@ -65,6 +65,9 @@
   // Größte Drehung der Füße gegen die Körperrichtung (Grad) je Kata und Stand: Die Skizze dreht die Füße im Hizakutsu
   // Bassai Dai 11, 13 um gut 70° ein – das sah zu extrem aus (45° dann zu wenig). Das Knie zeigt dann über den Fuß
   const DREH = { 'bassai-dai': [[/hizakutsu/i, 58]] };
+  // Richtung des vorderen Knies je Kata und Stand (Brustkoordinaten des Standes der Figur, vorderes Bein links): Im
+  // Kokutsu-dachi zeigt es bei der Figur gut 15° nach außen – in Bassai Dai 14–17 knickte es damit sichtbar weg
+  const KNIE = { 'bassai-dai': { kk: [0, 0.1, 1] } };
   const KREUZ = 0.28; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
   // Kreuzschritt (Ashi-mae Kosa): die Füße stehen dicht nebeneinander, der kreuzende ein Stück weiter vorn – so eng, wie es
   // geht, ohne dass die Hosenbeine ineinander geraten (aus dem Stand der Figur, S.kosamae). KOSA: so weit stehen die
@@ -257,6 +260,7 @@
       if (Math.abs(dot(d, v)) > Math.abs(d[0] * v[1] - d[1] * v[0])) key = 'hizakutsu';
     }
     let c = E.full(S[key || 'hachiji']);
+    if (KNIE[id] && KNIE[id][key]) c = E.full(M(c, { L: { kp: KNIE[id][key] } }));
     // welcher Fuß steht vorne? Passt das nicht zum Stand der Figur (meist links vorne, Kosa-dachi rechts): spiegeln
     const ahead = dot(sub(feet[1].c, feet[0].c), fwd(byaw));
     // Kreuzschritt (Füße nebeneinander, die Beine gekreuzt): der Name sagt, welches Bein vorne kreuzt (Figur: das linke)

@@ -1284,21 +1284,23 @@
     { t: 1, p: SS({ hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), e: 'kime' },
   ] };
   // 18: Ryosho Tsukami-uke, langsam und kraftvoll aus dem Shuto-uke. Die rechte offene Hand beschreibt vor dem Körper einen
-  // Halbkreis: vom Solarplexus hoch vor die linke Schulter, oben vor dem Gesicht hinüber nach rechts und von dort nach vorn
-  // in die Endstellung (Chudan, Handfläche nach vorn). Die linke Hand bleibt erst vorn und nimmt etwas Abstand; ab etwa der
-  // Hälfte folgt sie der rechten und legt sich an ihr Handgelenk. Ganz am Ende drücken beide langsam zusammen etwas nach unten
+  // großen Halbkreis über links: vom Solarplexus hoch vor die Stirn, im Bogen weit nach links außen auf Schulterhöhe und
+  // von dort unten herum nach vorn in die Endstellung (Chudan, Handfläche nach vorn). Die linke Hand geht zuerst etwas
+  // tiefer aus dem Weg; ab etwa der Hälfte folgt sie der rechten und legt sich an ihr Handgelenk. Ganz am Ende drücken
+  // beide langsam zusammen etwas nach unten
   const TSR = M(S.ashizk, { yaw: -15, oL: 1, oR: 1 });
-  const TS_L0 = { hL: [0.3, -0.16, 0.32], eL: [0.4, -1, 0.2], pL: [0.6, 0, 0.8], fL: [0.2, 0.9, 0.3] };
+  const TS_L0 = { hL: [0.22, -0.22, 0.34], eL: [0.5, -1, 0.1], pL: [0.2, -0.6, 0.8], fL: [-0.2, 0.3, 1] };
   const TS_R = (h, e, p, f) => ({ hR: h, eR: e, pR: p, fR: f });
   const TS_END = { hR: [-0.05, -0.02, 0.5], pR: [0, 0, 1], fR: [0, 1, 0.3], hL: [0.04, -0.07, 0.41], eL: [0.6, -1, 0.1], fL: [-0.8, 0.3, 0.5], pL: [0.3, -0.2, 1] };
   KATA['tsukami-uke-ryosho'] = { keys: [
     { t: 0, p: KK_SHUTO },
-    { t: 0.14, p: M(TSR, { yaw: -40 }, TS_L0, TS_R([0.08, -0.16, 0.3], [-0.6, -0.8, 0.2], [0, 0.3, -1], [0.3, 1, 0.2])), e: 'fl' },
-    { t: 0.28, p: M(TSR, { yaw: -32 }, TS_L0, TS_R([0.16, 0.08, 0.34], [-0.4, -1, 0.1], [-0.3, 0, 1], [0.2, 1, 0])), e: 'fl' },
-    { t: 0.42, p: M(TSR, { yaw: -24 }, TS_L0, TS_R([0.0, 0.2, 0.4], [-0.6, -0.8, 0.1], [0, 0, 1], [0, 1, 0])), e: 'fl' },
-    { t: 0.56, p: M(TSR, { yaw: -18 }, TS_L0, TS_R([-0.22, 0.1, 0.42], [-0.7, -0.7, 0], [0.3, 0, 1], [-0.2, 1, 0])), e: 'fl' },
-    { t: 0.72, p: M(TSR, { yaw: -15, hL: [0.1, -0.06, 0.36], eL: [0.6, -1, 0.1], pL: [0.4, -0.1, 1], fL: [-0.4, 0.6, 0.5] }, TS_R([-0.16, 0.0, 0.48], [-0.5, -1, 0], [0.1, 0, 1], [-0.1, 1, 0.2])), e: 'fl' },
-    { t: 0.86, p: M(TSR, TS_END), e: 'fl' },
+    { t: 0.14, p: M(TSR, TS_L0, TS_R([0.06, 0.0, 0.32], [-0.6, -0.8, 0.1], [0, 0, 1], [0, 1, 0])), e: 'fl' },
+    { t: 0.28, p: M(TSR, TS_L0, TS_R([0.16, 0.27, 0.34], [-0.5, -0.6, 0.2], [0, 0, 1], [0.2, 1, 0])), e: 'fl' },
+    { t: 0.42, p: M(TSR, TS_L0, TS_R([0.38, 0.2, 0.32], [-0.2, -1, 0.2], [0, 0, 1], [0.7, 0.7, 0])), e: 'fl' },
+    { t: 0.55, p: M(TSR, TS_L0, TS_R([0.48, 0.02, 0.3], [0.1, -1, -0.1], [0, 0, 1], [1, 0.2, 0])), e: 'fl' },
+    { t: 0.68, p: M(TSR, { hL: [0.24, -0.15, 0.36], eL: [0.6, -1, 0.1], pL: [0.3, -0.3, 1], fL: [-0.3, 0.5, 0.8] }, TS_R([0.36, -0.15, 0.45], [0, -1, -0.3], [0, 0, 1], [0.6, 0.6, 0.2])), e: 'fl' },
+    { t: 0.8, p: M(TSR, { hL: [0.14, -0.1, 0.4], eL: [0.6, -1, 0.1], pL: [0.3, -0.2, 1], fL: [-0.6, 0.4, 0.6] }, TS_R([0.12, -0.05, 0.5], [-0.3, -1, -0.1], [0, 0, 1], [0.2, 1, 0.3])), e: 'fl' },
+    { t: 0.9, p: M(TSR, TS_END), e: 'fl' },
     { t: 1, p: M(TSR, TS_END, { hR: [-0.05, -0.08, 0.5], hL: [0.04, -0.13, 0.41] }), e: 'io' },
   ] };
   // 19: Sokuto Gedan-kekomi zur rechten Seite – das Knie kommt hoch vor den Körper, dann stößt die Fußkante schräg nach
