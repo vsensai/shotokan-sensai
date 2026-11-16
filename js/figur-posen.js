@@ -1358,6 +1358,85 @@
     { t: 0.37, p: M(GS, { hR: [-0.36, -0.44, 0.32], eR: [-1, 0, -0.3], pR: [0.3, 1, 0] }), e: 'kime' },
   ] };
 
+  /* Kanku Dai */
+  // beide offenen Hände spiegelbildlich: Ort, Fingerrichtung, Handfläche der linken Hand
+  const beide = (h, f, p, o) => M({ oL: 1, oR: 1, hL: h, fL: f, pL: p, hR: mx(h), fR: mx(f), pR: mx(p) }, o);
+  // Yoi: Hachiji-dachi, die offenen Hände vor dem Unterbauch – die Finger der rechten Hand liegen schräg auf denen der
+  // linken, zwischen Daumen und Zeigefingern bleibt ein Dreieck offen; die Handflächen zeigen zum Körper
+  const KD_YOI = M(S.hachiji, beide([0.05, -0.5, 0.2], [-0.62, -0.75, 0.1], [0, 0.2, -1], { hR: [-0.05, -0.5, 0.215] }));
+  KATA['yoi-kanku'] = STILL(KD_YOI);
+  // 1: Die Hände steigen mit gestreckten Armen langsam im großen Bogen nach vorn oben bis über die Stirn; das Dreieck
+  // bleibt, die Handflächen zeigen am Ende vom Gesicht weg, der Blick geht durch die Öffnung zum Himmel
+  const KD_VORN = M(S.hachiji, beide([0.05, -0.05, 0.53], [-0.62, 0.2, 0.75], [0, -0.95, 0.3], { hR: [-0.05, -0.05, 0.54] }));
+  const KD_OBEN = M(S.hachiji, beide([0.05, 0.42, 0.27], [-0.62, 0.55, -0.55], [0, 0.7, 0.7], { hR: [-0.05, 0.42, 0.285], nod: -38 }));
+  KATA['kanku-himmel'] = { keys: [{ t: 0, p: KD_YOI }, { t: 0.5, p: KD_VORN, e: 'fl' }, { t: 1, p: KD_OBEN, e: 'fl' }] };
+  // 2: Die Hände reißen auseinander und beschreiben mit gestreckten Armen einen großen Kreis nach außen und unten; vor
+  // dem Unterbauch treffen sie sich – die linke Hand mit der Handfläche nach oben, die rechte Handkante schlägt hinein
+  const KD_UNTEN = M(S.hachiji, { oL: 1, oR: 1, hL: [0.05, -0.46, 0.25], fL: [-0.8, 0, 0.6], pL: [0, 1, 0], hR: [-0.06, -0.4, 0.26], fR: [0.75, -0.25, 0.6], pR: [1, 0, 0] });
+  KATA['kanku-kreis'] = { keys: [
+    { t: 0, p: KD_OBEN },
+    { t: 0.1, p: M(S.hachiji, beide([0.26, 0.47, 0.2], [-0.1, 0.9, -0.3], [0.5, 0.5, 0.7], { nod: -22 })), e: 'fl' },
+    { t: 0.4, p: M(S.hachiji, beide(stretch([0.72, 0.06, 0.08], 'L'), [1, 0.15, 0], [0, 0, 1])), e: 'fl' },
+    { t: 0.72, p: M(S.hachiji, beide([0.52, -0.36, 0.14], [0.55, -0.8, 0.1], [-0.3, -0.2, 1])), e: 'fl' },
+    { t: 1, p: KD_UNTEN, e: 'fl' },
+  ] };
+  // 3, 4: Haiwan Jodan-uke zur Seite mit offenen Händen – anders als in Heian Yondan steht die andere Hand nicht über
+  // der Stirn, sondern flach vor der Brust (Mune-mae-kamae, Handfläche unten, Finger zur Seite der Abwehr)
+  const HM = M(S.kk, { oL: 1, oR: 1 });
+  const HM_BRUST = { eR: [-1, -0.2, 0.2], pR: [0, -1, 0], fR: [1, 0, 0.2] };
+  KATA['haiwan-mune-mae'] = T(M(HM, HM_BRUST, { hL: [-0.1, -0.3, 0.22], eL: [0.2, -1, 0.2], pL: [0, 0, 1], fL: [-0.5, 0.3, 0.6], hR: [0.1, -0.2, 0.34] }),
+    M(HM, HM_BRUST, { hL: HAIWAN_END.hL, eL: HAIWAN_END.eL, pL: [0, 0, 1], fL: [0, 1, 0], hR: [0.03, -0.16, 0.2] }));
+  // 16, 21, 36: Jodan-uke mit Shuto Soto-mawashi-uchi wie in Heian Yondan 11, aber im Ashi-zenkutsu mit der Hüfte im
+  // Gyaku-hanmi (die Seite der schlagenden Hand vorn). Die Hände bleiben im Raum, wo sie im Bild von Heian Yondan sind
+  const umHuefte = (p, deg) => {
+    const q = M(p, { yaw: (p.yaw || 0) + deg });
+    const o = {};
+    ['hL', 'hR', 'eL', 'eR', 'pL', 'pR', 'fL', 'fR'].forEach((k) => { if (p[k] && Math.hypot(...p[k]) > 0.01) o[k] = aim(q, p[k]); });
+    return M(q, o);
+  };
+  KATA['jodan-uke-shuto-gyaku'] = { keys: KATA['jodan-uke-shuto-uchi'].keys.map((k) => ({ t: k.t, e: k.e, p: umHuefte(k.p, 25) })) };
+  // 20, 25: langsam in den Renoji-dachi aufrichten – die linke Faust geht als Gedan-kamae vor den linken Oberschenkel,
+  // die rechte an die Hüfte
+  KATA['gedan-kamae-renoji'] = STILL(M(S.renoji, { hL: L(H.gedan), hR: H.hip }));
+  // 42: Ura-zuki Jodan zusammen mit dem Kniestoß – die rechte Faust steigt vor dem Körper bis Kinnhöhe (Faustrücken zum
+  // Gegner, Ellbogen unten nah am Knie), die offene linke Hand liegt stützend innen am rechten Unterarm (Soede)
+  KATA['ura-zuki-soede'] = T(M(UG, { hR: H.hip, hL: L(H.hip) }),
+    M(UG, { hR: [-0.06, 0.08, 0.34], eR: [-0.25, -1, 0.1], pR: [0, 0.2, -1], oL: 1, hL: [-0.03, -0.1, 0.27], eL: [0.8, -0.6, 0.2], pL: [-1, 0, 0], fL: [-0.25, 0.9, 0.35] }));
+  // 43: Ude-tate – der Körper fällt flach nach vorn: das vordere Knie ist ganz gebeugt und zeigt nach außen, das hintere
+  // Bein gestreckt (Ferse am Boden), der Oberkörper liegt fast waagerecht innen neben dem vorderen Knie. Beide Hände
+  // stützen vor dem vorderen Fuß auf dem Boden, die Fingerspitzen schräg zueinander (wie das Schriftzeichen für „acht“);
+  // der Blick geht einige Meter voraus. Als Stand (vorderes Bein links) und als Haltung der Arme
+  S.udetate = { pelvis: [0, 0.42, 0], yaw: 0, L: { x: 0.15, z: 0.24, yaw: 20, kp: [0.9, 1, 0.6] }, R: { x: -0.12, z: -0.78, yaw: -40 }, w: [0.7, 0.3] };
+  const UT = M(S.udetate, { lean: 78, nod: -52, oL: 1, oR: 1 });
+  const utHand = (s) => {
+    const g = s === 'L' ? 1 : -1;
+    return { ['h' + s]: chestAt(UT, [0.2 * g, 0.03, 0.62]), ['f' + s]: chestAt(UT, [-0.6 * g, 0, 0.8], true), ['p' + s]: chestAt(UT, [0, -1, 0], true), ['e' + s]: chestAt(UT, [g, 0.4, -0.2], true) };
+  };
+  KATA['ude-tate'] = STILL(M(UT, utHand('L'), utHand('R')));
+  // 44: tiefer Kokutsu-dachi (Hüfte tiefer als üblich); die vordere Schwerthand wehrt Gedan ab – der Arm gestreckt über
+  // dem vorderen Knie –, die hintere liegt mit der Handfläche nach oben vor der Brust (wie beim Shuto-uke)
+  S.kkTief = M(S.kk, { pelvis: [0, 0.67, -0.04] });
+  KATA['shuto-gedan-uke'] = T(M(S.kk, { oL: 1, oR: 1, hL: [-0.13, 0.2, 0.1], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], fL: [0.3, 0.9, 0.2], hR: [0.12, -0.12, 0.48], eR: [-0.2, -0.6, 0.4], pR: [0, -1, 0] }),
+    M(S.kk, SHUTO_END, { hL: stretch([0.4, -0.5, 0.17], 'L'), eL: [0.6, -0.3, -0.6], fL: [0.4, -0.86, 0.31], pL: [-0.9, -0.4, 0] }));
+  // 55: Uraken Tate-mawashi-uchi zur Seite auf Kopfhöhe (Jodan) im Kiba-dachi – Bahn wie in Heian Sandan 13, die Faust
+  // trifft höher; die andere Faust zieht als Hikite an die Hüfte
+  const UJ = M(KB, { look: -90, hL: L(H.hip) });
+  KATA['uraken-tate-jodan'] = FLOW([
+    M(UJ, { hR: [-0.2, -0.3, 0.08], eR: [-1, -0.15, 0.2] }),
+    M(UJ, { hR: [-0.1, -0.06, 0.2], eR: [-1, -0.3, 0.2], pR: [0.3, 0, -1] }),
+    M(UJ, { hR: [-0.3, 0.32, 0.1], eR: [-1, 0, 0], pR: [0.7, 0.5, -0.5] }),
+    M(UJ, { hR: [-0.62, 0.09, 0.05], eR: [-0.4, -1, 0], pR: [1, 0, 0] }),
+  ], { eff: 'fistR' });
+  // 60: nach der schnellen Drehung im Kiba-dachi wehrt der linke Unterarm vor dem Körper nach unten ab (Zenwan
+  // Gedan-uke), die rechte Faust schwingt dabei als Gegenbewegung hoch über die Schulter (Furiage)
+  const ZG = M(KB, { hL: [0.0, -0.48, 0.27], eL: [1, -0.3, 0.1], hR: [-0.3, 0.34, 0.02], eR: [-1, 0.1, -0.2] });
+  KATA['zenwan-gedan-furiage'] = T(M(KB, { hL: [-0.13, 0.05, 0.2], eL: [0.4, -0.8, 0.5], hR: [-0.3, -0.45, 0.1] }), ZG);
+  // 61: Otoshi-zuki – die rechte Faust stößt von oben senkrecht abwärts und endet unter dem linken Handgelenk
+  KATA['otoshi-zuki-kiba'] = T(ZG, M(KB, { lean: 6, hL: [-0.04, -0.46, 0.26], eL: [1, -0.3, 0.1], hR: [0.05, -0.54, 0.31], eR: [-1, -0.3, 0.1] }));
+  // 64: langsam ziehen beide Fäuste, an den Handgelenken gekreuzt, vor die Brust – die Haltung, aus der der Nidan-geri
+  // des Lexikons losspringt
+  KATA['ryoken-mune-mae'] = STILL(M(S.zks, { hR: ND_START.hR, hL: ND_START.hL, eR: ND_START.eR, eL: ND_START.eL }));
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };

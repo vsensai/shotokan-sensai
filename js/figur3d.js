@@ -705,7 +705,11 @@ void main(){
     gl.uniform3fv(U.uHead, J.head);
     gl.uniform3fv(U.uHFwd, J.hf);
     gl.uniform3fv(U.uHUp, J.hu);
-    gl.uniform3fv(U.uPFwd, J.fp);
+    // Jacke: bei stark vorgeneigtem Oberkörper (über 40°, Ude-tate in Kanku Dai) steht „vorne“ senkrecht auf der
+    // Rumpfachse – sonst verzerrt sich der Jackenschoß zu einer großen Scheibe; bis 40° bleibt alles wie bisher
+    const jd = dot(J.fp, J.up);
+    const jw = Math.max(0, Math.min(1, (Math.abs(jd) - 0.64) / 0.23));
+    gl.uniform3fv(U.uPFwd, jw > 0 ? norm(sub(J.fp, mul(J.up, jd * jw))) : J.fp);
     gl.uniform3fv(U.uPLeft, J.lp);
     gl.uniform4fv(U.uBound, bounds(P));
     gl.uniform2f(U.uBase, cam.target[0], cam.target[2]);
