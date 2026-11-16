@@ -1262,9 +1262,11 @@
 
   /* Bassai Dai */
   // Yoi: wie in Tekki – Heisoku-dachi, beide Arme gestreckt, die Hände mittig vor dem Körper genau übereinander; nur liegt
-  // hier die rechte Faust (am Körper) in der leicht gebeugten linken Hand, die sie von vorn umfasst, ohne zu greifen
+  // hier zwei Fäuste: die rechte am Körper, die linke genau davor
   const YF_L = yoiHand([0, -0.54, 0.3], 'L');
-  KATA['yoi-faust-in-hand'] = STILL(M(S.heisoku, { oR: 0, oL: 1, ...yoiHand([0, -0.54, 0.265], 'R'), ...YF_L }));
+  KATA['yoi-faust-in-hand'] = STILL(M(S.heisoku, { oR: 0, oL: 0, ...yoiHand([0, -0.54, 0.265], 'R'), ...YF_L }));
+  // 11, 13: Uchi-uke im Hizakutsu – die Hüfte dreht nur gut halb so weit ein wie im Zenkutsu-dachi
+  KATA['uchi-uke-hiza'] = M(D['mv:uchi-uke'], { keys: D['mv:uchi-uke'].keys.map((k) => ({ t: k.t, e: k.e, p: M(k.p, { yaw: 25 }) })) });
   // 1: Uchi-uke im Kosa-dachi, Oberkörper halb seitlich (Hanmi); die offene linke Hand stützt mit dem Mittelfinger an der
   // Innenseite des rechten Handgelenks (Soede). Beide Hände holen an der linken Hüfte aus und gehen zusammen hinaus
   const SOE = M(S.kosa, { yaw: 35, oL: 1 });

@@ -59,7 +59,12 @@
   // gut 1,5 m breit (die Hüfte sänke bis unter Kniehöhe) – er bekommt die Breite des Standes der Figur; und der
   // Heisoku-dachi (22, 25, 34, 36) steht mit geschlossenen Füßen statt 20 cm auseinander
   // Zenkutsu-dachi 2/3 (Skizze 1,27 m): mit der Hüfte im Gyaku-hanmi (3) reichte das hintere Bein nicht, die Hüfte sackte ab
-  const BREITE = { 'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12]] };
+  // Hachiji-dachi 8–13 (Skizze 0,9 m): laut Buch nur etwas breiter als üblich – 0,7 m (der Hizakutsu 11, 13 auf denselben
+  // Plätzen damit auch)
+  const BREITE = { 'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12], [/hachiji/i, 0.7]] };
+  // Größte Drehung der Füße gegen die Körperrichtung (Grad) je Kata und Stand: Die Skizze dreht die Füße im Hizakutsu
+  // Bassai Dai 11, 13 um gut 70° ein – das sah zu extrem aus. Das Knie zeigt dann über den Fuß
+  const DREH = { 'bassai-dai': [[/hizakutsu/i, 45]] };
   const KREUZ = 0.28; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
   // Kreuzschritt (Ashi-mae Kosa): die Füße stehen dicht nebeneinander, der kreuzende ein Stück weiter vorn – so eng, wie es
   // geht, ohne dass die Hosenbeine ineinander geraten (aus dem Stand der Figur, S.kosamae). KOSA: so weit stehen die
@@ -126,6 +131,7 @@
   const TECH = [
     // Bassai Dai
     [/soede .*chudan uchi-uke/i, { def: 'soede-uchi-uke', side: 'R', from: 0.25 }],
+    [/chudan uchi-uke/i, { def: 'uchi-uke-hiza', side: 'R', from: 0.25 }, /hizakutsu.*bassai/i],
     [/chudan soto-uke/i, { def: 'sukui-soto-uke', side: 'R', from: 0, lang: true, dur: 1.15, heran: true }, /sukui-uke/i],
     [/chudan soto-uke/i, { def: 'mv:soto-uke', side: 'R', from: 0.25 }],
     [/tate-shuto/i, { def: 'tc:tate-shuto-uke', side: 'L', from: 0.12, lang: true }],
@@ -238,7 +244,7 @@
   }
 
   // Stand der Figur auf die Füße der Karte legen. m: Stellung der Ansage, stance: Name des Standes
-  function lower(m, stance, warn) {
+  function lower(m, stance, warn, id) {
     let key = (STAND.find(([rx]) => rx.test(stance)) || [])[1];
     if (!key) warn.push(`Kein Stand der Figur für „${stance}“ – Hachiji-dachi genommen`);
     const byaw = -m.body;
@@ -255,12 +261,16 @@
     const ahead = dot(sub(feet[1].c, feet[0].c), fwd(byaw));
     // Kreuzschritt (Füße nebeneinander, die Beine gekreuzt): der Name sagt, welches Bein vorne kreuzt (Figur: das linke)
     if (key === 'kosamae') { if (/^migi/i.test(stance)) c = E.full(mirror(c)); }
+    // Hizakutsu nach vorn mit nebeneinander stehenden Füßen: der Name sagt, welches Knie gebeugt ist (Figur: das linke)
+    else if (key === 'hizaShomen' && Math.abs(dot(sub(feet[1].c, feet[0].c), fwd(byaw))) < 0.1) { if (/^migi/i.test(stance)) c = E.full(mirror(c)); }
     else if ((c.L.z - c.R.z > 0.1 && ahead > 0.05) || (c.R.z - c.L.z > 0.1 && ahead < -0.05)) c = E.full(mirror(c));
     const ank = feet.map((ft) => sub(ft.c, mul(fwd(ft.yaw), FOOT_MID)));
     const cr = [c.R.x, c.R.z];
     const a = cdiv(sub(ank[0], ank[1]), sub([c.L.x, c.L.z], cr));
+    const dreh = ((DREH[id] || []).find(([rx]) => rx.test(stance)) || [])[1];
     const foot = (F, ft) => {
-      const rel = wrap(ft.yaw - byaw);
+      let rel = wrap(ft.yaw - byaw);
+      if (dreh && Math.abs(rel) > dreh) return { c: ft.c, rel: Math.sign(rel) * dreh, y: F.y, pitch: F.pitch, tu: F.tu, kp: [Math.sin(Math.sign(rel) * dreh * RAD), 0.15, Math.cos(dreh * RAD)] };
       // Knie: wie im Stand der Figur vorgegeben, sonst in Fußrichtung (beides bezogen auf die Körperrichtung)
       const kp = Math.hypot(...F.kp) > 0.01 ? F.kp.map((v) => v / Math.hypot(...F.kp)) : [Math.sin(rel * RAD), 0.15, Math.cos(rel * RAD)];
       return { c: ft.c, rel, y: F.y, pitch: F.pitch, tu: F.tu, kp };
@@ -283,7 +293,9 @@
     if (low.ext[s] <= STRAIGHT) return low.h;
     // … aber nur in Grenzen: die Skizzen sind mal gestaucht, mal gestreckt, die Hüfte soll trotzdem auf einer Höhe bleiben
     const want = Math.min(top(s, Math.max(low.ext[s], 0.97)), top(o, 0.99));
-    return low.h > 0.85 ? want : clamp(want, low.h - LEVEL, low.h + LEVEL);
+    // (Hizakutsu nach vorn ist kein tiefer Stand: steht er schmaler als der der Figur – Bassai Dai 11, 13 auf den Plätzen des
+    // Hachiji-dachi –, bleibt das andere Bein trotzdem gestreckt und die Hüfte steht höher)
+    return low.h > 0.85 || (low.key === 'hizaShomen' && want > low.h + LEVEL) ? want : clamp(want, low.h - LEVEL, low.h + LEVEL);
   }
 
   // Zenkutsu-dachi: hinteres Bein strecken (REAR), indem die Hüfte entlang der Standlinie nach vorne rückt. yaw: Hüftdrehung
@@ -671,7 +683,7 @@
     };
     const key = (m, stance, prev, up) => {
       const byaw = turnOf(m, prev, stance);
-      const low = lower(m, stance, warn);
+      const low = lower(m, stance, warn, k.id);
       low.h = height(low, byaw + up.yaw);
       rearLeg(low, byaw + up.yaw);
       return { low, byaw, up };
