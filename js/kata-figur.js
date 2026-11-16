@@ -380,10 +380,17 @@
       seg.hop = 0.1;
       // Tobikomi: ein richtiger Sprung mit Höhe – die Füße kommen hoch, die Hüfte steigt mit
       if (o.tobi) { seg.hop = 0.34; seg.air = 0.22; }
+      // Sprungschritt aus dem aufrechten Stand (Bassai Dai 1 aus dem Yoi): erst in die Knie (Absprung), dann fliegt die
+      // Figur nach vorn – beide Füße in der Luft, die Hüfte bleibt oben –, der vordere Fuß landet und trägt, der andere
+      // kommt dahinter an; erst mit der Landung sinkt die Hüfte in den Stand
+      else if (A.low.h > 0.85) {
+        seg.ab = { tief: A.low.h - 0.09, oben: A.low.h + 0.02 };
+        seg.hop = 0.16;
+      }
     }
     seg.feet = {};
     ['L', 'R'].forEach((s) => {
-      const [u0, u1] = lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
+      const [u0, u1] = seg.ab ? (s === lead ? [0.2, 0.68] : [0.26, 0.9]) : lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
       seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz, o.heran);
     });
     // Hüfte: beim Vorbeigleiten über dem Standbein (zwischen den Füßen), sonst gerade hinüber
@@ -503,6 +510,10 @@
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
+    if (seg.ab) {
+      const ab = seg.ab;
+      h = u < 0.18 ? lerp(A.low.h, ab.tief, smooth(u / 0.18)) : u < 0.42 ? lerp(ab.tief, ab.oben, smooth((u - 0.18) / 0.24)) : lerp(ab.oben, B.low.h, smooth((u - 0.42) / 0.4));
+    }
     const lp = [Math.cos(P.yaw * RAD), -Math.sin(P.yaw * RAD)];
     ['L', 'R'].forEach((s) => {
       const hip = add(pel, mul(lp, s === 'L' ? HIP : -HIP));
@@ -688,6 +699,15 @@
       let l;
       if (pin === 0) l = m.f[0].slice(0, 2);
       else if (pin === 1) l = sub(m.f[1], u);
+      // Beginnt die Kata mit einem Sprungschritt (Bassai Dai 1), bleibt das Yoi an seinem eigenen Platz – sonst stünde es
+      // schon dort, wo der Sprung landet, und die Figur spränge nicht nach vorn
+      // (seitlich genau hinter dem Fuß, auf dem die Figur landet: sie springt gerade nach vorn)
+      else if (j === 2 && /sprung/i.test(steps[3].pose.h || '')) {
+        const lf = steps[3].pose.f.reduce((a, b) => (b[3] > a[3] ? b : a));
+        const sq = [Math.cos(m.body * RAD), -Math.sin(m.body * RAD)]; // Körperseite nach rechts auf der Karte
+        const mc = mix(m.f[0], m.f[1], 0.5);
+        l = sub(add(mc, mul(sq, dot(sub(lf, mc), sq))), mul(u, 0.5));
+      }
       else l = sub(mix(r.f[0], r.f[1], 0.5), mul(u, 0.5));
       fixed[j] = Object.assign({}, m, { f: [l.concat(m.f[0].slice(2)), add(l, u).concat(m.f[1].slice(2))] });
     });
@@ -768,9 +788,11 @@
       // langsame Bewegung (laut Buch): ruhig und gleichmäßig über einen guten Teil der Zeit, ohne Kime
       const yori = /yori-ashi/i.test(m.h || '');
       const sprung = /sprung/i.test(m.h || '');
+      // Sprungschritt aus dem aufrechten Stand: etwas mehr Zeit für Absprung und Flug
+      const ausStand = sprung && cur.low.h > 0.85;
       const tobi = /tobikomi/i.test(m.h || '');
       const d = st.slow ? SLOW * gap
-        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : sprung ? 0.75 : 0.62 + 0.0016 * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
+        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : ausStand ? 0.9 : sprung ? 0.75 : 0.62 + 0.0016 * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
       const look = m.look == null ? null : wrap(m.body - m.look);
       // (bei zwei Teilen gilt die Anzeige für beide zusammen)
