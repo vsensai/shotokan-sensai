@@ -1283,21 +1283,44 @@
     { t: 0.8, p: SS({ hL: L(H.chudan), hR: [-0.45, 0.06, -0.06] }), e: 'fl' },
     { t: 1, p: SS({ hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), e: 'kime' },
   ] };
-  // 18: Ryosho Tsukami-uke, langsam und kraftvoll aus dem Shuto-uke. Die rechte offene Hand geht vom Solarplexus nach links
-  // vorn genau unter dem linken Unterarm durch, der dabei zur Mitte kommt, bis sich beide Unterarme mittig kreuzen. Dann
-  // steigt die rechte Hand vor der linken hoch, bis ihr Handgelenk an den Fingerspitzen der linken liegt. Von da an liegt
-  // die linke Hand am rechten Handgelenk, und beide werden zusammen nach unten vor den Körper gezogen
+  // 18: Ryosho Tsukami-uke, langsam und kraftvoll aus dem Shuto-uke. Die rechte Hand beginnt: Die linke bleibt zunächst
+  // still im Shuto-uke stehen, die rechte offene Hand geht vom Solarplexus nach links vorn unter dem linken Unterarm durch,
+  // bis sich beide Unterarme in ihrer Mitte kreuzen. Dann steigt die rechte Hand, bis ihr Handgelenk an den Fingerspitzen
+  // der linken liegt. Erst jetzt bewegt sich die linke: Sie liegt am rechten Handgelenk, und beide werden zusammen nach
+  // unten vor den Körper gezogen.
+  // Die Hüfte dreht bei langsamen Bewegungen in einem Zug aus dem Kokutsu-dachi nach vorn (kata-figur.js: yaw von −65° auf
+  // −15°, weich über die ganze Bewegung). Damit die linke Hand dabei im Raum stehen bleibt, sind ihre Stellen im Raum
+  // gerechnet (aus dem Bild des Shuto-uke) und für jedes Bild auf die Drehung der Brust umgerechnet
   const TSR = M(S.ashizk, { yaw: -15, oL: 1, oR: 1 });
-  const TS_LM = { hL: [0.12, -0.04, 0.4], eL: [0.6, -1, 0], fL: [-0.35, 1, 0.15], pL: [-0.8, 0, 0.6] };
-  const TS_HOCH = { hR: [0.06, 0.13, 0.45], eR: [-0.6, -1, 0], fR: [0, 1, 0.2], pR: [0, 0, 1] };
+  const TS_J0 = E.solve(E.full(KK_SHUTO));
+  const TS_YAW = (t) => -65 + 50 * t * t * (3 - 2 * t);
+  const TS_W = (v) => V.add(V.add(V.mul(TS_J0.lc, v[0]), V.mul(TS_J0.up, v[1])), V.mul(TS_J0.fc, v[2])); // Brust (Shuto) → Raum
+  // Punkt bzw. Richtung, im Raum relativ zur Brust des Shuto-uke gegeben, in Brustkoordinaten des Bildes zur Zeit t
+  const TS_AT = (t, w, dir) => { const pk = M(TSR, { yaw: TS_YAW(t) }); const J = E.solve(E.full(pk)); return chestAt(pk, dir ? w : V.add(J.chest, w), dir); };
+  const TS_REL = (q) => V.sub(q, TS_J0.chest);
+  // Mitte des linken Unterarms und Richtung von der Brust dorthin (waagerecht): dort kreuzt der rechte Unterarm darunter
+  const TS_MITTE = V.mix(TS_J0.elbowL, TS_J0.wristL, 0.5);
+  const TS_RAUS = V.norm([TS_MITTE[0] - TS_J0.chest[0], 0, TS_MITTE[2] - TS_J0.chest[2]]);
+  // linke Hand wie im Shuto-uke, im Raum still (rein: so weit ist sie zur Mitte gerückt). Die Fingerspitzen des Shuto-uke
+  // liegen weiter weg, als der rechte Arm reicht – während die rechte Hand hochsteigt, kommt die linke ihr deshalb ein
+  // kleines Stück (TS_REIN) zur Mitte entgegen
+  const TS_REIN = 0.18;
+  const TS_LINKS = (t, rein = 0) => ({ hL: TS_AT(t, TS_REL(V.sub(TS_J0.wristL, V.mul(TS_RAUS, rein)))), eL: TS_AT(t, TS_W(KK_SHUTO.eL), true), fL: TS_AT(t, TS_W(KK_SHUTO.fL), true), pL: TS_AT(t, TS_W(KK_SHUTO.pL), true) });
+  const TS_KREUZ = V.add(TS_MITTE, [0, -0.05, 0]);
+  const TS_SPITZE = V.add(TS_J0.tipL, V.mul(TS_RAUS, 0.02 - TS_REIN));
+  const TS_R = (t, q, f, pp) => ({ hR: TS_AT(t, TS_REL(q)), fR: TS_AT(t, f, true), pR: TS_AT(t, pp, true) });
   const TS_GRIFF = { eL: [0.8, -1, 0], fL: [-0.4, 0.2, 1], pL: [-1, 0, 0.2] };
+  const TS_HOCH = TS_R(0.62, TS_SPITZE, [0, 1, 0], TS_RAUS);
+  // die rechte Hand steht im Raum still, während die linke an ihr Handgelenk greift (Abstand in Brustkoordinaten wie am Ende)
+  const TS_GRIF2 = TS_R(0.72, TS_SPITZE, [0, 1, 0], TS_RAUS);
   KATA['tsukami-uke-ryosho'] = { keys: [
     { t: 0, p: KK_SHUTO },
-    { t: 0.36, p: M(TSR, TS_LM, { hR: [0.2, -0.15, 0.4], eR: [-0.7, -0.6, 0.1], fR: [0.6, 0.1, 0.8], pR: [0, 1, 0] }), e: 'fl' },
-    { t: 0.5, p: M(TSR, TS_LM, { hR: [0.14, 0.0, 0.47], eR: [-0.7, -0.8, 0], fR: [0.2, 1, 0.3], pR: [0, 0, 1] }), e: 'fl' },
-    { t: 0.62, p: M(TSR, TS_LM, TS_HOCH), e: 'io' },
-    { t: 0.72, p: M(TSR, TS_HOCH, TS_GRIFF, { hL: [0.13, 0.09, 0.39] }), e: 'io' },
-    { t: 1, p: M(TSR, TS_HOCH, TS_GRIFF, { hR: [-0.02, -0.12, 0.42], hL: [0.05, -0.16, 0.36] }), e: 'io' },
+    { t: 0.2, p: M(TSR, TS_LINKS(0.2), TS_R(0.2, V.add(V.mix(TS_J0.wristR, TS_KREUZ, 0.45), [0, -0.05, 0]), TS_RAUS, [0, 1, 0])), e: 'fl' },
+    { t: 0.4, p: M(TSR, TS_LINKS(0.4), TS_R(0.4, TS_KREUZ, TS_RAUS, [0, 1, 0])), e: 'fl' },
+    { t: 0.52, p: M(TSR, TS_LINKS(0.52, TS_REIN / 2), TS_R(0.52, V.add(V.mix(TS_KREUZ, TS_SPITZE, 0.5), V.mul(TS_RAUS, 0.04)), [0, 1, 0], TS_RAUS)), e: 'fl' },
+    { t: 0.62, p: M(TSR, TS_LINKS(0.62, TS_REIN), TS_HOCH), e: 'io' },
+    { t: 0.72, p: M(TSR, TS_GRIF2, TS_GRIFF, { hL: V.add(TS_GRIF2.hR, [0.07, -0.04, -0.06]) }), e: 'io' },
+    { t: 1, p: M(TSR, TS_GRIFF, { hR: [-0.02, -0.12, 0.42], fR: [0, 1, 0.3], pR: [0, 0, 1], hL: [0.05, -0.16, 0.36] }), e: 'io' },
   ] };
   // 19: Sokuto Gedan-kekomi zur rechten Seite – das Knie kommt hoch vor den Körper, dann stößt die Fußkante schräg nach
   // unten (knapp über Kniehöhe); der Oberkörper neigt sich nur wenig (Zeiten wie beim Yoko-geri-kekomi des Lexikons)
