@@ -1260,6 +1260,68 @@
   KATA['zuki-kagi-zuki'] = TWIST(T(M(KB, { look: 90, hR: H.hip, hL: [-0.11, -0.33, 0.04], pL: [0, -1, 0] }),
     M(KB, { look: 90, hL: stretch([0.74, -0.1, 0.04], 'L'), hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3] })), 'L');
 
+  /* Bassai Dai */
+  // Yoi: Heisoku-dachi, die rechte Faust vor dem Unterbauch, die linke Hand liegt leicht gebeugt von vorn um sie (ohne zu greifen)
+  KATA['yoi-faust-in-hand'] = STILL(M(S.heisoku, { oR: 0, hR: [-0.015, -0.47, 0.2], eR: [-1, -0.4, 0], pR: [0, 0, -1],
+    hL: [0.06, -0.47, 0.235], eL: [1, -0.4, 0], fL: [-1, -0.1, 0.05], pL: [0, 0, -1] }));
+  // 1: Uchi-uke im Kosa-dachi, Oberkörper halb seitlich (Hanmi); die offene linke Hand stützt mit dem Mittelfinger an der
+  // Innenseite des rechten Handgelenks (Soede). Beide Hände holen an der linken Hüfte aus und gehen zusammen hinaus
+  const SOE = M(S.kosa, { yaw: 35, oL: 1 });
+  KATA['soede-uchi-uke'] = T(M(SOE, { hR: [0.14, -0.3, 0.2], eR: [-0.5, -0.6, 0.5], hL: [0.23, -0.3, 0.13], fL: [-1, 0.2, 0.3], pL: [0, -0.3, -1] }),
+    M(SOE, { hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD, hL: [-0.2, -0.04, 0.29], eL: [0.4, -1, 0.1], fL: [-1, 0.25, 0.1], pL: [0, -0.3, -1] }));
+  // 6: erst schöpft die rechte Faust tief von links nach rechts und etwas hoch (Gedan Sukui-uke, Bahn wie im Lexikon),
+  // dann holt sie hinter dem Ohr aus und wehrt als Soto-uke ab – ein Zug, zusammen mit dem Fuß
+  const SS = (o) => M(MZK, { hL: L(H.hip) }, o);
+  KATA['sukui-soto-uke'] = { keys: [
+    { t: 0, p: SS({ hR: SU0.hR, eR: SU0.eR }) },
+    { t: 0.2, p: SS({ hR: SU1.hR, eR: SU1.eR }), e: 'fl' },
+    { t: 0.38, p: SS({ hR: SU2.hR, eR: SU2.eR }), e: 'fl' },
+    { t: 0.54, p: SS({ hR: SU3.hR, eR: SU3.eR, pR: SU3.pR }), e: 'fl' },
+    { t: 0.8, p: SS({ hL: L(H.chudan), hR: [-0.45, 0.06, -0.06] }), e: 'fl' },
+    { t: 1, p: SS({ hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), e: 'kime' },
+  ] };
+  // 18: Ryosho Tsukami-uke, langsam und kraftvoll aus dem Shuto-uke: die rechte offene Hand geht von unten unter der
+  // linken durch nach vorn (Chudan, Handfläche nach vorn), die linke legt sich ans rechte Handgelenk; die Hüfte dreht nach vorn
+  const TSR = M(S.ashizk, { yaw: -15, oL: 1, oR: 1 });
+  KATA['tsukami-uke-ryosho'] = { keys: [
+    { t: 0, p: KK_SHUTO },
+    { t: 0.5, p: M(TSR, { yaw: -30, hL: [0.3, -0.12, 0.3], eL: [0.4, -1, 0.2], pL: [0.5, 0, 0.8], fL: [0.2, 0.9, 0.3], hR: [0.06, -0.32, 0.36], eR: [-0.6, -0.8, 0.1], pR: [0, 1, 0], fR: [0.3, 0, 1] }), e: 'fl' },
+    { t: 1, p: M(TSR, { hR: [-0.05, 0.0, 0.5], pR: [0, 0, 1], fR: [0, 1, 0.3], hL: [0.05, -0.04, 0.4], eL: [0.6, -1, 0.1], fL: [-0.8, 0.3, 0.5], pL: [0.3, -0.2, 1] }), e: 'io' },
+  ] };
+  // 19: Sokuto Gedan-kekomi zur rechten Seite – das Knie kommt hoch vor den Körper, dann stößt die Fußkante schräg nach
+  // unten (knapp über Kniehöhe); der Oberkörper neigt sich nur wenig (Zeiten wie beim Yoko-geri-kekomi des Lexikons)
+  const GK_CH = BAL(M(KB_K, { pelvis: [0.3, 0.8, 0], yaw: 20, L: { yaw: 25, kp: [0.8, 0.2, 1] }, R: { x: 0.18, z: 0.2, y: 0.74, yaw: -10, pitch: -5, sole: [-1, -0.2, 0], kp: [-0.4, 0.9, 1] }, w: [1, 0] }), 'L');
+  const GK_EXT = BAL(M(KB_K, { pelvis: [0.34, 0.78, 0], yaw: 45, chest: -25, roll: 14, L: { yaw: 50, kp: [0.5, 0.2, 1] }, R: { x: -0.5, z: 0.02, y: 0.42, yaw: 0, pitch: -18, sole: [-0.9, -0.4, 0], kp: [0, -0.2, 1] }, w: [1, 0] }), 'L');
+  KATA['yoko-kekomi-gedan'] = { keys: [{ t: 0, p: KB_K }, { t: 0.12, p: KB_K }, { t: 0.27, p: GK_CH }, { t: 0.35, p: GK_EXT, e: 'kime' }, { t: 0.41, p: GK_EXT }, { t: 0.53, p: GK_CH }, { t: 0.71, p: KB_K }] };
+  // … dabei greifen beide Hände (sie stehen vom Tsukami-uke in Trittrichtung) und ziehen als Fäuste vor die Brust heran
+  KATA['tsukamiyose'] = { keys: [
+    { t: 0, p: M(KB, { oL: 1, oR: 1, hR: [-0.5, -0.04, 0.22], pR: [-1, 0, 0.3], fR: [0, 1, 0.2], hL: [-0.3, -0.08, 0.36], eL: [0.6, -1, 0.1], pL: [-1, 0, 0.3], fL: [-0.8, 0.5, 0.2] }) },
+    { t: 1, p: M(KB, { hR: [0.1, -0.14, 0.2], eR: [-0.7, -0.7, 0.2], hL: [0.24, -0.1, 0.13], eL: [0.8, -0.6, -0.3] }), e: 'kime' },
+  ] };
+  // 22: Morote Jodan Age-uke im Heisoku-dachi, Oberkörper gerade nach vorn – beide Fäuste steigen vor dem Körper auf,
+  // die Unterarme stehen schräg über der Stirn, Ellbogen außen
+  KATA['morote-age-uke'] = T(M(UG, { hL: [0.07, -0.25, 0.22], eL: [0.6, -0.8, 0.2], hR: [-0.07, -0.25, 0.22], eR: [-0.6, -0.8, 0.2] }),
+    M(UG, { hL: [0.075, 0.27, 0.25], eL: [1, -0.15, 0.3], pL: [0, 0, 1], hR: [-0.075, 0.27, 0.25], eR: [-1, -0.15, 0.3], pR: [0, 0, 1] }));
+  // 25, zweiter Teil: Manji-uke im Heisoku-dachi – der Körper steht quer, der Blick geht über die linke Schulter; die linke
+  // Faust schlägt als Gedan-uke zur linken Seite, der rechte Arm schwingt zur anderen Seite hoch (Unterarm senkrecht)
+  const MJ = M(UG, { look: 90 });
+  KATA['manji-uke-heisoku'] = T(M(MJ, { hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], hR: [0.2, -0.4, 0.32], eR: [-0.6, -0.6, 0.3] }),
+    M(MJ, { hL: stretch([0.5, -0.5, 0.04], 'L'), hR: [-0.45, 0.22, 0.0], eR: [-1, -0.25, -0.1] }));
+  // 29–31: Gedan-uke vor dem Körper im Kiba-dachi, der andere Unterarm liegt waagerecht vor der Brust (Mune-mae-kamae,
+  // schützt den Solarplexus). Die Arme wechseln über Kreuz: die Faust des Gedan-uke holt an der anderen Schulter aus
+  KATA['gedan-uke-mune-mae'] = T(M(KB, { hR: [0.13, 0.05, 0.2], eR: [-0.4, -0.8, 0.5], hL: stretch([0.1, -0.56, 0.2], 'L') }),
+    M(KB, { hR: stretch([-0.1, -0.56, 0.2], 'R'), hL: [-0.07, -0.15, 0.2], eL: [1, -0.15, 0.2], pL: [0, -1, 0] }));
+  // 32: Koshi-kamae mit halb seitlichem Oberkörper (Hanmi) – Fäuste wie in Tekki genau übereinander
+  KATA['koshi-kamae-hanmi'] = STILL(M(KATA['koshi-kamae-tekki'].keys[0].p, { yaw: -30 }));
+  // 38, 39: Gedan Sukui-uke im Hizakutsu – die Hüfte steht schräg, der Blick geht über die rechte Schulter zum Angriff;
+  // die rechte Faust schöpft tief vor dem Körper von links nach rechts außen, die Faust bleibt tiefer als der Ellbogen
+  const GS = M(S.hizakutsu, { yaw: -50, look: -90, hL: L(H.hip) });
+  KATA['gedan-sukui-uke'] = { keys: [
+    { t: 0, p: M(GS, { hR: [0.2, -0.42, 0.3], eR: [-0.4, -0.6, 0.4] }) }, { t: 0.25, p: M(GS, { hR: [0.2, -0.42, 0.3], eR: [-0.4, -0.6, 0.4] }) },
+    { t: 0.31, p: M(GS, { hR: [-0.02, -0.56, 0.36], eR: [-0.6, -0.3, 0.1] }), e: 'in' },
+    { t: 0.37, p: M(GS, { hR: [-0.36, -0.44, 0.32], eR: [-1, 0, -0.3], pR: [0.3, 1, 0] }), e: 'kime' },
+  ] };
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };
