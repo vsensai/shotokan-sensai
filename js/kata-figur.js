@@ -63,8 +63,8 @@
   // Plätzen damit auch)
   const BREITE = { 'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12], [/hachiji/i, 0.7]] };
   // Größte Drehung der Füße gegen die Körperrichtung (Grad) je Kata und Stand: Die Skizze dreht die Füße im Hizakutsu
-  // Bassai Dai 11, 13 um gut 70° ein – das sah zu extrem aus. Das Knie zeigt dann über den Fuß
-  const DREH = { 'bassai-dai': [[/hizakutsu/i, 45]] };
+  // Bassai Dai 11, 13 um gut 70° ein – das sah zu extrem aus (45° dann zu wenig). Das Knie zeigt dann über den Fuß
+  const DREH = { 'bassai-dai': [[/hizakutsu/i, 58]] };
   const KREUZ = 0.28; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
   // Kreuzschritt (Ashi-mae Kosa): die Füße stehen dicht nebeneinander, der kreuzende ein Stück weiter vorn – so eng, wie es
   // geht, ohne dass die Hosenbeine ineinander geraten (aus dem Stand der Figur, S.kosamae). KOSA: so weit stehen die
