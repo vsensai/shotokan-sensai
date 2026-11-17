@@ -65,13 +65,15 @@
   // Hachiji-dachi 8–13 (Skizze 0,9 m): laut Buch nur etwas breiter als üblich – 0,7 m (der Hizakutsu 11, 13 auf denselben
   // Plätzen damit auch)
   // Geprüft wird „Stand #Nummer“ – so gilt ein Eintrag auch nur für einzelne Bewegungen. Dritter Eintrag 'neu': nur der Fuß
-  // rückt, der in dieser Bewegung ankommt (sonst beide Plätze je zur Hälfte).
+  // rückt, der in dieser Bewegung ankommt (sonst beide Plätze je zur Hälfte); 'L' bzw. 'R': nur dieser Fuß rückt.
+  // Bassai Dai Hachiji-dachi: nur der rechte Fuß rückt – der linke bleibt bis 14 stehen, und der Kokutsu-dachi 14 stünde
+  // sonst gekreuzt (vorderer Fuß neben der Zehenseite des hinteren, das Knie knickte nach innen).
   // Kanku Dai: Yoi, 1 und 2 stehen im selben Hachiji-dachi (Skizze 0,9 m breit) – er bekommt die Breite der Figur. Aus ihm
   // gleitet der linke Fuß in den Kokutsu-dachi 3; auf dessen Plätzen stehen 4 bis 9 (der „etwas breitere“ Hachiji-dachi
   // und der Hizakutsu), deshalb ist er so lang wie der Kokutsu-dachi der Figur. Der tiefe Kokutsu-dachi 44 entsteht aus
   // dem langen Stand des Ude-tate: der linke Fuß rückt heran
   const BREITE = {
-    'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12], [/hachiji/i, 0.7]],
+    'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12], [/hachiji/i, 0.7, 'R']],
     'kanku-dai': [[/hachiji-dachi #[12]$/i, 0.368], [/kokutsu-dachi #3$/i, 0.8, 'neu'], [/kokutsu-dachi #44$/i, 0.95, 'neu']],
   };
   // Kleinste Standlänge je Kata und Bewegung (wie BREITE). Kanku Dai 43 (Ude-tate): der Körper liegt flach über dem
@@ -683,6 +685,8 @@
         const eig = (BREITE[id] || []).find(([rx]) => rx.test(name));
         // 'neu': nur der Fuß rückt, der in dieser Bewegung ankommt
         const neu = (e) => {
+          if (e && e[2] === 'L') return [1, 0];
+          if (e && e[2] === 'R') return [0, 1];
           if (!e || e[2] !== 'neu' || !j) return null;
           const an = [0, 1].filter((i) => node[j][i] !== node[j - 1][i]);
           return an.length === 1 ? (an[0] ? [0, 1] : [1, 0]) : null;

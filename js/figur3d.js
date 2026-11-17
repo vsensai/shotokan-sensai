@@ -16,6 +16,7 @@
   const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
   const len = (a) => Math.hypot(a[0], a[1], a[2]);
   const norm = (a) => { const l = len(a) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
+  const HAND_W = 0.5; // Vorgaben für Finger und Handfläche wirken ab dieser Länge ganz (darunter anteilig, siehe solve)
   const mix = (a, b, t) => add(a, mul(sub(b, a), t));
   const UP = [0, 1, 0];
   // Blickrichtung zu einem Drehwinkel: 0° = +z (vorne), positiv = zur linken Körperseite (+x)
@@ -161,7 +162,10 @@
       // offene Hand: Finger in Unterarmrichtung oder vorgegeben, Handfläche quer dazu
       J['open' + s] = P['o' + s] > 0.5;
       const fd0 = P['f' + s];
-      const fd = len(fd0) > 0.01 ? norm(sub(toW(fd0), chest)) : qd;
+      // Vorgaben (Fingerrichtung, Handfläche) wirken ab Länge HAND_W ganz; darunter – beim Überblenden zu einem Bild ohne
+      // Vorgabe – anteilig, statt ab einem kleinen Rest hart auf die eigene Rechnung umzuschalten (die Hand schnappte um)
+      const fw = cl(len(fd0) / HAND_W);
+      const fd = fw > 0 ? norm(add(mul(qd, 1 - fw), mul(norm(sub(toW(fd0), chest)), fw))) : qd;
       const pv0 = P['p' + s];
       // ohne Vorgabe: Handfläche unten, an der Hüfte (Hikite) nach oben – über „zur Mitte“ gedreht wie beim Stoß
       // tief vor dem Körper (Yoi, natürliche Stände): Handfläche zum Körper, Faustrücken nach vorn
@@ -170,9 +174,17 @@
       const st = P['s' + s];
       const ext = len(sub(target, sh)) / (UARM + FARM);
       const kq = st > 0.01 ? Math.max(kh, 1 - st * cl((ext - 0.72) / 0.24)) : kh;
-      let palm = len(pv0) > 0.01 ? sub(toW(pv0), chest) : add(add(mul(up, (2 * kq - 1) * (1 - ky)), mul(lc, -sg * Math.sin(Math.PI * kq))), mul(fc, -ky));
-      palm = sub(palm, mul(fd, dot(palm, fd)));
-      if (len(palm) < 0.05) palm = cross(fd, lc);
+      const flat = (v) => { const q = sub(v, mul(fd, dot(v, fd))); return len(q) < 0.05 ? cross(fd, lc) : q; };
+      const pw = cl(len(pv0) / HAND_W);
+      let palm = flat(add(add(mul(up, (2 * kq - 1) * (1 - ky)), mul(lc, -sg * Math.sin(Math.PI * kq))), mul(fc, -ky)));
+      if (pw >= 1) palm = flat(sub(toW(pv0), chest));
+      else if (pw > 0) {
+        // um die Fingerrichtung von der eigenen Rechnung zur Vorgabe drehen, anteilig
+        const a = norm(palm);
+        const g = norm(flat(sub(toW(pv0), chest)));
+        const w = mul(cross(fd, a), Math.sin(pw * Math.atan2(dot(cross(a, g), fd), dot(a, g))));
+        palm = add(mul(a, Math.cos(pw * Math.atan2(dot(cross(a, g), fd), dot(a, g)))), w);
+      }
       J['fd' + s] = fd;
       J['tip' + s] = add(wrist, mul(fd, 0.17));
       J['wd' + s] = norm(cross(fd, norm(palm)));

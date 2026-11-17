@@ -1116,7 +1116,9 @@
 
   // Heian Sandan 2, 3, 5, 6 im Heisoku-dachi: ein Arm Chudan Uchi-uke, der andere zugleich Gedan-uke. Ausholen über Kreuz –
   // die Uchi-uke-Faust unten an der anderen Hüfte, die Gedan-Faust oben an der anderen Schulter – dann fahren beide auseinander
-  const UG = M(S.heisoku, { oL: 0, oR: 0 });
+  // Fäuste: Finger- und Handflächenrichtung des Heisoku-dachi (offene Hände hängen seitlich) nicht übernehmen – sonst
+  // zeigen die Fäuste in jeder Technik stur nach unten und die Handgelenke knicken (Bassai Dai 25)
+  const UG = M(S.heisoku, { oL: 0, oR: 0, fL: [0, 0, 0], fR: [0, 0, 0], pL: [0, 0, 0], pR: [0, 0, 0] });
   KATA['uchi-gedan-uke'] = T(M(UG, { hR: [0.13, -0.3, 0.2], eR: [-0.5, -0.6, 0.5], hL: [-0.13, 0.08, 0.2], eL: [0.4, -0.8, 0.5] }),
     M(UG, { hR: [-0.22, 0.0, 0.3], eR: DOWN_FWD, hL: stretch([0.22, -0.52, 0.2], 'L') }));
   // Heian Sandan 9 im Kiba-dachi: Kentsui Chudan Uchi-mawashi-uchi zur linken Seite – die Faust holt vor der rechten
@@ -1335,8 +1337,9 @@
     { t: 1, p: M(KB, { hR: [0.1, -0.14, 0.2], eR: [-0.7, -0.7, 0.2], hL: [0.24, -0.1, 0.13], eL: [0.8, -0.6, -0.3] }), e: 'kime' },
   ] };
   // 22: Morote Jodan Age-uke im Heisoku-dachi, Oberkörper gerade nach vorn – beide Fäuste steigen vor dem Körper auf,
-  // die Unterarme stehen schräg über der Stirn, Ellbogen außen
-  KATA['morote-age-uke'] = T(M(UG, { hL: [0.07, -0.25, 0.22], eL: [0.6, -0.8, 0.2], hR: [-0.07, -0.25, 0.22], eR: [-0.6, -0.8, 0.2] }),
+  // die Unterarme stehen schräg über der Stirn, Ellbogen außen; die Fäuste drehen dabei in einem Zug von der Handfläche oben zur
+  // Handfläche vorn (ohne Vorgabe im Ausholen drehten sie erst nach unten und dann zurück)
+  KATA['morote-age-uke'] = T(M(UG, { hL: [0.07, -0.25, 0.22], eL: [0.6, -0.8, 0.2], pL: [0, 0.7, 0.7], hR: [-0.07, -0.25, 0.22], eR: [-0.6, -0.8, 0.2], pR: [0, 0.7, 0.7] }),
     M(UG, { hL: [0.075, 0.27, 0.25], eL: [1, -0.15, 0.3], pL: [0, 0, 1], hR: [-0.075, 0.27, 0.25], eR: [-1, -0.15, 0.3], pR: [0, 0, 1] }));
   // 25, zweiter Teil: Manji-uke im Heisoku-dachi – der Körper steht quer, der Blick geht über die linke Schulter; die linke
   // Faust schlägt als Gedan-uke zur linken Seite, der rechte Arm schwingt zur anderen Seite hoch (Unterarm senkrecht)

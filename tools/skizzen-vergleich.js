@@ -47,6 +47,7 @@ function sketches() {
 // nur am Ende gezählt. Schlüssel: Kata-ID und Stellung (Nr, Rei, Yoi …).
 const ACCEPTED = {
   jion: { 2: 'vorderer Fuß im Buch etwa 41° eingedreht, die App setzt wie überall 15°' },
+  'bassai-dai': { 23: 'vorderer Fuß im Buch etwa 41° eingedreht – das Knie knickte damit sichtbar nach innen (Nutzer); wie 24 jetzt 15°' },
 };
 
 const book = sketches();
