@@ -1320,9 +1320,9 @@
     { t: 0.2, p: M(TSR, TS_LINKS(0.2), TS_R(0.2, V.add(V.add(V.mix(TS_J0.wristR, TS_KREUZ, 0.4), [0, -0.05, 0]), V.mul(V.norm([TS_J0.fc[0], 0, TS_J0.fc[2]]), 0.08)), TS_RAUS, [0, 1, 0])), e: 'fl' },
     { t: 0.4, p: M(TSR, TS_LINKS(0.4), TS_R(0.4, TS_KREUZ, TS_RAUS, [0, 1, 0])), e: 'fl' },
     { t: 0.52, p: M(TSR, TS_LINKS(0.52, TS_REIN / 2), TS_R(0.52, V.add(V.mix(TS_KREUZ, TS_SPITZE, 0.5), V.mul(TS_RAUS, 0.04)), [0, 1, 0], TS_RAUS)), e: 'fl' },
-    { t: 0.62, p: M(TSR, TS_LINKS(0.62, TS_REIN), TS_HOCH), e: 'io' },
-    { t: 0.72, p: M(TSR, TS_GRIF2, TS_GRIFF, { hL: V.add(TS_GRIF2.hR, [0.07, -0.04, -0.06]) }), e: 'io' },
-    { t: 1, p: M(TSR, TS_GRIFF, { hR: [-0.02, -0.12, 0.42], fR: [0, 1, 0.3], pR: [0, 0, 1], hL: [0.05, -0.16, 0.36] }), e: 'io' },
+    { t: 0.62, p: M(TSR, TS_LINKS(0.62, TS_REIN), TS_HOCH), e: 'fl' },
+    { t: 0.72, p: M(TSR, TS_GRIF2, TS_GRIFF, { hL: V.add(TS_GRIF2.hR, [0.07, -0.04, -0.06]) }), e: 'fl' },
+    { t: 1, p: M(TSR, TS_GRIFF, { hR: [-0.02, -0.12, 0.42], fR: [0, 1, 0.3], pR: [0, 0, 1], hL: [0.05, -0.16, 0.36] }), e: 'fl' },
   ] };
   // 19: Sokuto Gedan-kekomi zur rechten Seite – das Knie kommt hoch vor den Körper, dann stößt die Fußkante schräg nach
   // unten (knapp über Kniehöhe); der Oberkörper neigt sich nur wenig (Zeiten wie beim Yoko-geri-kekomi des Lexikons)
