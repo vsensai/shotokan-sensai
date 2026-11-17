@@ -1222,10 +1222,10 @@
   // Freigegebene Kata: Ablauf von Hand durchgesehen, alle Stände und Techniken haben eine Figur (validate.js prüft das)
   const KATA = ['heian-shodan', 'heian-nidan', 'heian-sandan', 'heian-yondan', 'heian-godan', 'tekki-shodan', 'bassai-dai', 'kanku-dai'];
   const can = (k) => KATA.includes(k.id) && !!k.ansage && E.ok();
-  // Kamera: yaw 0 = von vorne (die Figur schaut am Anfang zur Kamera), 180 = von hinten (links bleibt links)
+  // Kamera (die erste gilt beim Start): yaw 0 = von vorne (die Figur schaut am Anfang zur Kamera), 180 = von hinten (links bleibt links)
   const CAMS = [
-    ['Von hinten', { yaw: 158, pitch: 20, dist: 6.2 }],
     ['Von vorne', { yaw: -22, pitch: 16, dist: 6.2 }],
+    ['Von hinten', { yaw: 158, pitch: 20, dist: 6.2 }],
     ['Von der Seite', { yaw: -90, pitch: 12, dist: 6.4 }],
     ['Von oben', { yaw: 180, pitch: 78, dist: 7.2 }],
   ];
@@ -1261,8 +1261,8 @@
     // Zoom: 0 = ganzer Bereich der Kata (Kamera steht still über seiner Mitte), darunter noch weiter weg, 1 = nah an der
     // Figur (Kamera folgt ihr), darüber noch näher.
     // zoomShown läuft dem Wert weich nach.
-    let zoom = 0;
-    let zoomShown = 0;
+    let zoom = 1;
+    let zoomShown = 1;
     let area = null;
     const pts = new Map();
     let pinch = 0;
@@ -1468,7 +1468,8 @@
     }, { passive: false });
     cv.addEventListener('dblclick', () => setZoom(zoom < 0.5 ? 1 : 0));
     if (window.ResizeObserver) new ResizeObserver(() => request()).observe(node);
-    setZoom(0);
+    // Start: von vorne und nah an der Figur (Wunsch des Nutzers)
+    setZoom(1);
     setCam(0);
 
     return {

@@ -1340,9 +1340,14 @@
     M(UG, { hL: [0.075, 0.27, 0.25], eL: [1, -0.15, 0.3], pL: [0, 0, 1], hR: [-0.075, 0.27, 0.25], eR: [-1, -0.15, 0.3], pR: [0, 0, 1] }));
   // 25, zweiter Teil: Manji-uke im Heisoku-dachi – der Körper steht quer, der Blick geht über die linke Schulter; die linke
   // Faust schlägt als Gedan-uke zur linken Seite, der rechte Arm schwingt zur anderen Seite hoch (Unterarm senkrecht)
+  // Die linke Faust läuft dabei vor dem Körper hinunter (Zwischenbild wie beim Gedan-barai), der Ellbogen zeigt nach
+  // unten – auf geradem Weg käme sie dicht an der linken Schulter vorbei, der Arm klappte zusammen und der Ellbogen
+  // drehte einmal um den Arm
   const MJ = M(UG, { look: 90 });
-  KATA['manji-uke-heisoku'] = T(M(MJ, { hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], hR: [0.2, -0.4, 0.32], eR: [-0.6, -0.6, 0.3] }),
-    M(MJ, { hL: stretch([0.5, -0.5, 0.04], 'L'), hR: [-0.45, 0.22, 0.0], eR: [-1, -0.25, -0.1] }));
+  const MJ0 = M(MJ, { hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], hR: [0.2, -0.4, 0.32], eR: [-0.6, -0.6, 0.3] });
+  const MJ1 = M(MJ, { hL: [0.1, -0.2, 0.36], eL: [0.7, -1, 0.2], hR: [-0.1, -0.12, 0.2], eR: [-0.8, -0.5, 0.15] });
+  const MJ2 = M(MJ, { hL: stretch([0.5, -0.5, 0.04], 'L'), hR: [-0.45, 0.22, 0.0], eR: [-1, -0.25, -0.1] });
+  KATA['manji-uke-heisoku'] = M({ keys: [{ t: 0, p: MJ0 }, { t: 0.25, p: MJ0 }, { t: 0.31, p: MJ1, e: 'in' }, { t: 0.37, p: MJ2, e: 'kime' }], best: 1, dur: 1.6 });
   // 29–31: Gedan-uke vor dem Körper im Kiba-dachi, der andere Unterarm liegt waagerecht vor der Brust (Mune-mae-kamae,
   // schützt den Solarplexus). Die Arme wechseln über Kreuz: die Faust des Gedan-uke holt an der anderen Schulter aus
   KATA['gedan-uke-mune-mae'] = T(M(KB, { hR: [0.13, 0.05, 0.2], eR: [-0.4, -0.8, 0.5], hL: stretch([0.1, -0.56, 0.2], 'L') }),

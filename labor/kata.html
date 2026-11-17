@@ -265,8 +265,8 @@
     </div>
     <div class="row" role="group" aria-label="Kamera">
       <b>Kamera</b>
-      <button data-cam="hinten" aria-pressed="true">Von hinten</button>
-      <button data-cam="vorne" aria-pressed="false">Von vorne</button>
+      <button data-cam="vorne" aria-pressed="true">Von vorne</button>
+      <button data-cam="hinten" aria-pressed="false">Von hinten</button>
       <button data-cam="seite" aria-pressed="false">Seite</button>
       <button data-cam="oben" aria-pressed="false">Oben</button>
       <button id="mit" aria-pressed="false" title="Kamera dreht mit dem Körper mit">dreht mit</button>
@@ -302,7 +302,7 @@
 
       // Kamera: yaw 0 = von vorne (die Figur schaut am Anfang zur Kamera), 180 = von hinten (links bleibt links)
       const CAMS = { hinten: { yaw: 158, pitch: 20, dist: 6.2 }, vorne: { yaw: -22, pitch: 16, dist: 6.2 }, seite: { yaw: -90, pitch: 12, dist: 6.4 }, oben: { yaw: 180, pitch: 78, dist: 7.2 } };
-      const st = { t: Math.min(anim.dur, Number(q.get('t')) || 0), playing: false, speed: 1, cam: Object.assign({ fov: 30 }, CAMS[q.get('cam')] || CAMS.hinten), mit: false, dirty: true, drag: false };
+      const st = { t: Math.min(anim.dur, Number(q.get('t')) || 0), playing: false, speed: 1, cam: Object.assign({ fov: 30 }, CAMS[q.get('cam')] || CAMS.vorne), mit: false, dirty: true, drag: false };
       const cv = $('fig');
       const ctx = cv.getContext('2d');
 
@@ -413,6 +413,9 @@
         document.querySelectorAll('[data-cam]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
         st.dirty = true;
       }));
+      // gewählte Kamera (?cam=, sonst von vorne) als gedrückt zeigen
+      const cam0 = CAMS[q.get('cam')] ? q.get('cam') : 'vorne';
+      document.querySelectorAll('[data-cam]').forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.cam === cam0)));
       $('mit').onclick = (e) => { st.mit = !st.mit; e.target.setAttribute('aria-pressed', String(st.mit)); st.dirty = true; };
       // Drehen mit Finger oder Maus (waagerecht ziehen dreht, senkrecht neigt)
       let last = null;
