@@ -31,7 +31,9 @@
   const HOCH = 0.38; // so hoch kommt der Fuß beim Stampfen (Fumikomi): Knie hoch, dann fällt er hart auf seinen Platz
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
   const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
-  const STRIKE = 0.22; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
+  const STRIKE = 0.17; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
+  // Dauer einer gewöhnlichen Bewegung (Sekunden): Grundwert und Zuschlag je Grad Drehung – kurz, damit sie explosiv wirkt
+  const STEP = [0.48, 0.0012];
   const LEAD = 75; // so weit dreht der Kopf dem Körper voraus (Grad)
   const BOW = 30; // Verbeugung (Grad)
   const BODY = [0.2, 0.19]; // Rumpf vor der Brustmitte: halbe Breite und Tiefe, in die keine Hand eintaucht (Meter)
@@ -118,8 +120,13 @@
   const mix3 = (a, b, u) => a.map((x, i) => lerp(x, b[i], u));
   // Kurve durch a (u = 0), m (u = 0,5) und b (u = 1)
   const via = (a, m, b, u) => { const c = sub(mul(m, 2), mul(add(a, b), 0.5)); const v = 1 - u; return add(add(mul(a, v * v), mul(c, 2 * u * v)), mul(b, u * u)); };
-  // Schritt: weich anlaufen, zügig durch, am Ende zum Stehen (etwas später als ein gleichmäßiges Hin und Her)
-  const stepEase = (u) => smooth(Math.pow(clamp(u), 1.2));
+  // Schritt: explosiv – kurz anlaufen, mit vollem Tempo durch und hart abbremsen (Kime): nach 55 % der Zeit sind drei
+  // Viertel des Weges geschafft, nach 80 % steht die Figur fast; der Rest ist das Einrasten im Stand
+  // In den schnellsten Takten (ab 1 s je Bewegung) ist die Zeit schon so knapp, dass die Figur dabei zu schnell würde –
+  // dort weich wie früher: anlaufen, zügig durch, am Ende zum Stehen. build() wählt je Takt
+  const EXPLOSIV = (u) => { u = clamp(u); return 1 - Math.pow(1 - Math.pow(u, 1.6), 3); };
+  const WEICH = (u) => smooth(Math.pow(clamp(u), 1.2));
+  let stepEase = EXPLOSIV;
   // Stampfen: Fuß in der ersten Hälfte hoch, kurz oben halten, im letzten guten Viertel immer schneller hinunter
   const stomp = (u) => (u < 0.5 ? smooth(u / 0.5) : u < 0.72 ? 1 : 1 - ((u - 0.72) / 0.28) ** 2);
 
@@ -406,7 +413,8 @@
   }
 
   function segment(A, B, o) {
-    const seg = Object.assign({ A, B, ease: stepEase }, o);
+    // weg: Verlauf des Schrittes (auch für den Zwischenschritt via), ease kann eine Bewegung eigens setzen (langsam)
+    const seg = Object.assign({ A, B, ease: stepEase, weg: stepEase }, o);
     const both = ['L', 'R'].every((s) => len(sub(B.low[s].c, A.low[s].c)) > 1e-6);
     // beide Füße wechseln den Platz (Yoi, Schluss): nacheinander, erst der linke – außer die Bewegung nennt den ersten
     // (first) oder beide gleiten zugleich (gleich: Yori-ashi)
@@ -507,7 +515,7 @@
   }
 
   // Bewegung auf der Stelle mit Zwischenschritt (via der Ansage): hin bis u = 0,45, dann zurück an den Platz
-  const hump = (u) => (u < 0.45 ? smooth(u / 0.45) : 1 - stepEase((u - 0.45) / 0.55));
+  const hump = (u, ease) => (u < 0.45 ? smooth(u / 0.45) : 1 - ease((u - 0.45) / 0.55));
   // Namigaeshi: der Fuß wird hochgerissen, steht kurz oben und fällt dann immer schneller zurück auf seinen Platz
   const welle = (u) => (u < 0.28 ? smooth(u / 0.28) : u < 0.52 ? 1 : 1 - ((u - 0.52) / 0.48) ** 2);
 
@@ -551,7 +559,7 @@
         pel = add(pel, mul(zum, (0.1 * hu) / len(zum)));
         wl = (F) => ({ pitch: F.pitch - 10 * hu, tu: Math.max(F.tu, hu), kp: mix3(F.kp, rotY([sg, 0.5, 0.6], byaw), hu), sole: hu > 0.02 ? mix3([0, -1, 0], rotY([-sg, 0.5, 0], byaw), hu) : F.sole });
       } else if (v) {
-        const hu = hump(u);
+        const hu = hump(u, seg.weg || WEICH);
         c = mix(fa.c, v.c, hu);
         rel = lerp(fa.rel, v.rel, hu);
         y += LIFT * Math.pow(Math.sin(Math.PI * u), 2);
@@ -714,6 +722,7 @@
   // opt.beat: Abstand zweier Zählzeiten in Sekunden (2 = Training, wie in der Kata-Ansage)
   function build(k, opt) {
     const beat = (opt && opt.beat) || 2;
+    stepEase = beat > 1 ? EXPLOSIV : WEICH;
     let steps = shorten(SK.ansageTimeline(k, beat, true), k.id);
     // Kreuzschritt: der kreuzende (leichte) Fuß kommt um KVOR vor den Standfuß; alles danach steht um dasselbe Stück weiter vorn
     let vor = [0, 0];
@@ -873,7 +882,7 @@
       const ausStand = sprung && cur.low.h > 0.85;
       const tobi = /tobikomi/i.test(m.h || '');
       const d = st.slow ? SLOW * gap
-        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : ausStand ? 0.9 : sprung ? 0.75 : 0.62 + 0.0016 * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
+        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : ausStand ? 0.9 : sprung ? 0.75 : STEP[0] + STEP[1] * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
       const look = m.look == null ? null : wrap(m.body - m.look);
       // (bei zwei Teilen gilt die Anzeige für beide zusammen)

@@ -36,12 +36,13 @@
 
   // ---------- Rhythmus ----------
   // beat = Abstand zwischen zwei normalen Bewegungen (Sekunden). Laut Buch fließend verbundene Bewegungen folgen
-  // nach einem halben Schlag, langsame Bewegungen dauern 2,5 Schläge, nach einem Kiai bleibt ein halber Schlag Zanshin.
-  const R = { cont: 0.5, slow: 2.5, kiai: 1.5, name: 2.2, rei: 2.6, yoi: 2.4, end: 2, naore: 2.6 };
+  // schnell hinterher (gut ein Drittel Schlag – zusammen wie eine Technik), langsame Bewegungen dauern 2,5 Schläge, nach einem Kiai bleibt ein halber Schlag Zanshin.
+  const R = { cont: 0.35, slow: 2.5, kiai: 1.5, name: 2.2, rei: 2.6, yoi: 2.4, end: 2, naore: 2.6 };
   SK.ansageRhythm = R;
 
   function moveGap(k, n, beat) {
-    if (k.continuous.some((g) => g.includes(n) && g.includes(n + 1))) return R.cont * beat;
+    // (in schnellen Takten nicht unter einem halben Schlag bzw. 0,7 s – schneller geht ein Schritt der Figur nicht)
+    if (k.continuous.some((g) => g.includes(n) && g.includes(n + 1))) return Math.max(R.cont * beat, Math.min(0.5 * beat, 0.7));
     if (k.slow.includes(n)) return R.slow * beat;
     if (k.kiai.includes(n)) return R.kiai * beat;
     return beat;
