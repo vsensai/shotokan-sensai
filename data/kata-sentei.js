@@ -65,6 +65,8 @@
     naore: 'Der rechte Fuß bleibt, der linke Fuß geht neben den rechten zurück in die Yoi-Position.',
     continuous: [[2, 3], [4, 5], [6, 7], [10, 11], [12, 13], [22, 23], [26, 27]],
     slow: [9, 18, 25, 27, 34, 36, 41],
+    // zügig: nach dieser Bewegung ohne Pause gleich weiter (nur Zeitablauf, nicht aus dem Buch – Wunsch des Nutzers)
+    zuegig: [19],
     seq: [
       [1, 'Migi Ashi-mae Kosa-dachi', 'Sasho Soede Migi Chudan Uchi-uke', 79],
       [2, 'Hidari Zenkutsu-dachi', 'Hidari Chudan Uchi-uke', 80],

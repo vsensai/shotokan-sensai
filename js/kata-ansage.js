@@ -42,7 +42,8 @@
 
   function moveGap(k, n, beat) {
     // (in schnellen Takten nicht unter einem halben Schlag bzw. 0,7 s – schneller geht ein Schritt der Figur nicht)
-    if (k.continuous.some((g) => g.includes(n) && g.includes(n + 1))) return Math.max(R.cont * beat, Math.min(0.5 * beat, 0.7));
+    // zuegig (Daten der Kata): ohne Pause weiter wie „fließend“, aber ohne die Angabe des Buches (z. B. nach einem Kiai)
+    if (k.continuous.some((g) => g.includes(n) && g.includes(n + 1)) || (k.zuegig || []).includes(n)) return Math.max(R.cont * beat, Math.min(0.5 * beat, 0.7));
     if (k.slow.includes(n)) return R.slow * beat;
     if (k.kiai.includes(n)) return R.kiai * beat;
     return beat;
