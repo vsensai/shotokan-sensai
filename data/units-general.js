@@ -165,38 +165,15 @@
             ${grid(W('koshi', 'Koshi (Fußballen)'), W('sokuto', 'Sokuto (Fußkante)'), W('kakato', 'Kakato (Ferse)'), W('haisoku', 'Haisoku (Fußrücken)'), W('hiji', 'Hiji / Enpi (Ellbogen)'), W('zenwan', 'Zenwan (Unterarm)'), W('hiza', 'Hiza (Knie)'))}`,
         },
         {
-          id: 'te-konzepte', title: 'Wichtige Konzepte', quiz: 'gl-begriff', minGrade: '7kyu',
+          id: 'te-konzepte', title: 'Grundprinzipien', minGrade: '7kyu',
           learn: () => `
-            <ul>
-              <li><b>Kiai</b> – Kampfschrei; Vereinigung von Kraft und Geist im Moment der Technik.</li>
-              <li><b>Kime</b> – Konzentration aller Kraft im Treffpunkt; <b>Kime-Waza</b> – entscheidende (abschließende) Technik.</li>
-              <li><b>Hikite</b> – zurückziehende Hand zur Hüfte.</li>
-              <li><b>Hanmi</b> – Oberkörper halb seitlich (45°); <b>Shomen</b> – frontal; <b>Gyaku-hanmi</b> – umgekehrt halbseitlich.</li>
-              <li><b>Kamae</b> – Kampfhaltung (z. B. Chudan-, Gedan-, Shuto-Kamae); <b>Shizentai</b> – natürliche Haltung.</li>
-              <li><b>Zanshin</b> – wache Aufmerksamkeit nach der Technik.</li>
-              <li><b>Maai</b> – Kampfdistanz; <b>Deai</b> – Treffen/Kontern im Moment des gegnerischen Angriffs.</li>
-              <li><b>Kogeki</b> – Angriff; <b>Uke</b> – Abwehr (auch: der Abwehrende).</li>
-              <li><b>Te</b> – Hand; <b>Do</b> – Weg; <b>Dojo</b> – Ort des Weges.</li>
-              <li><b>Suri-ashi</b> – Gleitschritt; <b>Yori-ashi</b> – Nachziehschritt (beide Füße gleiten, Stand bleibt).</li>
-              <li><b>Sun-dome</b> – Technik kontrolliert kurz vor dem Ziel abstoppen.</li>
-              <li><b>Tai-sabaki</b> – Körperausweichen; <b>Ashi-barai</b> – Fußfeger.</li>
-              <li><b>Shiai</b> – Wettkampf.</li>
-              <li><b>Bunkai</b> – Anwendung/Analyse der Kata-Techniken.</li>
-            </ul>
-            <h4>Grundprinzipien</h4>
             <ul>
               <li><b>Stand als Fundament</b> – wie ein Haus auf seinem Fundament steht jede Technik auf dem Stand. Ein wackliger oder unfertiger Stand macht auch die beste Arm- oder Beintechnik wirkungslos.</li>
               <li><b>Kraft aus dem Boden</b> – bei einer Handtechnik drückt der hintere Fuß aktiv gegen den Boden. Diese Kraft läuft über das Bein zur Körpermitte, die Hüfte verstärkt sie, Rumpf und zurückziehender Arm (Hikite) leiten sie zum Ziel. Eine Technik ist nie nur Arm oder Bein, sondern immer der ganze Körper.</li>
               <li><b>Fußtechniken</b> wirken auf andere Distanzen und in anderen Rhythmen als Handtechniken und erweitern so die Möglichkeiten im Kampf – auch sie brauchen den Einsatz des ganzen Körpers.</li>
               <li><b>Abwehr und Konter</b> gehören zusammen: Eine Abwehr soll den Angriff schnell vom Ziel ablenken; folgt kein schneller Konter, ist sie unvollständig – außer man verzichtet bewusst aus taktischen Gründen darauf. Treffender ist daher „Verteidigungstechnik“.</li>
               <li><b>Fußarbeit</b> entscheidet über die Distanz: Eine Abwehr kann scheitern, weil sie nicht durch Gleitschritt oder Körperdrehung unterstützt wurde, oder der Konter wird schwach, weil der Abstand zu kurz oder zu lang ist (siehe <a href="#/wissen/da-ashi">Fußbewegungen</a>).</li>
-            </ul>
-            <h4>Haltung und Kraft</h4>
-            ${grid(T('kiai', 'Kiai'), T('kime', 'Kime'), T('hikite', 'Hikite'), T('hanmi', 'Hanmi'), T('gyaku-hanmi', 'Gyaku-hanmi'), T('shizentai', 'Shizentai'))}
-            <h4>Partner und Distanz</h4>
-            ${grid(T('maai', 'Maai'), T('kogeki', 'Kogeki'), T('deai', 'Deai'), T('zanshin', 'Zanshin'), T('sun-dome', 'Sun-dome'), T('bunkai', 'Bunkai'))}
-            <h4>Schritte und Ausweichen</h4>
-            ${grid(A('suri-ashi', 'Suri-ashi'), A('yori-ashi', 'Yori-ashi'), A('tai-sabaki', 'Tai-sabaki'), T('ashi-barai', 'Ashi-barai'))}`,
+            </ul>`,
         },
       ],
     },

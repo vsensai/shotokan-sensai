@@ -118,7 +118,7 @@ In der App nur fünf Einträge: Ashi-sabaki, Ayumi-ashi, Suri-ashi, Yori-ashi, T
 ## Wo das Wissen in der App steht
 
 - **Lexikon**: Kategorie „Fußbewegungen (Ashi-sabaki)“, Ashi-barai unter Fußtechniken, neue Einträge zu Zuki, Enpi, Uke und Geri (`data/glossary.js`, Quelle `KO`).
-- **Lernen**: Lektion „Fußbewegungen (Ashi-sabaki)“ (`da-ashi`), Ergänzungen in Stände, Tsuki, Uke, Uchi, Geri und „Grundprinzipien“ unter „Wichtige Konzepte“ (`data/units-general.js`).
+- **Lernen**: Lektion „Fußbewegungen (Ashi-sabaki)“ (`da-ashi`), Ergänzungen in Stände, Tsuki, Uke, Uchi, Geri und die Lektion „Grundprinzipien“ (`te-konzepte`) (`data/units-general.js`).
 - **Quiz**: Fragen mit Quelle `S.kompakt` in `data/questions-general.js`; Begriffe-Trainer erzeugt zu jedem neuen Lexikon-Eintrag automatisch Fragen.
 - **Kompakt-Übersicht**: `#/kompakt[/<grad>]` in `js/app.js`.
 
