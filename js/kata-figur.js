@@ -156,6 +156,8 @@
   // passt, mit „#Nummer“ am Ende auch auf eine einzelne Bewegung (der erste passende Eintrag gilt)
   // ruhig: die Haltung geht gleichmäßig über die ganze Bewegung in die Endhaltung (kein Ausholen, kein Kime);
   // stand: eigener Stand der Figur (S.…) statt des Standes aus dem Namen – auch die Fußrichtungen kommen dann von dort;
+  // schlag: eigene Dauer (Sekunden) des Teils nach dem Ausholen statt STRIKE – für einen großen Bogen mit Pause davor
+  // (Bassai Dai 38, 39: Sukui-uke);
   // ganz: Ablauf des Lexikons samt Beinen und Hüfte (Sprung), ab Schlüsselbild von – er wird an die Plätze der Kata gelegt
   const TECH = [
     // Kanku Dai
@@ -195,7 +197,7 @@
     [/gedan-uke \+ .*mune-mae-kamae/i, { def: 'gedan-uke-mune-mae', side: 'R', from: 0.25, erst: true }],
     [/koshi-kamae/i, { def: 'koshi-kamae-hanmi', side: 'R', from: 0 }, /ashi-zenkutsu.*bassai/i],
     [/yama-zuki/i, { def: 'tc:yama-zuki', side: 'R', from: 0.25, direkt: true, erst: true }],
-    [/gedan sukui-uke/i, { def: 'gedan-sukui-uke', side: 'R', from: 0.25, dur: 1.1 }],
+    [/gedan sukui-uke/i, { def: 'gedan-sukui-uke', side: 'R', from: 0.25, dur: 1.8, schlag: 1.0 }],
     [/^rechte hand und rechter fuß/i, { bleibt: true }],
     // Tekki Shodan
     [/^kao (migi|hidari)-muki \(/i, { bleibt: true }],
@@ -1058,7 +1060,7 @@
         cur = k2;
         return;
       }
-      const uS = tech && tech.lang ? 0.1 : clamp(1 - STRIKE / d, 0.3, 0.8);
+      const uS = tech && tech.lang ? 0.1 : tech && tech.schlag ? clamp(1 - tech.schlag / d, 0.22, 0.8) : clamp(1 - STRIKE / d, 0.3, 0.8);
       let arms;
       let end;
       if (tech && tech.halten) {
