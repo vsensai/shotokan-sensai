@@ -4,35 +4,9 @@
   'use strict';
   const G = SK.gfx;
   const grid = (...figs) => `<div class="gfx-grid">${figs.join('')}</div>`;
-  // Standbilder erst erzeugen, wenn eine Lektion sie zeigt.
-  const S = {
-    musubi: () => G.stanceFigure('musubi'),
-    heisoku: () => G.stanceFigure('heisoku'),
-    hachiji: () => G.stanceFigure('hachiji'),
-    zenkutsu: () => G.stanceFigure('zenkutsu', false, 'Hidari Zenkutsu-dachi'),
-    zenkutsuR: () => G.stanceFigure('zenkutsu', true, 'Migi Zenkutsu-dachi'),
-    kokutsu: () => G.stanceFigure('kokutsu', false, 'Migi Kokutsu-dachi'),
-    kokutsuL: () => G.stanceFigure('kokutsu', true, 'Hidari Kokutsu-dachi'),
-    kiba: () => G.stanceFigure('kiba'),
-    kosa: () => G.stanceFigure('kosa', true, 'Migi Ashi-mae Kosa-dachi'),
-    neko: () => G.stanceFigure('neko'),
-    fudo: () => G.stanceFigure('fudo'),
-    hangetsu: () => G.stanceFigure('hangetsu'),
-    sanchin: () => G.stanceFigure('sanchin'),
-    renoji: () => G.stanceFigure('renoji'),
-    teiji: () => G.stanceFigure('teiji'),
-    ashizenkutsu: () => G.stanceFigure('ashizenkutsu', false, 'Hidari Ashi-zenkutsu'),
-    hizakutsu: () => G.stanceFigure('hizakutsu', false, 'Hidari Hizakutsu'),
-    ashidachi: () => G.stanceFigure('ashidachi', false, 'Hidari Ashi-dachi'),
-    orishiki: () => G.stanceFigure('orishiki', false, 'Migi Ashi Orishiki Hidari Hiza-tate'),
-  };
-  Object.keys(S).forEach((k) => SK.util.lazy(S, k, S[k]));
   // Grafik erst bei Bedarf: mit 3D-Figur gibt es keine SVG (G.byKey liefert dann '')
   const fig = (kind) => (key, caption, note) => G.figure(() => G.byKey(`${kind}:${key}`), caption, note, `${kind}:${key}`);
-  const W = fig('wp');
-  const M = fig('mv');
   const T = fig('tc');
-  const A = fig('as');
 
   SK.generalUnits = [
     {
@@ -41,18 +15,22 @@
         {
           id: 'et-dojo', title: 'Im Dojo', quiz: 'et-dojokun', minGrade: '9kyu',
           learn: () => `
-            <p><b>Dojo</b> bedeutet „Ort des Weges“. Karate beginnt und endet mit Respekt (Rei).</p>
-            <ul>
-              <li><b>Rei</b> – Gruß / Verbeugung. Im Stand meist aus <b>Musubi-dachi</b>.</li>
-              <li><b>Seiza</b> – kniender Sitz (Fersensitz) zum An- und Abgrüßen.</li>
-              <li><b>Mokuso</b> – Augen schließen, sammeln, meditieren. <b>Mokuso yame</b> – Meditation beenden.</li>
-              <li><b>Shomen ni rei</b> – Gruß nach vorne (zur Stirnseite des Dojo). <b>Sensei ni rei</b> – Gruß an den Lehrer. <b>Otagai ni rei</b> – Gruß untereinander.</li>
+            <p><b>Dojo</b> bedeutet „Ort des Weges“. Karate beginnt und endet mit Respekt (Rei). Laut DJKB-Prüfungsordnung muss man schon zum 9. Kyu die Etikette des An- und Abgrüßens beherrschen.</p>
+            <h4>Angrüßen im Sitzen</h4>
+            <ol>
+              <li><b>Seiza</b> – alle knien sich in den Fersensitz.</li>
+              <li><b>Mokuso</b> – Augen schließen und sammeln; <b>Mokuso yame</b> beendet die Meditation.</li>
+              <li><b>Shomen ni rei</b> – Gruß nach vorne zur Stirnseite des Dojo.</li>
+              <li><b>Sensei ni rei</b> – Gruß an den Lehrer.</li>
               <li><b>Kiritsu</b> – Aufstehen.</li>
-              <li><b>Yoi</b> – Bereit. <b>Hajime</b> – Beginnen. <b>Yame</b> – Aufhören. <b>Naore</b> – Zurück in die Ausgangsstellung. <b>Mawatte</b> – Wenden.</li>
-              <li><b>Sensei</b> – Lehrer; <b>Senpai</b> – Fortgeschrittener; <b>Kohai</b> – Jüngerer/Anfänger.</li>
-              <li>Laut DJKB-Prüfungsordnung muss man zum 9. Kyu die Etikette des An- und Abgrüßens beherrschen.</li>
+            </ol>
+            <p class="muted small">Die genaue Abfolge kann je nach Dojo leicht abweichen; manche grüßen zusätzlich untereinander (Otagai ni rei).</p>
+            <h4>Im Stehen und während des Trainings</h4>
+            <ul>
+              <li>Im Stehen grüßt man meist aus <b>Musubi-dachi</b>.</li>
+              <li>Eine Übung läuft meist so: <b>Yoi</b> (bereit) – <b>Hajime</b> (beginnen) – <b>Yame</b> (aufhören) – <b>Naore</b> (zurück in die Ausgangsstellung).</li>
             </ul>
-            ${grid(T('rei', 'Rei'), T('seiza', 'Seiza'), T('mokuso', 'Mokuso'), T('kiritsu', 'Kiritsu'), T('yoi', 'Yoi'), T('mawatte', 'Mawatte'))}`,
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/begriff"><h3>Alle Kommandos &amp; Begriffe im Lexikon</h3><p>Mit Bild, Aussprache und Stellen in den Kata</p><span class="area-go" aria-hidden="true">›</span></a>`,
         },
         {
           id: 'et-dojokun', title: 'Dojo-Kun', quizTitle: 'Etikette & Dojo-Kun', minGrade: '9kyu',
@@ -124,7 +102,7 @@
       ],
     },
     {
-      id: 'begriffe', title: 'Begriffe & Zählen', kind: 'general', desc: 'Japanische Grundbegriffe', quizTitle: 'Zählen & Grundwörter', quizDesc: 'Zahlen, Richtungen, Grade',
+      id: 'begriffe', title: 'Begriffe & Zählen', kind: 'general', desc: 'Zählen, Richtungen, Grundprinzipien', quizTitle: 'Zählen & Grundwörter', quizDesc: 'Zahlen, Richtungen, Grade',
       lessons: [
         {
           id: 'te-zahlen', title: 'Zählen & Richtungen', minGrade: '9kyu',
@@ -146,25 +124,6 @@
             ${grid(G.figure(null, 'Die drei Stufen', 'Jodan = Gesicht, Chudan = Brust, Gedan = Unterbauch (Definition im JKA-Kata-Buch)', 'fig:levels'))}`,
         },
         {
-          id: 'te-koerper', title: 'Körperwaffen', quiz: 'gl-waffe', minGrade: '8kyu',
-          learn: () => `
-            <ul>
-              <li><b>Seiken</b> – Vorderseite der Faust (Knöchel von Zeige- und Mittelfinger)</li>
-              <li><b>Uraken</b> – Faustrücken</li>
-              <li><b>Tettsui / Kentsui</b> – Hammerfaust (Kleinfingerseite der Faust)</li>
-              <li><b>Shuto</b> – Handkante; <b>Haito</b> – innere Handkante (Daumenseite)</li>
-              <li><b>Nukite</b> – Speerhand (Fingerspitzen); <b>Teisho</b> – Handballen; <b>Haishu</b> – Handrücken</li>
-              <li><b>Enpi / Hiji</b> – Ellbogen</li>
-              <li><b>Koshi</b> (Josokutei) – Fußballen (Mae-geri, Mawashi-geri)</li>
-              <li><b>Sokuto</b> – Fußkante (Yoko-geri); <b>Kakato</b> – Ferse (Ushiro-geri); <b>Haisoku</b> – Fußrücken</li>
-              <li><b>Hiza</b> – Knie; <b>Zenwan</b> – Unterarm</li>
-            </ul>
-            <h4>Hand</h4>
-            ${grid(W('seiken', 'Seiken'), W('uraken', 'Uraken'), W('tettsui', 'Tettsui / Kentsui'), W('shuto', 'Shuto'), W('haito', 'Haito'), W('nukite', 'Nukite'), W('teisho', 'Teisho'), W('haishu', 'Haishu'))}
-            <h4>Fuß, Arm und Bein</h4>
-            ${grid(W('koshi', 'Koshi (Fußballen)'), W('sokuto', 'Sokuto (Fußkante)'), W('kakato', 'Kakato (Ferse)'), W('haisoku', 'Haisoku (Fußrücken)'), W('hiji', 'Hiji / Enpi (Ellbogen)'), W('zenwan', 'Zenwan (Unterarm)'), W('hiza', 'Hiza (Knie)'))}`,
-        },
-        {
           id: 'te-konzepte', title: 'Grundprinzipien', minGrade: '7kyu',
           learn: () => `
             <ul>
@@ -178,56 +137,46 @@
       ],
     },
     {
-      id: 'dachi', title: 'Dachi – Stände', kind: 'general', desc: 'Grundstellungen mit Grafiken',
+      id: 'dachi', title: 'Dachi – Stände', kind: 'general', desc: 'Namen, Einsatz und Fußarbeit',
       lessons: [
         {
-          id: 'da-grund', title: 'Grund- & Natürliche Stände', quiz: 'da-kampf', minGrade: '9kyu',
-          learn: () => `<p>Stabile Stände sind das <b>Fundament</b> jeder Technik: Steht der Körper nicht sicher, verpufft die Kraft von Armen und Beinen. Jede Grafik zeigt den Stand als 3D-Figur; „Fußbild“ zeigt die Füße von oben mit der Gewichtsverteilung und ungefähren Maßen.</p>
-            ${grid(S.musubi, S.heisoku, S.hachiji)}
+          id: 'da-kampf', title: 'Stände', quizTitle: 'Stände', minGrade: '9kyu',
+          learn: () => `
+            <h4>Namen und Abkürzungen</h4>
             <ul>
-              <li><b>Musubi-dachi</b>: Grußstellung – Fersen zusammen, Fußspitzen geöffnet; im Shotokan der Stand für den Gruß im Stehen (Ritsu-rei).</li>
-              <li><b>Heisoku-dachi</b>: Füße geschlossen (z. B. Yoi von Tekki, Bassai Dai, Jion, Enpi).</li>
-              <li><b>Hachiji-dachi</b> (Soto-Hachiji-dachi): natürlicher Stand, Füße schulterbreit – Yoi der Heian-Kata; eine Form von <b>Shizentai</b>.</li>
-            </ul>`,
-        },
-        {
-          id: 'da-kampf', title: 'Zenkutsu, Kokutsu, Kiba', quizTitle: 'Stände', minGrade: '9kyu',
-          learn: () => `${grid(S.zenkutsu, S.zenkutsuR, S.kokutsu, S.kokutsuL, S.kiba)}
-            <p class="muted small">Die Prozentzahlen im „Fußbild“ zeigen, wie das Gewicht verteilt ist. Im JKA-Kata-Buch heißt Zenkutsu-dachi nach dem <b>vorderen</b> Bein, Kokutsu-dachi nach dem <b>hinteren</b> (belasteten) Bein – z. B. „Migi Kokutsu-dachi, Hidari Shuto-uke“: rechtes Bein hinten, linkes vorne.</p>
-            <ul>
-              <li><b>Zenkutsu-dachi (Zk)</b> – Vorwärtsstellung: vorderes Knie gebeugt (über dem Fuß), hinteres Bein gestreckt, Gewicht überwiegend vorne. Der am häufigsten genutzte Stand im Shotokan.</li>
-              <li><b>Kokutsu-dachi (Kk)</b> – Rückwärtsstellung: Gewicht überwiegend hinten, hinterer Fuß quer, vorderer Fuß zeigt nach vorne. Meist für Abwehrtechniken, in manchen Kata auch mit Angriffen verbunden.</li>
-              <li><b>Kiba-dachi (Kb)</b> – Reiterstellung: breit, Füße parallel, Gewicht gleich verteilt – der Name kommt vom Sitz auf einem Pferd.</li>
-              <li>Abkürzungen in der DJKB-Prüfungsordnung: <b>Zk, Kk, Kb</b>.</li>
-              <li><b>Hidari</b> Zenkutsu-dachi = linkes Bein vorne.</li>
-            </ul>`,
-        },
-        {
-          id: 'da-weitere', title: 'Weitere Stände', quiz: 'da-kampf', minGrade: '5kyu',
-          learn: () => `${grid(S.kosa, S.neko, S.fudo, S.hangetsu, S.sanchin, S.renoji, S.teiji)}
-            <ul>
-              <li><b>Kosa-dachi</b> – Kreuzstand (Begriff der Theorie zum 1. Dan); auch für Anwendungen mit Körperdrehung.</li>
-              <li><b>Neko-ashi-dachi</b> – Katzenfußstand, fast das ganze Gewicht hinten – wie eine Katze kurz vor dem Sprung.</li>
-              <li><b>Fudo-dachi</b> (Sochin-dachi) – „unbeweglicher Stand“: eine feste Basis, aus der eine Technik viel Kraft entfalten kann.</li>
-              <li><b>Hangetsu-dachi</b> – Halbmondstand (aus der Kata Hangetsu): etwa eine Fußlänge kürzer als Zenkutsu-dachi, Füße etwa schulterbreit. Laut JKA-Buch (Vol. 2) sind Knie und Oberschenkelinnenseiten zur Mitte gespannt, die Fußsohlen „greifen“ den Boden; der vordere Fuß kommt im Halbmondschritt (Bogen von innen nach außen).</li>
-              <li><b>Renoji-dachi</b> – L-förmiger Stand; <b>Teiji-dachi</b> – T-förmiger Stand.</li>
-              <li><b>Sanchin-dachi</b> – Sanduhrstand, Knie nach innen gespannt: sehr kurz, beim Gehen werden die Füße zur Mitte geführt – das ergibt die Form einer Sanduhr.</li>
+              <li>Die DJKB-Prüfungsordnung kürzt ab: <b>Zk</b> = Zenkutsu-dachi, <b>Kk</b> = Kokutsu-dachi, <b>Kb</b> = Kiba-dachi.</li>
+              <li><b>Hidari</b> (links) und <b>Migi</b> (rechts) im Namen: Im JKA-Kata-Buch heißt Zenkutsu-dachi nach dem <b>vorderen</b> Bein, Kokutsu-dachi nach dem <b>hinteren</b> (belasteten) Bein. Hidari Zenkutsu-dachi = linkes Bein vorne; „Migi Kokutsu-dachi, Hidari Shuto-uke“ = rechtes Bein hinten, linkes vorne.</li>
             </ul>
-            <h4>Stände aus dem JKA-Kata-Buch</h4>
-            ${grid(S.ashizenkutsu, S.hizakutsu, S.ashidachi, S.orishiki)}`,
+            <h4>Wofür welcher Stand</h4>
+            <ul>
+              <li><b>Musubi-dachi</b> – Stand für den Gruß im Stehen (Ritsu-rei).</li>
+              <li><b>Hachiji-dachi</b> – Yoi der Heian-Kata, eine Form von Shizentai; <b>Heisoku-dachi</b> – Yoi von Tekki, Bassai Dai, Jion und Enpi.</li>
+              <li><b>Zenkutsu-dachi</b> – der am häufigsten genutzte Stand im Shotokan.</li>
+              <li><b>Kokutsu-dachi</b> – meist für Abwehrtechniken, in manchen Kata auch mit Angriffen verbunden.</li>
+              <li><b>Fudo-dachi</b> – feste Basis, aus der eine Technik viel Kraft entfalten kann.</li>
+              <li><b>Kosa-dachi</b> – Begriff der Theorie zum 1. Dan; auch für Anwendungen mit Körperdrehung.</li>
+            </ul>
+            <h4>Woher die Namen kommen</h4>
+            <ul>
+              <li><b>Kiba-dachi</b> – Reiterstellung: wie der Sitz auf einem Pferd.</li>
+              <li><b>Neko-ashi-dachi</b> – Katzenfußstand: wie eine Katze kurz vor dem Sprung.</li>
+              <li><b>Sanchin-dachi</b> – Sanduhrstand: sehr kurz, beim Gehen werden die Füße zur Mitte geführt – das ergibt die Form einer Sanduhr.</li>
+              <li><b>Hangetsu-dachi</b> – Halbmondstand: der vordere Fuß kommt im Halbmondschritt, einem Bogen von innen nach außen.</li>
+            </ul>
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/stand"><h3>Alle Stände im Lexikon</h3><p>Mit 3D-Figur, Fußbild und Stellen in den Kata</p><span class="area-go" aria-hidden="true">›</span></a>`,
         },
         {
           id: 'da-ashi', title: 'Fußbewegungen (Ashi-sabaki)', minGrade: '8kyu',
           learn: () => `
             <p>Gute Beweglichkeit auf dem Boden ist nicht selbstverständlich und muss eigens geübt werden. Selbst Fortgeschrittene schätzen die Distanz oft falsch ein: Eine Abwehr scheitert, weil sie nicht durch Gleitschritt oder Körperdrehung unterstützt wird, oder der Konter wird schwach, weil der Abstand zu kurz oder zu groß ist.</p>
-            <p class="muted small">So liest man die Fußbilder: Blick von oben, „vorne“ ist oben. Blass = Ausgangslage, kräftig rot = Endlage, rot gestrichelt = Weg des Fußes, Zahlen = Reihenfolge. „▶ Bewegung“ spielt den Schritt ab.</p>
+            <h4>Die Unterschiede</h4>
             <ul>
-              <li><b>Ayumi-ashi</b> – der normale Schritt: der hintere Fuß wird zum vorderen. Bei Ständen mit Breite (z. B. Zenkutsu-dachi) kommen die Füße in der Mitte des Schritts zusammen – der Fuß beschreibt einen Bogen.</li>
-              <li><b>Suri-ashi</b> – Gleitschritt: der vordere Fuß gleitet vor, der hintere zieht nach (rückwärts umgekehrt). Anders als bei Ayumi-ashi wechseln die Beine nicht – vorne bleibt vorne. So ändert man die Distanz schnell, z. B. mit Kizami-zuki.</li>
-              <li><b>Yori-ashi</b> – beide Füße gleiten gemeinsam, der Stand bleibt; für kleine Distanzänderungen und um im Kampf den Rhythmus zu wechseln oder einen Angriff zu verschleiern. Kommt in vielen Kata vor (z. B. Heian Sandan, Tekki).</li>
-              <li><b>Tai-sabaki</b> – Körperausweichen: mit einer kreisförmigen Drehung aus der Angriffslinie, im Kumite und bei Partnerübungen.</li>
+              <li>Beim normalen Schritt (<b>Ayumi-ashi</b>) wechseln die Beine: der hintere Fuß wird zum vorderen. Bei Ständen mit Breite (z. B. Zenkutsu-dachi) kommen die Füße in der Mitte des Schritts zusammen – der Fuß beschreibt einen Bogen.</li>
+              <li>Beim Gleitschritt (<b>Suri-ashi</b>) wechseln sie nicht: der vordere Fuß gleitet vor, der hintere zieht nach – vorne bleibt vorne. So kommt man schnell in die Distanz, z. B. mit Kizami-zuki.</li>
+              <li>Bei <b>Yori-ashi</b> gleiten beide Füße gleichzeitig, der Stand bleibt – für kleine Distanzänderungen, Rhythmuswechsel und um einen Angriff zu verschleiern. Kommt in vielen Kata vor (z. B. Heian Sandan, Tekki).</li>
+              <li><b>Tai-sabaki</b> ist kein Schritt nach vorne oder hinten, sondern eine kreisförmige Drehung aus der Angriffslinie – im Kumite und bei Partnerübungen.</li>
             </ul>
-            ${grid(A('ayumi-ashi', 'Ayumi-ashi', 'Bogen über die Mitte'), A('suri-ashi', 'Suri-ashi'), A('yori-ashi', 'Yori-ashi'), A('tai-sabaki', 'Tai-sabaki'))}`,
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/ashi"><h3>Alle Fußbewegungen im Lexikon</h3><p>Mit Fußbild von oben zum Abspielen</p><span class="area-go" aria-hidden="true">›</span></a>`,
         },
       ],
     },
@@ -238,100 +187,46 @@
           id: 'ki-tsuki', title: 'Tsuki – Fauststöße', quizTitle: 'Hand: Tsuki, Uke, Uchi', minGrade: '9kyu',
           learn: () => `
             <ul>
-              <li><b>Choku-zuki</b> – gerader Fauststoß im Stand.</li>
-              <li><b>Oi-zuki</b> (Jun-zuki) – Stoß mit der Hand der Seite des vorderen Beins, meist mit Schritt.</li>
-              <li><b>Gyaku-zuki</b> – Stoß mit der Hand der Gegenseite zum vorderen Bein, mit Hüftdrehung.</li>
-              <li><b>Kizami-zuki</b> – Stoß mit der vorderen Hand ohne Schritt.</li>
-              <li><b>Sanbon-zuki</b> – drei Fauststöße (in der DJKB-Prüfung: Jodan/Chudan/Chudan).</li>
-              <li><b>Ren-zuki</b> – schnelle Folge von Stößen; <b>Morote-zuki</b> – Doppelfauststoß.</li>
-              <li><b>Kagi-zuki</b> – Hakenstoß; <b>Ura-zuki</b> – kurzer Stoß mit Handrücken nach unten; <b>Age-zuki</b> – Aufwärtsstoß; <b>Yama-zuki</b> – „Bergfauststoß“.</li>
-              <li><b>Tate-zuki</b> – Stoß mit senkrechter Faust auf dem kürzesten Weg; <b>Mawashi-zuki</b> – Stoß im Bogen (z. B. Schläfe, seitliche Rippen); <b>Awase-zuki</b> – U-förmiger Doppelstoß (oben Jodan, unten Ura-zuki), engere Form des Yama-zuki mit aufrechtem Oberkörper.</li>
-              <li>Zum Unterschied: <b>Kizami-zuki</b> wird oft durch einen Gleitschritt unterstützt, um in die Distanz zu kommen; bei <b>Oi-zuki</b> stößt die Hand der Seite, die den Schritt macht – so erreicht man das Ziel aus großer Entfernung.</li>
-              <li>Laut DJKB-Prüfungsordnung werden alle Fauststöße generell <b>Chudan</b> ausgeführt, sofern nichts anderes angegeben ist.</li>
+              <li>Laut DJKB-Prüfungsordnung werden alle Fauststöße generell <b>Chudan</b> ausgeführt, sofern nichts anderes angegeben ist. <b>Sanbon-zuki</b> in der Prüfung: Jodan / Chudan / Chudan.</li>
+              <li><b>Oi-zuki oder Gyaku-zuki?</b> Bei Oi-zuki stößt die Hand auf der Seite des vorderen Beins, meist mit Schritt – so erreicht man das Ziel aus großer Entfernung. Bei Gyaku-zuki stößt die Hand der Gegenseite, die Kraft kommt aus der Hüftdrehung.</li>
+              <li><b>Kizami-zuki</b> wird oft durch einen Gleitschritt unterstützt, um in die Distanz zu kommen.</li>
+              <li><b>Awase-zuki</b> ist die engere Form des Yama-zuki: U-förmig, mit aufrechtem Oberkörper.</li>
             </ul>
-            ${grid(M('oi-zuki', 'Oi-zuki', 'Faust und vorderer Fuß auf derselben Seite'), M('gyaku-zuki', 'Gyaku-zuki', 'Faust und vorderer Fuß auf entgegengesetzten Seiten'))}
-            <h4>Weitere Fauststöße</h4>
-            ${grid(T('choku-zuki', 'Choku-zuki'), T('kizami-zuki', 'Kizami-zuki'), T('sanbon-zuki', 'Sanbon-zuki'), T('ren-zuki', 'Ren-zuki'), T('morote-zuki', 'Morote-zuki'), T('kagi-zuki', 'Kagi-zuki'), T('ura-zuki', 'Ura-zuki'), T('age-zuki', 'Age-zuki'), T('yama-zuki', 'Yama-zuki'), T('tate-zuki', 'Tate-zuki'), T('mawashi-zuki', 'Mawashi-zuki'), T('awase-zuki', 'Awase-zuki'))}`,
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/tsuki"><h3>Alle Fauststöße im Lexikon</h3><p>Mit Bild, Aussprache und Stellen in den Kata</p><span class="area-go" aria-hidden="true">›</span></a>`,
         },
         {
           id: 'ki-uke', title: 'Uke – Abwehrtechniken', quiz: 'ki-tsuki', minGrade: '9kyu',
           learn: () => `
             <ul>
-              <li><b>Gedan-barai</b> – Abwehr nach unten (fegend).</li>
-              <li><b>Age-uke</b> – Abwehr nach oben (Jodan).</li>
-              <li><b>Soto-uke</b> – Abwehr von außen nach innen (Chudan).</li>
-              <li><b>Uchi-uke</b> – Abwehr von innen nach außen (Chudan).</li>
-              <li><b>Shuto-uke</b> – Handkantenabwehr, meist in Kokutsu-dachi.</li>
-              <li><b>Morote-uke</b> – unterstützte Abwehr (zweite Faust am Ellbogen).</li>
-              <li><b>Juji-uke / Kosa-uke</b> – gekreuzte Abwehr; <b>Kakiwake-uke</b> – auseinanderdrückende Abwehr.</li>
-              <li><b>Osae-uke</b> – drückende Abwehr nach unten.</li>
-              <li><b>Kake-uke</b> – Hakenabwehr; <b>Teisho-uke</b> – Handballenabwehr; <b>Sukui-uke</b> – schöpfende Abwehr.</li>
-              <li><b>Manji-uke</b> – Doppelabwehr: eine Hand Gedan-barai, die andere schützt oben (Jodan-uchi-uke).</li>
-              <li><b>Nagashi-uke</b> – Oberbegriff für fließende, ablenkende Abwehren (Theorie 1. Dan): der Angriff wird nicht hart gestoppt, sondern abgelenkt. Die Formen:
-                <ul>
-                  <li><b>Te-nagashi-uke</b> – die offene Hand lenkt Jodan- oder Chudan-Angriffe zur Seite; die häufigste Form, vor allem im Kampf.</li>
-                  <li><b>Soto-nagashi-uke</b> – der senkrechte Unterarm schiebt den Jodan-Angriff zur Seite weg (Heian Nidan 2 und 5).</li>
-                  <li><b>Uchi-nagashi-uke</b> – die Rückseite des Unterarms (Haiwan) lenkt Jodan von innen nach außen ab (Tekki Shodan 9 und 23).</li>
-                  <li><b>Gedan-nagashi-uke</b> – ablenkende Abwehr unten, in Gegenrichtung zum Gedan-barai.</li>
-                </ul>
-              </li>
-              <li>Paare mit Gegenrichtung: <b>Soto-uke</b> (außen → innen) und <b>Uchi-uke</b> (innen → außen) schützen beide Chudan; <b>Shuto-uke</b> wehrt wie Uchi-uke nach außen ab.</li>
+              <li><b>Paare mit Gegenrichtung:</b> Soto-uke (außen → innen) und Uchi-uke (innen → außen) schützen beide Chudan; Shuto-uke wehrt wie Uchi-uke nach außen ab, meist in Kokutsu-dachi. Gedan-nagashi-uke läuft in Gegenrichtung zum Gedan-barai.</li>
+              <li><b>Nagashi-uke</b> ist der Oberbegriff für fließende, ablenkende Abwehren (Theorie 1. Dan): der Angriff wird nicht hart gestoppt, sondern abgelenkt. Am häufigsten ist Te-nagashi-uke mit der offenen Hand, vor allem im Kampf; in den Kata kommen Soto-nagashi-uke (Heian Nidan 2 und 5) und Uchi-nagashi-uke (Tekki Shodan 9 und 23) vor.</li>
+              <li><b>Manji-uke</b> verbindet Gedan-barai mit Jodan-Uchi-uke zur Doppelabwehr; zuerst in Heian Godan.</li>
             </ul>
-            ${grid(M('age-uke', 'Age-uke', 'nach oben'), M('gedan-barai', 'Gedan-barai', 'nach unten, fegend'), M('soto-uke', 'Soto-uke', 'von außen nach innen'), M('uchi-uke', 'Uchi-uke', 'von innen nach außen'))}
-            <h4>Weitere Abwehrtechniken</h4>
-            ${grid(T('shuto-uke', 'Shuto-uke'), T('morote-uke', 'Morote-uke'), T('juji-uke', 'Juji-uke'), T('kakiwake-uke', 'Kakiwake-uke'), T('osae-uke', 'Osae-uke'), T('kake-uke', 'Kake-uke'), T('teisho-uke', 'Teisho-uke'), T('sukui-uke', 'Sukui-uke'), T('manji-uke', 'Manji-uke'))}
-            <h4>Nagashi-uke – ablenkende Abwehren</h4>
-            ${grid(T('te-nagashi-uke', 'Te-nagashi-uke'), T('soto-nagashi-uke', 'Soto-nagashi-uke'), T('uchi-nagashi-uke', 'Uchi-nagashi-uke'), T('gedan-nagashi-uke', 'Gedan-nagashi-uke'))}`,
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/uke"><h3>Alle Abwehrtechniken im Lexikon</h3><p>Mit Bild, Aussprache und Stellen in den Kata</p><span class="area-go" aria-hidden="true">›</span></a>`,
         },
         {
           id: 'ki-uchi', title: 'Uchi – Schläge', quiz: 'ki-tsuki', minGrade: '7kyu',
           learn: () => `
             <ul>
-              <li><b>Uraken-uchi</b> – Faustrückenschlag (z. B. Tate-uraken, Yoko-mawashi-uchi).</li>
-              <li><b>Tettsui-uchi / Kentsui-uchi</b> – Hammerfaustschlag.</li>
-              <li><b>Shuto-uchi</b> – Handkantenschlag.</li>
-              <li><b>Empi-uchi / Enpi-uchi</b> – Ellbogenschlag (Mae-, Yoko-, Ushiro-, Mawashi-, Tate-, Otoshi-enpi).</li>
-              <li><b>Haito-uchi</b> – Schlag mit der inneren Handkante.</li>
-              <li>In der Prüfungsordnung ab dem 6. Kyu: Soto-uke / umsetzen in Kb mit <b>Yoko-Empi-Uchi</b>; ab dem 5. Kyu zusätzlich <b>Tate-Uraken</b>.</li>
+              <li><b>Uchi oder Tsuki?</b> Laut JKA-Buch wirkt die Kraft beim Schlag (Uchi) im rechten Winkel zum Unterarm, beim Stoß (Tsuki) in Richtung des Unterarms. Schläge holen ihre Kraft aus dem Schnappen des Ellbogens.</li>
+              <li>Shuto- und Haito-uchi gibt es von innen und von außen, Uraken- und Tettsui-uchi in mehreren Formen.</li>
+              <li><b>Prüfungsordnung:</b> ab dem 6. Kyu Soto-uke / umsetzen in Kb mit <b>Yoko-Empi-Uchi</b>; ab dem 5. Kyu zusätzlich <b>Tate-Uraken</b>.</li>
+              <li><b>Ellbogen und Stand:</b> Yoko-enpi bevorzugt in Kiba-dachi, Otoshi-enpi in Fudo- oder Kiba-dachi, Furi-enpi mit Stampfer in Kiba-dachi.</li>
             </ul>
-            ${grid(W('uraken', 'Uraken-uchi'), W('tettsui', 'Tettsui-uchi'), W('shuto', 'Shuto-uchi'), W('hiji', 'Enpi-uchi'))}
-            <h4>Die Schläge in Bewegung</h4>
-            ${grid(T('uraken-uchi', 'Uraken-uchi'), T('tettsui-uchi', 'Tettsui-uchi'), T('shuto-uchi', 'Shuto-uchi'), T('haito-uchi', 'Haito-uchi'))}
-            <h4>Ellbogen (Enpi) in alle Richtungen</h4>
-            <ul>
-              <li><b>Mae-enpi</b> – nach vorne: der Ellbogen bleibt dicht am Körper, die Faust geht dafür über den Bauch zur anderen Seite.</li>
-              <li><b>Furi-enpi</b> – schwingend zur Seite, mit Stampfer in Kiba-dachi.</li>
-              <li><b>Mawashi-enpi</b> – im waagerechten Bogen, ohne Kontakt zum Körper.</li>
-              <li><b>Age-enpi</b> – senkrecht nach oben, dicht am Körper; die Faust endet neben dem Kopf.</li>
-              <li><b>Yoko-enpi</b> – zur Seite, bevorzugt in Kiba-dachi; <b>Otoshi-enpi</b> – senkrecht nach unten, in Fudo- oder Kiba-dachi.</li>
-              <li><b>Ushiro-enpi</b> – nach hinten, Jodan oder Chudan.</li>
-              <li>Schläge (Uchi) holen ihre Kraft aus dem Schnappen des Ellbogens. Shuto- und Haito-uchi gibt es von innen und von außen, Uraken- und Tettsui-uchi in mehreren Formen.</li>
-            </ul>
-            ${grid(T('enpi-uchi', 'Mae-enpi'), T('furi-enpi', 'Furi-enpi'), T('yoko-enpi', 'Yoko-enpi'), T('mawashi-enpi', 'Mawashi-enpi'), T('age-enpi', 'Age-enpi'), T('otoshi-enpi', 'Otoshi-enpi'), T('ushiro-enpi', 'Ushiro-enpi'))}`,
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/uchi"><h3>Alle Schläge im Lexikon</h3><p>Mit Bild, Aussprache und Stellen in den Kata</p><span class="area-go" aria-hidden="true">›</span></a>`,
         },
         {
           id: 'ki-geri', title: 'Geri – Fußtritte', quizTitle: 'Fuß: Geri', minGrade: '8kyu',
           learn: () => `
             <ul>
-              <li><b>Mae-geri</b> – Fußtritt nach vorne (Fußballen); Keage = schnappend, Kekomi = stoßend.</li>
-              <li><b>Mae-geri-kekomi</b> – Stoßtritt nach vorne mit Ferse oder Fußballen.</li>
-              <li><b>Yoko-geri-keage</b> – seitlicher Schnapptritt; <b>Yoko-geri-kekomi</b> – seitlicher Stoßtritt (Fußkante).</li>
-              <li><b>Mawashi-geri</b> – Halbkreisfußtritt.</li>
-              <li><b>Ushiro-geri</b> – Fußtritt nach hinten (Ferse).</li>
-              <li><b>Mikazuki-geri</b> – Sicheltritt; <b>Fumikomi</b> – Stampftritt.</li>
-              <li><b>Ren-geri</b> – Kombination mehrerer Fußtritte (Theorie 3. Kyu).</li>
-              <li><b>Sonoba-geri</b> – Fußtritte am Platz (Standübung, Theorie 1. Kyu).</li>
-              <li><b>Kizami-geri</b> – Tritt mit dem vorderen Bein (Theorie 2. Kyu).</li>
-              <li><b>Ura-mawashi-geri</b> – Halbkreistritt in Gegenrichtung zum Mawashi-geri (Sohle oder Ferse); <b>Ushiro-mawashi-geri</b> – derselbe Tritt aus einer Drehung wie beim Ushiro-geri.</li>
-              <li><b>Hiza-geri</b> – Kniestoß senkrecht nach oben; <b>Mawashi-hiza-geri</b> – Kniestoß im Bogen. Fuß und Zehen sind dabei zum Schienbein angezogen.</li>
-              <li>DJKB: <b>Ushiro-geri und Yoko-geri-kekomi</b> generell Chudan; alle übrigen Fußtritte (auch Kizami-mae-geri) generell <b>Jodan</b>. Seitliche Fußtritte in beide Richtungen.</li>
+              <li><b>Keage oder Kekomi?</b> Keage = Schnapptritt, Kekomi = Stoßtritt (z. B. Yoko-geri-keage und Yoko-geri-kekomi).</li>
+              <li><b>Höhe laut DJKB:</b> Ushiro-geri und Yoko-geri-kekomi generell Chudan; alle übrigen Fußtritte (auch Kizami-mae-geri) generell <b>Jodan</b>. Seitliche Fußtritte in beide Richtungen.</li>
+              <li><b>Welcher Fußteil trifft:</b> Mae-geri und Mawashi-geri mit dem Fußballen, Yoko-geri mit der Fußkante, Ushiro-geri mit der Ferse, Mae-geri-kekomi mit Ferse oder Fußballen. Beim Kniestoß sind Fuß und Zehen zum Schienbein angezogen.</li>
+              <li><b>Theorie-Begriffe:</b> Ren-geri (3. Kyu), Kizami-geri (2. Kyu), Sonoba-geri (1. Kyu).</li>
+              <li><b>Fußfeger (Ashi-barai)</b> nehmen dem Partner kurz das Gleichgewicht, sodass er der Folgetechnik nichts entgegensetzen kann. Sie setzen gute Grundlagen und Körperbeherrschung voraus.</li>
             </ul>
-            ${grid(M('mae-geri', 'Mae-geri', 'nach vorne'), M('yoko-geri', 'Yoko-geri', 'zur Seite'), M('mawashi-geri', 'Mawashi-geri', 'im Halbkreis'), M('ushiro-geri', 'Ushiro-geri', 'nach hinten'), M('mikazuki-geri', 'Mikazuki-geri', 'Sicheltritt'))}
-            <h4>Weitere Fußtechniken</h4>
-            ${grid(T('mae-geri-kekomi', 'Mae-geri-kekomi'), T('yoko-geri-keage', 'Yoko-geri-keage'), T('fumikomi', 'Fumikomi'), T('ren-geri', 'Ren-geri'), T('sonoba-geri', 'Sonoba-geri'), T('kizami-geri', 'Kizami-geri'), T('hiza-geri', 'Hiza-geri'), T('ura-mawashi-geri', 'Ura-mawashi-geri'), T('ushiro-mawashi-geri', 'Ushiro-mawashi-geri'), T('mawashi-hiza-geri', 'Mawashi-hiza-geri'))}
-            <h4>Fußfeger (Ashi-barai)</h4>
-            <p>Ein Fußfeger nimmt dem Partner kurz das Gleichgewicht, sodass er der Folgetechnik nichts entgegensetzen kann. Er setzt gute Grundlagen und Körperbeherrschung voraus.</p>
-            ${grid(T('ashi-barai', 'Ashi-barai'))}`,
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/geri"><h3>Alle Fußtechniken im Lexikon</h3><p>Mit Bild, Aussprache und Stellen in den Kata</p><span class="area-go" aria-hidden="true">›</span></a>
+            <a class="area area-begriffe lex-ziel" href="#/lexikon/waffe"><h3>Körperwaffen im Lexikon</h3><p>Faust, Hand, Fuß, Ellbogen und Knie – gezeichnet, mit Trefferfläche</p><span class="area-go" aria-hidden="true">›</span></a>`,
         },
       ],
     },
@@ -350,7 +245,7 @@
               <li><b>Jiyu-Kumite</b> – freier Kampf (DJKB: ab 2. Dan, alternativ Jiyu-Ippon je nach Alter).</li>
               <li><b>Happo-Kumite</b> – Kumite in acht Richtungen (Theorie 2. Dan).</li>
             </ul>
-            ${grid(T('gohon-kumite', 'Gohon-Kumite'), T('kihon-ippon-kumite', 'Kihon-Ippon-Kumite'), T('maai', 'Maai', 'richtige Distanz zum Partner'))}`,
+            ${grid(T('gohon-kumite', 'Gohon-Kumite'), T('kihon-ippon-kumite', 'Kihon-Ippon-Kumite'))}`,
         },
         {
           id: 'ku-prinzipien', title: 'Prinzipien im Kumite', minGrade: '6kyu',

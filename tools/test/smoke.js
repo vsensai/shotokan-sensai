@@ -51,7 +51,7 @@
         if (!filled.every(Boolean)) throw new Error(`leerer Reiter bei ${g.id}`);
         if (app.querySelector('.quiz-card, .actions .btn.primary')) throw new Error(`Quiz-Knopf auf Prüfungsseite ${g.id}`);
       }
-      for (const id of ['et-dojokun', 'da-grund', 'heian-shodan-ueberblick', 'gl-stand', 'gl-waffe', 'gl-ashi', 'da-ashi']) {
+      for (const id of ['et-dojokun', 'da-kampf', 'heian-shodan-ueberblick', 'gl-stand', 'gl-waffe', 'gl-ashi', 'da-ashi']) {
         location.hash = `#/quiz/${id}`;
         await wait();
         await answerAll(true);
