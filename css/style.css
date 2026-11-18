@@ -20,6 +20,10 @@
   --sel: var(--ink);
   --sel-ink: #fff;
   --sel-bg: #f1efec;
+  /* Bereichsfarben: nur als Streifen links an Karten des Bereichs, nie als Fläche, Schrift bleibt schwarz */
+  --c-begriffe: #3949ab;
+  --c-kata: var(--red);
+  --c-theorie: #455a64;
   --papier: radial-gradient(ellipse at 100% 0%, rgba(198, 40, 40, 0.14), transparent 45%), linear-gradient(170deg, #fffaf2, #efe4d2);
   font-size: 16px;
 }
@@ -333,11 +337,11 @@ main:has(> .version) {
 }
 
 .unit.kata {
-  border-left: 5px solid var(--red);
+  border-left: 5px solid var(--c-kata);
 }
 
 .unit.general {
-  border-left: 5px solid #455a64;
+  border-left: 5px solid var(--c-theorie);
 }
 
 .unit-head {
@@ -645,11 +649,10 @@ figure.gfx {
   font-size: 0.85rem;
 }
 
-/* Grafik als Karte: Name oben, roter Rand links (wie im Lexikon) */
+/* Grafik als Karte im Lerntext: Name oben; ohne Bereichsstreifen – sie gehört zum Text */
 figure.gfx {
   background: var(--card);
   border: 1px solid var(--line);
-  border-left: 5px solid var(--red);
   border-radius: 12px;
   padding: 0.7rem;
   box-shadow: var(--shadow);
@@ -853,7 +856,7 @@ figure.gfx svg {
   padding: 0.7rem 1rem;
   background: var(--card);
   border: 1px solid var(--line);
-  border-left: 5px solid var(--red);
+  border-left: 5px solid var(--c-begriffe);
   border-radius: 12px;
   box-shadow: var(--shadow);
   cursor: pointer;
@@ -881,7 +884,7 @@ figure.gfx svg {
   font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.04em;
-  color: var(--red);
+  color: var(--muted);
 }
 
 .lex-cat-n {
@@ -903,7 +906,7 @@ figure.gfx svg {
   height: 2rem;
   border-radius: 50%;
   background: var(--bg);
-  color: var(--red);
+  color: var(--muted);
   font-size: 1.3rem;
   line-height: 1;
   transition: transform 0.15s;
@@ -952,7 +955,7 @@ figure.gfx svg {
 .lex-card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-left: 5px solid var(--red);
+  border-left: 5px solid var(--c-begriffe);
   border-radius: 12px;
   padding: 0.7rem;
   box-shadow: var(--shadow);
@@ -1701,6 +1704,19 @@ details.unit>summary::-webkit-details-marker {
   background: var(--red);
 }
 
+/* Bereichsfarbe als Streifen */
+.area-begriffe {
+  border-left: 6px solid var(--c-begriffe);
+}
+
+.area-kata {
+  border-left: 6px solid var(--c-kata);
+}
+
+.area-theorie {
+  border-left: 6px solid var(--c-theorie);
+}
+
 .area-go {
   grid-row: 1 / span 4;
   grid-column: 2;
@@ -1719,7 +1735,7 @@ details.unit>summary::-webkit-details-marker {
 }
 
 .unit.drill {
-  border-left: 1px solid var(--line);
+  border-left: 5px solid var(--c-begriffe);
 }
 
 .unit.drill .path {
@@ -2609,6 +2625,9 @@ main:fullscreen .ans-wrap {
     --track: #1a1a1a;
     --sel-ink: #1b1b1b;
     --sel-bg: #2e2e2e;
+    --c-begriffe: #8c9eff;
+    --c-kata: #ef5350;
+    --c-theorie: #8fa4ae;
   }
 
   .hero-kanji {

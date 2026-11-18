@@ -465,7 +465,7 @@
         bar.firstChild.style.width = `${ls.length ? (done / ls.length) * 100 : 0}%`;
         return el(
           'a',
-          { class: 'area', href: `#/quiz/${t.id}` },
+          { class: `area area-${t.id}`, href: `#/quiz/${t.id}` },
           el('h3', {}, t.title, n ? el('span', { class: 'area-due', text: `${n} fällig` }) : ''),
           el('p', { text: t.desc }),
           bar,

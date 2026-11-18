@@ -34,6 +34,7 @@ Jedes Bedienelement hat eine Rolle, jede Rolle sieht überall gleich aus (Farben
 - **Auswahl** (Reiter, Umschalter, Ansicht, Tempo, 3D/Fußbild, gewählte Antwort, offene Lexikon-Kategorie): graue Leiste bzw. Rand, das Gewählte dunkel (`--sel`). Nie rot, nie blau.
 - **Hinweis**: Rot nur klein – Schild („5 fällig“, `pill due`), Fortschrittsbalken, aktuelle Stelle. Lektionen ohne roten Rand; der Punkt zeigt den Stand (Zahl offen, grünes ✓ bestanden). Grün/Rot nach einer Antwort bleibt für richtig/falsch.
 - **Navigation**: Karte mit › am Rand (z. B. Bereiche im Quiz), sieht nie aus wie ein Knopf.
+- **Bereichsfarbe**: Streifen links (5–6 px) an Karten eines Bereichs – Begriffe Indigo (`--c-begriffe`: Lexikon-Kategorien und -Karten, Karteikarten, Quiz › Begriffe), Kata Rot (`--c-kata`), Theorie Schiefergrau (`--c-theorie`). Nie als Fläche, nie auf Knöpfen; Titel und Schrift bleiben schwarz. Was zu keinem Bereich gehört (Bilder im Lerntext, Prüfungsprogramm, Profil), hat keinen Streifen.
 - Ausnahme: das Labor (`labor/`, Figur-Editor) folgt dem Konzept nicht zwingend.
 
 ## 3D-Figuren
