@@ -55,7 +55,7 @@
         { f: [[-0.82, -0.02, 295, 0.6], [-0.05, 0.03, 291, 0.4]], body: 270, look: 0, turn: -270, h: 'Rechtes Bein trägt, Blick zur Vorderseite, Drehung links herum, linker Fuß gleitet nach links (Hizakutsu)' },
         { f: [[-0.69, -0.01, 55, 0.4], [0.11, 0.02, 53, 0.6]], body: 90, look: 0, turn: 180, h: 'Füße bleiben, Hüfte dreht nach rechts (Hizakutsu)' },
         { f: [[-0.35, 0.08, 342, 0.7], [0.28, 0.42, 38, 0.3]], body: 45, turn: -45, h: 'Linker Fuß zieht unter den Körper, rechter Fuß gleitet schräg nach rechts vorne' },
-        { f: [[-0.22, 0.05, 42, 0.7], [0.18, -0.46, 128, 0.3]], body: 135, turn: 90, h: 'Langsam: linkes Bein trägt, Drehung um 90° im Uhrzeigersinn, rechter Fuß und rechte Hand nach rechts' },
+        { f: [[-0.22, 0.05, 42, 0.7], [0.18, -0.46, 128, 0.3]], body: 135, look: 315, turn: 90, h: 'Langsam: linkes Bein trägt, Blick schräg nach links vorne, Drehung um 90° im Uhrzeigersinn, rechter Fuß und rechte Hand nach rechts' },
         { f: [[-0.43, 0.29, 320, 0.3], [0.1, 0.1, 43, 0.7]], body: 315, turn: -180, h: 'Blick schräg nach links vorne, Drehung links herum: rechter Fuß zieht zur Mitte zurück, linker Fuß gleitet schräg nach links vorne' },
       ],
       naore: { f: [[-0.07, 0.15, 354, 0.5], [0.06, 0.15, 0, 0.5]], body: 0, turn: 45, h: 'Rechter Fuß bleibt, linker Fuß schließt neben den rechten' },

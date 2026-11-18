@@ -452,7 +452,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
 | 38 | Hidari Hizakutsu | Migi Gedan Sukui-uke | Rechtes Bein trägt, Blick zur Vorderseite, Drehung links herum, linker Fuß gleitet nach links (Hizakutsu) | links, Blick vorne, Wendung ¾ links herum | 96 |
 | 39 | Migi Hizakutsu | Hidari Gedan Sukui-uke | Füße bleiben, Hüfte dreht nach rechts (Hizakutsu) | rechts, Blick vorne, Wendung ½ rechts herum | 97 |
 | 40 | Hidari Kokutsu-dachi | Migi Shuto Chudan-uke | Linker Fuß zieht unter den Körper, rechter Fuß gleitet schräg nach rechts vorne | rechts vorne, Wendung ⅛ links herum | 97 |
-| 41 | Migi-te Migi-ashi Uho-e | Rechte Hand und rechter Fuß nach rechts (90°-Drehung) – langsam | Langsam: linkes Bein trägt, Drehung um 90° im Uhrzeigersinn, rechter Fuß und rechte Hand nach rechts | rechts hinten, Wendung ¼ rechts herum | 98 |
+| 41 | Migi-te Migi-ashi Uho-e | Rechte Hand und rechter Fuß nach rechts (90°-Drehung) – langsam | Langsam: linkes Bein trägt, Blick schräg nach links vorne, Drehung um 90° im Uhrzeigersinn, rechter Fuß und rechte Hand nach rechts | rechts hinten, Blick links vorne, Wendung ¼ rechts herum | 98 |
 | 42 | Migi Kokutsu-dachi | Hidari Shuto Chudan-uke – **Kiai** | Blick schräg nach links vorne, Drehung links herum: rechter Fuß zieht zur Mitte zurück, linker Fuß gleitet schräg nach links vorne | links vorne, Wendung ½ links herum | 98 |
 <!-- /ablauf -->
 

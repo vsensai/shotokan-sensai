@@ -146,6 +146,7 @@
   // vor: die Bewegung hat einen ersten Teil in einem anderen Stand (stand) mit eigener Technik – die Füße stehen dabei schon
   // an ihrem Platz, danach wechselt nur der Stand (Heian Godan 21, 23: Angriff im Zenkutsu-dachi, dann Gewicht zurück).
   // bleibt: die Arme bleiben, wie sie sind – nur Blick oder Füße wechseln (Tekki: Kao Migi-muki, Kreuzschritt);
+  // offen (mit bleibt): der Oberkörper dreht dabei um so viele Grad zum Blick hin (Bassai Dai 41);
   // zuvor: die Bewegung hat laut Hinweis der Kata („Teil 1: Stand, Technik“) einen ersten Teil, der als eigene Bewegung
   // davor läuft, zeit Sekunden lang (höchstens knapp die halbe Zählzeit). 'wende': auf der Stelle zur Blickrichtung drehen,
   // die Füße bleiben an ihren alten Plätzen (Bassai Dai 25); 'tritt': Tritt auf dem Standbein der Bewegung, auf halbem Weg
@@ -198,7 +199,8 @@
     [/koshi-kamae/i, { def: 'koshi-kamae-hanmi', side: 'R', from: 0 }, /ashi-zenkutsu.*bassai/i],
     [/yama-zuki/i, { def: 'tc:yama-zuki', side: 'R', from: 0.25, direkt: true, erst: true }],
     [/gedan sukui-uke/i, { def: 'gedan-sukui-uke', side: 'R', from: 0.25, dur: 1.8, schlag: 1.0 }],
-    [/^rechte hand und rechter fuß/i, { bleibt: true }],
+    // Bassai Dai 41: Blick schon schräg nach links vorn (Kyohan), der Oberkörper öffnet sich dorthin
+    [/^rechte hand und rechter fuß/i, { bleibt: true, offen: 25 }],
     // Tekki Shodan
     [/^kao (migi|hidari)-muki \(/i, { bleibt: true }],
     [/fuß kreuzt langsam/i, { bleibt: true }],
@@ -893,7 +895,10 @@
       const d = st.slow ? SLOW * gap
         : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : ausStand ? 0.9 : sprung ? 0.75 : STEP[0] + STEP[1] * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
-      const look = m.look == null ? null : wrap(m.body - m.look);
+      // Genau entgegen (Bassai Dai 41: Blick schräg nach links vorn, Fuß und Hand nach rechts hinten) wäre die Seite offen:
+      // der Kopf dreht gegen die Drehung des Körpers – sonst drehte er 270° herum und in der nächsten Bewegung im Kreis
+      let look = m.look == null ? null : wrap(m.body - m.look);
+      if (look === -180 && m.turn > 0) look = 180;
       // (bei zwei Teilen gilt die Anzeige für beide zusammen)
       const mark = (t1) => { if (st.teil !== 1) marks.push({ t: st.von != null ? st.von : st.t, t1, n: st.n, kan: st.kan, ro: st.ro, text: `${st.stance} · ${st.tech}`, kiai: st.kiai }); };
       if (tech && tech.tritt) {
@@ -1071,6 +1076,11 @@
         const y1 = end.yaw;
         const ease = st.slow ? smooth : stepEase;
         arms = (u) => M(base, { yaw: lerp(base.yaw, y1, ease(u)) });
+      } else if (tech && tech.bleibt && tech.offen) {
+        // die Arme bleiben, der Oberkörper öffnet sich dabei zum Blick hin (sonst dreht der Kopf zu weit über die Schulter)
+        const base = cur.up;
+        end = M(base, { chest: base.chest + tech.offen });
+        arms = (u) => M(base, { chest: lerp(base.chest, end.chest, smooth(u)) });
       } else if (tech && tech.bleibt) {
         end = cur.up;
         arms = () => end;
@@ -1149,6 +1159,8 @@
       const seg = segment(cur, nk, o);
       // bleibt der Oberkörper stehen, bleibt auch der Blick, wo er ist
       if (tech && tech.halten && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
+      // blickt der Kopf schon dorthin, wohin sich der Körper wendet (Bassai Dai 41 → 42), läuft er nicht noch voraus
+      else if (Math.abs(nk.byaw - cur.byaw) > 90 && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
       if (m.via) {
         const s = m.via[0] ? 'R' : 'L';
         seg.via = { s, c: [-m.via[1] * SCALE, m.via[2] * SCALE], rel: wrap(-m.via[3] + m.body) };
