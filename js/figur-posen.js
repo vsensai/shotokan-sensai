@@ -1330,7 +1330,10 @@
   // unten (knapp über Kniehöhe); der Oberkörper neigt sich nur wenig (Zeiten wie beim Yoko-geri-kekomi des Lexikons)
   const GK_CH = BAL(M(KB_K, { pelvis: [0.3, 0.8, 0], yaw: 20, L: { yaw: 25, kp: [0.8, 0.2, 1] }, R: { x: 0.18, z: 0.2, y: 0.74, yaw: -10, pitch: -5, sole: [-1, -0.2, 0], kp: [-0.4, 0.9, 1] }, w: [1, 0] }), 'L');
   const GK_EXT = BAL(M(KB_K, { pelvis: [0.34, 0.78, 0], yaw: 45, chest: -25, roll: 14, L: { yaw: 50, kp: [0.5, 0.2, 1] }, R: { x: -0.5, z: 0.02, y: 0.42, yaw: 0, pitch: -18, sole: [-0.9, -0.4, 0], kp: [0, -0.2, 1] }, w: [1, 0] }), 'L');
-  KATA['yoko-kekomi-gedan'] = { keys: [{ t: 0, p: KB_K }, { t: 0.12, p: KB_K }, { t: 0.27, p: GK_CH }, { t: 0.35, p: GK_EXT, e: 'kime' }, { t: 0.41, p: GK_EXT }, { t: 0.53, p: GK_CH }, { t: 0.71, p: KB_K }] };
+  // Das Knie kommt zuerst gerade nach vorn zum Ziel hoch, zwischen die Arme (Hüfte noch zum Ziel, die Brust bleibt, wo sie
+  // ist); erst mit dem Tritt dreht die Hüfte seitlich ein (über GK_CH)
+  const GK_VOR = BAL(M(KB_K, { pelvis: [0.3, 0.8, 0], yaw: -60, chest: 60, L: { yaw: 0, kp: [0.5, 0.2, 1] }, R: { x: 0.07, z: 0.03, y: 0.63, yaw: -60, pitch: -50, kp: [-0.87, 0.5, 0.5] }, w: [1, 0] }), 'L');
+  KATA['yoko-kekomi-gedan'] = { keys: [{ t: 0, p: KB_K }, { t: 0.12, p: KB_K }, { t: 0.27, p: GK_VOR }, { t: 0.31, p: GK_CH, e: 'fl' }, { t: 0.35, p: GK_EXT, e: 'kime' }, { t: 0.41, p: GK_EXT }, { t: 0.53, p: GK_CH }, { t: 0.71, p: KB_K }] };
   // … dabei greifen beide Hände (sie stehen vom Tsukami-uke in Trittrichtung) und ziehen als Fäuste vor die Brust heran
   KATA['tsukamiyose'] = { keys: [
     { t: 0, p: M(KB, { oL: 1, oR: 1, hR: [-0.5, -0.04, 0.22], pR: [-1, 0, 0.3], fR: [0, 1, 0.2], hL: [-0.3, -0.08, 0.36], eL: [0.6, -1, 0.1], pL: [-1, 0, 0.3], fL: [-0.8, 0.5, 0.2] }) },
