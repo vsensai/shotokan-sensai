@@ -1357,13 +1357,17 @@
     M(KB, { hR: stretch([-0.1, -0.56, 0.2], 'R'), hL: [-0.07, -0.15, 0.2], eL: [1, -0.15, 0.2], pL: [0, -1, 0] }));
   // 32: Koshi-kamae mit halb seitlichem Oberkörper (Hanmi) – Fäuste wie in Tekki genau übereinander
   KATA['koshi-kamae-hanmi'] = STILL(M(KATA['koshi-kamae-tekki'].keys[0].p, { yaw: -30 }));
-  // 38, 39: Gedan Sukui-uke im Hizakutsu – die Hüfte steht schräg, der Blick geht über die rechte Schulter zum Angriff;
-  // die rechte Faust schöpft tief vor dem Körper von links nach rechts außen, die Faust bleibt tiefer als der Ellbogen
+  // 38, 39: Gedan Sukui-uke im Hizakutsu – die Hüfte steht schräg, der Blick geht über die rechte Schulter zum Angriff.
+  // Nach dem Buch: die rechte Faust holt hoch über der rechten Körperseite aus und schwingt in großem Bogen hinunter vor den
+  // Unterbauch (Handrücken vorn); dann dreht der Unterarm um den Ellbogen schnell nach außen – die Faust bleibt tiefer als
+  // der Ellbogen, der Handrücken zeigt am Ende nach unten. Die linke Faust zieht am Körper entlang zur Hüfte.
   const GS = M(S.hizakutsu, { yaw: -50, look: -90, hL: L(H.hip) });
+  const GS0 = M(GS, { hR: [-0.22, 0.32, 0.12], eR: [-1, -0.3, 0], pR: [0, 0, 1] });
   KATA['gedan-sukui-uke'] = { keys: [
-    { t: 0, p: M(GS, { hR: [0.2, -0.42, 0.3], eR: [-0.4, -0.6, 0.4] }) }, { t: 0.25, p: M(GS, { hR: [0.2, -0.42, 0.3], eR: [-0.4, -0.6, 0.4] }) },
-    { t: 0.31, p: M(GS, { hR: [-0.02, -0.56, 0.36], eR: [-0.6, -0.3, 0.1] }), e: 'in' },
-    { t: 0.37, p: M(GS, { hR: [-0.36, -0.44, 0.32], eR: [-1, 0, -0.3], pR: [0.3, 1, 0] }), e: 'kime' },
+    { t: 0, p: GS0 }, { t: 0.25, p: GS0 },
+    { t: 0.29, p: M(GS, { hR: [-0.3, -0.18, 0.38], eR: [-1, -0.4, 0], pR: [0, 0, -1] }), e: 'in' },
+    { t: 0.33, p: M(GS, { hR: [0.03, -0.5, 0.34], eR: [-0.7, -0.4, 0.2], pR: [0, 0, -1] }) },
+    { t: 0.37, p: M(GS, { hR: [-0.36, -0.44, 0.32], eR: [-1, 0, -0.3], pR: [0, 1, 0] }), e: 'kime' },
   ] };
 
   /* Kanku Dai */
