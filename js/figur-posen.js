@@ -1334,7 +1334,7 @@
   // ist); erst mit dem Tritt dreht die Hüfte seitlich ein (über GK_CH)
   const GK_VOR = BAL(M(KB_K, { pelvis: [0.3, 0.8, 0], yaw: -60, chest: 60, L: { yaw: 0, kp: [0.5, 0.2, 1] }, R: { x: 0.07, z: 0.03, y: 0.63, yaw: -60, pitch: -50, kp: [-0.87, 0.5, 0.5] }, w: [1, 0] }), 'L');
   // Nach dem Tritt (Endstellung von 19) bleibt das Knie nur mäßig hoch – Oberschenkel schräg, nicht bis zur Brust
-  const GK_ZU = BAL(M(GK_CH, { R: { x: 0.16, z: 0.18, y: 0.4, kp: [-0.4, 0.3, 1] } }), 'L');
+  const GK_ZU = BAL(M(GK_CH, { R: { x: 0.17, z: 0.19, y: 0.55, kp: [-0.4, 0.6, 1] } }), 'L');
   KATA['yoko-kekomi-gedan'] = { keys: [{ t: 0, p: KB_K }, { t: 0.12, p: KB_K }, { t: 0.27, p: GK_VOR }, { t: 0.31, p: GK_CH, e: 'fl' }, { t: 0.35, p: GK_EXT, e: 'kime' }, { t: 0.41, p: GK_EXT }, { t: 0.53, p: GK_ZU }, { t: 0.71, p: KB_K }] };
   // … dabei greifen beide Hände (sie stehen vom Tsukami-uke in Trittrichtung) und ziehen als Fäuste vor die Brust heran
   KATA['tsukamiyose'] = { keys: [
