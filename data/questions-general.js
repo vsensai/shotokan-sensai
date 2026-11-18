@@ -136,7 +136,6 @@
 
   L = SK.qb('da-ashi', S.kompakt);
   L.mc('Warum beschreibt der hintere Fuß beim Schritt in Zenkutsu-dachi einen Bogen?', ['Der Stand hat Breite – in der Mitte des Schritts kommen die Füße zusammen', 'Damit der Schritt länger wird', 'Um den Partner zu fegen', 'Weil man dabei springt'], '');
-  L.mc('Wie geht der hintere Fuß bei einem Schritt in Kokutsu-dachi (Füße auf einer Linie) nach vorne?', ['Gerade, ohne Bogen', 'Im großen Halbkreis nach außen', 'Er wird nachgezogen, ohne vorne anzukommen', 'Im Sprung'], '');
   L.mc('Wofür eignet sich Yori-ashi (beide Füße gleiten gleichzeitig) besonders?', ['Kleine Distanzänderungen, Rhythmuswechsel und das Verschleiern eines Angriffs', 'Große Strecken in kurzer Zeit', 'Drehungen um 180°', 'Den Gruß'], '');
   L.mc('Wozu dienen die kreisförmigen Körperdrehungen (Tai-sabaki)?', ['Zum Ausweichen aus der Angriffslinie im Kumite und bei Partnerübungen', 'Zum Gruß', 'Zum Aufwärmen der Hüfte', 'Für Sprungtritte'], '');
   L.mc('Warum muss man Fußarbeit eigens üben?', ['Weil die richtige Distanz für Abwehr und Konter davon abhängt', 'Weil sie in Prüfungen nicht vorkommt', 'Damit die Kata schneller vorbei ist', 'Weil die Hände sonst ermüden'], '');

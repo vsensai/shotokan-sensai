@@ -305,7 +305,7 @@
     yama: 'やま', yame: 'やめ', waza: 'わざ', yoi: 'ようい', yoko: 'よこ', yori: 'より', zanshin: 'ざんしん', zenkutsu: 'ぜんくつ', zenwan: 'ぜんわん',
     zuki: 'づき',
   };
-  // Deutsche Zusätze im Namen („Ayumi-ashi auf einer Linie“) und Klammern („Tai-sabaki (45°)“, „Koshi (Josokutei)“) spricht
+  // Deutsche Zusätze im Namen und Klammern („Koshi (Josokutei)“) spricht
   // die Stimme nicht; „Hiji / Enpi“ nennt beide Namen mit kurzer Pause. Fehlt ein Wortteil, gibt es keine Aussprache ('').
   const DEUTSCH = new Set(['auf', 'einer', 'linie']);
   function kana(t) {

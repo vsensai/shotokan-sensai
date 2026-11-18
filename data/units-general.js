@@ -245,10 +245,10 @@
             <p>Gute Beweglichkeit auf dem Boden ist nicht selbstverständlich und muss eigens geübt werden. Selbst Fortgeschrittene schätzen die Distanz oft falsch ein: Eine Abwehr scheitert, weil sie nicht durch Gleitschritt oder Körperdrehung unterstützt wird, oder der Konter wird schwach, weil der Abstand zu kurz oder zu groß ist.</p>
             <p class="muted small">So liest man die Fußbilder: Blick von oben, „vorne“ ist oben. Blass = Ausgangslage, kräftig rot = Endlage, rot gestrichelt = Weg des Fußes, Zahlen = Reihenfolge. „▶ Bewegung“ spielt den Schritt ab.</p>
             <ul>
-              <li><b>Ayumi-ashi</b> – der normale Schritt: der hintere Fuß wird zum vorderen. Bei Ständen mit Breite (z. B. Zenkutsu-dachi) kommen die Füße in der Mitte des Schritts zusammen – der Fuß beschreibt einen Bogen. Stehen beide Füße auf einer Linie (z. B. Kokutsu-dachi), geht der hintere Fuß gerade nach vorne.</li>
+              <li><b>Ayumi-ashi</b> – der normale Schritt: der hintere Fuß wird zum vorderen. Bei Ständen mit Breite (z. B. Zenkutsu-dachi) kommen die Füße in der Mitte des Schritts zusammen – der Fuß beschreibt einen Bogen.</li>
               <li><b>Suri-ashi</b> – Gleitschritt: der Fuß bleibt flach am Boden und gleitet; so ändert man die Distanz schnell, z. B. mit Kizami-zuki.</li>
               <li><b>Yori-ashi</b> – beide Füße gleiten gemeinsam, der Stand bleibt; für kleine Distanzänderungen und um im Kampf den Rhythmus zu wechseln oder einen Angriff zu verschleiern. Kommt in vielen Kata vor (z. B. Heian Sandan, Tekki).</li>
-              <li><b>Tai-sabaki</b> – Körperausweichen: kreisförmige Drehungen aus der Angriffslinie im Kumite und bei Partnerübungen, üblich um 45° bis 180°; der hintere Fuß setzt im Bogen um, der vordere dreht sich auf der Stelle.</li>
+              <li><b>Tai-sabaki</b> – Körperausweichen: mit einer kreisförmigen Drehung aus der Angriffslinie, im Kumite und bei Partnerübungen.</li>
             </ul>
             ${grid(A('ayumi-ashi', 'Ayumi-ashi', 'Bogen über die Mitte'), A('suri-ashi', 'Suri-ashi'), A('yori-ashi', 'Yori-ashi'), A('tai-sabaki', 'Tai-sabaki'))}`,
         },

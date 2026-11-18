@@ -990,7 +990,7 @@
   // Partner gegenüber, danach Füße in Weltkoordinaten verschieben (der gefegte Fuß hebt ab, Gewicht aufs andere Bein)
   const UKE = (p, dx, dz) => move(rotate(p, 180, [0, 0]), dx, dz);
   const FKEYS = (tori, uke, best) => ({ keys: tori, partner: uke, best, dur: 2 });
-  // Teisoku-ashi-barai: der hintere (rechte) Fuß kommt flach über den Boden nach vorn und fegt den vorderen Fuß des Partners
+  // Ashi-barai (mit der Fußsohle): der hintere (rechte) Fuß kommt flach über den Boden nach vorn und fegt den vorderen Fuß des Partners
   // mit der Fußsohle von außen nach innen weg (beide Hidari-Kamae). Hüfte dreht ein, Standbein links.
   const TB_U0 = UKE(FIGHT, 0, 1.25);
   const TB_U1 = M(TB_U0, { pelvis: [0.06, 0.78, TB_U0.pelvis[2] + 0.03], lean: -6, roll: 8, L: { x: 0.06, z: 0.82, y: 0.17, yaw: 160, pitch: 10 }, w: [0, 1] });
@@ -1002,31 +1002,6 @@
     [{ t: 0, p: TB_0 }, { t: 0.12, p: TB_0 }, { t: 0.4, p: TB_1, e: 'in' }, { t: 0.56, p: TB_2, e: 'lin' }, { t: 0.68, p: TB_3, e: 'kime' }],
     [{ t: 0, p: TB_U0 }, { t: 0.56, p: TB_U0 }, { t: 0.68, p: TB_U1, e: 'kime' }], 0.68), M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'side', yaw: -22, pitch: 12 }));
   D['tc:ashi-barai'] = TB;
-  D['tc:teisoku-barai'] = TB;
-  // Haisoku-ashi-barai: aus der Kampfstellung gleitet der hintere Fuß nach, dann schwingt der vordere (linke) Fuß im Bogen
-  // von außen gegen den vorderen Fuß des Partners (Migi-Kamae) und fegt ihn mit dem Spann nach innen; Fußspitze gestreckt.
-  const HB_U0 = UKE(mirror(FIGHT), -0.1, 1.4);
-  const HB_U1 = M(HB_U0, { pelvis: [HB_U0.pelvis[0] - 0.06, 0.78, HB_U0.pelvis[2] + 0.03], lean: -6, roll: -8, R: { x: -0.02, z: 0.86, y: 0.2, yaw: 200, pitch: 10 }, w: [1, 0] });
-  const HB_0 = FIGHT;
-  const HB_1 = M(FIGHT, { pelvis: [-0.02, 0.75, 0.32], yaw: -30, R: { x: -0.13, z: -0.02 }, w: [0.4, 0.6] });
-  const HB_2 = M(HB_1, { pelvis: [-0.06, 0.74, 0.4], yaw: -10, L: { x: 0.5, z: 0.76, y: 0.2, yaw: -20, pitch: -30, sole: [1, 0.2, 0.2], kp: [1, 0.4, 0.6] }, w: [0, 1] });
-  const HB_3 = M(HB_2, { pelvis: [-0.06, 0.74, 0.42], yaw: -18, L: { x: 0.31, z: 0.9, y: 0.1, yaw: -15, pitch: -30, sole: [1, 0, 0.1] } });
-  const HB_4 = M(HB_2, { pelvis: [-0.1, 0.74, 0.42], yaw: -40, L: { x: -0.08, z: 0.84, y: 0.18, yaw: -40, pitch: -25, sole: [1, 0.1, 0.4], kp: [0.6, 0.4, 1] } });
-  D['tc:haisoku-barai'] = M(FKEYS(
-    [{ t: 0, p: HB_0 }, { t: 0.1, p: HB_0 }, { t: 0.3, p: HB_1 }, { t: 0.46, p: HB_2, e: 'in' }, { t: 0.56, p: HB_3, e: 'lin' }, { t: 0.68, p: HB_4, e: 'kime' }],
-    [{ t: 0, p: HB_U0 }, { t: 0.56, p: HB_U0 }, { t: 0.68, p: HB_U1, e: 'kime' }], 0.68), M(hit('toeL', 'Spann'), { eff: 'toeL', view: 'front3', yaw: -26, pitch: 7 }));
-  // Komura-ashi-barai: einen Schritt hinein (links neben den vorderen Fuß des Partners), das rechte Bein schwingt außen an
-  // dessen vorderem Bein vorbei und hakt es mit der Wade von hinten weg; die rechte Hand schiebt den Partner nach hinten.
-  const KO_U0 = UKE(FIGHT, 0, 1.3);
-  const KO_U1 = M(KO_U0, { pelvis: [0.02, 0.8, KO_U0.pelvis[2] + 0.12], lean: -16, L: { x: -0.2, z: 0.54, y: 0.3, yaw: 180, pitch: 20, kp: [0, 1, 0.3] }, w: [0, 1] });
-  const KO_0 = FIGHT;
-  const KO_1 = M(FIGHT, { pelvis: [0.02, 0.77, 0.28], yaw: -25, L: { x: 0.1, z: 0.66, y: 0.12 }, R: { z: -0.12 }, w: [0, 1] });
-  const KO_2 = M(FIGHT, { pelvis: [0.03, 0.78, 0.6], yaw: -10, L: { x: 0.1, z: 0.86, yaw: 0 }, R: { x: -0.14, z: 0.14, y: 0.16, yaw: -10, pitch: 10 }, hR: [-0.04, -0.02, 0.44], w: [1, 0] });
-  const KO_3 = M(KO_2, { pelvis: [0.03, 0.82, 0.66], yaw: 0, lean: -4, R: { x: -0.36, z: 1.1, y: 0.18, yaw: -10, pitch: 0, kp: [-0.3, 0.3, 1] }, hR: [-0.02, 0.02, 0.5] });
-  const KO_4 = M(KO_2, { pelvis: [0.04, 0.85, 0.7], yaw: 8, lean: 10, R: { x: -0.24, z: 0.62, y: 0.22, yaw: 0, pitch: 10, kp: [0, 0, 1] }, hR: [0.0, 0.08, 0.55] });
-  D['tc:komura-barai'] = M(FKEYS(
-    [{ t: 0, p: KO_0 }, { t: 0.08, p: KO_0 }, { t: 0.22, p: KO_1 }, { t: 0.34, p: KO_2 }, { t: 0.52, p: KO_3, e: 'in' }, { t: 0.68, p: KO_4, e: 'kime' }],
-    [{ t: 0, p: KO_U0 }, { t: 0.56, p: KO_U0 }, { t: 0.68, p: KO_U1, e: 'kime' }], 0.68), M(hit('kneeR', 'Wade'), { eff: 'ankleR', view: 'side', yaw: -32, pitch: 12 }));
   D['tc:maai'] = STILL(FIGHT, { partner: [{ t: 0, p: OPP(FIGHT, 2.3) }], view: 'side', marks: ['maai'] });
   D['tc:kogeki'] = M(D['mv:oi-zuki'], { keys: [{ t: 0, p: ZK_G }, { t: 0.15, p: ZK_G }, { t: 0.38, p: OI_MID, e: 'in' }, { t: 0.5, p: M(OI_END, { hR: H.jodan }), e: 'kime' }], partner: [{ t: 0, p: OPP(M(S.hachiji), 2.25) }], view: 'side' });
   D['tc:kogeki'] = TWIST(D['tc:kogeki'], 'R');
@@ -1070,7 +1045,7 @@
     'mv:yoko-geri': 'sokuto', 'tc:yoko-geri-keage': 'sokuto', 'mv:mawashi-geri': 'koshi', 'mv:ushiro-geri': 'kakato',
     'mv:mikazuki-geri': 'teisoku', 'tc:ura-mawashi-geri': 'teisoku', 'tc:ushiro-mawashi-geri': 'teisoku', 'tc:hiza-geri': 'hiza',
     'tc:mawashi-hiza-geri': 'hiza', 'tc:fumikomi': 'sokuto', 'tc:namigaeshi': 'teisoku', 'tc:nidan-geri': 'koshi:LR',
-    'tc:teisoku-barai': 'teisoku', 'tc:haisoku-barai': 'haisoku', 'tc:komura-barai': 'wade',
+    'tc:ashi-barai': 'teisoku',
   };
   /* ---------- Gestreckte Arme am Ende: überall nur ein minimaler Knick im Ellbogen ---------- */
   // Arme, die am Ende fast gestreckt sind (ab 97 %), und die hier genannten Schlag-/Abwehrarme werden auf 99 % gebracht

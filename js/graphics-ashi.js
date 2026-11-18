@@ -104,32 +104,6 @@
     return frame(w, 290, label, `${vorne}${axis}${def.extra || ''}${ghosts}${trails}${finals}${nums}`, def.lines);
   }
 
-  // Drehung eines Punktes um p (Grad, im Uhrzeigersinn)
-  function turn(p, c, deg) {
-    const a = (deg * Math.PI) / 180;
-    const dx = p[0] - c[0];
-    const dy = p[1] - c[1];
-    return [r1(c[0] + dx * Math.cos(a) - dy * Math.sin(a)), r1(c[1] + dx * Math.sin(a) + dy * Math.cos(a)), p[2] + deg];
-  }
-  function pivot(L, R, degs) {
-    return degs.map((d) => ({ L: [L[0], L[1], L[2] + d], R: turn(R, L, d) }));
-  }
-  // Querschritt (Yoko-sashi-ashi), optional um den Mittelpunkt gedreht (Shaho-sashi-ashi)
-  function sashi(deg) {
-    const c = [136, 150];
-    const k = [
-      { L: [50, 150, 0], R: [140, 150, 0] },
-      { L: [148, 118, 0, true], R: [140, 150, 0] },
-      { L: [148, 118, 0, true], R: [222, 150, 0] },
-      { L: [132, 150, 0], R: [222, 150, 0] },
-    ];
-    if (!deg) return k;
-    return k.map((f) => ({ L: turn(f.L, c, deg).concat(f.L[3] ? [true] : []), R: turn(f.R, c, deg) }));
-  }
-  const TS45 = pivot([110, 110, 0], [146, 194, 20], [0, 22.5, 45]);
-  const TS180 = pivot([110, 140, 0], [140, 214, 20], [0, -60, -120, -180]);
-  const SH = sashi(-45);
-
   SK.gfx.ASHI = {
     'ayumi-ashi': () => sabaki('Ayumi-ashi', {
       axis: 'M110 24 V270',
@@ -140,15 +114,7 @@
       ],
       lines: ['von oben: Schritt nach vorne – der hintere Fuß', 'kommt in der Mitte des Schritts zum Standbein'],
     }),
-    'ayumi-ashi-linie': () => sabaki('Ayumi-ashi auf einer Linie', {
-      axis: 'M110 24 V270',
-      keys: [
-        { L: [104, 150, 0], R: [118, 232, 90] },
-        { L: [104, 150, 0], R: [122, 152, 0] },
-        { L: [100, 152, -90], R: [112, 60, 0] },
-      ],
-      lines: ['von oben: Füße auf einer Linie (z. B. Kokutsu-dachi) –', 'der hintere Fuß geht gerade nach vorne'],
-    }),
+
     'suri-ashi': () => sabaki('Suri-ashi', {
       axis: 'M110 24 V270',
       keys: [
@@ -158,24 +124,8 @@
       ],
       lines: ['von oben: Gleitschritt – der Fuß bleibt flach', 'am Boden und gleitet nach vorne'],
     }),
-    'okuri-suri-ashi': () => sabaki('Okuri-suri-ashi', {
-      keys: [
-        { L: [86, 120, 0], R: [134, 212, 25] },
-        { L: [86, 64, 0], R: [134, 212, 25] },
-        { L: [86, 64, 0], R: [134, 156, 25] },
-      ],
-      nums: [[62, 96, 1], [160, 186, 2]],
-      lines: ['von oben: Gleitschritt – erst der Fuß, der näher', 'am Ziel ist (1), dann zieht der andere nach (2)'],
-    }),
-    'tsugi-suri-ashi': () => sabaki('Tsugi-suri-ashi', {
-      keys: [
-        { L: [86, 150, 0], R: [134, 238, 25] },
-        { L: [86, 150, 0], R: [122, 176, 20] },
-        { L: [86, 66, 0], R: [122, 176, 20] },
-      ],
-      nums: [[154, 214, 1], [62, 112, 2]],
-      lines: ['von oben: erst setzt der hintere Fuß nach vorne', 'auf (1), dann gleitet der vordere weit vor (2)'],
-    }),
+
+
     'yori-ashi': () => sabaki('Yori-ashi', {
       keys: [
         { L: [86, 156, 0], R: [134, 240, 25] },
@@ -183,15 +133,7 @@
       ],
       lines: ['von oben: beide Füße gleiten gleichzeitig,', 'der Stand bleibt dabei unverändert'],
     }),
-    'ashi-fumikae': () => sabaki('Ashi-fumikae', {
-      keys: [
-        { L: [86, 86, 0], R: [134, 196, 25] },
-        { L: [86, 196, -25], R: [134, 196, 25] },
-        { L: [86, 196, -25], R: [134, 86, 0] },
-      ],
-      nums: [[62, 142, 1], [158, 142, 2]],
-      lines: ['von oben: Beinwechsel am Platz – nach vorne', 'erst vorne zurück (1), dann hinten vor (2)'],
-    }),
+
     'tai-sabaki': () => sabaki('Tai-sabaki', {
       axis: 'M110 24 V270',
       keys: [
@@ -202,31 +144,9 @@
       extra: `<text x="116" y="40" font-size="10" fill="#78909c" ${FONT}>Angriffslinie</text>`,
       lines: ['von oben: Ausweichen – ein Fuß setzt schräg', 'zurück, der Körper dreht aus der Angriffslinie'],
     }),
-    'tai-sabaki-45': () => sabaki('Tai-sabaki (45°)', {
-      axis: 'M110 24 V270',
-      keys: TS45,
-      extra: `<path d="M110 110 L194 26" stroke="#b0bec5" stroke-width="1.2" stroke-dasharray="2 4"/><text x="152" y="62" font-size="11" font-weight="700" fill="${HL}" ${FONT}>45°</text>`,
-      lines: ['von oben: Ausweichen mit 45°-Drehung – der hintere', 'Fuß setzt im Bogen um, der vordere dreht am Platz'],
-    }),
-    'tai-sabaki-180': () => sabaki('Tai-sabaki (180°)', {
-      axis: 'M110 24 V270',
-      keys: TS180,
-      extra: `<text x="40" y="150" font-size="12" font-weight="700" fill="${HL}" ${FONT}>180°</text>`,
-      lines: ['von oben: Drehung um 180° – der hintere Fuß', 'setzt im Bogen um, der vordere dreht am Platz'],
-    }),
-    'yoko-sashi-ashi': () => sabaki('Yoko-sashi-ashi', {
-      w: 260,
-      axis: 'M20 150 H246',
-      keys: sashi(0),
-      nums: [[98, 112, 1], [182, 132, 2]],
-      lines: ['von oben: Querschritt – ein Fuß setzt vor dem', 'anderen über (1), der tritt seitlich weiter (2)'],
-    }),
-    'shaho-sashi-ashi': () => sabaki('Shaho-sashi-ashi', {
-      w: 260,
-      axis: 'M66 220 L216 70',
-      keys: SH,
-      nums: [[118, 176, 1], [176, 124, 2]],
-      lines: ['von oben: derselbe Querschritt wie Yoko-sashi-ashi,', 'nur schräg (diagonal) zur Seite'],
-    }),
+
+
+
+
   };
 })();
