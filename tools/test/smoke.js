@@ -69,7 +69,7 @@
         location.hash = `#/zufall/${scope}`;
         await wait();
         const before = app.querySelector('.card b').textContent;
-        app.querySelector('.actions .btn.primary').click();
+        app.querySelector('.actions .btn').click(); // erster Knopf: 10 Fragen
         await answerAll(true);
         location.hash = `#/zufall/${scope}/x`;
         await wait();
