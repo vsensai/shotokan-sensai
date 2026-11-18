@@ -39,7 +39,7 @@
       id: 'etikette', title: 'Dojo & Etikette', kind: 'general', desc: 'Gruß, Kommandos, Dojo-Kun',
       lessons: [
         {
-          id: 'et-dojo', title: 'Im Dojo', minGrade: '9kyu',
+          id: 'et-dojo', title: 'Im Dojo', quiz: 'et-dojokun', minGrade: '9kyu',
           learn: () => `
             <p><b>Dojo</b> bedeutet „Ort des Weges“. Karate beginnt und endet mit Respekt (Rei).</p>
             <ul>
@@ -55,7 +55,7 @@
             ${grid(T('rei', 'Rei'), T('seiza', 'Seiza'), T('mokuso', 'Mokuso'), T('kiritsu', 'Kiritsu'), T('yoi', 'Yoi'), T('mawatte', 'Mawatte'))}`,
         },
         {
-          id: 'et-dojokun', title: 'Dojo-Kun', minGrade: '9kyu',
+          id: 'et-dojokun', title: 'Dojo-Kun', quizTitle: 'Etikette & Dojo-Kun', minGrade: '9kyu',
           learn: () => `
             <p>Das <b>Dojo-Kun</b> sind die fünf Leitsätze des Shotokan-Karate. Jeder beginnt mit <b>„Hitotsu“</b> („eins“ / „erstens“) – das zeigt, dass alle gleich wichtig sind.</p>
             <ol>
@@ -124,7 +124,7 @@
       ],
     },
     {
-      id: 'begriffe', title: 'Begriffe & Zählen', kind: 'general', desc: 'Japanische Grundbegriffe',
+      id: 'begriffe', title: 'Begriffe & Zählen', kind: 'general', desc: 'Japanische Grundbegriffe', quizTitle: 'Zählen & Grundwörter', quizDesc: 'Zahlen, Richtungen, Grade',
       lessons: [
         {
           id: 'te-zahlen', title: 'Zählen & Richtungen', minGrade: '9kyu',
@@ -146,7 +146,7 @@
             ${grid(G.figure(null, 'Die drei Stufen', 'Jodan = Gesicht, Chudan = Brust, Gedan = Unterbauch (Definition im JKA-Kata-Buch)', 'fig:levels'))}`,
         },
         {
-          id: 'te-koerper', title: 'Körperwaffen', minGrade: '8kyu',
+          id: 'te-koerper', title: 'Körperwaffen', quiz: 'gl-waffe', minGrade: '8kyu',
           learn: () => `
             <ul>
               <li><b>Seiken</b> – Vorderseite der Faust (Knöchel von Zeige- und Mittelfinger)</li>
@@ -165,7 +165,7 @@
             ${grid(W('koshi', 'Koshi (Fußballen)'), W('sokuto', 'Sokuto (Fußkante)'), W('kakato', 'Kakato (Ferse)'), W('haisoku', 'Haisoku (Fußrücken)'), W('hiji', 'Hiji / Enpi (Ellbogen)'), W('zenwan', 'Zenwan (Unterarm)'), W('hiza', 'Hiza (Knie)'))}`,
         },
         {
-          id: 'te-konzepte', title: 'Wichtige Konzepte', minGrade: '7kyu',
+          id: 'te-konzepte', title: 'Wichtige Konzepte', quiz: 'gl-begriff', minGrade: '7kyu',
           learn: () => `
             <ul>
               <li><b>Kiai</b> – Kampfschrei; Vereinigung von Kraft und Geist im Moment der Technik.</li>
@@ -204,7 +204,7 @@
       id: 'dachi', title: 'Dachi – Stände', kind: 'general', desc: 'Grundstellungen mit Grafiken',
       lessons: [
         {
-          id: 'da-grund', title: 'Grund- & Natürliche Stände', minGrade: '9kyu',
+          id: 'da-grund', title: 'Grund- & Natürliche Stände', quiz: 'da-kampf', minGrade: '9kyu',
           learn: () => `<p>Stabile Stände sind das <b>Fundament</b> jeder Technik: Steht der Körper nicht sicher, verpufft die Kraft von Armen und Beinen. Jede Grafik zeigt den Stand als 3D-Figur; „Fußbild“ zeigt die Füße von oben mit der Gewichtsverteilung und ungefähren Maßen.</p>
             ${grid(S.musubi, S.heisoku, S.hachiji)}
             <ul>
@@ -214,7 +214,7 @@
             </ul>`,
         },
         {
-          id: 'da-kampf', title: 'Zenkutsu, Kokutsu, Kiba', minGrade: '9kyu',
+          id: 'da-kampf', title: 'Zenkutsu, Kokutsu, Kiba', quizTitle: 'Stände', minGrade: '9kyu',
           learn: () => `${grid(S.zenkutsu, S.zenkutsuR, S.kokutsu, S.kokutsuL, S.kiba)}
             <p class="muted small">Die Prozentzahlen im „Fußbild“ zeigen, wie das Gewicht verteilt ist. Im JKA-Kata-Buch heißt Zenkutsu-dachi nach dem <b>vorderen</b> Bein, Kokutsu-dachi nach dem <b>hinteren</b> (belasteten) Bein – z. B. „Migi Kokutsu-dachi, Hidari Shuto-uke“: rechtes Bein hinten, linkes vorne.</p>
             <ul>
@@ -226,7 +226,7 @@
             </ul>`,
         },
         {
-          id: 'da-weitere', title: 'Weitere Stände', minGrade: '5kyu',
+          id: 'da-weitere', title: 'Weitere Stände', quiz: 'da-kampf', minGrade: '5kyu',
           learn: () => `${grid(S.kosa, S.neko, S.fudo, S.hangetsu, S.sanchin, S.renoji, S.teiji)}
             <ul>
               <li><b>Kosa-dachi</b> – Kreuzstand (Begriff der Theorie zum 1. Dan); auch für Anwendungen mit Körperdrehung.</li>
@@ -277,10 +277,10 @@
       ],
     },
     {
-      id: 'kihon', title: 'Kihon – Techniken', kind: 'general', desc: 'Tsuki, Uke, Uchi, Geri',
+      id: 'kihon', title: 'Kihon – Techniken', kind: 'general', desc: 'Tsuki, Uke, Uchi, Geri', quizDesc: 'Hand- und Fußtechniken',
       lessons: [
         {
-          id: 'ki-tsuki', title: 'Tsuki – Fauststöße', minGrade: '9kyu',
+          id: 'ki-tsuki', title: 'Tsuki – Fauststöße', quizTitle: 'Hand: Tsuki, Uke, Uchi', minGrade: '9kyu',
           learn: () => `
             <ul>
               <li><b>Choku-zuki</b> – gerader Fauststoß im Stand.</li>
@@ -299,7 +299,7 @@
             ${grid(T('choku-zuki', 'Choku-zuki'), T('kizami-zuki', 'Kizami-zuki'), T('sanbon-zuki', 'Sanbon-zuki'), T('ren-zuki', 'Ren-zuki'), T('morote-zuki', 'Morote-zuki'), T('kagi-zuki', 'Kagi-zuki'), T('ura-zuki', 'Ura-zuki'), T('age-zuki', 'Age-zuki'), T('yama-zuki', 'Yama-zuki'), T('tate-zuki', 'Tate-zuki'), T('mawashi-zuki', 'Mawashi-zuki'), T('awase-zuki', 'Awase-zuki'))}`,
         },
         {
-          id: 'ki-uke', title: 'Uke – Abwehrtechniken', minGrade: '9kyu',
+          id: 'ki-uke', title: 'Uke – Abwehrtechniken', quiz: 'ki-tsuki', minGrade: '9kyu',
           learn: () => `
             <ul>
               <li><b>Gedan-barai</b> – Abwehr nach unten (fegend).</li>
@@ -329,7 +329,7 @@
             ${grid(T('te-nagashi-uke', 'Te-nagashi-uke'), T('soto-nagashi-uke', 'Soto-nagashi-uke'), T('uchi-nagashi-uke', 'Uchi-nagashi-uke'), T('gedan-nagashi-uke', 'Gedan-nagashi-uke'))}`,
         },
         {
-          id: 'ki-uchi', title: 'Uchi – Schläge', minGrade: '7kyu',
+          id: 'ki-uchi', title: 'Uchi – Schläge', quiz: 'ki-tsuki', minGrade: '7kyu',
           learn: () => `
             <ul>
               <li><b>Uraken-uchi</b> – Faustrückenschlag (z. B. Tate-uraken, Yoko-mawashi-uchi).</li>
@@ -355,7 +355,7 @@
             ${grid(T('enpi-uchi', 'Mae-enpi'), T('furi-enpi', 'Furi-enpi'), T('yoko-enpi', 'Yoko-enpi'), T('mawashi-enpi', 'Mawashi-enpi'), T('age-enpi', 'Age-enpi'), T('otoshi-enpi', 'Otoshi-enpi'), T('ushiro-enpi', 'Ushiro-enpi'))}`,
         },
         {
-          id: 'ki-geri', title: 'Geri – Fußtritte', minGrade: '8kyu',
+          id: 'ki-geri', title: 'Geri – Fußtritte', quizTitle: 'Fuß: Geri', minGrade: '8kyu',
           learn: () => `
             <ul>
               <li><b>Mae-geri</b> – Fußtritt nach vorne (Fußballen); Keage = schnappend, Kekomi = stoßend.</li>

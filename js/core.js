@@ -30,9 +30,9 @@
   SK.bookSrc = (n, vol) => `${SK.bookName(vol)}, ${SK.bookPages(n, vol)}`;
   SK.bookSrc2 = (n) => SK.bookSrc(n, 2);
   // Bei jeder veröffentlichten Änderung hochzählen: node tools/version.js patch|minor|major (setzt auch ?v= in index.html)
-  SK.VERSION = '1.84.0';
+  SK.VERSION = '1.85.0';
   SK.VERSION_DATE = '18.11.2026';
-  SK.VERSION_TIME = '18:21';
+  SK.VERSION_TIME = '18:30';
 
   // Lektionstexte als Funktion (learn: () => `…`) werden erst beim ersten Öffnen erzeugt.
   SK.lazyLearn = (unit) => unit.lessons.forEach((l) => typeof l.learn === 'function' && SK.util.lazy(l, 'learn', l.learn));
@@ -128,12 +128,29 @@
     }
     return out;
   }
+  // Fragen, die in eine andere Lektion umgezogen sind (SK.lessonMoves: alte Lektion → neue), behalten ihren Lernstand:
+  // die ID wechselt nur die Lektion, der Hash bleibt gleich. Läuft bei jedem Laden, ändert nur unbekannte IDs.
+  function moveIds(map) {
+    const moves = SK.lessonMoves || {};
+    const known = new Set(SK.questions.map((q) => q.id));
+    const out = {};
+    let changed = false;
+    for (const [id, v] of Object.entries(map || {})) {
+      const m = !known.has(id) && /^(.+?)-([a-z0-9]+(?:-\d+)?)$/.exec(id);
+      const to = m && [].concat(moves[m[1]] || []).map((l) => `${l}-${m[2]}`).find((n) => known.has(n) && !(n in map));
+      if (to) changed = true;
+      out[to || id] = v;
+    }
+    return changed ? out : map;
+  }
   function migrate(d) {
     if (d.version === 1) {
       d.srs = migrateIds(d.srs);
       d.asked = migrateIds(d.asked);
       d.version = 2;
     }
+    d.srs = moveIds(d.srs);
+    d.asked = moveIds(d.asked);
     return d;
   }
 
@@ -147,9 +164,9 @@
         // XP, Tages-Serie und Freischalten gibt es nicht mehr.
         ['xp', 'streak', 'bestStreak', 'lastActive'].forEach((k) => delete d[k]);
         if (d.settings) delete d.settings.unlockAll;
-        const old = d.version;
+        const old = JSON.stringify([d.version, Object.keys(d.srs || {}), Object.keys(d.asked || {})]);
         SK.store.data = migrate(d);
-        if (old !== d.version) SK.store.save();
+        if (old !== JSON.stringify([d.version, Object.keys(d.srs), Object.keys(d.asked)])) SK.store.save();
       } catch (e) {
         SK.store.data = blank();
       }

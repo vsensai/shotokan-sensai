@@ -28,8 +28,14 @@
   // ---------- Hilfen ----------
   const lessonState = (id) => store.data.lessons[id] || null;
   const passed = (id) => !!(lessonState(id) && lessonState(id).passed);
+  // Im Quiz zählen nur Lektionen mit Fragen. Lerntexte, deren Fragen im Quiz woanders stehen, nennen das Ziel in
+  // `quiz` (z. B. Körperwaffen → Begriffe); Lektionen und Einheiten können im Quiz anders heißen (`quizTitle`).
+  const quizLessons = (u) => u.lessons.filter((l) => (qByLesson[l.id] || []).length);
+  const qTitle = (x) => x.quizTitle || x.title;
+  const qDesc = (u) => u.quizDesc || u.desc;
   function unitProgress(u) {
-    return { done: u.lessons.filter((l) => passed(l.id)).length, total: u.lessons.length };
+    const ls = quizLessons(u);
+    return { done: ls.filter((l) => passed(l.id)).length, total: ls.length };
   }
   // Höchstens eine Frage je Gruppe (z. B. derselbe Begriff); weitere nur, wenn sonst zu wenige da sind.
   function distinct(list, n) {
@@ -187,7 +193,8 @@
     const next = pos >= 0 ? learnLessons[pos + 1] : null;
     const learn = el('div', { class: 'learn' });
     learn.innerHTML = lesson.learn;
-    const n = (qByLesson[id] || []).length;
+    const quizId = (qByLesson[id] || []).length ? id : lesson.quiz;
+    const n = quizId ? (qByLesson[quizId] || []).length : 0;
     app.innerHTML = '';
     app.append(
       el('nav', { class: 'crumbs' }, el('a', { href: '#/wissen', text: 'Lernen' }), ' › ', el('span', { text: unit.title })),
@@ -196,7 +203,7 @@
       el(
         'div',
         { class: 'actions' },
-        n ? el('a', { class: 'btn primary', href: `#/quiz/${id}`, text: `Quiz zu diesem Thema (${n} Fragen)` }) : ''
+        n ? el('a', { class: 'btn primary', href: `#/quiz/${quizId}`, text: quizId === id ? `Quiz zu diesem Thema (${n} Fragen)` : `Quiz: ${qTitle(lessonIndex[quizId].lesson)} (${n} Fragen)` }) : ''
       ),
       el(
         'nav',
@@ -315,9 +322,10 @@
     finishView();
     if (!arg) return;
     const key = norm(arg);
-    const target = cats.find((x) => x.items.some((e) => e.t.split(' / ').some((n) => norm(n) === key)));
-    // Kategorie (#/lexikon/stand, aus dem Quiz-Reiter „Begriffe“): nur aufklappen
-    const kat = !target && cats.find((x) => x.c.id === arg);
+    // Kategorie (#/lexikon/stand, aus dem Quiz-Reiter „Begriffe“): nur aufklappen. Vor den Begriffen prüfen –
+    // die Kategorie „uke“ hat denselben Namen wie der Begriff „Uke“.
+    const kat = cats.find((x) => x.c.id === arg);
+    const target = !kat && cats.find((x) => x.items.some((e) => e.t.split(' / ').some((n) => norm(n) === key)));
     if (kat) {
       kat.det.dataset.jump = '1';
       kat.det.open = true;
@@ -536,11 +544,11 @@
   function unitCard(u) {
     const p = unitProgress(u);
     const card = el('details', { class: `unit ${u.kind}` });
-    const head = el('summary', { class: 'unit-head' }, el('div', {}, el('h3', { text: u.title }), el('p', { class: 'muted small', text: u.desc })), el('div', { class: 'ring', text: `${p.done}/${p.total}` }));
+    const head = el('summary', { class: 'unit-head' }, el('div', {}, el('h3', { text: qTitle(u) }), el('p', { class: 'muted small', text: qDesc(u) })), el('div', { class: 'ring', text: `${p.done}/${p.total}` }));
     const bar = el('div', { class: 'progress thin' }, el('div', { class: 'progress-bar' }));
     bar.firstChild.style.width = `${(p.done / p.total) * 100}%`;
     const path = el('ol', { class: 'path' });
-    u.lessons.forEach((l, i) => {
+    quizLessons(u).forEach((l, i) => {
       const st = lessonState(l.id);
       const n = (qByLesson[l.id] || []).length;
       path.append(
@@ -551,7 +559,7 @@
             'a',
             { class: `node ${passed(l.id) ? 'done' : 'open'}`, href: `#/quiz/${l.id}` },
             el('span', { class: 'dot', text: passed(l.id) ? '✓' : String(i + 1) }),
-            el('span', { class: 'node-title', text: l.title }),
+            el('span', { class: 'node-title', text: qTitle(l) }),
             el('span', { class: 'node-meta', text: st ? `${Math.round(st.best * 100)} %` : `${n} Fragen` })
           ),
           el('a', { class: 'node-learn', href: `#/wissen/${l.id}`, text: 'Lernen', title: 'Lerninhalt öffnen' })
@@ -565,8 +573,10 @@
   function viewQuiz(id) {
     const entry = lessonIndex[id];
     if (!entry) return viewNotFound();
+    // Alte Adresse einer Lektion, deren Fragen jetzt woanders stehen
+    if (!(qByLesson[id] || []).length) return location.replace(entry.lesson.quiz ? `#/quiz/${entry.lesson.quiz}` : `#/quiz/${quizTabOf(entry.unit)}`);
     setNav('quiz');
-    setTitle(`Quiz: ${entry.lesson.title}`);
+    setTitle(`Quiz: ${qTitle(entry.lesson)}`);
     const back = `#/quiz/${quizTabOf(entry.unit)}`;
     const pool = qByLesson[id] || [];
     // Begriffe: höchstens so viele Fragen wie Begriffe, damit kein Begriff doppelt kommt.
@@ -574,15 +584,16 @@
     const qs = pickRound(pool, n);
     SK.runQuiz(app, qs, {
       mode: 'lesson',
-      title: `${entry.unit.title} · ${entry.lesson.title}`,
+      title: `${qTitle(entry.unit)} · ${qTitle(entry.lesson)}`,
       onExit: () => go(back),
       onFinish: (results) => {
         const ratio = results.filter((r) => r.ok).length / results.length;
         const prev = lessonState(id) || { best: 0, passed: false, runs: 0 };
         store.data.lessons[id] = { best: Math.max(prev.best, ratio), passed: prev.passed || ratio >= PASS_LESSON, runs: prev.runs + 1 };
         store.save();
-        const next = ratio >= PASS_LESSON && entry.unit.kind !== 'drill' ? entry.unit.lessons[entry.idx + 1] : null;
-        showResult({ results, pass: ratio >= PASS_LESSON, again: `#/quiz/${id}`, back, next: next ? { href: `#/quiz/${next.id}`, title: next.title } : null });
+        const ls = quizLessons(entry.unit);
+        const next = ratio >= PASS_LESSON && entry.unit.kind !== 'drill' ? ls[ls.indexOf(entry.lesson) + 1] : null;
+        showResult({ results, pass: ratio >= PASS_LESSON, again: `#/quiz/${id}`, back, next: next ? { href: `#/quiz/${next.id}`, title: qTitle(next) } : null });
       },
     });
   }
@@ -594,7 +605,7 @@
       { id: 'allgemein', title: 'Theorie', test: (q) => unitOf(q).kind === 'general' },
       { id: 'kata', title: 'Kata-Wissen (alle Kata)', test: (q) => unitOf(q).kind === 'kata' },
       { id: 'begriffe', title: 'Begriffe', test: (q) => unitOf(q).kind === 'drill' },
-    ].concat(units.map((u) => ({ id: u.id, title: `Thema: ${u.title}`, test: (q) => unitOf(q) === u })));
+    ].concat(units.map((u) => ({ id: u.id, title: `Thema: ${qTitle(u)}`, test: (q) => unitOf(q) === u })));
   }
 
   function viewZufall(scopeId) {
@@ -1075,7 +1086,7 @@
       const p = unitProgress(u);
       const bar = el('div', { class: 'progress thin' }, el('div', { class: 'progress-bar' }));
       bar.firstChild.style.width = `${(p.done / p.total) * 100}%`;
-      unitList.append(el('li', {}, el('span', { text: `${u.title} (${p.done}/${p.total})` }), bar));
+      unitList.append(el('li', {}, el('span', { text: `${qTitle(u)} (${p.done}/${p.total})` }), bar));
     });
 
     const fileInput = el('input', { type: 'file', accept: 'application/json,.json', class: 'visually-hidden', id: 'importFile' });
