@@ -1588,64 +1588,133 @@ details.unit>summary::-webkit-details-marker {
   color: #fff;
 }
 
-/* Reiter als Link (Quiz: Begriffe, Kata, Theorie) */
-a.tab {
-  text-align: center;
-  text-decoration: none;
+/* Quiz: Karte mit Wiederholen und Gemischt – die Überschrift sagt, wofür sie gelten (alle Bereiche oder einer) */
+.quiz-scope {
+  margin: 0.8rem 0 0.6rem;
+  padding: 0.8rem 1rem;
 }
 
-/* Quiz: Wiederholen und Zufallsmix nebeneinander, kleiner als die Kacheln der Startseite */
-.quiz-extra {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
-  margin: 0.8rem 0 0;
+.quiz-scope h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 1.05rem;
 }
 
-.quiz-extra .tile {
-  padding: 0.6rem 0.8rem;
-}
-
-.quiz-extra .tile h3 {
-  font-size: 0.98rem;
-}
-
-.quiz-extra .tile p {
+.quiz-scope h2 span {
+  color: var(--muted);
   font-size: 0.8rem;
+  font-weight: 500;
 }
 
-/* Umschalter (Quiz | Karteikarten, Richtung der Karteikarten) */
-.seg {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  margin: 0.8rem 0 0.4rem;
-  border: 1px solid var(--line);
-  border-radius: 11px;
-  background: var(--card);
+.quiz-scope .actions {
+  margin: 0.6rem 0 0;
 }
 
-.seg + .seg {
-  margin-top: 0;
+.quiz-scope .btn {
+  flex: 1 1 auto;
+  padding-inline: 0.6rem;
 }
 
-.seg-btn {
-  padding: 0.45rem 0.3rem;
-  border: 0;
-  border-radius: 8px;
-  background: none;
+/* Zahl im Knopf (fällig, neu) */
+.pill {
+  margin-left: 0.2rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--bg);
   color: var(--ink);
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
+  font-size: 0.78rem;
+  white-space: nowrap;
 }
 
-.seg-btn[aria-pressed="true"] {
-  background: var(--ink);
-  color: var(--card);
+.btn.primary .pill {
+  background: #fff;
+  color: var(--red);
+}
+
+.quiz-label {
+  margin: 1.2rem 0 0.3rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Bereich (Begriffe, Kata, Theorie) als große Karte */
+.area {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.15rem 0.8rem;
+  align-items: center;
+  margin: 0 0 0.7rem;
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: 0 3px 0 var(--line);
+}
+
+.area h3 {
+  font-size: 1.15rem;
+}
+
+.area p {
+  grid-column: 1;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.area .area-meta {
+  font-size: 0.75rem;
+}
+
+.area-due {
+  margin-left: 0.4rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.72rem;
+  vertical-align: 2px;
+}
+
+.area-bar {
+  grid-column: 1;
+  height: 6px;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.area-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--red);
+}
+
+.area-go {
+  grid-row: 1 / span 4;
+  grid-column: 2;
+  color: var(--red);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* Begriffe: Karteikarten-Knopf neben der Kategorie */
+.btn.node-karten {
+  min-height: 38px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.85rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 0 var(--line);
 }
 
 .unit.drill {

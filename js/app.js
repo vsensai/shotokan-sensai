@@ -423,135 +423,117 @@
   }
 
   // ---------- Quiz ----------
-  // Drei Reiter nach Inhalt: Begriffe (Lexikon, als Quiz oder Karteikarten), Kata, Theorie (alles andere).
-  // Reiter in der Adresse (#/quiz/kata), sonst der zuletzt gewählte. Darüber Wiederholen und der Zufallsmix über alles.
+  // Zwei Stufen: #/quiz zeigt „Alle Bereiche“ (Wiederholen, Zufallsmix über alles) und die drei Bereiche;
+  // #/quiz/<bereich> zeigt Wiederholen und Gemischt nur für diesen Bereich und darunter seine Lektionen.
+  // Begriffe = Lexikon (Zeile: Quiz, Knopf „Karten“: Karteikarten), Kata, Theorie = alles andere.
   const QUIZ_TABS = [
-    { id: 'begriffe', title: 'Begriffe' },
-    { id: 'kata', title: 'Kata' },
-    { id: 'theorie', title: 'Theorie' },
+    { id: 'begriffe', title: 'Begriffe', desc: 'Stände, Techniken, Kommandos – als Quiz oder Karteikarten', scope: 'begriffe' },
+    { id: 'kata', title: 'Kata', desc: 'Alle Kata aus dem JKA-Buch, Hangetsu aus Band 2', scope: 'kata' },
+    { id: 'theorie', title: 'Theorie', desc: 'Dojo, Geschichte, Stände, Kihon, Kumite', scope: 'allgemein' },
   ];
   const quizTabOf = (u) => (u.kind === 'drill' ? 'begriffe' : u.kind === 'kata' ? 'kata' : 'theorie');
-  const settings = () => store.data.settings || {};
-  const setSetting = (k, v) => {
-    store.data.settings = Object.assign({}, store.data.settings, { [k]: v });
-    store.save();
-  };
+  const areaOf = (q) => unitOf(q) && quizTabOf(unitOf(q));
+  const areaUnits = (id) => (id === 'begriffe' ? [drillUnit] : id === 'kata' ? kataUnits : theorieUnits);
+  const areaLessons = (id) => areaUnits(id).flatMap(quizLessons);
+  const pill = (n, cls) => el('b', { class: `pill${cls ? ` ${cls}` : ''}`, text: String(n) });
 
-  function viewQuizList(tabId) {
+  function viewQuizList(areaId) {
+    if (areaId) return viewQuizArea(QUIZ_TABS.find((t) => t.id === areaId));
     setNav('quiz');
     setTitle('Quiz');
-    const tab = QUIZ_TABS.find((t) => t.id === (tabId || settings().quizTab)) || QUIZ_TABS[0];
-    if (settings().quizTab !== tab.id) setSetting('quizTab', tab.id);
-    if (tabId !== tab.id) history.replaceState(history.state, '', `#/quiz/${tab.id}`);
     app.innerHTML = '';
-    const due = SK.srs.due().length;
-    const asked = Object.keys(store.data.asked).filter((id) => qById[id]).length;
-    const bar = el(
-      'div',
-      { class: 'tabs', role: 'tablist', 'aria-label': 'Bereich' },
-      QUIZ_TABS.map((t) => el('a', { class: 'tab', role: 'tab', href: `#/quiz/${t.id}`, 'aria-selected': String(t === tab), text: t.title }))
-    );
-    const panel = el('div', { role: 'tabpanel', 'aria-label': tab.title });
-    if (tab.id === 'begriffe') panel.append(...begriffePanel());
-    else {
-      const list = tab.id === 'kata' ? kataUnits : theorieUnits;
-      panel.append(
-        el(
-          'div',
-          { class: 'actions' },
-          el('a', { class: 'btn primary', href: `#/zufall/${tab.id === 'kata' ? 'kata' : 'allgemein'}`, text: tab.id === 'kata' ? 'Kata gemischt' : 'Theorie gemischt' })
-        ),
-        el('p', {
-          class: 'muted small',
-          text: `${tab.id === 'kata' ? 'Ausschließlich aus „Karate-Do Kata Vol. 1“ (JKA), Hangetsu aus „Karate-Do Kata Vol. 2“. ' : 'Dojo, Geschichte, Stände, Kihon und Kumite – was man über die Begriffe hinaus wissen muss. '}Alle Lektionen sind frei wählbar. Ab 80 % richtigen Antworten gilt eine Lektion als bestanden (✓).`,
-        }),
-        ...list.map((u) => unitCard(u))
-      );
-    }
+    const due = SK.srs.due().map((id) => qById[id]);
     app.append(
       el('h1', { text: 'Quiz' }),
       el(
-        'div',
-        { class: 'quiz-extra' },
-        el('a', { class: `tile${due ? ' primary' : ''}`, href: '#/review' }, el('h3', { text: 'Wiederholen' }), el('p', { text: due ? `${due} Fragen fällig` : 'Heute nichts fällig' })),
-        el('a', { class: 'tile', href: '#/zufall' }, el('h3', { text: 'Zufallsmix' }), el('p', { text: `Aus allen Fragen – ${SK.questions.length - asked} noch nie gestellt` }))
+        'section',
+        { class: 'card quiz-scope' },
+        el('h2', { text: 'Alle Bereiche' }),
+        el(
+          'div',
+          { class: 'actions' },
+          el('a', { class: `btn${due.length ? ' primary' : ''}`, href: '#/review' }, 'Wiederholen', pill(due.length || '0')),
+          el('a', { class: 'btn', href: '#/zufall' }, 'Zufallsmix')
+        )
       ),
-      bar,
-      panel
+      el('p', { class: 'quiz-label', text: 'Bereich wählen' }),
+      ...QUIZ_TABS.map((t) => {
+        const ls = areaLessons(t.id);
+        const done = ls.filter((l) => passed(l.id)).length;
+        const n = due.filter((q) => areaOf(q) === t.id).length;
+        const bar = el('span', { class: 'area-bar' }, el('i'));
+        bar.firstChild.style.width = `${ls.length ? (done / ls.length) * 100 : 0}%`;
+        return el(
+          'a',
+          { class: 'area', href: `#/quiz/${t.id}` },
+          el('h3', {}, t.title, n ? el('span', { class: 'area-due', text: `${n} fällig` }) : ''),
+          el('p', { text: t.desc }),
+          bar,
+          el('p', { class: 'area-meta', text: `${done} von ${ls.length} ${t.id === 'begriffe' ? 'Kategorien' : 'Lektionen'} bestanden` }),
+          el('span', { class: 'area-go', 'aria-hidden': 'true', text: '›' })
+        );
+      })
     );
     finishView();
   }
 
-  // Reiter „Begriffe“: Lexikon-Kategorien, oben umschaltbar zwischen Quiz und Karteikarten (bleibt gespeichert).
-  function begriffePanel() {
-    const karten = settings().begriffe === 'karten';
-    const dir = kartenRichtung();
-    const seg = (label, items) =>
-      el(
-        'div',
-        { class: 'seg', role: 'group', 'aria-label': label },
-        items.map(([text, on, fn]) => el('button', { type: 'button', class: 'seg-btn', 'aria-pressed': String(on), text, onclick: () => (on ? null : fn()) }))
-      );
-    const again = () => viewQuizList('begriffe');
-    const out = [
-      seg('Art der Abfrage', [
-        ['Quiz', !karten, () => (setSetting('begriffe', 'quiz'), again())],
-        ['Karteikarten', karten, () => (setSetting('begriffe', 'karten'), again())],
-      ]),
-    ];
+  function viewQuizArea(t) {
+    if (!t) return viewNotFound();
+    setNav('quiz');
+    setTitle(`Quiz: ${t.title}`);
+    app.innerHTML = '';
+    const pool = SK.questions.filter((q) => areaOf(q) === t.id);
+    const fresh = pool.filter((q) => !store.data.asked[q.id]);
+    const due = SK.srs.due().map((id) => qById[id]).filter((q) => areaOf(q) === t.id);
+    const back = `#/quiz/${t.id}`;
+    const run = (qs, title, mode) =>
+      SK.runQuiz(app, qs, { mode, title, onExit: () => go(back), onFinish: (results) => showResult({ results, again: back, back }) });
+    const actions = el(
+      'div',
+      { class: 'actions' },
+      el('button', { type: 'button', class: `btn${due.length ? ' primary' : ''}`, disabled: !due.length, onclick: () => run(due.slice(0, 15), `Wiederholen · ${t.title}`, 'review') }, 'Wiederholen', pill(due.length)),
+      fresh.length
+        ? el('button', { type: 'button', class: `btn${due.length ? '' : ' primary'}`, onclick: () => run(distinct(util.shuffle(fresh), 10), `Gemischt · ${t.title}`, 'review') }, 'Gemischt', pill(`${fresh.length} neu`))
+        : el('a', { class: 'btn', href: `#/zufall/${t.scope}`, title: 'Alle Fragen gestellt – im Zufallsmix zurücksetzen' }, 'Gemischt', pill('alle gestellt'))
+    );
+    if (t.id === 'begriffe') actions.append(el('a', { class: 'btn', href: '#/karten' }, 'Karteikarten'));
+    app.append(
+      el('nav', { class: 'crumbs' }, el('a', { href: '#/quiz', text: 'Quiz' }), ' › ', el('span', { text: t.title })),
+      el('h1', { text: t.title }),
+      el('section', { class: 'card quiz-scope' }, el('h2', {}, t.title, el('span', { text: `${pool.length} Fragen` })), actions),
+      el('p', {
+        class: 'muted small',
+        text: t.id === 'begriffe'
+          ? 'Zeile antippen startet das Quiz der Kategorie, „Karten“ die Karteikarten. Die Richtung (Bild → Name oder umgekehrt) wählst du auf der Karte.'
+          : `${t.id === 'kata' ? 'Ausschließlich aus „Karate-Do Kata Vol. 1“ (JKA), Hangetsu aus „Karate-Do Kata Vol. 2“. ' : ''}Alle Lektionen sind frei wählbar. Ab 80 % richtigen Antworten gilt eine Lektion als bestanden (✓).`,
+      }),
+      ...(t.id === 'begriffe' ? [begriffeListe()] : areaUnits(t.id).map((u) => unitCard(u)))
+    );
+    finishView();
+  }
+
+  // Begriffe: eine Zeile je Lexikon-Kategorie – antippen startet das Quiz, daneben die Karteikarten.
+  function begriffeListe() {
     const path = el('ol', { class: 'path' });
-    if (!karten) {
-      const total = drillUnit.lessons.reduce((s, l) => s + (qByLesson[l.id] || []).length, 0);
-      out.push(
-        el('div', { class: 'actions' }, el('a', { class: 'btn primary', href: '#/zufall/begriffe', text: 'Alle Begriffe gemischt' })),
-        el('p', { class: 'muted small', text: `Antwort auswählen: Jeder Begriff kommt in beide Richtungen und, wo es ein Bild gibt, auch als Bildfrage (${total} Fragen).` })
-      );
-      drillUnit.lessons.forEach((l, i) => {
-        const st = lessonState(l.id);
-        const n = SK.glossary.filter((e) => `gl-${e.cat}` === l.id).length;
-        path.append(
+    drillUnit.lessons.forEach((l, i) => {
+      const st = lessonState(l.id);
+      const n = SK.glossary.filter((e) => `gl-${e.cat}` === l.id).length;
+      path.append(
+        el(
+          'li',
+          {},
           el(
-            'li',
-            {},
-            el(
-              'a',
-              { class: `node ${passed(l.id) ? 'done' : 'open'}`, href: `#/quiz/${l.id}` },
-              el('span', { class: 'dot', text: passed(l.id) ? '✓' : String(i + 1) }),
-              el('span', { class: 'node-title', text: l.title }),
-              el('span', { class: 'node-meta', text: st ? `${Math.round(st.best * 100)} %` : `${n} Begriffe` })
-            ),
-            el('a', { class: 'node-learn', href: `#/lexikon/${l.id.slice(3)}`, text: 'Lexikon', title: 'Im Lexikon nachschlagen' })
-          )
-        );
-      });
-    } else {
-      out.push(
-        seg('Richtung', Object.entries(KARTEN_RICHTUNG).map(([d, text]) => [text, d === dir, () => (setSetting('karten', d), again())])),
-        el('div', { class: 'actions' }, el('a', { class: 'btn primary', href: '#/karten', text: 'Alle Karten gemischt' })),
-        el('p', { class: 'muted small', text: `${dir === 'bild' ? 'Vorn das Bild oder die Bewegung' : 'Vorn der Name'}: überlegen, umdrehen und selbst einschätzen – „nicht gewusst“ landet wie eine falsche Antwort in der Wiederholung.` })
+            'a',
+            { class: `node ${passed(l.id) ? 'done' : 'open'}`, href: `#/quiz/${l.id}` },
+            el('span', { class: 'dot', text: passed(l.id) ? '✓' : String(i + 1) }),
+            el('span', { class: 'node-title', text: l.title }),
+            el('span', { class: 'node-meta', text: st ? `${Math.round(st.best * 100)} %` : `${n} Begriffe` })
+          ),
+          el('a', { class: 'btn node-karten', href: `#/karten/${l.id.slice(3)}`, text: 'Karten', title: 'Als Karteikarten üben' })
+        )
       );
-      let i = 0;
-      SK.glossaryCats.forEach((c) => {
-        const n = kartenBegriffe(c.id, dir).length;
-        if (!n) return;
-        path.append(
-          el(
-            'li',
-            {},
-            el(
-              'a',
-              { class: 'node open', href: `#/karten/${c.id}` },
-              el('span', { class: 'dot', text: String(++i) }),
-              el('span', { class: 'node-title', text: c.title }),
-              el('span', { class: 'node-meta', text: `${n} Karten` })
-            ),
-            el('a', { class: 'node-learn', href: `#/lexikon/${c.id}`, text: 'Lexikon', title: 'Im Lexikon nachschlagen' })
-          )
-        );
-      });
-    }
-    out.push(el('div', { class: 'unit drill' }, path));
-    return out;
+    });
+    return el('div', { class: 'unit drill' }, path);
   }
 
   function unitCard(u) {
