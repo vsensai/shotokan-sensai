@@ -803,6 +803,11 @@ figure.gfx svg {
   font-size: 0.88rem;
 }
 
+/* Startseite: Eingänge zu den Bereichen mit rotem Streifen wie die Bereichskarten im Quiz */
+.hero ~ .tiles .tile {
+  border-left: 5px solid var(--c-kata);
+}
+
 .tile.primary {
   border-color: var(--red);
   box-shadow: 0 3px 0 var(--red-dark);
@@ -1516,6 +1521,7 @@ details.unit>summary::-webkit-details-marker {
   padding: 0.75rem 1rem;
   background: var(--card);
   border: 1px solid var(--line);
+  border-left: 5px solid var(--c-kata);
   border-radius: 12px;
   color: var(--ink);
   text-decoration: none;
