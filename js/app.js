@@ -33,6 +33,19 @@
   const quizLessons = (u) => u.lessons.filter((l) => (qByLesson[l.id] || []).length);
   const qTitle = (x) => x.quizTitle || x.title;
   const qDesc = (u) => u.quizDesc || u.desc;
+  // Im Quiz zusammengelegte Einheiten (`quizInto`: Lektionen stehen im Quiz vor denen der Ziel-Einheit). Nur die Anzeige
+  // ändert sich – Lektionen und Fragen-IDs bleiben, unter „Lernen“ bleibt die Einteilung.
+  const quizUnits = (list) => {
+    const out = list.filter((u) => !u.quizInto).map((u) => Object.assign({}, u, { lessons: u.lessons.slice() }));
+    list.filter((u) => u.quizInto).forEach((u) => {
+      const t = out.find((x) => x.id === u.quizInto);
+      t.lessons = u.lessons.concat(t.lessons);
+    });
+    return out;
+  };
+  const theorieUnits = quizUnits(SK.generalUnits);
+  const allQuizUnits = theorieUnits.concat(kataUnits, [drillUnit]);
+  const quizUnitOf = (lessonId) => allQuizUnits.find((u) => u.lessons.some((l) => l.id === lessonId));
   function unitProgress(u) {
     const ls = quizLessons(u);
     return { done: ls.filter((l) => passed(l.id)).length, total: ls.length };
@@ -441,7 +454,7 @@
     const panel = el('div', { role: 'tabpanel', 'aria-label': tab.title });
     if (tab.id === 'begriffe') panel.append(...begriffePanel());
     else {
-      const list = tab.id === 'kata' ? kataUnits : SK.generalUnits;
+      const list = tab.id === 'kata' ? kataUnits : theorieUnits;
       panel.append(
         el(
           'div',
@@ -584,14 +597,14 @@
     const qs = pickRound(pool, n);
     SK.runQuiz(app, qs, {
       mode: 'lesson',
-      title: `${qTitle(entry.unit)} · ${qTitle(entry.lesson)}`,
+      title: `${qTitle(quizUnitOf(id))} · ${qTitle(entry.lesson)}`,
       onExit: () => go(back),
       onFinish: (results) => {
         const ratio = results.filter((r) => r.ok).length / results.length;
         const prev = lessonState(id) || { best: 0, passed: false, runs: 0 };
         store.data.lessons[id] = { best: Math.max(prev.best, ratio), passed: prev.passed || ratio >= PASS_LESSON, runs: prev.runs + 1 };
         store.save();
-        const ls = quizLessons(entry.unit);
+        const ls = quizLessons(quizUnitOf(id));
         const next = ratio >= PASS_LESSON && entry.unit.kind !== 'drill' ? ls[ls.indexOf(entry.lesson) + 1] : null;
         showResult({ results, pass: ratio >= PASS_LESSON, again: `#/quiz/${id}`, back, next: next ? { href: `#/quiz/${next.id}`, title: qTitle(next) } : null });
       },
@@ -605,7 +618,7 @@
       { id: 'allgemein', title: 'Theorie', test: (q) => unitOf(q).kind === 'general' },
       { id: 'kata', title: 'Kata-Wissen (alle Kata)', test: (q) => unitOf(q).kind === 'kata' },
       { id: 'begriffe', title: 'Begriffe', test: (q) => unitOf(q).kind === 'drill' },
-    ].concat(units.map((u) => ({ id: u.id, title: `Thema: ${qTitle(u)}`, test: (q) => unitOf(q) === u })));
+    ].concat(allQuizUnits.map((u) => ({ id: u.id, title: `Thema: ${qTitle(u)}`, test: (q) => u.lessons.some((l) => l.id === q.lesson) })));
   }
 
   function viewZufall(scopeId) {
@@ -1082,7 +1095,7 @@
       ].map(([k, v]) => el('div', { class: 'stat-card' }, el('b', { text: String(v) }), el('span', { text: k })))
     );
     const unitList = el('ul', { class: 'unit-progress' });
-    units.forEach((u) => {
+    allQuizUnits.forEach((u) => {
       const p = unitProgress(u);
       const bar = el('div', { class: 'progress thin' }, el('div', { class: 'progress-bar' }));
       bar.firstChild.style.width = `${(p.done / p.total) * 100}%`;

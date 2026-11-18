@@ -36,7 +36,7 @@
 
   SK.generalUnits = [
     {
-      id: 'etikette', title: 'Dojo & Etikette', kind: 'general', desc: 'Gruß, Kommandos, Dojo-Kun',
+      id: 'etikette', title: 'Dojo & Etikette', kind: 'general', desc: 'Gruß, Kommandos, Dojo-Kun', quizInto: 'geschichte',
       lessons: [
         {
           id: 'et-dojo', title: 'Im Dojo', quiz: 'et-dojokun', minGrade: '9kyu',
@@ -69,7 +69,7 @@
       ],
     },
     {
-      id: 'geschichte', title: 'Geschichte & Philosophie', kind: 'general', desc: 'Funakoshi, JKA, DJKB, Niju-Kun',
+      id: 'geschichte', title: 'Geschichte & Philosophie', kind: 'general', desc: 'Funakoshi, JKA, DJKB, Niju-Kun', quizTitle: 'Dojo & Geschichte', quizDesc: 'Etikette, Dojo-Kun, Funakoshi, JKA, Niju-Kun',
       lessons: [
         {
           id: 'ge-funakoshi', title: 'Gichin Funakoshi', minGrade: '9kyu',
