@@ -542,13 +542,26 @@
   SK.turnText = (deg) => (Math.abs(deg) === 360 ? `ganze Drehung ${deg < 0 ? 'links' : 'rechts'} herum` : `Wendung ${{ 45: '⅛', 90: '¼', 135: '⅜', 180: '½', 225: '⅝', 270: '¾' }[Math.abs(deg)] || `${Math.abs(deg)}°`} ${deg < 0 ? 'links' : 'rechts'} herum`);
 
   // ---------- Takt ----------
-  // Das Buch nennt kein Tempo. Mitte = Training (2 s je Bewegung); langsamer in ganzen Sekunden bis 6 s (3× langsamer),
-  // schneller spiegelbildlich bis ⅔ s (3× schneller). Immer mit Name, Rei und Yoi vorab.
-  const BEATS = [6, 5, 4, 3, 2, 4 / 3, 1, 0.8, 2 / 3];
-  const TRAINING = 4;
+  // Das Buch nennt kein Tempo. Normal = Training (2 s je Bewegung), schneller doppelt und dreifach. Zeitlupe: der Ablauf im
+  // normalen Takt, dreimal so langsam abgespielt – Ansage und Figur gedehnt, jede Bewegung samt Kime nur langsamer
+  // (lupe). Immer mit Name, Rei und Yoi vorab.
+  const TEMPI = [
+    { name: 'Zeitlupe', knopf: 'Zeitlupe', beat: 2, lupe: 3 },
+    { name: 'Normal', knopf: 'Tempo 1×', beat: 2, lupe: 1 },
+    { name: '2× schneller', knopf: 'Tempo 2×', beat: 1, lupe: 1 },
+    { name: '3× schneller', knopf: 'Tempo 3×', beat: 2 / 3, lupe: 1 },
+  ];
+  const TRAINING = 1;
+  const BEATS = [...new Set(TEMPI.map((x) => x.beat))];
   SK.ansageBeats = BEATS;
+  SK.ansageTempi = TEMPI;
+  // Ansagen im Tempo x: Zeitpunkte des Takts, in der Zeitlupe gedehnt
+  SK.ansageTempoTimeline = (k, x) => {
+    const tl = SK.ansageTimeline(k, x.beat, true);
+    if (x.lupe !== 1) tl.forEach((st) => { st.t *= x.lupe; });
+    return tl;
+  };
   const fmtNum = (x) => String(Math.round(x * 10) / 10).replace('.', ',');
-  const tempoName = (beat) => (beat === 2 ? 'Training' : beat > 2 ? `${fmtNum(beat / 2)}× langsamer` : `${fmtNum(2 / beat)}× schneller`);
   // Ansicht im Kata-Trainer: Bodenkarte, beides nebeneinander oder Figur (nur wo es die Figur gibt).
   // Ohne gespeicherte Wahl: am PC (breiter Bildschirm) beides, sonst die Karte.
   const VIEWS = ['karte', 'beide', 'figur'];
@@ -566,11 +579,11 @@
       localStorage.setItem(VIEW_KEY, v);
     } catch (e) { /* ohne Speicher */ }
   }
-  const TEMPO_KEY = 'shotokan-sensai-ansage-tempo';
+  const TEMPO_KEY = 'shotokan-sensai-ansage-tempo2';
   function loadTempo() {
     try {
       const i = Number(localStorage.getItem(TEMPO_KEY));
-      if (localStorage.getItem(TEMPO_KEY) !== null && BEATS[i]) return i;
+      if (localStorage.getItem(TEMPO_KEY) !== null && TEMPI[i]) return i;
     } catch (e) { /* ohne Speicher */ }
     return TRAINING;
   }
@@ -760,7 +773,7 @@
   SK.viewAnsage = function (app, k, startN) {
     const { el } = util;
     let tempo = loadTempo();
-    let steps = SK.ansageTimeline(k, BEATS[tempo], true);
+    let steps = SK.ansageTempoTimeline(k, TEMPI[tempo]);
     let idx = 0;
     let running = false;
     let base = 0; // performance.now() in ms, zu dem t = 0 gehört
@@ -827,14 +840,13 @@
     const tempoBtn = el('button', { class: 'ans-tempo-btn', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false' });
     const tempoOut = el('p', { class: 'ans-tempo-out' });
     const tempoList = el('div', { class: 'ans-tempo-list', role: 'group', 'aria-label': 'Tempo wählen', hidden: true },
-      ...BEATS.map((beat, i) => el('button', { type: 'button', 'data-tempo': i, 'aria-pressed': 'false' },
-        el('span', { text: tempoName(beat) }), el('span', { class: 'ans-tempo-s', text: `${fmtNum(beat)} s` }))),
+      ...TEMPI.map((x, i) => el('button', { type: 'button', 'data-tempo': i, 'aria-pressed': 'false' },
+        el('span', { text: x.name }), el('span', { class: 'ans-tempo-s', text: `${fmtNum(x.beat * x.lupe)} s` }))),
       tempoOut);
     const tempoBox = el('div', { class: 'ans-tempo' }, tempoBtn, tempoList);
     function tempoInfo() {
-      const beat = BEATS[tempo];
-      tempoBtn.textContent = `Tempo ${fmtNum(2 / beat)}×`;
-      tempoBtn.setAttribute('aria-label', `Tempo: ${tempoName(beat)}`);
+      tempoBtn.textContent = TEMPI[tempo].knopf;
+      tempoBtn.setAttribute('aria-label', `Tempo: ${TEMPI[tempo].name}`);
       tempoList.querySelectorAll('[data-tempo]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.tempo) === tempo)));
       tempoOut.textContent = `Kata etwa ${Math.round(steps[steps.length - 1].t)} s`;
     }
@@ -852,7 +864,7 @@
       if (Number(b.dataset.tempo) === tempo) return;
       tempo = Number(b.dataset.tempo);
       saveTempo(tempo);
-      steps = SK.ansageTimeline(k, BEATS[tempo], true);
+      steps = SK.ansageTempoTimeline(k, TEMPI[tempo]);
       tempoInfo();
       if (running) start(idx);
       else figShow();
@@ -1009,12 +1021,12 @@
       fig.on(view !== 'karte');
       if (view !== 'figur') render(idx);
       if (view === 'karte') return;
-      if (running) { fig.beat(BEATS[tempo]); fig.run((performance.now() - base) / 1000); }
+      if (running) { fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe); fig.run((performance.now() - base) / 1000); }
       else figShow();
     }
     function figShow(move) {
       if (view === 'karte') return;
-      fig.beat(BEATS[tempo]);
+      fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe);
       if (move) fig.run(steps[idx].t, fig.end(idx));
       else fig.show(fig.end(idx));
     }
@@ -1057,7 +1069,7 @@
       base = performance.now() - steps[from].t * 1000;
       speak(steps[from], gapAfter(from));
       render(from);
-      if (view !== 'karte') { fig.beat(BEATS[tempo]); fig.run(steps[from].t); }
+      if (view !== 'karte') { fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe); fig.run(steps[from].t); }
       // nach einem Sprung folgt die nächste Ansage mit dem normalen Abstand
       if (from + 1 < steps.length) schedule(from + 1);
       else timers.push(setTimeout(finish, 1500));

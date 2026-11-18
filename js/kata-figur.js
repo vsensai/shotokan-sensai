@@ -1261,6 +1261,9 @@
     let t = 0;
     let t0 = 0;
     let tEnd = 0;
+    // Zeitlupe: der Ablauf eines Takts läuft lupe-mal langsamer ab. Außen (Ansage) zählt die gedehnte Zeit, innen t die des
+    // Ablaufs – so bleibt jede Bewegung samt Kime gleich, nur langsamer.
+    let lupe = 1;
     let clock = 0;
     let moving = false;
     let drag = null;
@@ -1428,7 +1431,7 @@
       raf = 0;
       if (!on || !node.isConnected) return;
       if (moving) {
-        t = Math.min(tEnd, t0 + (now - clock) / 1000);
+        t = Math.min(tEnd, t0 + (now - clock) / 1000 / lupe);
         if (t >= tEnd) moving = false;
       }
       draw();
@@ -1485,20 +1488,22 @@
       node,
       // Ansicht ein- oder ausschalten (aus: es wird nichts gerechnet)
       on(v) { on = !!v; node.hidden = !on; if (on) request(); },
-      // Takt der Ansage (Sekunden je Bewegung): Ablauf dafür rechnen bzw. aus dem Vorrat nehmen
-      beat(b) {
+      // Takt der Ansage (Sekunden je Bewegung): Ablauf dafür rechnen bzw. aus dem Vorrat nehmen; f > 1 spielt ihn f-mal
+      // langsamer ab (Zeitlupe). Alle Zeiten unten sind dann die gedehnten der Ansage.
+      beat(b, f = 1) {
         if (!anims.has(b)) anims.set(b, build(k, { beat: b }));
         anim = anims.get(b);
+        lupe = f;
         if (!area) area = areaOf(anim);
       },
       // Zeitpunkt, zu dem die Bewegung der Ansage i fertig ist
-      end: (i) => anim.ends[i],
+      end: (i) => anim.ends[i] * lupe,
       // ab Zeitpunkt a in Echtzeit laufen, bis b (ohne b: bis zum Schluss)
-      run(a, b) { t0 = t = a; tEnd = b == null ? anim.dur : b; clock = performance.now(); moving = tEnd > a; E.quality.begin(); request(); },
+      run(a, b) { t0 = t = a / lupe; tEnd = b == null ? anim.dur : b / lupe; clock = performance.now(); moving = tEnd > t0; E.quality.begin(); request(); },
       // Standbild zum Zeitpunkt a
-      show(a) { t = a; moving = false; request(); },
+      show(a) { t = a / lupe; moving = false; request(); },
       freeze() { moving = false; request(); },
-      time: () => t,
+      time: () => t * lupe,
       zoom: (z) => (z == null ? zoom : setZoom(z)),
     };
   }
