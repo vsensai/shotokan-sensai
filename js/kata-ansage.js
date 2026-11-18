@@ -1079,8 +1079,9 @@
       wake(false);
       ui();
     }
+    // Über Anfang und Ende hinaus geht es ringsum: nach der letzten Ansage wieder zur ersten und umgekehrt
     function jump(i) {
-      i = Math.max(0, Math.min(steps.length - 1, i));
+      i = (i + steps.length) % steps.length;
       if (running) start(i);
       else { idx = i; render(i); figShow(true); }
     }
