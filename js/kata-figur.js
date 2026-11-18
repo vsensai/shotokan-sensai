@@ -153,7 +153,7 @@
   // drehung: langsame Bewegung, deren Hüfte schon nach diesem Anteil fertig gedreht ist (sonst über die ganze Bewegung);
   // heran: der Fuß, der den Platz wechselt, zieht erst zum Standfuß heran und geht von dort hinaus (Halbkreis, Bassai Dai 6);
   // Ein dritter Eintrag beschränkt die Zuordnung auf Stände, Hinweise der Kata (note) oder den Namen der Kata, auf die er
-  // passt (der erste passende Eintrag gilt)
+  // passt, mit „#Nummer“ am Ende auch auf eine einzelne Bewegung (der erste passende Eintrag gilt)
   // ruhig: die Haltung geht gleichmäßig über die ganze Bewegung in die Endhaltung (kein Ausholen, kein Kime);
   // stand: eigener Stand der Figur (S.…) statt des Standes aus dem Namen – auch die Fußrichtungen kommen dann von dort;
   // ganz: Ablauf des Lexikons samt Beinen und Hüfte (Sprung), ab Schlüsselbild von – er wird an die Plätze der Kata gelegt
@@ -189,6 +189,9 @@
     [/nagashi-uke \+ .*gedan-uchikomi/i, { def: 'nagashi-shuto-gedan', side: 'R', from: 0.25 }],
     [/jodan uchi-uke \+ .*gedan-uke/i, { def: 'manji-uke-heisoku', side: 'L', from: 0.25, zuvor: 'wende', zeit: 1.1 }, /heisoku/i],
     [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25, zuvor: 'tritt', zeit: 0.9 }, /teil 1: .*mikazuki-geri/i],
+    // Bassai Dai 29: aus dem Mae-enpi ohne Ausholen – der rechte Unterarm geht gleich nach unten, die linke Hand schließt
+    // zur Faust und kommt an die Innenseite des rechten Ellbogens (erst 30 und 31 wechseln die Arme über Kreuz)
+    [/gedan-uke \+ .*mune-mae-kamae/i, { def: 'gedan-uke-mune-mae', side: 'R', from: 0.25, direkt: true, erst: true }, /bassai dai #29$/i],
     [/gedan-uke \+ .*mune-mae-kamae/i, { def: 'gedan-uke-mune-mae', side: 'R', from: 0.25, erst: true }],
     [/koshi-kamae/i, { def: 'koshi-kamae-hanmi', side: 'R', from: 0 }, /ashi-zenkutsu.*bassai/i],
     [/yama-zuki/i, { def: 'tc:yama-zuki', side: 'R', from: 0.25, direkt: true, erst: true }],
@@ -812,7 +815,7 @@
     // Naore: zurück in die Yoi-Haltung – außer die Kata endet anders (Kanku Dai: Fäuste vor den Oberschenkeln)
     const naoreUp = /fäuste vor den oberschenkeln/i.test(k.naore || '') ? upper(S.hachiji) : yoiUp;
     let cur = key(steps[0].pose, 'Musubi-dachi', null, musubi);
-    const techOf = (st) => (TECH.find(([rx, , nur]) => rx.test(st.tech) && (!nur || nur.test(`${st.stance} ${st.note || ''} · ${k.name}`))) || [])[1];
+    const techOf = (st) => (TECH.find(([rx, , nur]) => rx.test(st.tech) && (!nur || nur.test(`${st.stance} ${st.note || ''} · ${k.name} #${st.n}`))) || [])[1];
     // Bewegungen mit einem ersten Teil (zuvor): er läuft als eigene Bewegung davor, in derselben Zählzeit
     const lauf = [];
     steps.forEach((st, i) => {
