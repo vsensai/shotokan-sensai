@@ -14,7 +14,6 @@
     { id: 'uchi', title: 'Schläge (Uchi)', ask: 'Welcher Schlag ist abgebildet?' },
     { id: 'uke', title: 'Abwehrtechniken (Uke)', ask: 'Welche Abwehr ist abgebildet?' },
     { id: 'geri', title: 'Fußtechniken (Geri)', ask: 'Welche Fußtechnik zeigt die Grafik?' },
-    { id: 'barai', title: 'Fußfeger (Ashi-barai)', ask: 'Welcher Fußfeger ist abgebildet?' },
     { id: 'ashi', title: 'Fußbewegungen (Ashi-sabaki)', ask: 'Welche Fußbewegung zeigt die Grafik?' },
     { id: 'waffe', title: 'Körperwaffen', ask: 'Welcher Körperteil ist markiert?' },
     { id: 'kamae', title: 'Haltungen (Kamae)', ask: 'Welche Haltung ist abgebildet?' },
@@ -122,6 +121,7 @@
     ['Ura-mawashi-geri', 'Halbkreistritt gegenläufig zum Mawashi-geri, trifft mit Sohle oder Ferse', 'geri', tc('ura-mawashi-geri'), KO],
     ['Ushiro-mawashi-geri', 'Ura-mawashi-geri aus einer Körperdrehung wie beim Ushiro-geri', 'geri', tc('ushiro-mawashi-geri'), KO],
     ['Mawashi-hiza-geri', 'Kniestoß im Bogen, waagerecht oder schräg zum Ziel', 'geri', tc('mawashi-hiza-geri'), KO],
+    ['Ashi-barai', 'Fußfeger', 'geri', tc('ashi-barai'), PO],
 
     ['Ashi-sabaki', 'Fußarbeit: alle Schritte, mit denen man Distanz und Richtung ändert', 'ashi', null, KO],
     ['Ayumi-ashi', 'Normaler Schritt: der hintere Fuß wird zum vorderen; bei Ständen mit Breite kommt er in der Schrittmitte zum Standbein (Bogen)', 'ashi', as('ayumi-ashi'), KO],
@@ -129,10 +129,6 @@
     ['Yori-ashi', 'Beide Füße gleiten gemeinsam, der Stand bleibt erhalten', 'ashi', as('yori-ashi'), PDF(38)],
     ['Tai-sabaki', 'Körperausweichbewegung', 'ashi', as('tai-sabaki'), PO],
 
-    ['Ashi-barai', 'Fußfeger', 'barai', tc('ashi-barai'), PO],
-    ['Teisoku-ashi-barai', 'Fußfeger mit der Fußsohle – mit dem vorderen oder hinteren Fuß', 'barai', tc('teisoku-barai'), KO],
-    ['Haisoku-ashi-barai', 'Fußfeger mit dem Spann, meist mit dem vorderen Fuß aus der Kampfstellung', 'barai', tc('haisoku-barai'), KO],
-    ['Komura-ashi-barai', 'Fußfeger mit der Wade, meist innerhalb einer Kombination', 'barai', tc('komura-barai'), KO],
 
     ['Seiken', 'Faustvorderseite (Knöchel von Zeige- und Mittelfinger)', 'waffe', wp('seiken')],
     ['Uraken', 'Faustrücken', 'waffe', wp('uraken')],
