@@ -195,7 +195,7 @@
     [/gedan-uke \+ .*mune-mae-kamae/i, { def: 'gedan-uke-mune-mae', side: 'R', from: 0.25, erst: true }],
     [/koshi-kamae/i, { def: 'koshi-kamae-hanmi', side: 'R', from: 0 }, /ashi-zenkutsu.*bassai/i],
     [/yama-zuki/i, { def: 'tc:yama-zuki', side: 'R', from: 0.25, direkt: true, erst: true }],
-    [/gedan sukui-uke/i, { def: 'gedan-sukui-uke', side: 'R', from: 0.25 }],
+    [/gedan sukui-uke/i, { def: 'gedan-sukui-uke', side: 'R', from: 0.25, dur: 1.1 }],
     [/^rechte hand und rechter fuß/i, { bleibt: true }],
     // Tekki Shodan
     [/^kao (migi|hidari)-muki \(/i, { bleibt: true }],
