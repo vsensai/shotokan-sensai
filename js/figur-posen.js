@@ -149,7 +149,8 @@
   // Keine feste Fingerrichtung: die Finger liegen bei beiden Händen in der Linie des Unterarms (Handgelenk gerade) – eine
   // in Brustkoordinaten vorgegebene Richtung passte nicht zum Unterarm, die Handgelenke knickten am Ende (hintere Hand
   // 39°) und beim Überblenden in der Wendung (bis 60°, Bassai Dai 14–17)
-  const SHUTO_END = { oL: 1, oR: 1, hL: [0.43, -0.14, 0.16], pL: [0.98, 0, -0.09], eL: [0.15, -1, 0.35], hR: [0.02, -0.2, 0.2], eR: [-0.7, -0.6, 0.2], pR: [0, 1, 0] };
+  // Linke Hand, Ellbogen und Handfläche aus dem Bewegungs-Editor (vom Nutzer gestellt)
+  const SHUTO_END = { oL: 1, oR: 1, hL: [0.448, -0.085, 0.079], pL: [0, -1, 0], eL: [-0.095, -0.589, -0.061], hR: [0.02, -0.2, 0.2], eR: [-0.7, -0.6, 0.2], pR: [0, 1, 0] };
   const KK_SHUTO = M(S.kk, SHUTO_END);
   const YOI = S.hachiji;
 
