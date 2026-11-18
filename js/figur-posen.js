@@ -956,30 +956,7 @@
   D['tc:shizentai'] = STILL(M(S.hachiji), { view: 'front3' });
   D['tc:hikite'] = T(M(S.zks, { hL: L(H.chudan), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: H.chudan }), M(hit('fistL', 'Hikite'), { eff: 'fistL', view: 'front3' }));
 
-  /* ---------- Begriffe ---------- */
-  D['tc:yoi'] = T_RUHIG(S.musubi, S.hachiji, { view: 'front3' });
-  const REI = M(S.musubi, { lean: 30, look: 0 });
-  D['tc:rei'] = M({ keys: [{ t: 0, p: S.musubi }, { t: 0.15, p: S.musubi }, { t: 0.45, p: REI }, { t: 0.65, p: REI }, { t: 0.9, p: S.musubi }], best: 0.5, dur: 2.4, view: 'side' });
-  // Füße im Seiza: Zehen nach hinten, Sohle oben – als ganz gestreckter Fuß (Neigung −180°) statt um 180° gedreht, damit er
-  // beim Aufstehen über „Zehen nach unten“ in den Stand dreht (wie das Sprunggelenk) und nicht über die Seite umschlägt.
-  // Sohle mit Anteil nach hinten: so läuft sie beim Überblenden über hinten (wird im Bild auf die Fußebene gelegt).
-  const SEIZA = { pelvis: [0, 0.32, 0], yaw: 0, L: { x: 0.1, z: -0.08, y: 0.06, yaw: 0, pitch: -180, sole: [0, 1, -1], kp: [0, -1, 0.6] }, R: { x: -0.1, z: -0.08, y: 0.06, yaw: 0, pitch: -180, sole: [0, 1, -1], kp: [0, -1, 0.6] }, hL: [0.1, -0.58, 0.24], hR: [-0.1, -0.58, 0.24], oL: 1, oR: 1, pL: [0, 1, 0], pR: [0, 1, 0], w: [0, 0] };
-  D['tc:seiza'] = STILL(SEIZA, { view: 'side3' });
-  D['tc:mokuso'] = STILL(M(SEIZA, { look: 0, hL: [0.03, -0.46, 0.2], hR: [-0.03, -0.47, 0.18], pL: [0, -1, 0], pR: [0, -1, 0] }), { view: 'front3' });
-  // Stehender Fuß: Sohle nach unten, mit Anteil nach hinten (Gegenstück zum Seiza-Fuß, im Bild genau nach unten)
-  const SOHLE_STAND = (p, s) => V.sub([0, -1, 0], E.solve(E.full(p))['dir' + s]);
-  const KNEEL_UP0 = M(SEIZA, { pelvis: [0, 0.5, 0.02], L: { x: 0.12, z: 0.38, y: 0.075, yaw: 0, pitch: 0, kp: [0, 0.3, 1] }, R: { z: -0.22 } });
-  const KNEEL_UP = M(KNEEL_UP0, { L: { sole: SOHLE_STAND(KNEEL_UP0, 'L') } });
-  const KI_END = M(S.heisoku, { L: { sole: SOHLE_STAND(S.heisoku, 'L') }, R: { sole: SOHLE_STAND(S.heisoku, 'R') } });
-  D['tc:kiritsu'] = M({ keys: [{ t: 0, p: SEIZA }, { t: 0.15, p: SEIZA }, { t: 0.45, p: KNEEL_UP }, { t: 0.8, p: KI_END }], best: 0.45, dur: 2.2, view: 'side3' });
-  const TURN0 = ZK_G;
-  D['tc:mawatte'] = M({ keys: [{ t: 0, p: TURN0 }, { t: 0.15, p: TURN0 }, { t: 0.45, p: rotate(M(TURN0, { pelvis: [0, 0.76, 0.06] }), 90, [0, 0.06]) }, { t: 0.75, p: rotate(TURN0, 180, [0, 0.06]), e: 'kime' }], best: 1, dur: 2, view: 'front3', marks: ['turn'] });
-  D['tc:kiai'] = M(D['mv:gyaku-zuki'], { marks: ['kiai'], hit: null });
-  D['tc:kime'] = M(D['mv:gyaku-zuki'], { marks: ['kime'], hit: null });
-  D['tc:sun-dome'] = M(T(ZK_G, M(S.zks, { hL: L(H.hip), hR: H.jodan })), { eff: 'fistR', view: 'side', marks: ['sundome'] });
-
   /* ---------- Mit Partner (grau) ---------- */
-  const OPP = (p, dz) => move(rotate(p, 180, [0, 0]), 0, dz);
   const FIGHT = M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.1, -0.12, 0.42], hR: [-0.02, -0.22, 0.2] });
 
   /* ---------- Fußfeger mit Partner ---------- */
@@ -998,12 +975,6 @@
     [{ t: 0, p: TB_0 }, { t: 0.12, p: TB_0 }, { t: 0.4, p: TB_1, e: 'in' }, { t: 0.56, p: TB_2, e: 'lin' }, { t: 0.68, p: TB_3, e: 'kime' }],
     [{ t: 0, p: TB_U0 }, { t: 0.56, p: TB_U0 }, { t: 0.68, p: TB_U1, e: 'kime' }], 0.68), M(hit('heelR', 'Fußsohle'), { eff: 'heelR', view: 'side', yaw: -22, pitch: 12 }));
   D['tc:ashi-barai'] = TB;
-  D['tc:maai'] = STILL(FIGHT, { partner: [{ t: 0, p: OPP(FIGHT, 2.3) }], view: 'side', marks: ['maai'] });
-  D['tc:kogeki'] = M(D['mv:oi-zuki'], { keys: [{ t: 0, p: ZK_G }, { t: 0.15, p: ZK_G }, { t: 0.38, p: OI_MID, e: 'in' }, { t: 0.5, p: M(OI_END, { hR: H.jodan }), e: 'kime' }], partner: [{ t: 0, p: OPP(M(S.hachiji), 2.25) }], view: 'side' });
-  D['tc:kogeki'] = TWIST(D['tc:kogeki'], 'R');
-  D['tc:deai'] = M(T_RUHIG(FIGHT, M(S.zks, { pelvis: [0, 0.71, 0.12], hL: L(H.hip), hR: H.chudan })), { partner: [{ t: 0, p: OPP(ZK_G, 2.15) }, { t: 0.22, p: OPP(ZK_G, 2.15) }, { t: 0.62, p: OPP(M(OI_MID, { hR: [-0.05, 0.0, 0.4] }), 2.15) }], eff: 'fistR', view: 'side', hit: { at: 'fistR', text: 'Konter' } });
-  D['tc:zanshin'] = STILL(M(S.zks, { hL: L(H.guardF), hR: H.guardR, look: 0 }), { partner: [{ t: 0, p: OPP(M(S.hachiji, { lean: -4 }), 1.7) }], view: 'side', marks: ['gaze'] });
-  D['tc:bunkai'] = T_RUHIG(MZK, M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), { partner: [{ t: 0, p: OPP(M(ZK_G, {}), 1.75) }, { t: 0.22, p: OPP(ZK_G, 1.75) }, { t: 0.62, p: OPP(M(OI_MID, { pelvis: [0, 0.71, 0.45], hR: [0.0, 0.05, 0.5], hL: L(H.hip) }), 1.75) }], eff: 'fistR', view: 'side', hit: { at: 'elbowR', text: 'Age-uke' } });
 
   /* ---------- Übersichten ---------- */
   D['fig:levels'] = STILL(M(S.hachiji, { hL: L(H.side), hR: H.side, oL: 1, oR: 1, fL: [0, -1, 0], fR: [0, -1, 0], pL: [-1, 0, 0], pR: [1, 0, 0] }), { view: 'front', marks: ['levels'] });
@@ -1027,11 +998,11 @@
     'mv:gyaku-zuki': 'seiken', 'mv:oi-zuki': 'seiken', 'tc:choku-zuki': 'seiken', 'tc:kizami-zuki': 'seiken', 'tc:tate-zuki': 'seiken',
     'tc:sanbon-zuki': 'seiken:LR', 'tc:ren-zuki': 'seiken:LR', 'tc:morote-zuki': 'seiken:LR', 'tc:kagi-zuki': 'seiken', 'tc:ura-zuki': 'seiken',
     'tc:age-zuki': 'seiken', 'tc:yama-zuki': 'seiken:LR', 'tc:awase-zuki': 'seiken:LR', 'tc:otoshi-zuki': 'seiken', 'tc:mawashi-zuki': 'seiken',
-    'tc:nukite': 'fingerspitzen', 'tc:kogeki': 'seiken', 'tc:deai': 'seiken',
+    'tc:nukite': 'fingerspitzen',
     'tc:uraken-uchi': 'uraken', 'tc:tettsui-uchi': 'tettsui', 'tc:shuto-uchi': 'shuto', 'tc:haito-uchi': 'haito', 'tc:teisho-uchi': 'teisho',
     'tc:enpi-uchi': 'ellbogen', 'tc:furi-enpi': 'ellbogen', 'tc:yoko-enpi': 'ellbogen', 'tc:mawashi-enpi': 'ellbogen', 'tc:age-enpi': 'ellbogen',
     'tc:otoshi-enpi': 'ellbogen', 'tc:ushiro-enpi': 'ellbogen', 'tc:hasami-uchi': 'innen:LR',
-    'mv:age-uke': 'unterarm', 'mv:gedan-barai': 'unterarm', 'mv:soto-uke': 'unterarm', 'mv:uchi-uke': 'unterarm', 'tc:bunkai': 'unterarm',
+    'mv:age-uke': 'unterarm', 'mv:gedan-barai': 'unterarm', 'mv:soto-uke': 'unterarm', 'mv:uchi-uke': 'unterarm', 
     'tc:shuto-uke': 'shuto', 'tc:morote-uke': 'unterarm:L', 'tc:juji-uke': 'handgelenk:LR', 'tc:kakiwake-uke': 'unterarm:LR',
     'tc:te-nagashi-uke': 'handflaeche', 'tc:gedan-nagashi-uke': 'unterarm', 'tc:osae-uke': 'handflaeche',
     'tc:kake-uke': 'handgelenk', 'tc:sukui-uke': 'unterarm', 'tc:haiwan-uke': 'unterarm', 'tc:tsukami-uke': 'handflaeche',

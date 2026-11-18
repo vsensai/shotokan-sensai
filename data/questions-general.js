@@ -123,9 +123,6 @@
   L.mc('Wofür steht die Abkürzung „Zk“ in der DJKB-Prüfungsordnung?', ['Zenkutsu-dachi', 'Zenwan-kamae', 'Zuki-kihon', 'Zanshin-kamae'], '', S.po);
   L.mc('Wofür steht die Abkürzung „Kk“?', ['Kokutsu-dachi', 'Kiba-kamae', 'Kosa-dachi', 'Kizami-kamae'], '', S.po);
   L.mc('Wofür steht die Abkürzung „Kb“?', ['Kiba-dachi', 'Kokutsu-dachi', 'Kake-barai', 'Kosa-barai'], '', S.po);
-  L.mc('Wo liegt das Gewicht hauptsächlich im Zenkutsu-dachi?', ['Überwiegend auf dem vorderen Bein', 'Überwiegend auf dem hinteren Bein', 'Genau gleich verteilt', 'Nur auf den Zehen'], '');
-  L.mc('Wo liegt das Gewicht hauptsächlich im Kokutsu-dachi?', ['Überwiegend auf dem hinteren Bein', 'Überwiegend auf dem vorderen Bein', 'Gleich verteilt', 'Auf den Fersen beider Füße'], '', S.pdf);
-  L.mc('Wie ist das Gewicht im Kiba-dachi verteilt?', ['Gleichmäßig auf beide Beine', 'Überwiegend vorne', 'Überwiegend hinten', 'Nur auf einem Bein'], '');
   L.mc('Was bedeutet „Hidari Zenkutsu-dachi“?', ['Vorwärtsstellung mit dem linken Bein vorne', 'Vorwärtsstellung mit dem rechten Bein vorne', 'Rückwärtsstellung mit links vorne', 'Reiterstellung nach links'], '');
   L.mc('In welchem Stand wird Shuto-uke in der Kihon-Prüfung typischerweise ausgeführt?', ['Kokutsu-dachi', 'Zenkutsu-dachi', 'Kiba-dachi', 'Heisoku-dachi'], '', S.po);
   L.mc('In welchem Stand wird Yoko-geri-keage im DJKB-Kihon ausgeführt?', ['Kiba-dachi', 'Zenkutsu-dachi', 'Kokutsu-dachi', 'Neko-ashi-dachi'], '', S.po);
@@ -138,7 +135,6 @@
   L.mc('Warum beschreibt der hintere Fuß beim Schritt in Zenkutsu-dachi einen Bogen?', ['Der Stand hat Breite – in der Mitte des Schritts kommen die Füße zusammen', 'Damit der Schritt länger wird', 'Um den Partner zu fegen', 'Weil man dabei springt'], '');
   L.mc('Was unterscheidet Suri-ashi von Ayumi-ashi?', ['Bei Suri-ashi wechseln die Beine nicht – der vordere Fuß gleitet vor, der hintere zieht nach', 'Bei Suri-ashi springt man', 'Bei Suri-ashi gleiten beide Füße gleichzeitig', 'Es gibt keinen Unterschied'], '');
   L.mc('Wofür eignet sich Yori-ashi (beide Füße gleiten gleichzeitig) besonders?', ['Kleine Distanzänderungen, Rhythmuswechsel und das Verschleiern eines Angriffs', 'Große Strecken in kurzer Zeit', 'Drehungen um 180°', 'Den Gruß'], '');
-  L.mc('Wozu dienen die kreisförmigen Körperdrehungen (Tai-sabaki)?', ['Zum Ausweichen aus der Angriffslinie im Kumite und bei Partnerübungen', 'Zum Gruß', 'Zum Aufwärmen der Hüfte', 'Für Sprungtritte'], '');
   L.mc('Warum muss man Fußarbeit eigens üben?', ['Weil die richtige Distanz für Abwehr und Konter davon abhängt', 'Weil sie in Prüfungen nicht vorkommt', 'Damit die Kata schneller vorbei ist', 'Weil die Hände sonst ermüden'], '');
 
   // ---------- Kihon ----------
