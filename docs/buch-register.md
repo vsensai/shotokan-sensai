@@ -412,7 +412,7 @@ Die Spalte „Scan-S.“ nennt die Scan-Seite mit dem Buchtext zur Bewegung.
 <!-- ablauf:bassai-dai -->
 | Nr | Stand | Technik | Fußarbeit | Richtung | Scan-S. |
 |---|---|---|---|---|---|
-| 1 | Migi Ashi-mae Kosa-dachi | Sasho Soede Migi Chudan Uchi-uke | Sprungschritt nach vorne: rechtes Bein trägt, linker Fuß kreuzt hinter die rechte Ferse | vorne | 79 |
+| 1 | Migi Ashi-mae Kosa-dachi | Sasho Soede Migi Chudan Uchi-uke | Sprungschritt nach vorne: rechtes Knie hoch, dann weiter, kraftvoller Stampfschritt – rechtes Bein trägt, linker Fuß kreuzt hinter die rechte Ferse | vorne | 79 |
 | 2 | Hidari Zenkutsu-dachi | Hidari Chudan Uchi-uke – fließend weiter | Rechtes Bein trägt, linker Fuß gleitet nach hinten – Wendung links herum Richtung Start | Start, Wendung ½ links herum | 80 |
 | 3 | Hidari Zenkutsu-dachi | Migi Chudan Uchi-uke | Stand bleibt | Start | 80 |
 | 4 | Migi Zenkutsu-dachi | Hidari Chudan Soto-uke – fließend weiter | Linkes Bein trägt, Oberkörper dreht rechts herum zur Vorderseite – rechter Fuß vorne | vorne, Wendung ½ rechts herum | 81 |

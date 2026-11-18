@@ -28,6 +28,9 @@
   const HIP = 0.09; // Hüftgelenk seitlich neben der Beckenmitte
   const PASS = 0.15; // Abstand der Fußmitten, wenn ein Fuß am Standfuß vorbeigleitet
   const LIFT = 0.025; // so hoch hebt der gleitende Fuß ab (Suri-ashi: fast gar nicht)
+  const ST_KNIE = 0.36; // Stampfschritt aus dem Stand (Bassai Dai 1): bis hier kommt das Knie hoch,
+  const ST_AUF = 0.72; // hier setzt der Fuß auf,
+  const ST_HOCH = 0.42; // so hoch kommt der Fuß (Meter)
   const HOCH = 0.38; // so hoch kommt der Fuß beim Stampfen (Fumikomi): Knie hoch, dann fällt er hart auf seinen Platz
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
   const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
@@ -454,17 +457,20 @@
       seg.hop = 0.1;
       // Tobikomi: ein richtiger Sprung mit Höhe – die Füße kommen hoch, die Hüfte steigt mit
       if (o.tobi) { seg.hop = 0.34; seg.air = 0.22; }
-      // Sprungschritt aus dem aufrechten Stand (Bassai Dai 1 aus dem Yoi): erst in die Knie (Absprung), dann fliegt die
-      // Figur nach vorn – beide Füße in der Luft, die Hüfte bleibt oben –, der vordere Fuß landet und trägt, der andere
-      // kommt dahinter an; erst mit der Landung sinkt die Hüfte in den Stand
+      // Sprungschritt aus dem aufrechten Stand (Bassai Dai 1 aus dem Yoi): kein Flug – erst kommt das Knie des Fußes, der
+      // landet, hoch (die Figur steht dabei auf dem anderen Bein), von dort ein weiter, kraftvoller Stampfschritt nach vorn;
+      // der andere Fuß stößt ab und zieht gleich hinter die Ferse nach, mit dem Aufsetzen sinkt die Hüfte in den Stand
       else if (A.low.h > 0.85) {
-        seg.ab = { tief: A.low.h - 0.09, oben: A.low.h + 0.02 };
-        seg.hop = 0.16;
+        seg.ab = { s: lead, tief: A.low.h - 0.05 };
+        seg.hop = 0.06;
+        const dir = sub(B.low[lead].c, A.low[lead].c);
+        const fw = [dir[0] / len(dir), dir[1] / len(dir)];
+        seg.knee = { w: (u) => ramp(0, 0.2, u) * (1 - ramp(ST_AUF - 0.12, ST_AUF, u)), [lead]: [fw[0], 0.35, fw[1]] };
       }
     }
     seg.feet = {};
     ['L', 'R'].forEach((s) => {
-      const [u0, u1] = seg.ab ? (s === lead ? [0.2, 0.68] : [0.26, 0.9]) : lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
+      const [u0, u1] = seg.ab ? (s === lead ? [0, ST_AUF] : [ST_AUF - 0.1, 0.94]) : lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
       seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz, o.heran);
     });
     // Hüfte: beim Vorbeigleiten über dem Standbein (zwischen den Füßen), sonst gerade hinüber
@@ -543,6 +549,9 @@
     else P.look = byaw + up.look + clamp(B.byaw - byaw, -LEAD, LEAD) * ramp(0, 0.22, u);
     const prog = (s) => { const pl = seg.feet[s]; return seg.ease(clamp((u - pl.u0) / (pl.u1 - pl.u0))); };
     let pel = via(A.low.pel, seg.pelMid, B.low.pel, seg.share ? seg.share.L * prog('L') + seg.share.R * prog('R') : eb);
+    // Stampfschritt aus dem Stand: die Hüfte bleibt, solange das Knie hochkommt, über dem Standbein und geht dann mit dem
+    // Schritt kraftvoll nach vorn
+    if (seg.ab) pel = mix(A.low.pel, B.low.pel, u < ST_KNIE ? 0.08 * smooth(u / ST_KNIE) : 0.08 + 0.92 * smooth(clamp((u - ST_KNIE) / (0.94 - ST_KNIE))));
     ['L', 'R'].forEach((s) => {
       const fa = A.low[s];
       const fb = B.low[s];
@@ -581,12 +590,23 @@
       const so = seg.sole && seg.sole[s];
       P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
       if (wl) Object.assign(P[s], wl(P[s]));
+      // Stampfschritt aus dem Stand: Knie hoch (Fuß fast noch über seinem Platz), dann weit nach vorn und hart hinunter
+      if (seg.ab && seg.ab.s === s) {
+        const q = u < ST_KNIE ? smooth(u / ST_KNIE) : 1;
+        const w = clamp((u - ST_KNIE) / (ST_AUF - ST_KNIE));
+        const vor = 0.1 * q + 0.9 * smooth(w);
+        const hoch = u < ST_KNIE ? q : 1 - w * w;
+        const cc = mix(fa.c, fb.c, vor);
+        const yw = byaw + lerp(fa.rel, fb.rel, vor);
+        const ak = sub(cc, mul(fwd(yw), FOOT_MID));
+        Object.assign(P[s], { x: ak[0], z: ak[1], y: lerp(fa.y, fb.y, vor) + ST_HOCH * hoch, yaw: yw, pitch: lerp(fa.pitch, fb.pitch, vor) - 25 * hoch });
+      }
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
     if (seg.ab) {
-      const ab = seg.ab;
-      h = u < 0.18 ? lerp(A.low.h, ab.tief, smooth(u / 0.18)) : u < 0.42 ? lerp(ab.tief, ab.oben, smooth((u - 0.18) / 0.24)) : lerp(ab.oben, B.low.h, smooth((u - 0.42) / 0.4));
+      // Knie hoch auf dem Standbein (leicht gebeugt), dann sinkt die Hüfte mit dem Aufsetzen in den Stand
+      h = u < ST_KNIE ? lerp(A.low.h, seg.ab.tief, smooth(u / ST_KNIE)) : lerp(seg.ab.tief, B.low.h, smooth(clamp((u - ST_KNIE) / (ST_AUF + 0.06 - ST_KNIE))));
     }
     const lp = [Math.cos(P.yaw * RAD), -Math.sin(P.yaw * RAD)];
     ['L', 'R'].forEach((s) => {
@@ -893,7 +913,7 @@
       const ausStand = sprung && cur.low.h > 0.85;
       const tobi = /tobikomi/i.test(m.h || '');
       const d = st.slow ? SLOW * gap
-        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : ausStand ? 0.9 : sprung ? 0.75 : STEP[0] + STEP[1] * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
+        : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : ausStand ? 1.0 : sprung ? 0.75 : STEP[0] + STEP[1] * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
       // Genau entgegen (Bassai Dai 41: Blick schräg nach links vorn, Fuß und Hand nach rechts hinten) wäre die Seite offen:
       // der Kopf dreht gegen die Drehung des Körpers – sonst drehte er 270° herum und in der nächsten Bewegung im Kreis

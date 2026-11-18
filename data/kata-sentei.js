@@ -15,7 +15,7 @@
       rei: { f: [[-0.05, 0.11, 330, 0.5], [0.05, 0.11, 30, 0.5]], body: 0, h: 'Verbeugung, Fersen zusammen' },
       yoi: { f: [[-0.1, 0.16, 0, 0.5], [0.03, 0.15, 4, 0.5]], body: 0, h: 'Füße geschlossen (Heisoku-dachi)' },
       moves: [
-        { f: [[0.11, 0.54, 5, 0.1], [-0.07, 0.71, 0, 0.9]], body: 0, h: 'Sprungschritt nach vorne: rechtes Bein trägt, linker Fuß kreuzt hinter die rechte Ferse' },
+        { f: [[0.11, 0.54, 5, 0.1], [-0.07, 0.71, 0, 0.9]], body: 0, h: 'Sprungschritt nach vorne: rechtes Knie hoch, dann weiter, kraftvoller Stampfschritt – rechtes Bein trägt, linker Fuß kreuzt hinter die rechte Ferse' },
         { f: [[0.12, -0.05, 200, 0.7], [-0.13, 0.54, 215, 0.3]], body: 180, turn: -180, h: 'Rechtes Bein trägt, linker Fuß gleitet nach hinten – Wendung links herum Richtung Start' },
         { f: [[0.06, -0.08, 200, 0.7], [-0.14, 0.54, 212, 0.3]], body: 180, h: 'Stand bleibt' },
         { f: [[0.03, 0.22, 342, 0.3], [0.16, 0.75, 351, 0.7]], body: 0, turn: 180, h: 'Linkes Bein trägt, Oberkörper dreht rechts herum zur Vorderseite – rechter Fuß vorne' },
