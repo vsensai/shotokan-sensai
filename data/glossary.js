@@ -1,4 +1,4 @@
-/* Lexikon aller Stände, Techniken und Begriffe – Grundlage für Wissen (Lexikon) und Begriffe-Trainer. */
+/* Lexikon aller Stände, Techniken und Begriffe – Grundlage für Wissen (Lexikon) und den Quiz-Reiter „Begriffe“. */
 (function () {
   'use strict';
   const G = SK.gfx;
@@ -10,7 +10,7 @@
 
   SK.glossaryCats = [
     { id: 'stand', title: 'Stände (Dachi)', ask: 'Welcher Stand ist abgebildet?' },
-    { id: 'tsuki', title: 'Fauststoße (Tsuki)', ask: 'Welche Technik ist abgebildet?' },
+    { id: 'tsuki', title: 'Fauststöße (Tsuki)', ask: 'Welche Technik ist abgebildet?' },
     { id: 'uchi', title: 'Schläge (Uchi)', ask: 'Welcher Schlag ist abgebildet?' },
     { id: 'uke', title: 'Abwehrtechniken (Uke)', ask: 'Welche Abwehr ist abgebildet?' },
     { id: 'geri', title: 'Fußtechniken (Geri)', ask: 'Welche Fußtechnik zeigt die Grafik?' },
@@ -410,7 +410,7 @@
   SK.glossaryAlt = altName;
 
   SK.buildGlossaryContent = function () {
-    const unit = { id: 'begriffe-trainer', title: 'Begriffe-Trainer', kind: 'drill', desc: 'Stände, Techniken & Begriffe – kurz abgefragt', lessons: [] };
+    const unit = { id: 'begriffe-trainer', title: 'Begriffe', kind: 'drill', desc: 'Stände, Techniken & Begriffe – kurz abgefragt', lessons: [] };
     SK.glossaryCats.forEach((c) => {
       const items = SK.glossary.filter((e) => e.cat === c.id);
       const lid = `gl-${c.id}`;

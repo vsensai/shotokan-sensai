@@ -1588,6 +1588,74 @@ details.unit>summary::-webkit-details-marker {
   color: #fff;
 }
 
+/* Reiter als Link (Quiz: Begriffe, Kata, Theorie) */
+a.tab {
+  text-align: center;
+  text-decoration: none;
+}
+
+/* Quiz: Wiederholen und Zufallsmix nebeneinander, kleiner als die Kacheln der Startseite */
+.quiz-extra {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  margin: 0.8rem 0 0;
+}
+
+.quiz-extra .tile {
+  padding: 0.6rem 0.8rem;
+}
+
+.quiz-extra .tile h3 {
+  font-size: 0.98rem;
+}
+
+.quiz-extra .tile p {
+  font-size: 0.8rem;
+}
+
+/* Umschalter (Quiz | Karteikarten, Richtung der Karteikarten) */
+.seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  margin: 0.8rem 0 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--card);
+}
+
+.seg + .seg {
+  margin-top: 0;
+}
+
+.seg-btn {
+  padding: 0.45rem 0.3rem;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.seg-btn[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--card);
+}
+
+.unit.drill {
+  border-left: 5px solid var(--red);
+}
+
+.unit.drill .path {
+  padding-top: 1rem;
+}
+
 .prog {
   margin: 0.5rem 0;
   padding-left: 1.6rem;

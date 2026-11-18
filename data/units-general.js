@@ -295,7 +295,7 @@
               <li>Laut DJKB-Prüfungsordnung werden alle Fauststöße generell <b>Chudan</b> ausgeführt, sofern nichts anderes angegeben ist.</li>
             </ul>
             ${grid(M('oi-zuki', 'Oi-zuki', 'Faust und vorderer Fuß auf derselben Seite'), M('gyaku-zuki', 'Gyaku-zuki', 'Faust und vorderer Fuß auf entgegengesetzten Seiten'))}
-            <h4>Weitere Fauststoße</h4>
+            <h4>Weitere Fauststöße</h4>
             ${grid(T('choku-zuki', 'Choku-zuki'), T('kizami-zuki', 'Kizami-zuki'), T('sanbon-zuki', 'Sanbon-zuki'), T('ren-zuki', 'Ren-zuki'), T('morote-zuki', 'Morote-zuki'), T('kagi-zuki', 'Kagi-zuki'), T('ura-zuki', 'Ura-zuki'), T('age-zuki', 'Age-zuki'), T('yama-zuki', 'Yama-zuki'), T('tate-zuki', 'Tate-zuki'), T('mawashi-zuki', 'Mawashi-zuki'), T('awase-zuki', 'Awase-zuki'))}`,
         },
         {
