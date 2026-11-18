@@ -101,29 +101,23 @@ In der App gekennzeichnet als Quelle `SK.sources.kompakt`.
 
 | S. | Technik | Kernaussage |
 |---|---|---|
-| 64 | Einleitung | Fortgeschritten; Gegner kurz aus dem Gleichgewicht, Folgetechnik; psychologischer Vorteil. |
-| 65 | Teisoku-ashi-barai | Mit der Fußsohle aus der Kamae, vorderer oder hinterer Fuß. |
-| 66 | Haisoku-ashi-barai | Mit dem Spann, meist vorderer Fuß, wird vorbereitet. |
-| 67 | Komura-ashi-barai | Mit der Wade, meist in einer Kombination. |
+| 64 | Ashi-barai | Fortgeschritten; Gegner kurz aus dem Gleichgewicht, Folgetechnik; psychologischer Vorteil. In der App nur als Oberbegriff (letzte Fußtechnik). |
 
 ### Fußbewegungen / Ashi-sabaki (S. 68–78)
+
+In der App nur fünf Einträge: Ashi-sabaki, Ayumi-ashi, Suri-ashi, Yori-ashi, Tai-sabaki.
 
 | S. | Bewegung | Kernaussage |
 |---|---|---|
 | 68 | Einleitung | Beweglichkeit muss geübt werden; falsche Distanz macht Abwehr unwirksam oder den Konter schwach. |
-| 69 | Ayumi-ashi 1 | Füße kommen in der Schrittmitte zusammen; bei Ständen mit Breite folgt der hintere Fuß einem Bogen. |
-| 70 | Ayumi-ashi 2 | Bei Ständen mit Füßen auf einer Linie gerade, ohne Bogen. |
-| 71–72 | Tai-sabaki | Kreisförmige Drehungen zum Ausweichen, 45° bis 180°; hinterer Fuß versetzt, vorderer dreht am Platz. |
-| 73 | Ashi-fumikae | Beinwechsel am Platz; vorwärts erst vorderer Fuß zurück, dann hinterer vor. |
-| 74 | Okuri-suri-ashi | Zielnaher Fuß zuerst; vorwärts/seitlich/diagonal zieht der hintere nach, rückwärts der vordere. |
-| 75 | Tsugi-suri-ashi | Größere Reichweite; vorwärts erst hinterer zum vorderen, dann vorderer gleitet; rückwärts erst der vordere. |
-| 76 | Yori-suri-ashi | Beide gleiten gleichzeitig; kleine Distanzen, Rhythmuswechsel, Angriff verschleiern. |
-| 77 | Yoko-sashi-ashi | Seitlicher Übersetzschritt (Ferse noch angehoben); Übergang zwischen Ständen oder zu Fußtechnik; im Kihon meist mit Yoko-geri, in Kata vor allem Tekki. |
-| 78 | Shaho-sashi-ashi | Derselbe Schritt diagonal; gelegentlich in höheren Kata zum Richtungswechsel. |
+| 69 | Ayumi-ashi | Füße kommen in der Schrittmitte zusammen; bei Ständen mit Breite folgt der hintere Fuß einem Bogen. |
+| 71–72 | Tai-sabaki | Kreisförmige Drehungen zum Ausweichen aus der Angriffslinie. |
+| 74 | Suri-ashi | Gleitschritt: der Fuß, der näher am Ziel ist, gleitet zuerst, der andere zieht nach; die Beinstellung bleibt. |
+| 76 | Yori-ashi | Beide gleiten gleichzeitig; kleine Distanzen, Rhythmuswechsel, Angriff verschleiern. |
 
 ## Wo das Wissen in der App steht
 
-- **Lexikon**: neue Kategorien „Fußbewegungen (Ashi-sabaki)“ und „Fußfeger (Ashi-barai)“, neue Einträge zu Zuki, Enpi, Uke und Geri (`data/glossary.js`, Quelle `KO`).
+- **Lexikon**: Kategorie „Fußbewegungen (Ashi-sabaki)“, Ashi-barai unter Fußtechniken, neue Einträge zu Zuki, Enpi, Uke und Geri (`data/glossary.js`, Quelle `KO`).
 - **Lernen**: Lektion „Fußbewegungen (Ashi-sabaki)“ (`da-ashi`), Ergänzungen in Stände, Tsuki, Uke, Uchi, Geri und „Grundprinzipien“ unter „Wichtige Konzepte“ (`data/units-general.js`).
 - **Quiz**: Fragen mit Quelle `S.kompakt` in `data/questions-general.js`; Begriffe-Trainer erzeugt zu jedem neuen Lexikon-Eintrag automatisch Fragen.
 - **Kompakt-Übersicht**: `#/kompakt[/<grad>]` in `js/app.js`.

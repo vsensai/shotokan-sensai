@@ -124,8 +124,8 @@
     ['Ashi-barai', 'Fußfeger', 'geri', tc('ashi-barai'), PO],
 
     ['Ashi-sabaki', 'Fußarbeit: alle Schritte, mit denen man Distanz und Richtung ändert', 'ashi', null, KO],
-    ['Ayumi-ashi', 'Normaler Schritt: der hintere Fuß wird zum vorderen; bei Ständen mit Breite kommt er in der Schrittmitte zum Standbein (Bogen)', 'ashi', as('ayumi-ashi'), KO],
-    ['Suri-ashi', 'Gleitschritt', 'ashi', as('suri-ashi'), PO],
+    ['Ayumi-ashi', 'Normaler Schritt: der hintere Fuß wird zum vorderen (die Beine wechseln); bei Ständen mit Breite kommt er in der Schrittmitte zum Standbein (Bogen)', 'ashi', as('ayumi-ashi'), KO],
+    ['Suri-ashi', 'Gleitschritt: der vordere Fuß gleitet vor, der hintere zieht nach – die Beinstellung bleibt', 'ashi', as('suri-ashi'), PO],
     ['Yori-ashi', 'Beide Füße gleiten gemeinsam, der Stand bleibt erhalten', 'ashi', as('yori-ashi'), PDF(38)],
     ['Tai-sabaki', 'Körperausweichbewegung', 'ashi', as('tai-sabaki'), PO],
 

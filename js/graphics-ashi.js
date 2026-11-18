@@ -116,14 +116,15 @@
     }),
 
     'suri-ashi': () => sabaki('Suri-ashi', {
-      axis: 'M110 24 V270',
       keys: [
-        { L: [86, 140, 0], R: [134, 232, 25] },
-        { L: [86, 140, 0], R: [108, 150, 5] },
-        { L: [86, 140, -25], R: [134, 56, 0] },
+        { L: [86, 120, 0], R: [134, 212, 25] },
+        { L: [86, 64, 0], R: [134, 212, 25] },
+        { L: [86, 64, 0], R: [134, 156, 25] },
       ],
-      lines: ['von oben: Gleitschritt – der Fuß bleibt flach', 'am Boden und gleitet nach vorne'],
+      nums: [[62, 96, 1], [160, 186, 2]],
+      lines: ['von oben: der vordere Fuß gleitet vor (1), der hintere', 'zieht nach (2) – vorne bleibt vorne'],
     }),
+
 
 
     'yori-ashi': () => sabaki('Yori-ashi', {
