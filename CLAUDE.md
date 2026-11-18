@@ -27,6 +27,15 @@
 - Die Kata-PDFs (Band 1 und 2) und `tools/out/` niemals committen.
 - Heft „Karate kompakt“ (Quelle `SK.sources.kompakt`): Wissen steht in `docs/karate-kompakt.md`. Keine Scans, Bilder oder wörtlichen Texte des Heftes ins Repo – nur Fakten in eigenen Worten; Grafiken selbst zeichnen. Für Kata-Inhalte gilt weiter nur das JKA-Buch (Band 1, Hangetsu aus Band 2).
 
+## Bedienkonzept (Knöpfe, Auswahl, Hinweise)
+Jedes Bedienelement hat eine Rolle, jede Rolle sieht überall gleich aus (Farben als Tokens in `css/style.css`: `--sel`, `--sel-ink`, `--sel-bg`, `--track`).
+- **Nächster Schritt** (`btn primary`, rot gefüllt): höchstens einer pro Bildschirm und nur, wenn der Schritt eindeutig ist (Weiter, Prüfen, Umdrehen, Start, „Quiz zu diesem Thema“). Stehen mehrere gleichwertige Aktionen nebeneinander, ist keine rot.
+- **Aktion** (`btn`): weiß mit Rand.
+- **Auswahl** (Reiter, Umschalter, Ansicht, Tempo, 3D/Fußbild, gewählte Antwort, offene Lexikon-Kategorie): graue Leiste bzw. Rand, das Gewählte dunkel (`--sel`). Nie rot, nie blau.
+- **Hinweis**: Rot nur klein – Schild („5 fällig“, `pill due`), Fortschrittsbalken, aktuelle Stelle. Lektionen ohne roten Rand; der Punkt zeigt den Stand (Zahl offen, grünes ✓ bestanden). Grün/Rot nach einer Antwort bleibt für richtig/falsch.
+- **Navigation**: Karte mit › am Rand (z. B. Bereiche im Quiz), sieht nie aus wie ein Knopf.
+- Ausnahme: das Labor (`labor/`, Figur-Editor) folgt dem Konzept nicht zwingend.
+
 ## 3D-Figuren
 - Bilder mit ganzer Figur kommen aus `js/figur-posen.js` (Schlüssel wie `tc:age-zuki`). Neue Technik mit Figur: nur die Pose dort ergänzen – keine SVG-Grafik als Rückfall (ohne WebGL 2 bleibt das Bild leer, die Startseite zeigt einen Hinweis). SVG-Grafiken nur, wo keine Figur passt (Fußbilder, Körperwaffen, Fußbewegungen, Schemabilder, Bodenkarte). `validate.html` meldet ein SVG neben einer 3D-Figur als Fehler.
 - Nach Änderungen an Posen `tools/test/gfx3d.html` mit WebGL (Playwright: `--use-angle=swiftshader`) ansehen; `validate.html` prüft, dass alle Posen rechenbar sind und Standfüße ihren Platz erreichen.

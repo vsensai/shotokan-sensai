@@ -452,7 +452,7 @@
         el(
           'div',
           { class: 'actions' },
-          el('a', { class: `btn${due.length ? ' primary' : ''}`, href: '#/review' }, 'Wiederholen', pill(due.length || '0')),
+          el('a', { class: 'btn', href: '#/review' }, 'Wiederholen', due.length ? pill(`${due.length} fällig`, 'due') : pill('0')),
           el('a', { class: 'btn', href: '#/zufall' }, 'Zufallsmix')
         )
       ),
@@ -491,9 +491,9 @@
     const actions = el(
       'div',
       { class: 'actions' },
-      el('button', { type: 'button', class: `btn${due.length ? ' primary' : ''}`, disabled: !due.length, onclick: () => run(due.slice(0, 15), `Wiederholen · ${t.title}`, 'review') }, 'Wiederholen', pill(due.length)),
+      el('button', { type: 'button', class: 'btn', disabled: !due.length, onclick: () => run(due.slice(0, 15), `Wiederholen · ${t.title}`, 'review') }, 'Wiederholen', due.length ? pill(`${due.length} fällig`, 'due') : pill('0')),
       fresh.length
-        ? el('button', { type: 'button', class: `btn${due.length ? '' : ' primary'}`, onclick: () => run(distinct(util.shuffle(fresh), 10), `Gemischt · ${t.title}`, 'review') }, 'Gemischt', pill(`${fresh.length} neu`))
+        ? el('button', { type: 'button', class: 'btn', onclick: () => run(distinct(util.shuffle(fresh), 10), `Gemischt · ${t.title}`, 'review') }, 'Gemischt', pill(`${fresh.length} neu`))
         : el('a', { class: 'btn', href: `#/zufall/${t.scope}`, title: 'Alle Fragen gestellt – im Zufallsmix zurücksetzen' }, 'Gemischt', pill('alle gestellt'))
     );
     if (t.id === 'begriffe') actions.append(el('a', { class: 'btn', href: '#/karten' }, 'Karteikarten'));
@@ -634,7 +634,7 @@
       select,
       el('section', { class: 'card' }, el('p', {}, el('b', { text: `${fresh.length}` }), ` von ${pool.length} Fragen noch nicht gestellt`), bar),
       fresh.length
-        ? el('div', { class: 'actions' }, [10, 20, 50].filter((n, i) => i === 0 || fresh.length > [10, 20, 50][i - 1]).map((n) => el('button', { class: `btn ${n === 10 ? 'primary' : ''}`, text: `${Math.min(n, fresh.length)} Fragen`, onclick: () => start(n) })))
+        ? el('div', { class: 'actions' }, [10, 20, 50].filter((n, i) => i === 0 || fresh.length > [10, 20, 50][i - 1]).map((n) => el('button', { class: 'btn', text: `${Math.min(n, fresh.length)} Fragen`, onclick: () => start(n) })))
         : el('p', { text: 'Alle Fragen dieses Bereichs wurden bereits gestellt.' }),
       el(
         'div',
@@ -790,7 +790,7 @@
           footer.innerHTML = '';
           footer.append(
             el('button', { class: 'btn kk-nein', type: 'button', text: 'Nicht gewusst', onclick: () => answer(false) }),
-            el('button', { class: 'btn primary kk-ja', type: 'button', text: 'Gewusst', onclick: () => answer(true) }),
+            el('button', { class: 'btn kk-ja', type: 'button', text: 'Gewusst', onclick: () => answer(true) }),
             el('button', { class: 'gfx-btn kk-um', type: 'button', text: '↺ Umdrehen', onclick: () => turn() })
           );
           footer.querySelector('.kk-ja').focus({ preventScroll: true });

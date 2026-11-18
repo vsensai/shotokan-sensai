@@ -15,6 +15,11 @@
   --bad-bg: #fdecea;
   --radius: 14px;
   --shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  /* Bedienkonzept (CLAUDE.md): Auswahl = graue Leiste, Gewähltes dunkel; Rot nur für den nächsten Schritt und kleine Hinweise */
+  --track: #ece8e2;
+  --sel: var(--ink);
+  --sel-ink: #fff;
+  --sel-bg: #f1efec;
   --papier: radial-gradient(ellipse at 100% 0%, rgba(198, 40, 40, 0.14), transparent 45%), linear-gradient(170deg, #fffaf2, #efe4d2);
   font-size: 16px;
 }
@@ -417,14 +422,8 @@ main:has(> .version) {
   border: 2px solid var(--line);
 }
 
-.node.open {
-  border-color: var(--red);
-}
-
 .node.open .dot {
-  background: var(--red);
-  color: #fff;
-  border-color: var(--red-dark);
+  color: var(--ink);
 }
 
 .node.done .dot {
@@ -911,8 +910,8 @@ figure.gfx svg {
 }
 
 .lex-cat[open] > summary {
-  background: var(--red);
-  border-color: var(--red);
+  background: var(--sel);
+  border-color: var(--sel);
 }
 
 .lex-cat[open] > summary::after {
@@ -922,13 +921,13 @@ figure.gfx svg {
 .lex-cat[open] .lex-cat-de,
 .lex-cat[open] .lex-cat-jp,
 .lex-cat[open] > summary::after {
-  color: #fff;
+  color: var(--sel-ink);
 }
 
 .lex-cat[open] .lex-cat-n,
 .lex-cat[open] > summary::after {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  background: rgba(127, 127, 127, 0.25);
+  color: var(--sel-ink);
 }
 
 .lex-card.lex-hit {
@@ -1196,8 +1195,9 @@ p.kk-frage {
 }
 
 .gfx-btn[aria-pressed="true"] {
-  border-color: var(--red);
-  color: var(--red);
+  border-color: var(--sel);
+  background: var(--sel);
+  color: var(--sel-ink);
 }
 
 .gfx-btn.quiz-anim {
@@ -1347,8 +1347,9 @@ details.unit>summary::-webkit-details-marker {
 }
 
 .option.selected {
-  border-color: #1565c0;
-  background: #e3f2fd;
+  border-color: var(--sel);
+  background: var(--sel-bg);
+  box-shadow: inset 0 0 0 1px var(--sel);
 }
 
 .option.right {
@@ -1394,8 +1395,8 @@ details.unit>summary::-webkit-details-marker {
 }
 
 .chip.placed {
-  border-color: #1565c0;
-  background: #e3f2fd;
+  border-color: var(--sel);
+  background: var(--sel-bg);
   width: 100%;
 }
 
@@ -1563,10 +1564,10 @@ details.unit>summary::-webkit-details-marker {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  gap: 0.3rem;
-  padding: 0.3rem;
+  gap: 2px;
+  padding: 3px;
   margin-top: 0.8rem;
-  background: var(--card);
+  background: var(--track);
   border: 1px solid var(--line);
   border-radius: 12px;
   box-shadow: var(--shadow);
@@ -1584,8 +1585,8 @@ details.unit>summary::-webkit-details-marker {
 }
 
 .tab[aria-selected="true"] {
-  background: var(--red);
-  color: #fff;
+  background: var(--sel);
+  color: var(--sel-ink);
 }
 
 /* Quiz: Karte mit Wiederholen und Gemischt – die Überschrift sagt, wofür sie gelten (alle Bereiche oder einer) */
@@ -1629,9 +1630,9 @@ details.unit>summary::-webkit-details-marker {
   white-space: nowrap;
 }
 
-.btn.primary .pill {
-  background: #fff;
-  color: var(--red);
+.pill.due {
+  background: var(--red);
+  color: #fff;
 }
 
 .quiz-label {
@@ -1703,7 +1704,7 @@ details.unit>summary::-webkit-details-marker {
 .area-go {
   grid-row: 1 / span 4;
   grid-column: 2;
-  color: var(--red);
+  color: var(--muted);
   font-size: 1.6rem;
   font-weight: 700;
 }
@@ -1718,7 +1719,7 @@ details.unit>summary::-webkit-details-marker {
 }
 
 .unit.drill {
-  border-left: 5px solid var(--red);
+  border-left: 1px solid var(--line);
 }
 
 .unit.drill .path {
@@ -2106,9 +2107,9 @@ main:fullscreen .ans-wrap {
 }
 
 .ans-fs[aria-pressed="true"] {
-  background: var(--red);
-  border-color: var(--red);
-  color: #fff;
+  background: var(--sel);
+  border-color: var(--sel);
+  color: var(--sel-ink);
 }
 
 .ans-view button:not(:last-child) {
@@ -2124,9 +2125,9 @@ main:fullscreen .ans-wrap {
 }
 
 .ans-view button[aria-pressed="true"] {
-  background: var(--red);
-  border-color: var(--red);
-  color: #fff;
+  background: var(--sel);
+  border-color: var(--sel);
+  color: var(--sel-ink);
 }
 
 .ans-map svg {
@@ -2279,9 +2280,9 @@ main:fullscreen .ans-wrap {
 }
 
 .ans-tempo.offen .ans-tempo-btn {
-  background: var(--red);
-  border-color: var(--red);
-  color: #fff;
+  background: var(--sel);
+  border-color: var(--sel);
+  color: var(--sel-ink);
 }
 
 .ans-tempo-list {
@@ -2321,8 +2322,8 @@ main:fullscreen .ans-wrap {
 }
 
 .ans-tempo-list button[aria-pressed="true"] {
-  background: var(--red);
-  color: #fff;
+  background: var(--sel);
+  color: var(--sel-ink);
   font-weight: 700;
 }
 
@@ -2331,7 +2332,7 @@ main:fullscreen .ans-wrap {
 }
 
 .ans-tempo-list button[aria-pressed="true"] .ans-tempo-s {
-  color: #fff;
+  color: var(--sel-ink);
 }
 
 .ans-tempo-out {
@@ -2605,6 +2606,9 @@ main:fullscreen .ans-wrap {
     --bad-bg: #3a1716;
     --hint: rgba(239, 120, 110, 0.8);
     --hint-fill: rgba(239, 120, 110, 0.25);
+    --track: #1a1a1a;
+    --sel-ink: #1b1b1b;
+    --sel-bg: #2e2e2e;
   }
 
   .hero-kanji {
@@ -2624,7 +2628,7 @@ main:fullscreen .ans-wrap {
 
   .option.selected,
   .chip.placed {
-    background: #10314f;
+    background: var(--sel-bg);
   }
 
   .option.right {
