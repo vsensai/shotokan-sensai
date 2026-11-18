@@ -244,35 +244,13 @@
           learn: () => `
             <p>Gute Beweglichkeit auf dem Boden ist nicht selbstverständlich und muss eigens geübt werden. Selbst Fortgeschrittene schätzen die Distanz oft falsch ein: Eine Abwehr scheitert, weil sie nicht durch Gleitschritt oder Körperdrehung unterstützt wird, oder der Konter wird schwach, weil der Abstand zu kurz oder zu groß ist.</p>
             <p class="muted small">So liest man die Fußbilder: Blick von oben, „vorne“ ist oben. Blass = Ausgangslage, kräftig rot = Endlage, rot gestrichelt = Weg des Fußes, Zahlen = Reihenfolge. „▶ Bewegung“ spielt den Schritt ab.</p>
-            <h4>Schreiten (Ayumi-ashi)</h4>
             <ul>
-              <li><b>Ayumi-ashi</b> – der normale Schritt: der hintere Fuß wird zum vorderen. Bei Ständen mit Breite (z. B. Zenkutsu-dachi) kommen die Füße in der Mitte des Schritts zusammen – der Fuß beschreibt einen Bogen.</li>
-              <li>Bei Ständen mit beiden Füßen <b>auf einer Linie</b> (z. B. Kokutsu-dachi) ist kein Bogen nötig: der hintere Fuß geht gerade nach vorne.</li>
+              <li><b>Ayumi-ashi</b> – der normale Schritt: der hintere Fuß wird zum vorderen. Bei Ständen mit Breite (z. B. Zenkutsu-dachi) kommen die Füße in der Mitte des Schritts zusammen – der Fuß beschreibt einen Bogen. Stehen beide Füße auf einer Linie (z. B. Kokutsu-dachi), geht der hintere Fuß gerade nach vorne.</li>
+              <li><b>Suri-ashi</b> – Gleitschritt: der Fuß bleibt flach am Boden und gleitet; so ändert man die Distanz schnell, z. B. mit Kizami-zuki.</li>
+              <li><b>Yori-ashi</b> – beide Füße gleiten gemeinsam, der Stand bleibt; für kleine Distanzänderungen und um im Kampf den Rhythmus zu wechseln oder einen Angriff zu verschleiern. Kommt in vielen Kata vor (z. B. Heian Sandan, Tekki).</li>
+              <li><b>Tai-sabaki</b> – Körperausweichen: kreisförmige Drehungen aus der Angriffslinie im Kumite und bei Partnerübungen, üblich um 45° bis 180°; der hintere Fuß setzt im Bogen um, der vordere dreht sich auf der Stelle.</li>
             </ul>
-            ${grid(A('ayumi-ashi', 'Ayumi-ashi', 'Bogen über die Mitte'), A('ayumi-ashi-linie', 'Ayumi-ashi auf einer Linie', 'gerade, z. B. in Kokutsu-dachi'))}
-            <h4>Gleiten (Suri-ashi)</h4>
-            <ul>
-              <li><b>Okuri-suri-ashi</b> – zuerst bewegt sich der Fuß, der näher am Ziel ist; der andere zieht nach. Vorwärts, diagonal oder zur Seite: erst vorne, dann hinten. Rückwärts: erst hinten, dann zieht der vordere nach.</li>
-              <li><b>Tsugi-suri-ashi</b> – größere Reichweite: vorwärts setzt erst der hintere Fuß zum vorderen, dann gleitet der vordere weit vor. Rückwärts setzt erst der vordere Fuß nach hinten.</li>
-              <li><b>Yori-ashi</b> – beide Füße gleiten gleichzeitig, der Stand bleibt; für kleine Distanzänderungen und um im Kampf den Rhythmus zu wechseln oder einen Angriff zu verschleiern.</li>
-              <li><b>Ashi-fumikae</b> – Beinwechsel am Platz. Die Energie geht in Richtung der Handlung: nach vorne erst den vorderen Fuß zurück, dann den hinteren vor.</li>
-            </ul>
-            ${grid(A('okuri-suri-ashi', 'Okuri-suri-ashi'), A('tsugi-suri-ashi', 'Tsugi-suri-ashi'), A('yori-ashi', 'Yori-ashi'), A('ashi-fumikae', 'Ashi-fumikae'))}
-            <h4>Drehen und Übersetzen</h4>
-            <ul>
-              <li><b>Tai-sabaki</b> – kreisförmige Körperdrehungen zum Ausweichen im Kumite und bei Partnerübungen. Üblich sind Drehungen um 45° bis 180°: der hintere Fuß setzt im Bogen um, der vordere dreht sich auf der Stelle.</li>
-              <li><b>Yoko-sashi-ashi</b> – seitlicher Übersetzschritt: ein Fuß setzt vor dem anderen über (die Ferse ist dabei noch angehoben), dann tritt der andere seitlich weiter. Oft ein Übergang zwischen zwei Ständen oder zu einem Fußtritt – im Kihon meist mit Yoko-geri, in Kata besonders in den Tekki-Kata.</li>
-              <li><b>Shaho-sashi-ashi</b> – derselbe Schritt, nur diagonal; kommt gelegentlich in höheren Kata vor, um die Richtung zu wechseln.</li>
-            </ul>
-            ${grid(A('tai-sabaki-45', 'Tai-sabaki 45°'), A('tai-sabaki-180', 'Tai-sabaki 180°'), A('yoko-sashi-ashi', 'Yoko-sashi-ashi'), A('shaho-sashi-ashi', 'Shaho-sashi-ashi'))}
-            <h4>Fußfeger (Ashi-barai)</h4>
-            <p>Fußfeger sind fortgeschrittene Techniken – sie setzen gute Grundlagen und Körperbeherrschung voraus. Ein Feger nimmt dem Partner kurz das Gleichgewicht, sodass er der Folgetechnik nichts entgegensetzen kann; schon das verschafft einen psychologischen Vorteil.</p>
-            <ul>
-              <li><b>Teisoku-ashi-barai</b> – mit der Fußsohle, aus der Kamae mit dem vorderen oder hinteren Fuß.</li>
-              <li><b>Haisoku-ashi-barai</b> – mit dem Spann, meist mit dem vorderen Fuß und gut vorbereitet.</li>
-              <li><b>Komura-ashi-barai</b> – mit der Wade, meist innerhalb einer Kombination.</li>
-            </ul>
-            ${grid(T('teisoku-barai', 'Teisoku-ashi-barai'), T('haisoku-barai', 'Haisoku-ashi-barai'), T('komura-barai', 'Komura-ashi-barai'))}`,
+            ${grid(A('ayumi-ashi', 'Ayumi-ashi', 'Bogen über die Mitte'), A('suri-ashi', 'Suri-ashi'), A('yori-ashi', 'Yori-ashi'), A('tai-sabaki', 'Tai-sabaki'))}`,
         },
       ],
     },
@@ -373,7 +351,10 @@
             </ul>
             ${grid(M('mae-geri', 'Mae-geri', 'nach vorne'), M('yoko-geri', 'Yoko-geri', 'zur Seite'), M('mawashi-geri', 'Mawashi-geri', 'im Halbkreis'), M('ushiro-geri', 'Ushiro-geri', 'nach hinten'), M('mikazuki-geri', 'Mikazuki-geri', 'Sicheltritt'))}
             <h4>Weitere Fußtechniken</h4>
-            ${grid(T('mae-geri-kekomi', 'Mae-geri-kekomi'), T('yoko-geri-keage', 'Yoko-geri-keage'), T('fumikomi', 'Fumikomi'), T('ren-geri', 'Ren-geri'), T('sonoba-geri', 'Sonoba-geri'), T('kizami-geri', 'Kizami-geri'), T('hiza-geri', 'Hiza-geri'), T('ura-mawashi-geri', 'Ura-mawashi-geri'), T('ushiro-mawashi-geri', 'Ushiro-mawashi-geri'), T('mawashi-hiza-geri', 'Mawashi-hiza-geri'))}`,
+            ${grid(T('mae-geri-kekomi', 'Mae-geri-kekomi'), T('yoko-geri-keage', 'Yoko-geri-keage'), T('fumikomi', 'Fumikomi'), T('ren-geri', 'Ren-geri'), T('sonoba-geri', 'Sonoba-geri'), T('kizami-geri', 'Kizami-geri'), T('hiza-geri', 'Hiza-geri'), T('ura-mawashi-geri', 'Ura-mawashi-geri'), T('ushiro-mawashi-geri', 'Ushiro-mawashi-geri'), T('mawashi-hiza-geri', 'Mawashi-hiza-geri'))}
+            <h4>Fußfeger (Ashi-barai)</h4>
+            <p>Ein Fußfeger nimmt dem Partner kurz das Gleichgewicht, sodass er der Folgetechnik nichts entgegensetzen kann. Er setzt gute Grundlagen und Körperbeherrschung voraus.</p>
+            ${grid(T('ashi-barai', 'Ashi-barai'))}`,
         },
       ],
     },

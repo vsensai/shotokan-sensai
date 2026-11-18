@@ -137,20 +137,9 @@
   L = SK.qb('da-ashi', S.kompakt);
   L.mc('Warum beschreibt der hintere Fuß beim Schritt in Zenkutsu-dachi einen Bogen?', ['Der Stand hat Breite – in der Mitte des Schritts kommen die Füße zusammen', 'Damit der Schritt länger wird', 'Um den Partner zu fegen', 'Weil man dabei springt'], '');
   L.mc('Wie geht der hintere Fuß bei einem Schritt in Kokutsu-dachi (Füße auf einer Linie) nach vorne?', ['Gerade, ohne Bogen', 'Im großen Halbkreis nach außen', 'Er wird nachgezogen, ohne vorne anzukommen', 'Im Sprung'], '');
-  L.mc('Okuri-suri-ashi vorwärts: Welcher Fuß bewegt sich zuerst?', ['Der vordere – er ist näher am Ziel', 'Der hintere', 'Beide gleichzeitig', 'Keiner, es wird gesprungen'], '');
-  L.mc('Okuri-suri-ashi rückwärts: Welcher Fuß bewegt sich zuerst?', ['Der hintere – er ist näher am Ziel', 'Der vordere', 'Beide gleichzeitig', 'Es gibt ihn nur vorwärts'], '');
-  L.mc('Tsugi-suri-ashi vorwärts: Welcher Fuß bewegt sich zuerst?', ['Der hintere – er setzt zum vorderen', 'Der vordere', 'Beide gleichzeitig', 'Der Fuß mit dem meisten Gewicht'], '');
-  L.mc('Tsugi-suri-ashi rückwärts: Welcher Fuß bewegt sich zuerst?', ['Der vordere – er setzt nach hinten', 'Der hintere', 'Beide gleichzeitig', 'Es gibt ihn nur vorwärts'], '');
-  L.mc('Welcher Gleitschritt hat die größere Reichweite?', ['Tsugi-suri-ashi', 'Okuri-suri-ashi', 'Yori-ashi', 'Ashi-fumikae'], '');
   L.mc('Wofür eignet sich Yori-ashi (beide Füße gleiten gleichzeitig) besonders?', ['Kleine Distanzänderungen, Rhythmuswechsel und das Verschleiern eines Angriffs', 'Große Strecken in kurzer Zeit', 'Drehungen um 180°', 'Den Gruß'], '');
   L.mc('Wozu dienen die kreisförmigen Körperdrehungen (Tai-sabaki)?', ['Zum Ausweichen aus der Angriffslinie im Kumite und bei Partnerübungen', 'Zum Gruß', 'Zum Aufwärmen der Hüfte', 'Für Sprungtritte'], '');
-  L.mc('Tai-sabaki mit Drehung bis 180°: Was macht der vordere Fuß?', ['Er dreht sich auf der Stelle, der hintere setzt im Bogen um', 'Er setzt im Bogen um, der hintere bleibt', 'Er springt über den hinteren', 'Er wird angehoben'], '');
-  L.mc('In welchen Kata kommt Yoko-sashi-ashi besonders oft vor?', ['In den Tekki-Kata', 'In Heian Shodan', 'In keiner Kata', 'Nur in Jion'], '');
-  L.mc('Mit welchem Fußtritt wird Yoko-sashi-ashi im Kihon meist verbunden?', ['Yoko-geri', 'Mae-geri', 'Ushiro-geri', 'Mikazuki-geri'], '');
-  L.mc('Wie unterscheidet sich Shaho-sashi-ashi von Yoko-sashi-ashi?', ['Er wird diagonal ausgeführt', 'Er wird rückwärts ausgeführt', 'Er wird gesprungen', 'Es gibt keinen Unterschied im Namen'], '');
   L.mc('Warum muss man Fußarbeit eigens üben?', ['Weil die richtige Distanz für Abwehr und Konter davon abhängt', 'Weil sie in Prüfungen nicht vorkommt', 'Damit die Kata schneller vorbei ist', 'Weil die Hände sonst ermüden'], '');
-  L.mc('Was bewirkt ein Fußfeger im Karate?', ['Der Partner verliert kurz das Gleichgewicht und ist der Folgetechnik ausgeliefert', 'Der Partner wird dauerhaft zu Boden geworfen', 'Er ersetzt die Abwehr', 'Er ist nur ein Aufwärmspiel'], '');
-  L.order('Ordne den Ablauf von Tsugi-suri-ashi vorwärts:', ['Hinterer Fuß setzt zum vorderen', 'Vorderer Fuß gleitet weit nach vorne', 'Technik trifft das Ziel'], '');
 
   // ---------- Kihon ----------
   L = SK.qb('ki-tsuki', S.allg);
@@ -171,6 +160,7 @@
   L.mc('Woher holen Schlagtechniken (Uchi) wie Uraken- oder Shuto-uchi ihre Kraft?', ['Aus dem Schnappen des Ellbogens', 'Aus einem Sprung', 'Nur aus der Schulter', 'Aus dem Kiai'], '', S.kompakt);
 
   L = SK.qb('ki-geri', S.allg);
+  L.mc('Was bewirkt ein Fußfeger (Ashi-barai) im Karate?', ['Der Partner verliert kurz das Gleichgewicht und ist der Folgetechnik ausgeliefert', 'Der Partner wird dauerhaft zu Boden geworfen', 'Er ersetzt die Abwehr', 'Er ist nur ein Aufwärmspiel'], '', S.kompakt);
   L.mc('Was ist der Unterschied zwischen Keage und Kekomi?', ['Keage = Schnapptritt, Kekomi = Stoßtritt', 'Keage = Stoßtritt, Kekomi = Schnapptritt', 'Keage = Sprungtritt, Kekomi = Bodentritt', 'Kein Unterschied'], '', S.pdf);
   L.mc('Auf welcher Höhe werden Ushiro-geri und Yoko-geri-kekomi im DJKB-Kihon generell ausgeführt?', ['Chudan', 'Jodan', 'Gedan', 'Frei'], '', S.po);
   L.mc('Auf welcher Höhe werden laut DJKB alle übrigen Fußtritte (auch Kizami-mae-geri) generell ausgeführt?', ['Jodan', 'Chudan', 'Gedan', 'Frei'], 'Ausnahmen sind im Programm angegeben.', S.po);
