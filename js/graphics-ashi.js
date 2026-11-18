@@ -149,6 +149,15 @@
       ],
       lines: ['von oben: Füße auf einer Linie (z. B. Kokutsu-dachi) –', 'der hintere Fuß geht gerade nach vorne'],
     }),
+    'suri-ashi': () => sabaki('Suri-ashi', {
+      axis: 'M110 24 V270',
+      keys: [
+        { L: [86, 140, 0], R: [134, 232, 25] },
+        { L: [86, 140, 0], R: [108, 150, 5] },
+        { L: [86, 140, -25], R: [134, 56, 0] },
+      ],
+      lines: ['von oben: Gleitschritt – der Fuß bleibt flach', 'am Boden und gleitet nach vorne'],
+    }),
     'okuri-suri-ashi': () => sabaki('Okuri-suri-ashi', {
       keys: [
         { L: [86, 120, 0], R: [134, 212, 25] },
@@ -182,6 +191,16 @@
       ],
       nums: [[62, 142, 1], [158, 142, 2]],
       lines: ['von oben: Beinwechsel am Platz – nach vorne', 'erst vorne zurück (1), dann hinten vor (2)'],
+    }),
+    'tai-sabaki': () => sabaki('Tai-sabaki', {
+      axis: 'M110 24 V270',
+      keys: [
+        { L: [88, 150, -10], R: [132, 150, 10] },
+        { L: [88, 150, 20], R: [132, 150, 10] },
+        { L: [88, 150, 20], R: [168, 212, 30] },
+      ],
+      extra: `<text x="116" y="40" font-size="10" fill="#78909c" ${FONT}>Angriffslinie</text>`,
+      lines: ['von oben: Ausweichen – ein Fuß setzt schräg', 'zurück, der Körper dreht aus der Angriffslinie'],
     }),
     'tai-sabaki-45': () => sabaki('Tai-sabaki (45°)', {
       axis: 'M110 24 V270',
