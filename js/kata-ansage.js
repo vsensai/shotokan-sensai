@@ -579,7 +579,7 @@
       localStorage.setItem(TEMPO_KEY, String(i));
     } catch (e) { /* privates Fenster */ }
   }
-  // Der Bereich mit Tempo, Bewegungen und Legende ist anfangs eingeklappt; Auf- oder Zuklappen bleibt gespeichert,
+  // Der Bereich mit Bewegungen und Legende ist anfangs eingeklappt; Auf- oder Zuklappen bleibt gespeichert,
   // auch beim Wechsel zur nächsten Kata
   const FOLD_KEY = 'shotokan-sensai-ansage-offen';
   function loadFold() {
@@ -627,10 +627,16 @@
     live.add(u);
     tts.speak(u);
   }
-  // Im schnellen Tempo spricht die Stimme schneller, damit die Zahl in den Takt passt.
-  function speak(st, beat) {
+  // Die Stimme spricht in jedem Tempo gleich schnell. Nur wenn die Ansage nicht mehr in die Zeit bis zur nächsten passt
+  // (sehr schnelles Tempo, fließend verbundene Bewegungen), spricht sie gerade so viel schneller, dass sie hineinpasst –
+  // sonst stauen sich die Ansagen und hinken dem Takt hinterher. Dauer geschätzt aus den Moren (kleine ゃゅょ zählen nicht).
+  const MORA_S = 7.5; // Moren je Sekunde bei rate 1
+  const morae = (text) => text.replace(/[ゃゅょぁぃぅぇぉ！!、。\s]/g, '').length;
+  function speak(st, avail) {
     if (!tts || !voice) return;
-    const fast = Math.min(1.7, Math.max(1, Math.sqrt(2 / beat)));
+    const text = st.kiai ? st.say + KIAI : st.say;
+    const need = morae(text) / (MORA_S * TONE.rate);
+    const fast = Math.min(1.7, Math.max(1, need / (0.9 * avail)));
     utter(st.say, TONE, fast, true);
     // Kiai als eigene Äußerung direkt nach der Zahl, damit der Ruf eigene Betonung bekommt
     if (st.kiai) utter(KIAI, TONE_KIAI, fast, false);
@@ -816,21 +822,48 @@
       return d;
     }
 
-    // Tempo-Regler: Änderung gilt sofort, eine laufende Ansage zählt ab der aktuellen Bewegung im neuen Takt weiter
-    const tempoIn = el('input', { type: 'range', id: 'ans-tempo', min: '0', max: String(BEATS.length - 1), step: '1', value: String(tempo), 'aria-label': 'Tempo' });
-    const tempoOut = el('output', { class: 'ans-tempo-out', for: 'ans-tempo' });
+    // Tempo-Knopf oben rechts im Bild: öffnet eine Liste der Stufen. Änderung gilt sofort, eine laufende Ansage zählt
+    // ab der aktuellen Bewegung im neuen Takt weiter.
+    const tempoBtn = el('button', { class: 'ans-tempo-btn', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false' });
+    const tempoOut = el('p', { class: 'ans-tempo-out' });
+    const tempoList = el('div', { class: 'ans-tempo-list', role: 'group', 'aria-label': 'Tempo wählen', hidden: true },
+      ...BEATS.map((beat, i) => el('button', { type: 'button', 'data-tempo': i, 'aria-pressed': 'false' },
+        el('span', { text: tempoName(beat) }), el('span', { class: 'ans-tempo-s', text: `${fmtNum(beat)} s` }))),
+      tempoOut);
+    const tempoBox = el('div', { class: 'ans-tempo' }, tempoBtn, tempoList);
     function tempoInfo() {
       const beat = BEATS[tempo];
-      tempoOut.textContent = `${tempoName(beat)} · ${fmtNum(beat)} s je Bewegung · Kata etwa ${Math.round(steps[steps.length - 1].t)} s`;
-      tempoIn.setAttribute('aria-valuetext', tempoName(beat));
+      tempoBtn.textContent = `Tempo ${fmtNum(2 / beat)}×`;
+      tempoBtn.setAttribute('aria-label', `Tempo: ${tempoName(beat)}`);
+      tempoList.querySelectorAll('[data-tempo]').forEach((b) => b.setAttribute('aria-pressed', String(Number(b.dataset.tempo) === tempo)));
+      tempoOut.textContent = `Kata etwa ${Math.round(steps[steps.length - 1].t)} s`;
     }
-    tempoIn.addEventListener('input', () => {
-      tempo = Number(tempoIn.value);
+    function tempoOpen(on) {
+      tempoList.hidden = !on;
+      tempoBtn.setAttribute('aria-expanded', String(on));
+      tempoBox.classList.toggle('offen', on);
+    }
+    tempoBtn.addEventListener('click', () => tempoOpen(tempoList.hidden));
+    tempoList.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-tempo]');
+      if (!b) return;
+      tempoOpen(false);
+      tempoBtn.focus();
+      if (Number(b.dataset.tempo) === tempo) return;
+      tempo = Number(b.dataset.tempo);
       saveTempo(tempo);
       steps = SK.ansageTimeline(k, BEATS[tempo], true);
       tempoInfo();
       if (running) start(idx);
       else figShow();
+    });
+    // Tippen daneben oder Escape schließt die Liste
+    const tempoAway = (ev) => {
+      if (!tempoList.hidden && !tempoBox.contains(ev.target)) tempoOpen(false);
+    };
+    document.addEventListener('pointerdown', tempoAway);
+    tempoBox.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !tempoList.hidden) { tempoOpen(false); tempoBtn.focus(); ev.stopPropagation(); }
     });
 
     // Hinweis nur, wenn etwas fehlt: japanische Stimme oder Bildschirm-an
@@ -1001,12 +1034,14 @@
       timers.forEach(clearTimeout);
       timers = [];
     }
+    // Zeit bis zur nächsten Ansage (für die Sprechgeschwindigkeit); nach der letzten ist Zeit genug
+    const gapAfter = (i) => (i + 1 < steps.length ? steps[i + 1].t - steps[i].t : 9);
     function schedule(from) {
       clearTimers();
       const now = performance.now();
       for (let i = from; i < steps.length; i++) {
         const at = base + steps[i].t * 1000;
-        timers.push(setTimeout(() => speak(steps[i], BEATS[tempo]), Math.max(0, at - latency * 1000 - now)));
+        timers.push(setTimeout(() => speak(steps[i], gapAfter(i)), Math.max(0, at - latency * 1000 - now)));
         timers.push(setTimeout(() => { idx = i; render(i); }, Math.max(0, at - now)));
       }
       const end = base + (steps[steps.length - 1].t + 1.5) * 1000;
@@ -1020,7 +1055,7 @@
       }
       // erste Ansage sofort im Klick (iOS gibt die Sprachausgabe nur nach einer Berührung frei)
       base = performance.now() - steps[from].t * 1000;
-      speak(steps[from], BEATS[tempo]);
+      speak(steps[from], gapAfter(from));
       render(from);
       if (view !== 'karte') { fig.beat(BEATS[tempo]); fig.run(steps[from].t); }
       // nach einem Sprung folgt die nächste Ansage mit dem normalen Abstand
@@ -1086,7 +1121,9 @@
       ev.preventDefault();
     }
     document.addEventListener('keydown', onKey);
+    mapBox.append(tempoBox);
     SK.ansageCleanup = () => {
+      document.removeEventListener('pointerdown', tempoAway);
       pause();
       wake(false);
       document.removeEventListener('visibilitychange', onVisibility);
@@ -1140,10 +1177,7 @@
     }
     const wrap = el('div', { class: 'ans-wrap' }, stage, lexDlg, controls,
       infoOut,
-      fold('optionen', 'Tempo, Bewegungen und Legende',
-        el('div', { class: 'ans-tempo' },
-          el('div', { class: 'ans-tempo-row' }, el('span', { class: 'muted small', text: '3× langsamer' }), tempoIn, el('span', { class: 'muted small', text: '3× schneller' })),
-          tempoOut),
+      fold('optionen', 'Bewegungen und Legende',
         track,
         el('div', { class: 'ans-legend muted small' }, el('span', { class: 'lg-kiai', text: 'Kiai' }), el('span', { class: 'lg-slow', text: 'langsam' }), el('span', { class: 'lg-link', text: 'fließend zur nächsten' })),
         el('div', { class: 'ans-legend muted small' }, el('span', { class: 'lg-heavy', text: 'viel Gewicht' }), el('span', { class: 'lg-light', text: 'wenig Gewicht' }), el('span', { class: 'lg-ghost', text: 'Fuß vorher' }), el('span', { class: 'lg-lift', text: 'Fuß angehoben' }), el('span', { class: 'lg-body', text: 'Körper zeigt' }), el('span', { class: 'lg-look', text: 'Blick' }), el('span', { class: 'lg-turn', text: 'Wendung' }), el('span', { class: 'lg-via', text: 'Fuß zieht heran und zurück' }))));

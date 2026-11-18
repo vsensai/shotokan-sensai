@@ -1809,7 +1809,7 @@ main:fullscreen .ans-wrap {
 /* Kiai, langsam, fließend: auf der Karte, damit sie den Kasten nicht verschieben */
 .ans-chips {
   position: absolute;
-  top: 0.4rem;
+  top: 2.9rem;
   right: 0.4rem;
   pointer-events: none;
   display: flex;
@@ -2114,28 +2114,92 @@ main:fullscreen .ans-wrap {
   white-space: nowrap;
 }
 
+/* Oben rechts auf dem Bild: Tempo-Knopf mit Liste der Stufen */
 .ans-tempo {
-  display: grid;
-  gap: 0.2rem;
-  justify-items: center;
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
 }
 
-.ans-tempo-row {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 0.5rem;
-  align-items: center;
-  width: 100%;
+.ans-tempo-btn {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-height: 2rem;
+  padding: 0.15rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-.ans-tempo-row input {
-  min-width: 0;
-  width: 100%;
-  accent-color: var(--red);
+.ans-tempo.offen .ans-tempo-btn {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.ans-tempo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 11.5rem;
+  padding: 0.3rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--card);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 20%);
+}
+
+.ans-tempo-list[hidden] {
+  display: none;
+}
+
+.ans-tempo-list button {
+  font: inherit;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0.6rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+.ans-tempo-list button:hover {
+  background: var(--line);
+}
+
+.ans-tempo-list button[aria-pressed="true"] {
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
+
+.ans-tempo-s {
+  color: var(--muted);
+}
+
+.ans-tempo-list button[aria-pressed="true"] .ans-tempo-s {
+  color: #fff;
 }
 
 .ans-tempo-out {
-  font-size: 0.85rem;
+  margin: 0.2rem 0.6rem 0.1rem;
+  font-size: 0.75rem;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
