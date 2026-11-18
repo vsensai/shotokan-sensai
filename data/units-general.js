@@ -196,7 +196,7 @@
             <h4>Partner und Distanz</h4>
             ${grid(T('maai', 'Maai'), T('kogeki', 'Kogeki'), T('deai', 'Deai'), T('zanshin', 'Zanshin'), T('sun-dome', 'Sun-dome'), T('bunkai', 'Bunkai'))}
             <h4>Schritte und Ausweichen</h4>
-            ${grid(T('suri-ashi', 'Suri-ashi'), T('yori-ashi', 'Yori-ashi'), T('tai-sabaki', 'Tai-sabaki'), T('ashi-barai', 'Ashi-barai'))}`,
+            ${grid(A('suri-ashi', 'Suri-ashi'), A('yori-ashi', 'Yori-ashi'), A('tai-sabaki', 'Tai-sabaki'), T('ashi-barai', 'Ashi-barai'))}`,
         },
       ],
     },
