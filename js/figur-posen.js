@@ -145,8 +145,11 @@
   const MZK = mirror(S.zk);
   const KB = M(S.kb, HANDS_HIP);
   // Shuto-uke: vordere Hand vor der vorderen Schulter Richtung Gegner, Fingerspitzen etwa auf Schulterhöhe,
-  // Handfläche schräg nach vorn-außen, Ellbogen nach unten; hintere Hand offen, Handfläche oben, vor dem Solarplexus
-  const SHUTO_END = { oL: 1, oR: 1, hL: [0.43, -0.14, 0.16], pL: [0.98, 0, -0.09], fL: [0.54, 0.8, 0.25], eL: [0.15, -1, 0.35], hR: [0.02, -0.2, 0.2], eR: [-0.7, -0.6, 0.2], pR: [0, 1, 0], fR: [0.6, 0, 0.6] };
+  // Handfläche schräg nach vorn-außen, Ellbogen nach unten; hintere Hand offen, Handfläche oben, vor dem Solarplexus.
+  // Keine feste Fingerrichtung: die Finger liegen bei beiden Händen in der Linie des Unterarms (Handgelenk gerade) – eine
+  // in Brustkoordinaten vorgegebene Richtung passte nicht zum Unterarm, die Handgelenke knickten am Ende (hintere Hand
+  // 39°) und beim Überblenden in der Wendung (bis 60°, Bassai Dai 14–17)
+  const SHUTO_END = { oL: 1, oR: 1, hL: [0.43, -0.14, 0.16], pL: [0.98, 0, -0.09], eL: [0.15, -1, 0.35], hR: [0.02, -0.2, 0.2], eR: [-0.7, -0.6, 0.2], pR: [0, 1, 0] };
   const KK_SHUTO = M(S.kk, SHUTO_END);
   const YOI = S.hachiji;
 
@@ -332,7 +335,7 @@
   [['mv:gyaku-zuki', 'R'], ['mv:oi-zuki', 'R'], ['tc:choku-zuki', 'LR'], ['tc:kizami-zuki', 'L'], ['tc:sanbon-zuki', 'LR'], ['tc:ren-zuki', 'LR'], ['tc:morote-zuki', 'LR'], ['tc:awase-zuki', 'R']].forEach(([id, s]) => (D[id] = TWIST(D[id], s)));
   D['tc:tate-zuki'] = TWIST(D['tc:tate-zuki'], 'R', 0.5);
   // Nukite wie in Heian Nidan (Kiai): Arm ganz gestreckt, die andere offene Hand liegt flach unter dem Ellbogen (Osae-uke)
-  D['tc:nukite'] = T(ZK_G, M(S.zks, { hR: [0.0, -0.13, 0.62], oR: 1, pR: [1, 0, 0], hL: [-0.07, -0.19, 0.27], oL: 1, pL: [0, -1, 0], fL: [-1, 0, 0.1] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
+  D['tc:nukite'] = T(ZK_G, M(S.zks, { hR: [0.0, -0.13, 0.62], oR: 1, pR: [1, 0, 0], hL: [-0.07, -0.19, 0.27], oL: 1, pL: [0, -1, 0] }), M(hit('tipR', 'Fingerspitzen'), { eff: 'tipR', view: 'side3' }));
 
   /* ---------- Schläge ---------- */
   // Uraken (Yoko-mawashi-uchi): Faust vor der linken Brust, der Ellbogen führt zur Seite, dann schnappt der Unterarm
@@ -1308,7 +1311,7 @@
   // liegen weiter weg, als der rechte Arm reicht – während die rechte Hand hochsteigt, kommt die linke ihr deshalb ein
   // kleines Stück (TS_REIN) zur Mitte entgegen
   const TS_REIN = 0.18;
-  const TS_LINKS = (t, rein = 0) => ({ hL: TS_AT(t, TS_REL(V.sub(TS_J0.wristL, V.mul(TS_RAUS, rein)))), eL: TS_AT(t, TS_W(KK_SHUTO.eL), true), fL: TS_AT(t, TS_W(KK_SHUTO.fL), true), pL: TS_AT(t, TS_W(KK_SHUTO.pL), true) });
+  const TS_LINKS = (t, rein = 0) => ({ hL: TS_AT(t, TS_REL(V.sub(TS_J0.wristL, V.mul(TS_RAUS, rein)))), eL: TS_AT(t, TS_W(KK_SHUTO.eL), true), fL: TS_AT(t, V.norm(V.sub(TS_J0.wristL, TS_J0.elbowL)), true), pL: TS_AT(t, TS_W(KK_SHUTO.pL), true) });
   const TS_KREUZ = V.add(TS_MITTE, [0, -0.05, 0]);
   const TS_SPITZE = V.add(TS_J0.tipL, V.mul(TS_RAUS, 0.02 - TS_REIN));
   // (der rechte Ellbogen bleibt dabei vor dem Körper, damit der Unterarm nicht in den Bauch gerät)
@@ -1437,10 +1440,11 @@
   };
   KATA['ude-tate'] = STILL(M(UT, utHand('L'), utHand('R')));
   // 44: tiefer Kokutsu-dachi (Hüfte tiefer als üblich); die vordere Schwerthand wehrt Gedan ab – der Arm gestreckt über
-  // dem vorderen Knie –, die hintere liegt mit der Handfläche nach oben vor der Brust (wie beim Shuto-uke)
+  // dem vorderen Knie –, die hintere liegt mit der Handfläche nach oben vor der Brust (wie beim Shuto-uke). Finger in der
+  // Linie des Unterarms (keine feste Fingerrichtung, sonst knickt das Handgelenk beim Ausholen und in der Bewegung)
   S.kkTief = M(S.kk, { pelvis: [0, 0.67, -0.04] });
-  KATA['shuto-gedan-uke'] = T(M(S.kk, { oL: 1, oR: 1, hL: [-0.13, 0.2, 0.1], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], fL: [0.3, 0.9, 0.2], hR: [0.12, -0.12, 0.48], eR: [-0.2, -0.6, 0.4], pR: [0, -1, 0] }),
-    M(S.kk, SHUTO_END, { hL: stretch([0.4, -0.5, 0.17], 'L'), eL: [0.6, -0.3, -0.6], fL: [0.4, -0.86, 0.31], pL: [-0.9, -0.4, 0] }));
+  KATA['shuto-gedan-uke'] = T(M(S.kk, { oL: 1, oR: 1, hL: [-0.13, 0.2, 0.1], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], hR: [0.12, -0.12, 0.48], eR: [-0.2, -0.6, 0.4], pR: [0, -1, 0] }),
+    M(S.kk, SHUTO_END, { hL: stretch([0.4, -0.5, 0.17], 'L'), eL: [0.6, -0.3, -0.6], pL: [-0.9, -0.4, 0] }));
   // 55: Uraken Tate-mawashi-uchi zur Seite auf Kopfhöhe (Jodan) im Kiba-dachi – Bahn wie in Heian Sandan 13, die Faust
   // trifft höher; die andere Faust zieht als Hikite an die Hüfte
   const UJ = M(KB, { look: -90, hL: L(H.hip) });
