@@ -20,10 +20,10 @@
   --sel: var(--ink);
   --sel-ink: #fff;
   --sel-bg: #f1efec;
-  /* Bereichsfarben: nur als Streifen links an Karten des Bereichs, nie als Fläche, Schrift bleibt schwarz */
-  --c-begriffe: #3949ab;
+  /* Streifen links an Karten der Bereiche (Begriffe, Kata, Theorie): alle rot, nie als Fläche, Schrift bleibt schwarz */
+  --c-begriffe: var(--red);
   --c-kata: var(--red);
-  --c-theorie: #455a64;
+  --c-theorie: var(--red);
   --papier: radial-gradient(ellipse at 100% 0%, rgba(198, 40, 40, 0.14), transparent 45%), linear-gradient(170deg, #fffaf2, #efe4d2);
   font-size: 16px;
 }
@@ -2625,9 +2625,9 @@ main:fullscreen .ans-wrap {
     --track: #1a1a1a;
     --sel-ink: #1b1b1b;
     --sel-bg: #2e2e2e;
-    --c-begriffe: #8c9eff;
+    --c-begriffe: #ef5350;
     --c-kata: #ef5350;
-    --c-theorie: #8fa4ae;
+    --c-theorie: #ef5350;
   }
 
   .hero-kanji {
