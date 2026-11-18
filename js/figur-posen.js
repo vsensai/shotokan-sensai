@@ -1365,11 +1365,14 @@
   const GS = M(S.hizakutsu, { yaw: -50, look: -90, hL: L(H.hip) });
   const GS0 = M(GS, { yaw: -5, hL: stretch([0.26, -0.52, 0.3], 'L'), hR: [-0.2, 0.3, 0.04], eR: [-1, -0.2, -0.1], pR: [0, 0, 1] });
   KATA['gedan-sukui-uke'] = { keys: [
-    { t: 0, p: GS0 }, { t: 0.25, p: GS0 }, { t: 0.275, p: GS0 },
-    { t: 0.298, p: M(GS, { yaw: -10, hR: stretch([-0.3, 0.05, 0.55], 'R'), pR: [-1, 0, 0] }), e: 'in' },
-    { t: 0.32, p: M(GS, { yaw: -20, hL: stretch([0.12, -0.62, 0.12], 'L'), hR: stretch([-0.04, -0.6, 0.38], 'R'), pR: [0, 0, -1] }) },
-    { t: 0.342, p: M(GS, { yaw: -30, hR: stretch([0.3, -0.05, 0.5], 'R'), pR: [1, 0, 0] }) },
-    { t: 0.363, p: M(GS, { yaw: -40, hR: [0.24, 0.3, 0.22], eR: [-0.2, -1, 0.3], pR: [-1, 0, 0] }) },
+    { t: 0, p: GS0 }, { t: 0.25, p: GS0 }, { t: 0.27, p: GS0 },
+    // aus dem Ausholen gerade hinunter an die rechte Seite (der Arm streckt sich dabei an der Schulter vorbei) …
+    { t: 0.29, p: M(GS, { yaw: -8, hR: stretch([-0.34, 0, 0.3], 'R'), pR: [-1, 0, 0] }), e: 'in' },
+    { t: 0.306, p: M(GS, { yaw: -12, hL: stretch([0.16, -0.6, 0.16], 'L'), hR: stretch([-0.26, -0.62, 0.16], 'R'), pR: [-1, 0, 0] }), e: 'fl' },
+    // … dann mit gestrecktem Arm im Halbkreis vor dem Körper nach links und hoch bis links neben den Kopf
+    { t: 0.323, p: M(GS, { yaw: -20, hR: stretch([0, -0.64, 0.32], 'R'), pR: [0, 0, -1] }), e: 'fl' },
+    { t: 0.342, p: M(GS, { yaw: -30, hR: stretch([0.4, -0.2, 0.36], 'R'), pR: [1, 0, 0] }), e: 'fl' },
+    { t: 0.36, p: M(GS, { yaw: -40, hR: [0.24, 0.3, 0.22], eR: [-0.2, -1, 0.3], pR: [-1, 0, 0] }), e: 'fl' },
     { t: 0.40, p: M(GS, { hR: [-0.08, -0.5, 0.34], eR: [-1, 0.1, 0], pR: [0, 1, 0] }), e: 'kime' },
   ] };
 
