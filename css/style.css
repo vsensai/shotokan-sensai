@@ -1105,13 +1105,6 @@ p.kk-frage {
 .kk-bild.lex-img svg {
   max-height: 260px;
 }
-/* Bild nur so groß, dass Text und Knöpfe ohne Scrollen darunter passen (Handy) */
-.kk-karte .kk-bild {
-  max-width: clamp(12rem, (100dvh - 35rem) * 1.25, 26rem);
-}
-.kk-karte .kk-bild.lex-img svg {
-  max-height: clamp(9rem, 100dvh - 35rem, 260px);
-}
 .kk-hinweis {
   margin: 0.7rem 0 0;
   text-align: center;
@@ -1154,7 +1147,7 @@ p.kk-frage {
 .kk-footer {
   grid-template-columns: 1fr 1fr;
 }
-.kk-footer .btn:only-child {
+.kk-footer:not(:has(.kk-ja)) .btn {
   grid-column: 1 / -1;
 }
 /* nach dem Umdrehen: Nicht gewusst | Gewusst | ↺ in einer Reihe, damit alles ohne Scrollen auf den Bildschirm passt */
@@ -1185,6 +1178,9 @@ p.kk-frage {
   margin: -0.2rem 0 0;
   text-align: center;
   font-size: 0.8rem;
+}
+.kk-platz {
+  visibility: hidden;
 }
 /* Wischen nur auf Touch-Geräten erklären */
 @media (hover: hover) and (pointer: fine) {

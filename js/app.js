@@ -703,8 +703,11 @@
     let seen = false; // Rückseite der aktuellen Karte schon gesehen: Einschätzen möglich
     let turn = () => {};
 
+    let passen = () => {};
+    const onResize = () => passen();
     function cleanup() {
       document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onResize);
       if (SK.quizCleanup === cleanup) SK.quizCleanup = null;
     }
     function onKey(ev) {
@@ -720,6 +723,7 @@
     if (SK.quizCleanup) SK.quizCleanup();
     SK.quizCleanup = cleanup;
     document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
 
     function answer(ok) {
       const e = queue.shift();
@@ -951,6 +955,38 @@
       app.append(head, el('section', { class: 'kk' }, el('div', { class: 'kk-kopf' }, title, wechsel), karte), footer);
       footer.querySelector('.kk-um').focus({ preventScroll: true });
       window.scrollTo(0, 0);
+      // Handy: alles ohne Scrollen auf einen Bildschirm – zu großes Bild verkleinern, übrigen Platz bekommt die Karte.
+      // Gemessen wird mit der Zeile „Wischen …“, die erst nach dem Umdrehen kommt; davor steht sie unsichtbar als Platzhalter.
+      const platz = el('p', { class: 'kk-wisch muted kk-platz', 'aria-hidden': 'true', text: '·' });
+      footer.append(platz);
+      passen = () => {
+        const bilder = [...karte.querySelectorAll('.kk-bild')];
+        const svgs = bilder.map((b) => b.querySelector('svg:not(button svg)')).filter(Boolean);
+        bilder.forEach((b) => { b.style.maxWidth = ''; });
+        svgs.forEach((g) => { g.style.maxHeight = ''; });
+        karte.style.minHeight = '';
+        if (!karte.isConnected || innerWidth > 700) return;
+        const bar = document.querySelector('.bottombar');
+        const unten = () => footer.getBoundingClientRect().bottom + 8;
+        const grenze = bar && bar.getClientRects().length ? bar.getBoundingClientRect().top : innerHeight;
+        // zweimal: ein Bild kann auch an seiner Höhengrenze hängen (gezeichnete Bilder), dann greift erst der zweite Schritt
+        for (let i = 0; i < 2; i++) {
+          const zuviel = unten() - grenze;
+          if (zuviel <= 0) break;
+          bilder.forEach((b) => {
+            const w = b.offsetWidth;
+            const h = b.offsetHeight;
+            if (w && h) b.style.maxWidth = `${Math.max(192, w - zuviel * (w / h))}px`;
+          });
+          svgs.forEach((g) => {
+            const h = g.getBoundingClientRect().height;
+            if (h) g.style.maxHeight = `${Math.max(120, h - zuviel)}px`;
+          });
+        }
+        const frei = grenze - unten();
+        if (frei > 0) karte.style.minHeight = `${karte.offsetHeight + frei}px`;
+      };
+      passen();
     }
     render();
   }
