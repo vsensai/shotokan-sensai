@@ -795,11 +795,13 @@
         if (toBack && !seen) {
           // erstes Umdrehen: jetzt einschätzen; „Umdrehen“ bleibt als kleiner Knopf, um die andere Seite noch einmal zu sehen
           seen = true;
+          karte.classList.add('kk-wertbar');
           footer.innerHTML = '';
           footer.append(
             el('button', { class: 'btn kk-nein', type: 'button', text: 'Nicht gewusst', onclick: () => answer(false) }),
             el('button', { class: 'btn kk-ja', type: 'button', text: 'Gewusst', onclick: () => answer(true) }),
-            el('button', { class: 'gfx-btn kk-um', type: 'button', text: '↺ Umdrehen', onclick: () => turn() })
+            el('button', { class: 'gfx-btn kk-um', type: 'button', text: '↺ Umdrehen', onclick: () => turn() }),
+            el('p', { class: 'kk-wisch muted', text: 'Wischen: ↑ gewusst · ↓ nicht gewusst · ↔ umdrehen' })
           );
           footer.querySelector('.kk-ja').focus({ preventScroll: true });
         }
@@ -835,23 +837,35 @@
       // Wischen (Handy): waagerecht ziehen dreht die Karte mit dem Finger, nach links wie nach rechts. Loslassen nach gut
       // einer Vierteldrehung (oder schnellem Wischen) dreht sie ganz um, sonst federt sie zurück. Senkrecht scrollt die
       // Seite; auf der 3D-Figur dreht Ziehen weiter die Figur.
+      // Nach dem ersten Umdrehen auch senkrecht: nach oben = gewusst, nach unten = nicht gewusst (auch auf der Figur).
+      // Die Karte scrollt dann nicht mehr mit dem Finger (touch-action none an .kk-wertbar), Kopf und Knöpfe schon.
       let zug = null;
       karte.addEventListener('pointerdown', (ev) => {
         if (busy || zug || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
         gewischt = false;
-        if (ev.target.closest('button, a, input, select, .f3d-stage')) return;
-        zug = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: ev.timeStamp, an: false, w: 0, back: karte.dataset.seite !== 'vorn' };
+        if (ev.target.closest('button, a, input, select')) return;
+        zug = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: ev.timeStamp, an: false, w: 0, back: karte.dataset.seite !== 'vorn', figur: !!ev.target.closest('.f3d-stage') };
       });
       karte.addEventListener('pointermove', (ev) => {
         if (!zug || ev.pointerId !== zug.id) return;
         const dx = ev.clientX - zug.x;
         const dy = ev.clientY - zug.y;
         if (!zug.an) {
-          if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { zug = null; return; }
-          if (Math.abs(dx) < 10) return;
+          if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) {
+            if (!seen) { zug = null; return; }
+            zug.wertung = true;
+          } else if (Math.abs(dx) < 10) return;
+          else if (zug.figur) { zug = null; return; }
           zug.an = true;
           gewischt = true;
           try { karte.setPointerCapture(ev.pointerId); } catch (e) { /* egal */ }
+        }
+        if (zug.wertung) {
+          zug.dy = dy;
+          zug.v = dy / Math.max(1, ev.timeStamp - zug.t);
+          karte.style.transform = `translateY(${dy}px)`;
+          karte.dataset.wertung = dy < -30 ? 'ja' : dy > 30 ? 'nein' : '';
+          return;
         }
         // ganze Kartenbreite = halbe Drehung
         const w = Math.max(-180, Math.min(180, (dx / Math.max(200, karte.offsetWidth)) * 180));
@@ -866,6 +880,7 @@
         const z = zug;
         zug = null;
         if (!z.an) return;
+        if (z.wertung) return werten(z, ev.type === 'pointerup');
         const ganz = ev.type === 'pointerup' && (Math.abs(z.w) > 50 || (Math.abs(z.w) > 15 && Math.abs(z.v) > 0.5 && Math.sign(z.v) === Math.sign(z.w)));
         const s = Math.sign(z.w) || 1;
         // von der jetzigen Lage aus weiterdrehen (umgedreht) oder zurück (Ausgangsseite)
@@ -909,6 +924,27 @@
         busy = true;
         const a = karte.animate([{ transform: dreh(von) }, { transform: dreh(0) }], { duration: 170, easing: 'ease-out' });
         a.onfinish = a.oncancel = ende;
+      };
+      // Senkrechtes Wischen loslassen: weit (oder schnell) genug → Karte fliegt hinaus und zählt, sonst zurück
+      const werten = (z, up) => {
+        const dy = z.dy || 0;
+        const ok = up && (dy < -80 || (dy < -30 && z.v < -0.5));
+        const nein = up && (dy > 80 || (dy > 30 && z.v > 0.5));
+        delete karte.dataset.wertung;
+        if (!ok && !nein) {
+          karte.style.transform = '';
+          if (still()) return;
+          busy = true;
+          const a = karte.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 170, easing: 'ease-out' });
+          a.onfinish = a.oncancel = () => { busy = false; };
+          return;
+        }
+        karte.dataset.wertung = ok ? 'ja' : 'nein';
+        if (still()) return answer(ok);
+        busy = true;
+        const ziel = (ok ? -1 : 1) * window.innerHeight;
+        const a = karte.animate([{ transform: `translateY(${dy}px)`, opacity: 1 }, { transform: `translateY(${ziel}px)`, opacity: 0 }], { duration: 220, easing: 'ease-in', fill: 'forwards' });
+        a.onfinish = a.oncancel = () => { if (karte.isConnected) answer(ok); };
       };
       karte.addEventListener('pointerup', loslassen);
       karte.addEventListener('pointercancel', loslassen);

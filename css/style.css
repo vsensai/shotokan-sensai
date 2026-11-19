@@ -1154,6 +1154,27 @@ p.kk-frage {
   grid-column: 1 / -1;
   justify-self: center;
 }
+.kk-karte.kk-wertbar {
+  touch-action: none;
+}
+.kk-karte[data-wertung="ja"] {
+  box-shadow: 0 0 0 3px var(--ok);
+}
+.kk-karte[data-wertung="nein"] {
+  box-shadow: 0 0 0 3px var(--bad);
+}
+.kk-wisch {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+}
+/* Wischen nur auf Touch-Geräten erklären */
+@media (hover: hover) and (pointer: fine) {
+  .kk-wisch {
+    display: none;
+  }
+}
 .kk-nein {
   border-color: var(--bad);
   color: var(--bad);
