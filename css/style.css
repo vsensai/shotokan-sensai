@@ -1077,6 +1077,8 @@ figure.gfx svg {
   display: grid;
   min-height: 15rem;
   cursor: pointer;
+  /* waagerecht wischen dreht die Karte, senkrecht scrollt die Seite */
+  touch-action: pan-y;
 }
 .kk-seite {
   grid-area: 1 / 1;

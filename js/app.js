@@ -772,16 +772,24 @@
       const karte = el('div', { class: 'quiz-card kk-karte', 'data-seite': 'vorn' }, vorn, hinten);
       const footer = el('div', { class: 'quiz-footer kk-footer' }, el('button', { class: 'btn primary kk-um', type: 'button', text: 'Umdrehen', onclick: () => turn() }));
       // Antippen der Karte dreht sie um – außer auf Bild, Knöpfen und Links
+      let gewischt = false; // gerade gewischt: das folgende „click“ nicht als Antippen werten
       karte.addEventListener('click', (ev) => {
+        if (gewischt) {
+          gewischt = false;
+          return;
+        }
         if (!ev.target.closest('button, a, summary, details, .f3d, .gfx-box, svg')) turn();
       });
       let busy = false;
       let again = false; // während der Drehung noch einmal angetippt: danach gleich weiterdrehen
-      turn = () => {
-        if (busy) {
-          again = !again;
-          return;
-        }
+      const still = () => !karte.animate || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+      const zeige = (back) => {
+        vorn.classList.toggle('kk-weg', back);
+        hinten.classList.toggle('kk-weg', !back);
+      };
+      const dreh = (w) => `perspective(1000px) rotateY(${w}deg)`;
+      // Seite festlegen; beim ersten Blick auf die Rückseite kommt das Einschätzen
+      const umgedreht = () => {
         const toBack = karte.dataset.seite === 'vorn';
         karte.dataset.seite = toBack ? 'hinten' : 'vorn';
         if (toBack && !seen) {
@@ -795,30 +803,115 @@
           );
           footer.querySelector('.kk-ja').focus({ preventScroll: true });
         }
-        const swap = () => {
-          vorn.classList.toggle('kk-weg', toBack);
-          hinten.classList.toggle('kk-weg', !toBack);
-        };
+        return toBack;
+      };
+      const fertig = () => {
+        busy = false;
+        if (again && karte.isConnected) {
+          again = false;
+          turn();
+        }
+      };
+      // richtung: +1 dreht nach rechts (wie Wischen nach rechts), −1 nach links
+      turn = (richtung = 1) => {
+        if (busy) {
+          again = !again;
+          return;
+        }
+        const toBack = umgedreht();
         // Drehung in zwei Hälften: bis zur Kante, Seite wechseln, weiter. In Ruhe liegt keine Drehung auf der Karte
         // (Schrift bleibt scharf, die Figur bedienbar). Ohne Animation (Einstellung „weniger Bewegung“) sofort wechseln.
-        const still = !karte.animate || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-        if (still) return swap();
+        if (still()) return zeige(toBack);
         busy = true;
         const half = (from, to, easing, then) => {
-          const a = karte.animate([{ transform: `perspective(1000px) rotateY(${from}deg)` }, { transform: `perspective(1000px) rotateY(${to}deg)` }], { duration: 170, easing });
+          const a = karte.animate([{ transform: dreh(from) }, { transform: dreh(to) }], { duration: 170, easing });
           a.onfinish = a.oncancel = then;
         };
-        half(0, toBack ? 90 : -90, 'ease-in', () => {
-          swap();
-          half(toBack ? -90 : 90, 0, 'ease-out', () => {
-            busy = false;
-            if (again && karte.isConnected) {
-              again = false;
-              turn();
-            }
-          });
+        half(0, 90 * richtung, 'ease-in', () => {
+          zeige(toBack);
+          half(-90 * richtung, 0, 'ease-out', fertig);
         });
       };
+      // Wischen (Handy): waagerecht ziehen dreht die Karte mit dem Finger, nach links wie nach rechts. Loslassen nach gut
+      // einer Vierteldrehung (oder schnellem Wischen) dreht sie ganz um, sonst federt sie zurück. Senkrecht scrollt die
+      // Seite; auf der 3D-Figur dreht Ziehen weiter die Figur.
+      let zug = null;
+      karte.addEventListener('pointerdown', (ev) => {
+        if (busy || zug || (ev.pointerType === 'mouse' && ev.button !== 0)) return;
+        gewischt = false;
+        if (ev.target.closest('button, a, input, select, .f3d-stage')) return;
+        zug = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: ev.timeStamp, an: false, w: 0, back: karte.dataset.seite !== 'vorn' };
+      });
+      karte.addEventListener('pointermove', (ev) => {
+        if (!zug || ev.pointerId !== zug.id) return;
+        const dx = ev.clientX - zug.x;
+        const dy = ev.clientY - zug.y;
+        if (!zug.an) {
+          if (Math.abs(dy) > 10 && Math.abs(dy) > Math.abs(dx)) { zug = null; return; }
+          if (Math.abs(dx) < 10) return;
+          zug.an = true;
+          gewischt = true;
+          try { karte.setPointerCapture(ev.pointerId); } catch (e) { /* egal */ }
+        }
+        // ganze Kartenbreite = halbe Drehung
+        const w = Math.max(-180, Math.min(180, (dx / Math.max(200, karte.offsetWidth)) * 180));
+        zug.w = w;
+        zug.v = dx / Math.max(1, ev.timeStamp - zug.t);
+        const ueber = Math.abs(w) > 90;
+        zeige(ueber ? !zug.back : zug.back);
+        karte.style.transform = dreh(ueber ? w - 180 * Math.sign(w) : w);
+      });
+      const loslassen = (ev) => {
+        if (!zug || ev.pointerId !== zug.id) return;
+        const z = zug;
+        zug = null;
+        if (!z.an) return;
+        const ganz = ev.type === 'pointerup' && (Math.abs(z.w) > 50 || (Math.abs(z.w) > 15 && Math.abs(z.v) > 0.5 && Math.sign(z.v) === Math.sign(z.w)));
+        const s = Math.sign(z.w) || 1;
+        // von der jetzigen Lage aus weiterdrehen (umgedreht) oder zurück (Ausgangsseite)
+        const von = Math.abs(z.w) > 90 ? z.w - 180 * s : z.w;
+        karte.style.transform = '';
+        const ende = () => {
+          busy = false;
+        };
+        if (ganz) {
+          umgedreht();
+          if (Math.abs(z.w) <= 90 && !still()) {
+            busy = true;
+            const a = karte.animate([{ transform: dreh(von) }, { transform: dreh(90 * s) }], { duration: 120 * (1 - Math.abs(von) / 90) + 20, easing: 'ease-in' });
+            a.onfinish = a.oncancel = () => {
+              zeige(!z.back);
+              const b = karte.animate([{ transform: dreh(-90 * s) }, { transform: dreh(0) }], { duration: 170, easing: 'ease-out' });
+              b.onfinish = b.oncancel = fertig;
+            };
+            return;
+          }
+          zeige(!z.back);
+          if (still()) return;
+          busy = true;
+          const a = karte.animate([{ transform: dreh(von) }, { transform: dreh(0) }], { duration: 170, easing: 'ease-out' });
+          a.onfinish = a.oncancel = fertig;
+          return;
+        }
+        // zurückfedern auf die Ausgangsseite
+        if (Math.abs(z.w) > 90 && !still()) {
+          busy = true;
+          const a = karte.animate([{ transform: dreh(von) }, { transform: dreh(-90 * s) }], { duration: 120, easing: 'ease-in' });
+          a.onfinish = a.oncancel = () => {
+            zeige(z.back);
+            const b = karte.animate([{ transform: dreh(90 * s) }, { transform: dreh(0) }], { duration: 170, easing: 'ease-out' });
+            b.onfinish = b.oncancel = ende;
+          };
+          return;
+        }
+        zeige(z.back);
+        if (still()) return;
+        busy = true;
+        const a = karte.animate([{ transform: dreh(von) }, { transform: dreh(0) }], { duration: 170, easing: 'ease-out' });
+        a.onfinish = a.oncancel = ende;
+      };
+      karte.addEventListener('pointerup', loslassen);
+      karte.addEventListener('pointercancel', loslassen);
       app.append(head, el('section', { class: 'kk' }, el('div', { class: 'kk-kopf' }, title, wechsel), karte), footer);
       footer.querySelector('.kk-um').focus({ preventScroll: true });
       window.scrollTo(0, 0);
