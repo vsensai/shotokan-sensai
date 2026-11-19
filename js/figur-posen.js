@@ -951,7 +951,7 @@
   D['tc:shuto-kamae'] = STILL(KK_SHUTO, { view: 'front3' });
   // Koshi-kamae: die rechte Faust an der Hüfte (Handrücken unten), die linke genau darauf (Handrücken oben); der linke
   // Unterarm liegt dicht vor dem Bauch, nicht in ihm. Auch für die Kata (Tekki, Bassai Dai, Kanku Dai)
-  const KOSHI_KAMAE = { hR: [-0.21, -0.34, 0.03], pR: [0, 1, 0], hL: [-0.205, -0.275, 0.075], eL: [0.3, -0.3, 1], pL: [0, -1, 0] };
+  const KOSHI_KAMAE = { hR: [-0.21, -0.34, 0.03], pR: [0, 1, 0], hL: [-0.193, -0.289, 0.107], eL: [0.3, -0.3, 1], pL: [0, -1, 0] };
   D['tc:koshi-kamae'] = STILL(M(S.hachiji, KOSHI_KAMAE), M(hit('fistR', 'Fäuste an der Hüfte'), { view: 'front3' }));
   D['tc:mizunagare-no-kamae'] = STILL(M(KB, { hL: L(H.hip), hR: [0.1, -0.22, 0.27], eR: [-0.7, -0.3, 0.4] }), { view: 'front3' });
   D['tc:hanmi'] = STILL(M(ZK_KAMAE), M(hit('shL', 'vordere Schulter'), { view: 'front3' }));
