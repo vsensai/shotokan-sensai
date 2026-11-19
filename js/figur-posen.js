@@ -949,7 +949,10 @@
   D['tc:chudan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.1, -0.12, 0.42], hR: [-0.02, -0.22, 0.2] }), { view: 'side3' });
   D['tc:gedan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: L(H.gedan), hR: [-0.02, -0.22, 0.2] }), { view: 'side3' });
   D['tc:shuto-kamae'] = STILL(KK_SHUTO, { view: 'front3' });
-  D['tc:koshi-kamae'] = STILL(M(S.hachiji, { hR: H.hip, hL: [-0.11, -0.33, 0.04], pL: [0, -1, 0] }), M(hit('fistR', 'Fäuste an der Hüfte'), { view: 'front3' }));
+  // Koshi-kamae: die rechte Faust an der Hüfte (Handrücken unten), die linke genau darauf (Handrücken oben); der linke
+  // Unterarm liegt dicht vor dem Bauch, nicht in ihm. Auch für die Kata (Tekki, Bassai Dai, Kanku Dai)
+  const KOSHI_KAMAE = { hR: [-0.21, -0.34, 0.03], pR: [0, 1, 0], hL: [-0.205, -0.275, 0.075], eL: [0.3, -0.3, 1], pL: [0, -1, 0] };
+  D['tc:koshi-kamae'] = STILL(M(S.hachiji, KOSHI_KAMAE), M(hit('fistR', 'Fäuste an der Hüfte'), { view: 'front3' }));
   D['tc:mizunagare-no-kamae'] = STILL(M(KB, { hL: L(H.hip), hR: [0.1, -0.22, 0.27], eR: [-0.7, -0.3, 0.4] }), { view: 'front3' });
   D['tc:hanmi'] = STILL(M(ZK_KAMAE), M(hit('shL', 'vordere Schulter'), { view: 'front3' }));
   D['tc:gyaku-hanmi'] = STILL(M(S.zk, { yaw: 35, R: { z: -0.45 }, hL: L(H.guardR), hR: H.guardF }), M(hit('shR', 'vordere Schulter'), { view: 'front3' }));
@@ -1188,9 +1191,8 @@
   // Füße bleiben im Kiba-dachi
   KATA['mae-enpi-seite'] = T(KU3, M(KB, { look: 90, yaw: 32, chest: 30, hR: MAE_ENPI.hR, eR: MAE_ENPI.eR, oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }));
   // 4, 14, 18, 28: Ryoken Koshi-kamae – die rechte Faust an der Hüfte (Handrücken unten), die linke genau darauf
-  // (Handrücken oben); der linke Unterarm liegt vor dem Bauch am Körper an. Damit er anliegt und nicht im Körper steckt,
-  // stehen die Fäuste etwas vor der Hüfte (im Lexikon direkt an der Hüfte)
-  KATA['koshi-kamae-tekki'] = STILL(M(KB, { hR: [-0.205, -0.34, 0.11], pR: [0, 1, 0], hL: [-0.165, -0.26, 0.17], eL: [0.3, -0.3, 1], pL: [0, -1, 0] }));
+  // (Handrücken oben), direkt an der Hüfte; der linke Unterarm liegt dicht vor dem Bauch (wie im Lexikon)
+  KATA['koshi-kamae-tekki'] = STILL(M(KB, KOSHI_KAMAE));
   // 8, 22: Chudan Uchi-uke im Kiba-dachi, Körper gerade nach vorn (Ende wie der Beginn des Uchi-nagashi-uke im Lexikon)
   KATA['uchi-uke-kiba'] = T(M(KB, { hL: [0.1, -0.15, 0.4], hR: [0.12, -0.2, 0.25], eR: [-0.5, -0.6, 0.5] }), UN1);
   // 9, 23: erst Uchi-nagashi-uke Jodan links mit Gedan-uke rechts (Ablauf des Lexikons), dann schlägt die linke Faust als
