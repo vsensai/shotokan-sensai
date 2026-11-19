@@ -1105,6 +1105,13 @@ p.kk-frage {
 .kk-bild.lex-img svg {
   max-height: 260px;
 }
+/* Bild nur so groß, dass Text und Knöpfe ohne Scrollen darunter passen (Handy) */
+.kk-karte .kk-bild {
+  max-width: clamp(12rem, (100dvh - 35rem) * 1.25, 26rem);
+}
+.kk-karte .kk-bild.lex-img svg {
+  max-height: clamp(9rem, 100dvh - 35rem, 260px);
+}
 .kk-hinweis {
   margin: 0.7rem 0 0;
   text-align: center;
@@ -1150,9 +1157,19 @@ p.kk-frage {
 .kk-footer .btn:only-child {
   grid-column: 1 / -1;
 }
+/* nach dem Umdrehen: Nicht gewusst | Gewusst | ↺ in einer Reihe, damit alles ohne Scrollen auf den Bildschirm passt */
+.kk-footer:has(.kk-ja) {
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.5rem;
+}
+.kk-footer .btn {
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+}
 .kk-footer .gfx-btn {
-  grid-column: 1 / -1;
-  justify-self: center;
+  align-self: stretch;
+  padding: 0.3rem 0.9rem;
+  font-size: 1.15rem;
 }
 .kk-karte.kk-wertbar {
   touch-action: none;
@@ -1165,7 +1182,7 @@ p.kk-frage {
 }
 .kk-wisch {
   grid-column: 1 / -1;
-  margin: 0;
+  margin: -0.2rem 0 0;
   text-align: center;
   font-size: 0.8rem;
 }

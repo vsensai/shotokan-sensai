@@ -793,14 +793,14 @@
         const toBack = karte.dataset.seite === 'vorn';
         karte.dataset.seite = toBack ? 'hinten' : 'vorn';
         if (toBack && !seen) {
-          // erstes Umdrehen: jetzt einschätzen; „Umdrehen“ bleibt als kleiner Knopf, um die andere Seite noch einmal zu sehen
+          // erstes Umdrehen: jetzt einschätzen; „Umdrehen“ bleibt als kleiner Knopf ↺ in derselben Reihe, um die andere Seite noch einmal zu sehen
           seen = true;
           karte.classList.add('kk-wertbar');
           footer.innerHTML = '';
           footer.append(
             el('button', { class: 'btn kk-nein', type: 'button', text: 'Nicht gewusst', onclick: () => answer(false) }),
             el('button', { class: 'btn kk-ja', type: 'button', text: 'Gewusst', onclick: () => answer(true) }),
-            el('button', { class: 'gfx-btn kk-um', type: 'button', text: '↺ Umdrehen', onclick: () => turn() }),
+            el('button', { class: 'gfx-btn kk-um', type: 'button', text: '↺', title: 'Umdrehen', 'aria-label': 'Umdrehen', onclick: () => turn() }),
             el('p', { class: 'kk-wisch muted', text: 'Wischen: ↑ gewusst · ↓ nicht gewusst · ↔ umdrehen' })
           );
           footer.querySelector('.kk-ja').focus({ preventScroll: true });
