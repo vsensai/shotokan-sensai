@@ -1261,7 +1261,7 @@
   const TS_SPITZE = V.add(TS_J0.tipL, V.mul(TS_RAUS, 0.02 - TS_REIN));
   // (der rechte Ellbogen bleibt dabei vor dem Körper, damit der Unterarm nicht in den Bauch gerät)
   const TS_R = (t, q, f, pp) => ({ hR: TS_AT(t, TS_REL(q)), eR: [-0.45, -0.6, 0.65], fR: TS_AT(t, f, true), pR: TS_AT(t, pp, true) });
-  const TS_GRIFF = { eL: [0.8, -1, 0], fL: [-0.4, 0.2, 1], pL: [-1, 0, 0.2] };
+  const TS_GRIFF = { eL: [0.15, -1, 0.1], fL: [-0.4, 0.2, 1], pL: [-1, 0, 0.2] };
   const TS_HOCH = TS_R(0.62, TS_SPITZE, [0, 1, 0], TS_RAUS);
   // die rechte Hand steht im Raum still, während die linke an ihr Handgelenk greift (Abstand in Brustkoordinaten wie am Ende)
   const TS_GRIF2 = TS_R(0.72, TS_SPITZE, [0, 1, 0], TS_RAUS);
