@@ -143,7 +143,31 @@
             if (!S || !S.kata || S.kata.M.n !== 9 || S.keys.length < 3 || S.kata.names[S.k] !== 'Ende' || !/\nGilt für: nur diese Stelle\n/.test(S.text)) throw new Error('Kata-Trainer: ✎ öffnet die Bewegung nicht im Editor');
             if (!S.dlg.classList.contains('pe-kata') || S.dlg.querySelector('[data-tab=treffer]').offsetParent) throw new Error('Kata-Editor: Reiter Treffer bei einer Kata sichtbar');
             log.push(`Kata-Editor: ${S.kata.names.join(', ')}`);
+            // Bild einfügen: Balken zwischen die ersten beiden Bilder, +; der Text nennt es, Import holt es zurück, − entfernt es
+            const PE = SK.poseEditor;
+            const n0 = S.keys.length;
+            PE.seek((S.kata.even[0] + S.kata.even[1]) / 2);
+            PE.insertHere();
+            const T = S.text;
+            if (S.keys.length !== n0 + 1 || S.kata.names[S.k] !== 'Eingefügt' || S.k !== 1 || !/\nEingefügt: Bild 2 bei /.test(T)) throw new Error('Kata-Editor: Bild einfügen geht nicht');
+            PE.removeHere();
+            if (S.keys.length !== n0 || S.kata.names.includes('Eingefügt')) throw new Error('Kata-Editor: eingefügtes Bild lässt sich nicht entfernen');
+            if (!/^Importiert/.test(PE.importText(T)) || S.keys.length !== n0 + 1 || S.kata.names[1] !== 'Eingefügt') throw new Error('Kata-Editor: Import bringt das eingefügte Bild nicht zurück');
             S.dlg.close();
+            // dasselbe im Editor des Lexikons: das neue Bild wird ein Bild des Ablaufs (fließend)
+            PE.open('tc:shuto-uke', 'Shuto-uke');
+            const L = PE.state();
+            const nL = L.keys.length;
+            // (größte Lücke zwischen zwei gezeigten Bildern)
+            let a = 0;
+            L.keys.forEach((_, i) => { if (i > 0 && !L.hid.has(i) && (!a || L.tm[i].t - L.tm[i - 1].t > L.tm[a].t - L.tm[a - 1].t)) a = i; });
+            PE.seek(((L.tm[a - 1].t + L.tm[a].t) / 2 - L.tm[0].t) / (L.tm[nL - 1].t - L.tm[0].t));
+            PE.insertHere();
+            const TL = L.text;
+            if (L.keys.length !== nL + 1 || L.k !== a || L.tm[a].e !== 'fl' || !/neu eingefügt\)/.test(TL)) throw new Error('Lexikon-Editor: Bild einfügen geht nicht');
+            PE.removeHere();
+            if (L.keys.length !== nL || !/^Importiert/.test(PE.importText(TL)) || L.keys.length !== nL + 1 || !L.keys[a].neu) throw new Error('Lexikon-Editor: Import bringt das eingefügte Bild nicht zurück');
+            L.dlg.close();
             app.querySelector('.ans-view [data-view=karte]').click();
           } finally {
             SK.poseEditor.setEnabled(false);

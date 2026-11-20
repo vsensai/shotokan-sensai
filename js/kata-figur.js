@@ -763,6 +763,13 @@
     if (tb - ta < 1e-6) return [];
     return [...new Set(d.keys.filter((k) => k.t >= ta - 1e-9 && k.t < tb - 1e-9).map((k) => Math.round((u0 + ((k.t - ta) / (tb - ta)) * (1 - u0)) * 1e4) / 1e4))];
   }
+  // Lage des Arm-Ablaufs in der Bewegung (für eingefügte Bilder im Bewegungs-Editor): ab dem Anteil u0 läuft der Ablauf
+  // von from bis zu seinem letzten Bild
+  function armZeit(tech, u0) {
+    const d = tech && tech.def && defOf(tech.def);
+    if (!d || d.keys.length < 2) return null;
+    return { u0, ta: tech.from || 0, tb: d.keys[d.keys.length - 1].t };
+  }
   // Woher die Arme einer Bewegung kommen (für den Bewegungs-Editor): Ablauf, Seite, ob gespiegelt, Optionen
   function quelleOf(tech, side) {
     if (!tech) return null;
@@ -1118,6 +1125,7 @@
       }
       const uS = tech && tech.lang ? 0.1 : tech && tech.schlag ? clamp(1 - tech.schlag / d, 0.22, 0.8) : clamp(1 - STRIKE / d, 0.3, 0.8);
       let zw = []; // Bilder des Arm-Ablaufs als Anteile der Bewegung (Ausholen und Zwischenbilder im Editor)
+      let az = null; // wo der Arm-Ablauf in der Bewegung liegt (armZeit)
       let arms;
       let end;
       if (tech && tech.halten) {
@@ -1155,7 +1163,7 @@
           // Godan 14 nach dem Gedan-barai), wird der Unterschied im ersten Drittel weich ausgeblendet, statt erst in die
           // Anfangshaltung des Ablaufs zu gehen
           const uP = tech.lang ? 0 : 0.35;
-          if (defOf(tech.def).keys.length > 1) zw = armBilder(tech, uP);
+          if (defOf(tech.def).keys.length > 1) { zw = armBilder(tech, uP); az = armZeit(tech, uP); }
           const t0 = upper(tr(0));
           const c0 = upper(cur.up);
           const vor = (a, f) => {
@@ -1180,6 +1188,7 @@
           const pre = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: tr(0) }]);
           arms = (u) => (u < uS ? upper(pre(u)) : tr((u - uS) / (1 - uS)));
           zw = armBilder(tech, uS);
+          az = armZeit(tech, uS);
         }
       }
       if (look != null) {
@@ -1227,7 +1236,7 @@
         }
       }
       segs.push(seg);
-      mark(st.t + d, { zw: zw.map((u) => st.t + u * d) });
+      mark(st.t + d, { zw: zw.map((u) => st.t + u * d), arm: az && Object.assign({ t0: st.t, d }, az) });
       cur = nk;
       if (tech && tech.schnapp) {
         // kurz stehen lassen, dann zurück – das zählt nicht mehr zur Bewegung (ends: der Treffer)
@@ -1330,7 +1339,15 @@
     const c = [(Pe.L.x + Pe.R.x) / 2, (Pe.L.z + Pe.R.z) / 2];
     const byaw = mk.byaw || 0;
     const at = (t) => E.full(move(rotate(anim.pose(t), -byaw, c), -c[0], -c[1]));
-    return { kata: anim.kata, n, beat: anim.beat, kan: mk.kan, ro: mk.ro, kiai: !!mk.kiai, stand: I.stand, standFigur: standOf(I.stand), tech: I.tech, quelle: I.quelle, frames: fr, t0: fr[0].t, t1: fr[fr.length - 1].t, byaw: wrap(byaw), at };
+    // Zeit t der Kata → Zeit im Arm-Ablauf (null: davor bzw. ohne Ablauf) – für Bilder, die der Editor einfügt
+    const armT = (t) => {
+      const a = I.arm;
+      if (!a) return null;
+      const u = (t - a.t0) / a.d;
+      if (u < a.u0 - 1e-6 || u > 1 + 1e-6) return null;
+      return Math.round((a.ta + ((u - a.u0) / (1 - a.u0 || 1)) * (a.tb - a.ta)) * 1000) / 1000;
+    };
+    return { kata: anim.kata, n, beat: anim.beat, kan: mk.kan, ro: mk.ro, kiai: !!mk.kiai, stand: I.stand, standFigur: standOf(I.stand), tech: I.tech, quelle: I.quelle, frames: fr, t0: fr[0].t, t1: fr[fr.length - 1].t, byaw: wrap(byaw), at, armT };
   }
   // Wo ein Ablauf in den Kata vorkommt (freigegebene und Vorschau): „Heian Shodan 9“ …
   function nutzung(def) {

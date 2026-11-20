@@ -3355,6 +3355,17 @@ main:fullscreen .ans-wrap {
   box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.35);
 }
 
+/* eingefügtes Bild (+ in der Zeitleiste) */
+.pe-mk.neu {
+  border-style: double;
+  border-width: 4px;
+}
+
+.pe-ins {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
 .pe-mk.sel {
   border-color: var(--red);
   background: var(--red);

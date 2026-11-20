@@ -271,7 +271,7 @@
 <p class="pe-helptext" hidden>${HELP}</p>
 <span class="pe-cam" aria-hidden="true"></span></div>
 <div class="pe-grip" title="Ziehen: Bild höher oder niedriger" aria-hidden="true"></div>
-<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb" data-pe="stop" aria-label="Stopp" title="Stopp: Abspielen beenden und zum gewählten Bild zurück">■</button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-trackwrap"><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><span class="pe-trackpad" aria-hidden="true"></span></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button></div>
+<div class="pe-tl"><button type="button" class="pe-rb" data-pe="play"></button><button type="button" class="pe-rb" data-pe="stop" aria-label="Stopp" title="Stopp: Abspielen beenden und zum gewählten Bild zurück">■</button><button type="button" class="pe-rb pe-slow" data-pe="slow" aria-pressed="false" aria-label="Zeitlupe" title="Zeitlupe: beim Abspielen mit ▶ viermal langsamer (ändert die Bewegung nicht)">¼×</button><button type="button" class="pe-rb" data-pe="fprev" aria-label="Bild davor" title="Bild davor">‹</button><div class="pe-trackwrap"><div class="pe-track" role="radiogroup" aria-label="Bilder der Bewegung"></div><span class="pe-trackpad" aria-hidden="true"></span></div><button type="button" class="pe-rb" data-pe="fnext" aria-label="nächstes Bild" title="Nächstes Bild">›</button><button type="button" class="pe-rb pe-star" data-pe="fbest"></button><button type="button" class="pe-rb pe-ins" data-pe="ins">+</button></div>
 </div>
 <div class="pe-side">
 <div class="pe-tabs" role="tablist"><button type="button" class="pe-tab" role="tab" data-tab="bild" title="Zeitpunkt, Übergang, Dauer und Kernbild des gezeigten Bildes">Bild</button><button type="button" class="pe-tab" role="tab" data-tab="koerper" title="Körperteile des gezeigten Bildes einstellen">Körper</button><button type="button" class="pe-tab" role="tab" data-tab="treffer" title="Rot markierte Trefferfläche: welche Fläche, welche Seite, genaue Lage und Größe">Treffer</button><button type="button" class="pe-tab" role="tab" data-tab="ausgabe" title="Text der ganzen Bewegung zum Kopieren, Import">Ausgabe</button></div>
@@ -434,15 +434,12 @@ ${easeGuide()}
   // Körperrahmen der Endstellung. Die Zeitleiste zeigt die Bilder gleichmäßig verteilt; Zeiten und Übergänge sind fest,
   // ▶ spielt die Bewegung, wie sie in der App läuft. Die Füße lassen sich nur im Bild „Ende“ verschieben (davor gehören sie
   // zur Bewegung davor bzw. zum gerechneten Schritt). Die Ausgabe nennt Kata, Bewegung, Herkunft und „Gilt für“.
-  function openKata(M, was) {
+  // Spur der Zeitleiste (Bilder gleichmäßig verteilt) ↔ Anteil der echten Bewegung (Abspielen, Spulen)
+  function kataSpur(M) {
     const n = M.frames.length;
     const span = M.t1 - M.t0 || 1;
-    const keys = M.frames.map((f, i) => ({ t: n > 1 ? Math.round((i / (n - 1)) * 1e4) / 1e4 : 0, p: M.at(f.t), e: i ? 'io' : undefined }));
-    const end = M.frames.findIndex((f) => f.ende);
-    const def = { keys, best: keys[end].t, dur: span, view: 'front3' };
-    // Spur der Zeitleiste (gleichmäßig) ↔ Anteil der echten Bewegung (Abspielen, Spulen)
+    const even = M.frames.map((_, i) => (n > 1 ? Math.round((i / (n - 1)) * 1e4) / 1e4 : 0));
     const real = M.frames.map((f) => (f.t - M.t0) / span);
-    const even = keys.map((k) => k.t);
     const map = (xs, ys) => (u) => {
       if (n < 2) return u;
       let i = 0;
@@ -450,9 +447,17 @@ ${easeGuide()}
       const w = xs[i + 1] - xs[i] || 1;
       return clamp(ys[i] + ((u - xs[i]) / w) * (ys[i + 1] - ys[i]), 0, 1);
     };
+    return { even, real, end: M.frames.findIndex((f) => f.ende), names: M.frames.map((f) => f.name), toTrack: map(real, even), fromTrack: map(even, real) };
+  }
+  function openKata(M0, was) {
+    // eigene Liste der Bilder: eingefügte Bilder kommen hinein (und bleiben für „←“ aus dem Arm-Ablauf erhalten)
+    const M = Object.assign({}, M0, { frames: M0.frames.map((f) => Object.assign({}, f)) });
+    const sp = kataSpur(M);
+    const keys = M.frames.map((f, i) => Object.assign({ t: sp.even[i], p: M.at(f.t), e: i ? 'io' : undefined }, f.neu ? { neu: true } : {}));
+    const def = { keys, best: keys[sp.end].t, dur: M.t1 - M.t0 || 1, view: 'front3' };
     open(`kb:${M.kata.id}-${M.n}`, `${M.kata.name} ${M.n}`, {
       def,
-      kata: { M, end, names: M.frames.map((f) => f.name), gilt: (was && was.gilt) || 'hier', real, toTrack: map(real, even), fromTrack: map(even, real) },
+      kata: Object.assign({ M, gilt: (was && was.gilt) || 'hier' }, sp),
     });
     if (was && was.dirty) {
       const r = importText(was.text);
@@ -482,7 +487,8 @@ ${easeGuide()}
 <p class="small"><b>Stand:</b> ${esc(M.stand || '–')} – Stand der Figur <code>${esc(M.standFigur || '?')}</code> auf den Plätzen der Bodenkarte. Die Füße lassen sich nur im Bild „Ende“ verschieben.</p>
 <div class="pe-row"><span>Gilt für</span><div class="pe-gilt" role="group" aria-label="Gilt für"><button type="button" data-pe="gilt-hier" aria-pressed="${g === 'hier'}" title="Nur diese Stelle dieser Kata ändern">nur hier</button><button type="button" data-pe="gilt-ueberall" aria-pressed="${g === 'ueberall'}" title="Den Ablauf bzw. Stand selbst ändern – überall, wo er vorkommt">überall</button></div></div>
 ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm-Ablauf selbst im Editor öffnen (← führt hierher zurück)">Arm-Ablauf öffnen (${esc(q.def)})</button>` : ''}
-<p class="small muted">▶ zeigt die Bewegung, wie sie in der App läuft, mit deinen Änderungen: zwischen zwei Bildern gehen sie weich ineinander über. Zeiten und Übergänge lassen sich hier nicht ändern.</p>`;
+<p class="small muted">▶ zeigt die Bewegung, wie sie in der App läuft, mit deinen Änderungen: zwischen zwei Bildern gehen sie weich ineinander über. Zeiten und Übergänge lassen sich hier nicht ändern.</p>
+<p class="small muted">Stimmt der Weg zwischen zwei Bildern nicht: den Balken dorthin ziehen und mit + in der Zeitleiste ein Bild einfügen, dann ändern – die Wege davor und danach gehen durch diese Pose (Füße bleiben fest). − entfernt ein eingefügtes Bild wieder.</p>`;
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
   const holdOf = (i) => { let j = i; while (j > 0 && same(rounded(S.frames[j - 1]), rounded(S.frames[i]))) j--; return j; };
@@ -514,13 +520,14 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
     const head = S.kata ? `${S.kata.names[S.k]} · Bild ${nr(S.k)} von ${nTot()}${isK ? ' ★' : ''}` : n > 1 ? `Bild ${nr(S.k)} von ${nTot()}${isK ? ' · Kernbild ★' : ''}` : 'Standbild';
     d.querySelector('.pe-bh').textContent = head;
     d.querySelector('.pe-kh').textContent = `${partOf(S.sel).label}${S.kata ? ` · ${S.kata.names[S.k]}` : n > 1 ? ` · Bild ${nr(S.k)}${isK ? ' ★' : ''}` : ''}`;
-    d.querySelector('.pe-finfo').innerHTML = [isK && S.k0 !== S.k0app ? 'Kernbild neu gewählt' : '', h !== S.k ? `gleiche Pose wie Bild ${nr(h)}` : '', edS.length ? `<span class="pe-ed">geändert: Bild ${edS.map(nr).join(', ')}</span>` : ''].filter(Boolean).join(' · ');
+    d.querySelector('.pe-finfo').innerHTML = [S.keys[S.k].neu ? 'eingefügtes Bild (− in der Zeitleiste entfernt es)' : '', isK && S.k0 !== S.k0app ? 'Kernbild neu gewählt' : '', h !== S.k ? `gleiche Pose wie Bild ${nr(h)}` : '', edS.length ? `<span class="pe-ed">geändert: Bild ${edS.map(nr).join(', ')}</span>` : ''].filter(Boolean).join(' · ');
     // Kamera fürs Kernbild: nur über den Knopf übernommen, Drehen zum Anschauen ändert nichts
     const kc = S.kcam || camInfo0();
     d.querySelector('.pe-camv').textContent = `Kamera ${n > 1 ? 'fürs Kernbild' : 'des Bildes'}: ${kc.y}° · ${kc.p}°${S.kcam ? ' (neu übernommen)' : ' (wie in der App)'}`;
     d.querySelector('[data-pe="camset"]').textContent = n > 1 ? 'Ansicht als Kamera fürs Kernbild' : 'Ansicht als Kamera übernehmen';
     d.querySelector('[data-pe="camreset"]').disabled = !S.kcam;
     if (n < 2) return;
+    insBtn();
     fillSrc(d.querySelector('.pe-cpsrc'));
     const pb = d.querySelector('[data-pe="play"]');
     const run = S.play && !S.play.paused;
@@ -551,7 +558,7 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
       if (!shown(i)) return `<span class="pe-pause" data-a="${S.tm[i - 1].t}" data-b="${x.t}" title="${ownerOf(i) === 0 ? 'Pause am Anfang' : `Bild ${nr(i)} hält`}: ${((x.t - S.tm[ownerOf(i)].t) * S.dur).toFixed(2)} s"></span>`;
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
-      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}"${S.kata && !/^Zwischenbild/.test(S.kata.names[i]) ? ` data-l="${esc(S.kata.names[i])}"` : ''} title="${S.kata ? esc(S.kata.names[i]) : tipOf(i, x, hold)}"><span>${nr(i)}</span></button>`;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}${S.keys[i].neu ? ' neu' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}"${S.kata && !/^(Zwischenbild|Eingefügt)/.test(S.kata.names[i]) ? ` data-l="${esc(S.kata.names[i])}"` : ''} title="${S.kata ? esc(S.kata.names[i]) : tipOf(i, x, hold)}${S.keys[i].neu && !S.kata ? ' · eingefügt' : ''}"><span>${nr(i)}</span></button>`;
     }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden><span class="pe-hk" data-hk="1" title="Ziehen: die Bewegung vor- und zurückspulen"></span></span><span class="pe-dlab" hidden></span>`;
     // Balken: beim Abspielen (auch angehalten) an seiner Stelle, sonst beim gewählten Bild
     headAt(S.play ? S.play.u || 0 : (S.tm[S.k].t - S.tm[0].t) / (S.tm[n - 1].t - S.tm[0].t || 1));
@@ -798,17 +805,22 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
     });
   }
   const shiftIdx = (o, from, d) => { const r = {}; Object.keys(o).forEach((k) => (r[+k >= from ? +k + d : +k] = o[k])); return r; };
+  // Bild an Stelle at in alle Listen einfügen bzw. daraus entfernen (Halten, eingefügte Bilder); Nummern rücken mit
+  function addFrame(at, key, frame, tk, tm) {
+    S.keys.splice(at, 0, key);
+    S.frames.splice(at, 0, frame);
+    S.tk.splice(at, 0, tk);
+    S.tm.splice(at, 0, tm);
+    S.edits = shiftIdx(S.edits, at, 1);
+    S.undos = shiftIdx(S.undos, at, 1);
+    S.hid = new Set([...S.hid].map((j) => (j >= at ? j + 1 : j)));
+    ['k', 'k0', 'k0app'].forEach((f) => { if (S[f] != null && S[f] >= at) S[f]++; });
+  }
   // Gehaltenes Bild an Stelle at einfügen (hält Bild at-1) bzw. entfernen
   function insertHold(at) {
     const o = at - 1;
-    S.keys.splice(at, 0, Object.assign({}, S.keys[o]));
-    S.frames.splice(at, 0, clone(S.frames[o]));
-    S.tk.splice(at, 0, null);
-    S.tm.splice(at, 0, { t: S.tm[o].t, e: 'io' });
-    S.edits = shiftIdx(S.edits, at, 1);
-    S.undos = shiftIdx(S.undos, at, 1);
-    S.hid = new Set([...S.hid].map((j) => (j >= at ? j + 1 : j)).concat(at));
-    ['k', 'k0', 'k0app'].forEach((f) => { if (S[f] != null && S[f] >= at) S[f]++; });
+    addFrame(at, Object.assign({}, S.keys[o], { neu: undefined }), clone(S.frames[o]), null, { t: S.tm[o].t, e: 'io' });
+    S.hid.add(at);
   }
   function removeHold(at) {
     S.keys.splice(at, 1);
@@ -821,6 +833,81 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
     S.undos = shiftIdx(S.undos, at + 1, -1);
     S.hid = new Set([...S.hid].filter((j) => j !== at).map((j) => (j > at ? j - 1 : j)));
     ['k', 'k0', 'k0app'].forEach((f) => { if (S[f] != null && S[f] > at) S[f]--; });
+  }
+  /* ---------- Bild einfügen (Balken zwischen zwei Bildern angehalten) ---------- */
+  // Das neue Bild zeigt die Pose dieses Augenblicks, wie ▶ sie zeigt (samt den Änderungen der Bilder daneben). Ändert man
+  // es, gehen die Wege vom Bild davor und zum Bild danach durch diese Pose. Im Lexikon wird es ein neues Bild des Ablaufs
+  // (Übergang fließend: die Figur zieht ohne Anhalten hindurch); bei einer Kata ein Bild zwischen den Bildern der App –
+  // die Füße bleiben dort fest (sie kommen aus Bodenkarte und Schrittregeln).
+  // Stelle des Balkens: { at: Index des neuen Bildes, t: Zeit (Kata: Sekunden der Kata, sonst t des Ablaufs) } oder null
+  const MIN_ABST = 0.02;
+  function insSpot() {
+    const run = S.play;
+    if (!run || !run.paused || S.keys.length < 2) return null;
+    if (S.kata) {
+      const M = S.kata.M;
+      const t = M.t0 + Math.round(run.u * (M.t1 - M.t0) * 100) / 100;
+      const at = M.frames.findIndex((f) => f.t > t);
+      if (at < 1 || t - M.frames[at - 1].t < MIN_ABST || M.frames[at].t - t < MIN_ABST) return null;
+      return { at, t };
+    }
+    const t = Math.round((run.t0 + (run.t1 - run.t0) * run.u) * 1000) / 1000;
+    const at = S.tm.findIndex((x) => x.t > t);
+    // nicht in einer Pause (gehaltenes Bild) und nicht dicht an einem Bild
+    if (at < 1 || isHid(at) || (t - S.tm[at - 1].t) * S.dur < MIN_ABST || (S.tm[at].t - t) * S.dur < MIN_ABST) return null;
+    return { at, t };
+  }
+  // Bild mit Pose P an Stelle at, Zeit t einfügen
+  function place(at, t, P) {
+    P = E.full(clone(P));
+    if (S.kata) {
+      S.kata.M.frames.splice(at, 0, { name: 'Eingefügt', t, neu: true });
+      addFrame(at, { t: 0, p: clone(P), e: 'io', neu: true }, clone(P), { t: 0, e: 'io' }, { t: 0, e: 'io' });
+      kataTrack();
+    } else addFrame(at, { t, p: clone(P), e: 'fl', neu: true }, clone(P), { t, e: 'fl' }, { t, e: 'fl' });
+  }
+  // Kata: Spur und Zeitpunkte der Bilder nach Einfügen oder Entfernen neu verteilen
+  function kataTrack() {
+    Object.assign(S.kata, kataSpur(S.kata.M));
+    S.keys = S.keys.map((k, i) => Object.assign({}, k, { t: S.kata.even[i] }));
+    S.tm.forEach((x, i) => { x.t = S.kata.even[i]; S.tk[i] = { t: x.t, e: x.e }; });
+  }
+  function insertHere() {
+    const msg = S.dlg.querySelector('.pe-msg');
+    const sp = insSpot();
+    if (!sp) {
+      msg.textContent = 'Zum Einfügen den Balken (Griff ziehen oder ▶ und ❚❚) zwischen zwei Bilder bringen – nicht direkt auf ein Bild und nicht in eine Pause.';
+      return;
+    }
+    keep();
+    const P = clone(S.play.pose);
+    place(sp.at, sp.t, P);
+    S.play = null;
+    S.fast = false;
+    goFrame(sp.at);
+    msg.textContent = `Bild ${nr(sp.at)} eingefügt – jetzt im Reiter Körper ändern; die Wege davor und danach gehen durch diese Pose.${S.kata ? ' Die Füße bleiben fest.' : ''}`;
+  }
+  function removeHere() {
+    const i = S.k;
+    if (!S.keys[i] || !S.keys[i].neu) return;
+    removeHold(i);
+    if (S.kata) {
+      S.kata.M.frames.splice(i, 1);
+      kataTrack();
+    }
+    S.play = null;
+    S.k = null;
+    goFrame(Math.max(0, i - 1));
+    S.dlg.querySelector('.pe-msg').textContent = 'Eingefügtes Bild entfernt.';
+  }
+  // Knopf in der Zeitleiste: + fügt an der Stelle des Balkens ein, − entfernt das gewählte eingefügte Bild
+  function insBtn() {
+    const b = S.dlg.querySelector('[data-pe="ins"]');
+    const weg = !S.play && !!S.keys[S.k].neu;
+    b.textContent = weg ? '−' : '+';
+    b.disabled = !weg && !insSpot();
+    b.setAttribute('aria-label', weg ? 'Eingefügtes Bild entfernen' : 'Bild hier einfügen');
+    b.title = weg ? 'Dieses eingefügte Bild wieder entfernen' : 'Bild hier einfügen: erst den Balken (Griff ziehen oder ▶ und ❚❚) zwischen zwei Bilder bringen';
   }
   // Halten in Bild i auf secs Sekunden setzen (0 = nicht halten); die Bilder danach rücken mit.
   // quiet: nur die Struktur und Zeiten (für den Import), ohne Anzeige
@@ -866,7 +953,7 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
       // Änderungen darüber – je Bild der Unterschied zur Pose der App, zwischen zwei Bildern weich übergeblendet
       const M = S.kata.M;
       const real = S.kata.real;
-      const D = S.keys.map((_, i) => (S.edits[i] ? delta(S.frames[i], S.edits[i]) : null));
+      const D = S.keys.map((k, i) => (S.edits[i] || k.neu ? delta(k.neu ? M.at(M.frames[i].t) : S.frames[i], S.edits[i] || S.frames[i]) : null));
       const tl = (t) => {
         const P = M.at(M.t0 + t * (M.t1 - M.t0));
         if (!D.some(Boolean)) return P;
@@ -912,6 +999,7 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
     headAt(run.u);
     const lab = S.dlg.querySelector('.pe-dlab');
     if (lab) { lab.hidden = false; lab.classList.add('seek'); lab.textContent = `${(run.u * (run.t1 - run.t0) * S.dur).toFixed(2)} s`; lab.style.left = `${clamp(u, 0, 1) * 100}%`; }
+    insBtn();
     S.fast = true;
     draw();
   }
@@ -1082,6 +1170,11 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
       `Stand: ${M.stand || '–'} → Stand der Figur ${M.standFigur || '?'}`,
       `Bezug: Endstellung mit Blick nach vorn, Nullpunkt zwischen den Knöcheln (Körperrichtung in der Kata ${Math.round(M.byaw)}°); Füße nur im Bild Ende geändert`,
       `Bilder: ${S.kata.names.join(', ')} (Zeit ab Start: ${M.frames.map((f) => zahl(f.t - M.t0)).join(', ')} s)`,
+      ...M.frames.map((f, i) => {
+        if (!f.neu) return null;
+        const at = M.armT ? M.armT(f.t) : null;
+        return `Eingefügt: Bild ${nr(i)} bei ${zahl(f.t - M.t0)} s ab Start, zwischen ${S.kata.names[i - 1]} und ${S.kata.names[i + 1]} – ${at != null && q && q.def ? `im Arm-Ablauf ${q.def} bei t = ${at}` : 'vor dem Arm-Ablauf (Übergang aus der Stellung davor)'}`;
+      }).filter(Boolean),
     ];
   }
   function text() {
@@ -1113,7 +1206,7 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
         const hold = same0 != null;
         const ease = i && !S.kata ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : '';
         const hs = i && holdEnd(i) > i ? `, hält ${holdSec(i).toFixed(2)} s bis t = ${Math.round(S.tm[holdEnd(i)].t * 1000) / 1000}` : '';
-        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}${hs})${S.kata ? ` ${S.kata.names[i]}` : ''} – ${hold ? `gleiche Pose wie Bild ${nr(same0)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
+        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}${hs}${S.keys[i].neu && !S.kata ? ', neu eingefügt' : ''})${S.kata ? ` ${S.kata.names[i]}` : ''} – ${hold ? `gleiche Pose wie Bild ${nr(same0)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
         if (!hold) lines.push(lit(diff(P)));
         return;
       }
@@ -1291,7 +1384,7 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
         let r = null;
         if (m) {
           tot = +m[2];
-          r = { num: +m[1], t: +m[3], e: m[4] ? easeOf(m[4]) : null };
+          r = { num: +m[1], t: +m[3], e: m[4] ? easeOf(m[4]) : null, neu: /neu eingefügt/.test(L[li]) };
           const h = L[li].match(/hält ([\d.]+) s bis t = ([\d.]+)/);
           if (h) r.hold = { sec: +h[1], until: +h[2] };
         } else if (n === 1 && /^Standbild/.test(L[li])) r = { num: 1 };
@@ -1306,6 +1399,25 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
     }
     if (!rows.length) return 'Im Text stehen keine Bilder.';
     keep();
+    // Eingefügte Bilder des Textes, die hier noch fehlen, an ihrer Zeit einfügen (ihre Pose kommt gleich aus dem Text)
+    if (S.kata) {
+      const M = S.kata.M;
+      const bm = (L.find((l) => /^Bilder: /.test(l)) || '').match(/^Bilder: (.*) \(Zeit ab Start: (.*) s\)$/);
+      if (bm) {
+        const ts = bm[2].split(', ').map((x) => +x.replace(',', '.'));
+        bm[1].split(', ').forEach((name, j) => {
+          const t = M.t0 + ts[j];
+          if (name !== 'Eingefügt' || !Number.isFinite(t) || M.frames.some((f) => Math.abs(f.t - t) < 0.005)) return;
+          const at = M.frames.findIndex((f) => f.t > t);
+          if (at > 0) place(at, t, M.at(t));
+        });
+      }
+    } else if (n > 1) {
+      rows.filter((r) => r.neu && !S.tm.some((x) => Math.abs(x.t - r.t) < 5e-4)).forEach((r) => {
+        const at = S.tm.findIndex((x) => x.t > r.t);
+        if (at > 0) place(at, r.t, E.timeline(effKeys(), S.e.d.fix)(r.t));
+      });
+    }
     // Neue Texte zählen ohne gehaltene Bilder (Halten steht beim Bild); ältere zählten jedes Bild außer der Pause am Anfang
     let map;
     if (n === 1 || tot === nTot()) {
@@ -1410,6 +1522,7 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
       draw();
     }
     if (a === 'play') return play();
+    if (a === 'ins') return !S.play && S.keys[S.k].neu ? removeHere() : insertHere();
     if (a === 'gilt-hier' || a === 'gilt-ueberall') {
       S.kata.gilt = a === 'gilt-hier' ? 'hier' : 'ueberall';
       kinfo();
@@ -1752,5 +1865,6 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
 
   // state: offener Editor (für Tests)
   window.addEventListener('beforeunload', (ev) => { if (dirty()) { ev.preventDefault(); ev.returnValue = ''; } });
-  SK.poseEditor = { enabled, setEnabled, open, openKata, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, elbowSpread, setElbowSpread, state: () => S };
+  // (seek, insertHere, removeHere, importText: für tools/test/smoke.js)
+  SK.poseEditor = { enabled, setEnabled, open, openKata, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, elbowSpread, setElbowSpread, state: () => S, seek, insertHere, removeHere, importText };
 })();
