@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /*
- * Werkzeug für die Kata als Figur (js/kata-figur.js): rechnet die Kata im Browser (labor/kata.html, Playwright mit
+ * Werkzeug für die Kata als Figur (js/kata-figur.js): rechnet die Kata im Browser (tools/kata-figur.html, Playwright mit
  * Software-WebGL) und hilft beim Bauen und Prüfen einer neuen Kata.
  *
  *   node tools/kata-figur.js ablauf <id>                  Bewegungen mit Zeit, Dauer, Hüfthöhe, Stand und Technik
@@ -119,7 +119,7 @@ async function open(id) {
   const browser = await chromium.launch({ args: ['--use-angle=swiftshader'] });
   const page = await browser.newPage({ viewport: { width: 400, height: 900 } });
   page.on('pageerror', (e) => { console.error('JavaScript-Fehler auf der Seite: ' + e.message); process.exitCode = 1; });
-  await page.goto(`file://${path.join(root, 'labor', 'kata.html')}?kata=${id || 'heian-shodan'}`);
+  await page.goto(`file://${path.join(root, 'tools', 'kata-figur.html')}?kata=${id || 'heian-shodan'}`);
   await page.waitForFunction(() => window.kataLab && window.SK && SK.kataFigur, null, { timeout: 30000 });
   return { browser, page };
 }

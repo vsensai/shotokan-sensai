@@ -1,4 +1,4 @@
-/* Kata als 3D-Figur: die ganze Kata als durchgehende Bewegung (Ansicht „Figur“ im Kata-Trainer, Versuchsseite labor/kata.html).
+/* Kata als 3D-Figur: die ganze Kata als durchgehende Bewegung (Ansicht „Figur“ im Kata-Trainer; Prüfwerkzeug tools/kata-figur.js).
    Baut aus zwei vorhandenen Quellen einen durchgehenden Ablauf der ganzen Kata:
    – Bodenkarte der Kata-Ansage (SK.ansagePoses): Platz, Richtung und Gewicht beider Füße je Bewegung, Körperrichtung, Drehung
    – Technik-Abläufe des Lexikons (SK.fig3dDefs): Ausholen und Endstellung von Armen, Hüfte und Oberkörper

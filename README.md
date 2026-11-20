@@ -21,8 +21,7 @@ Statische Lern- und Quiz-App (Deutsch) zu Shotokan-Karate nach JKA/DJKB: Etikett
 - `tools/test/smoke.html` – klickt automatisch durch Prüfungsseiten, Lektionen und Quiz; löscht dabei den lokalen Fortschritt und läuft deshalb nur lokal (`file://` oder `localhost`).
 - `tools/test/gfx.html` – Vorschau aller SVG-Grafiken.
 - `tools/test/gfx3d.html` – alle 3D-Figuren als Kernbild auf einen Blick (`?f=tc:` filtert).
-- `labor/figuren.html` – Figuren-Labor zum Ausprobieren von Stilen und Abläufen.
-- `labor/kata.html` – Kata-Labor (nicht in der App verlinkt): die Kata als 3D-Figur mit Zeitlupe und Spulen, zum Prüfen neuer Abläufe aus `js/kata-figur.js`.
+- `tools/kata-figur.js` – Werkzeug für die Kata als Figur (Ablauf, Prüfen in allen Tempi, Vergleich, Kontrollbilder); rechnet über `tools/kata-figur.html`.
 - `tools/version.js` – Versionsnummer setzen (siehe unten).
 - `tools/kata-pdf/` – Python-Skripte, die Text und Fußskizzen aus dem Kata-Buch auswerten (siehe README dort).
 - `tools/register-tabellen.js` – schreibt die Ablauftabellen der Kata aus den App-Daten in `docs/buch-register.md`.
