@@ -1265,14 +1265,18 @@
   const TS_HOCH = TS_R(0.62, TS_SPITZE, [0, 1, 0], TS_RAUS);
   // die rechte Hand steht im Raum still, während die linke an ihr Handgelenk greift (Abstand in Brustkoordinaten wie am Ende)
   const TS_GRIF2 = TS_R(0.72, TS_SPITZE, [0, 1, 0], TS_RAUS);
+  // Nach dem Bewegungs-Editor (Bassai Dai 18): Finger beider Hände gerade in Verlängerung des Unterarms (TS_GERADE); beim
+  // Kreuzen etwas mehr Abstand zwischen den Händen, beim Hochsteigen beide Hände höher (linker Ellbogen vor dem Körper),
+  // beim Greifen und am Ende die Handflächen nach oben
+  const TS_GERADE = { fL: [0, 0, 0], fR: [0, 0, 0], qL: [0, 0, 0], qR: [0, 0, 0] };
   KATA['tsukami-uke-ryosho'] = { keys: [
     { t: 0, p: KK_SHUTO },
-    { t: 0.2, p: M(TSR, TS_LINKS(0.2), TS_R(0.2, V.add(V.add(V.mix(TS_J0.wristR, TS_KREUZ, 0.4), [0, -0.05, 0]), V.mul(V.norm([TS_J0.fc[0], 0, TS_J0.fc[2]]), 0.08)), TS_RAUS, [0, 1, 0])), e: 'fl' },
-    { t: 0.4, p: M(TSR, TS_LINKS(0.4), TS_R(0.4, TS_KREUZ, TS_RAUS, [0, 1, 0])), e: 'fl' },
-    { t: 0.52, p: M(TSR, TS_LINKS(0.52, TS_REIN / 2), TS_R(0.52, V.add(V.mix(TS_KREUZ, TS_SPITZE, 0.5), V.mul(TS_RAUS, 0.04)), [0, 1, 0], TS_RAUS)), e: 'fl' },
-    { t: 0.62, p: M(TSR, TS_LINKS(0.62, TS_REIN), TS_HOCH), e: 'fl' },
-    { t: 0.72, p: M(TSR, TS_GRIF2, TS_GRIFF, { hL: V.add(TS_GRIF2.hR, [0.07, -0.04, -0.06]) }), e: 'fl' },
-    { t: 1, p: M(TSR, TS_GRIFF, { hR: [-0.02, -0.12, 0.42], fR: [0, 1, 0.3], pR: [0, 0, 1], hL: [0.05, -0.16, 0.36] }), e: 'fl' },
+    { t: 0.2, p: M(TSR, TS_LINKS(0.2), TS_R(0.2, V.add(V.add(V.mix(TS_J0.wristR, TS_KREUZ, 0.4), [0, -0.05, 0]), V.mul(V.norm([TS_J0.fc[0], 0, TS_J0.fc[2]]), 0.08)), TS_RAUS, [0, 1, 0]), TS_GERADE), e: 'fl' },
+    { t: 0.4, p: M(TSR, TS_LINKS(0.4), TS_R(0.4, TS_KREUZ, TS_RAUS, [0, 1, 0]), TS_GERADE, { hL: [0.148, -0.09, 0.406], hR: [0.113, -0.24, 0.375] }), e: 'fl' },
+    { t: 0.52, p: M(TSR, TS_LINKS(0.52, TS_REIN / 2), TS_R(0.52, V.add(V.mix(TS_KREUZ, TS_SPITZE, 0.5), V.mul(TS_RAUS, 0.04)), [0, 1, 0], TS_RAUS), TS_GERADE), e: 'fl' },
+    { t: 0.62, p: M(TSR, TS_LINKS(0.62, TS_REIN), TS_HOCH, TS_GERADE, { hL: [0.11, -0.033, 0.211], eL: [-0.006, -0.541, 0.259], hR: [0.108, 0.1, 0.361] }), e: 'fl' },
+    { t: 0.72, p: M(TSR, TS_GRIF2, TS_GRIFF, TS_GERADE, { hL: V.add(TS_GRIF2.hR, [0.07, -0.04, -0.06]), pL: [0, 1, 0] }), e: 'fl' },
+    { t: 1, p: M(TSR, TS_GRIFF, TS_GERADE, { hR: [-0.02, -0.12, 0.42], pR: [0, 1, 0], hL: [0.047, -0.127, 0.334], pL: [0, 1, 0] }), e: 'fl' },
   ] };
   // 19: Sokuto Gedan-kekomi zur rechten Seite – das Knie kommt hoch vor den Körper, dann stößt die Fußkante schräg nach
   // unten (knapp über Kniehöhe); der Oberkörper neigt sich nur wenig (Zeiten wie beim Yoko-geri-kekomi des Lexikons)
