@@ -209,15 +209,17 @@
     if (id[0] === 'h') {
       const h = P['h' + s];
       const open = () => P['o' + s] > 0.5;
-      const dirSel = (label, key) => ({
-        t: 'select', label, opts: DIRS(s),
+      // gerade: ohne Vorgabe zeigen Finger bzw. Faust in Richtung des Unterarms (Verlängerung des Unterarms, figur3d.js) –
+      // dafür muss auch das Abknicken der Faust frei sein, sonst folgen die Finger ihm
+      const dirSel = (label, key, gerade) => ({
+        t: 'select', label, opts: gerade ? [['auto', 'gerade (wie der Unterarm)']].concat(DIRS(s).slice(1)) : DIRS(s),
         get: () => { const v = P[key + s]; const m = DIRS(s).find((d) => same(d[2], v.map((x) => Math.round(x * 1000) / 1000))); return m ? m[0] : 'eigen'; },
-        set: (v) => { const m = DIRS(s).find((d) => d[0] === v); if (m) P[key + s] = m[2].slice(); },
+        set: (v) => { const m = DIRS(s).find((d) => d[0] === v); if (!m) return; P[key + s] = m[2].slice(); if (gerade && v === 'auto') P['q' + s] = [0, 0, 0]; },
       });
       return [
         { t: 'select', label: 'Hand', opts: [['faust', 'Faust'], ['offen', 'offen']], get: () => (open() ? 'offen' : 'faust'), set: (v) => (P['o' + s] = v === 'offen' ? 1 : 0) },
         dirSel('Handfläche zeigt', 'p'),
-        open() ? dirSel('Finger zeigen', 'f') : dirSel('Faust abgeknickt', 'q'),
+        open() ? dirSel('Finger zeigen', 'f', true) : dirSel('Faust abgeknickt', 'q', true),
         R('seitlich (+ links)', -0.75, 0.75, 0.005, () => h[0], (v) => (P['h' + s][0] = v), 'm'),
         R('hoch/runter', -0.85, 0.75, 0.005, () => h[1], (v) => (P['h' + s][1] = v), 'm'),
         R('vor/zurück', -0.5, 0.8, 0.005, () => h[2], (v) => (P['h' + s][2] = v), 'm'),
@@ -450,7 +452,7 @@ ${easeGuide()}
     };
     open(`kb:${M.kata.id}-${M.n}`, `${M.kata.name} ${M.n}`, {
       def,
-      kata: { M, end, names: M.frames.map((f) => f.name), gilt: (was && was.gilt) || 'hier', toTrack: map(real, even), fromTrack: map(even, real) },
+      kata: { M, end, names: M.frames.map((f) => f.name), gilt: (was && was.gilt) || 'hier', real, toTrack: map(real, even), fromTrack: map(even, real) },
     });
     if (was && was.dirty) {
       const r = importText(was.text);
@@ -480,7 +482,7 @@ ${easeGuide()}
 <p class="small"><b>Stand:</b> ${esc(M.stand || '–')} – Stand der Figur <code>${esc(M.standFigur || '?')}</code> auf den Plätzen der Bodenkarte. Die Füße lassen sich nur im Bild „Ende“ verschieben.</p>
 <div class="pe-row"><span>Gilt für</span><div class="pe-gilt" role="group" aria-label="Gilt für"><button type="button" data-pe="gilt-hier" aria-pressed="${g === 'hier'}" title="Nur diese Stelle dieser Kata ändern">nur hier</button><button type="button" data-pe="gilt-ueberall" aria-pressed="${g === 'ueberall'}" title="Den Ablauf bzw. Stand selbst ändern – überall, wo er vorkommt">überall</button></div></div>
 ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm-Ablauf selbst im Editor öffnen (← führt hierher zurück)">Arm-Ablauf öffnen (${esc(q.def)})</button>` : ''}
-<p class="small muted">▶ zeigt die Bewegung, wie sie jetzt in der App läuft – ohne deine Änderungen. Zeiten und Übergänge lassen sich hier nicht ändern.</p>`;
+<p class="small muted">▶ zeigt die Bewegung, wie sie in der App läuft, mit deinen Änderungen: zwischen zwei Bildern gehen sie weich ineinander über. Zeiten und Übergänge lassen sich hier nicht ändern.</p>`;
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
   const holdOf = (i) => { let j = i; while (j > 0 && same(rounded(S.frames[j - 1]), rounded(S.frames[i]))) j--; return j; };
@@ -860,9 +862,21 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
   function newRun() {
     keep();
     if (S.kata) {
-      // Kata: die Bewegung, wie sie in der App läuft (u = Anteil der echten Zeit vom Bild Start bis zum letzten Bild)
+      // Kata: die Bewegung, wie sie in der App läuft (u = Anteil der echten Zeit vom Bild Start bis zum letzten Bild), mit den
+      // Änderungen darüber – je Bild der Unterschied zur Pose der App, zwischen zwei Bildern weich übergeblendet
       const M = S.kata.M;
-      const tl = (t) => M.at(M.t0 + t * (M.t1 - M.t0));
+      const real = S.kata.real;
+      const D = S.keys.map((_, i) => (S.edits[i] ? delta(S.frames[i], S.edits[i]) : null));
+      const tl = (t) => {
+        const P = M.at(M.t0 + t * (M.t1 - M.t0));
+        if (!D.some(Boolean)) return P;
+        let i = 0;
+        while (i < real.length - 2 && t > real[i + 1]) i++;
+        const w = smooth01((t - real[i]) / (real[i + 1] - real[i] || 1));
+        if (D[i]) addDelta(P, D[i], 1 - w);
+        if (D[i + 1]) addDelta(P, D[i + 1], w);
+        return P;
+      };
       return (S.play = { tl, t0: 0, t1: 1, u: 0, pose: tl(0) });
     }
     const K = effKeys();
@@ -870,6 +884,24 @@ ${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm
     const t0 = K[0].t;
     const t1 = K[K.length - 1].t;
     return (S.play = { tl, t0, t1, u: 0, pose: tl(t0) });
+  }
+  // Unterschied zweier Posen (nur Zahlen; Winkel über den kürzeren Weg) und anteilig wieder aufaddieren
+  const smooth01 = (u) => { u = clamp(u, 0, 1); return u * u * (3 - 2 * u); };
+  const wrapDeg = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
+  function delta(a, b, k) {
+    if (typeof a === 'number' && typeof b === 'number') { const d = ANG[k] ? wrapDeg(b - a) : b - a; return Math.abs(d) > 1e-9 ? d : null; }
+    if (Array.isArray(a) && Array.isArray(b)) { if (a.length !== b.length) return null; const r = a.map((x, i) => b[i] - x); return r.some((x) => Math.abs(x) > 1e-9) ? r : null; }
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object') return null;
+    const r = {};
+    Object.keys(b).forEach((q) => { const d = delta(a[q], b[q], q); if (d != null) r[q] = d; });
+    return Object.keys(r).length ? r : null;
+  }
+  function addDelta(P, d, w) {
+    Object.keys(d).forEach((q) => {
+      if (typeof d[q] === 'number') P[q] += d[q] * w;
+      else if (Array.isArray(d[q])) P[q] = P[q].map((x, i) => x + d[q][i] * w);
+      else if (P[q]) addDelta(P[q], d[q], w);
+    });
   }
   // Spulen: Balken an die Stelle u (0 = erstes, 1 = letztes Bild), dort angehalten
   function seek(u) {
