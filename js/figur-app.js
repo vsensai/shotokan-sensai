@@ -68,10 +68,12 @@
     });
     cam.dist = Math.max(cam.dist, need);
   }
-  function entry(key) {
-    if (entries.has(key)) return entries.get(key);
+  // def: eigener Ablauf statt des Eintrags in SK.fig3dDefs (Bewegungs-Editor: Bewegung einer Kata, Ablauf nur für Kata) –
+  // wird nicht gemerkt
+  function entry(key, def) {
+    if (!def && entries.has(key)) return entries.get(key);
     const { id, mirrored } = split(key);
-    const d = D[id];
+    const d = def || D[id];
     const pose = E.timeline(d.keys, d.fix);
     const partner = d.partner ? E.timeline(d.partner) : null;
     const poses = d.keys.map((k) => E.full(k.p)).concat(d.partner ? d.partner.map((k) => E.full(k.p)) : []);
@@ -93,7 +95,7 @@
     const t1 = d.keys[d.keys.length - 1].t;
     fitCam(cam, pose, partner, t0, t1);
     const e = { key, d, pose, partner, cam, mirrored, t0, t1 };
-    entries.set(key, e);
+    if (!def) entries.set(key, e);
     return e;
   }
 

@@ -1,7 +1,8 @@
 /* Bewegungs-Editor (früher Pose-Editor): jedes Bild einer 3D-Figur von Hand einstellen (fürs Handy gebaut), dazu
    Zeitpunkte, Übergänge, Dauer, Kernbild und Kamera; die Werte als Text kopieren – zum Übernehmen in js/figur-posen.js
    oder zum Sichern (Import holt sie zurück). Der Editor merkt sich nichts: beim Schließen ist alles Ungesicherte weg.
-   Einschalten unter Fortschritt → Einstellungen; dann steht in der Großansicht jeder Figur der Knopf „✎ Bearbeiten“.
+   Einschalten im Profil (Karte „Bearbeiten-Modus“); dann steht in der Großansicht jeder Figur der Knopf „✎ Bearbeiten“, und im
+   Kata-Trainer öffnet „✎ <Nummer>“ die angehaltene Bewegung einer Kata (openKata, Momentaufnahme aus SK.kataFigur.moment).
    Bedienung: Punkt antippen und ziehen (bewegt ihn in der Bildebene), daneben ziehen dreht die Ansicht,
    zwei Finger zoomen. Feinarbeit mit den Reglern des gewählten Körperteils. */
 (function () {
@@ -260,7 +261,7 @@
     const touch = matchMedia('(pointer: coarse)').matches;
     const HELP = touch ? '1 Finger auf einem Punkt: ziehen · 1 Finger daneben: Ansicht drehen · 2 Finger: zoomen und verschieben' : 'Punkt ziehen: bewegen · daneben ziehen: Ansicht drehen · rechte Maustaste oder Umschalt: verschieben · Mausrad: zoomen';
     const pm = (cls, label, st) => `<div class="pe-ctl"><button type="button" class="pe-pm" data-pm="${cls}"${st ? ` data-st="${st}"` : ''} data-d="-1" aria-label="${label} weniger" title="${label}: einen Schritt weniger">−</button><input type="range" class="${cls}" aria-label="${label}"><button type="button" class="pe-pm" data-pm="${cls}"${st ? ` data-st="${st}"` : ''} data-d="1" aria-label="${label} mehr" title="${label}: einen Schritt mehr">+</button></div>`;
-    d.innerHTML = `<div class="f3d-dlg-head"><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x pe-fullbtn" data-pe="full" aria-pressed="false" aria-label="Vollbild" title="Editor über das ganze Fenster">⛶</button><button type="button" class="f3d-dlg-x pe-close" aria-label="Schließen" title="Editor schließen – alles nicht Kopierte geht verloren">✕</button></div>
+    d.innerHTML = `<div class="f3d-dlg-head"><button type="button" class="pe-sm pe-back" data-pe="back" hidden></button><b class="f3d-dlg-title"></b><button type="button" class="f3d-dlg-x pe-fullbtn" data-pe="full" aria-pressed="false" aria-label="Vollbild" title="Editor über das ganze Fenster">⛶</button><button type="button" class="f3d-dlg-x pe-close" aria-label="Schließen" title="Editor schließen – alles nicht Kopierte geht verloren">✕</button></div>
 <div class="pe-main"><div class="pe-left">
 <div class="pe-stage"><canvas class="pe-cv"></canvas>
 <div class="pe-tools"><button type="button" class="pe-tb" data-pe="v-front" title="Figur von vorn ansehen (eingepasst)">Vorne</button><button type="button" class="pe-tb" data-pe="v-side" title="Figur von der Seite ansehen (eingepasst)">Seite</button><button type="button" class="pe-tb" data-pe="v-top" title="Figur von oben ansehen (eingepasst)">Oben</button><button type="button" class="pe-tb" data-pe="hide" aria-pressed="false" title="Anfasspunkte und Linien aus- bzw. einblenden">Punkte aus</button></div>
@@ -275,6 +276,7 @@
 <div class="pe-pane" data-pane="bild">
 <div class="pe-ph"><h3 class="pe-bh"></h3><button type="button" class="pe-sm" data-pe="undo" aria-label="Rückgängig" title="Letzte Änderung an diesem Bild rückgängig">↶</button><button type="button" class="pe-sm" data-pe="orig" title="Dieses Bild zurück auf den Stand der App (Pose, Zeitpunkt und Übergang)">Original</button></div>
 <p class="pe-finfo small"></p>
+<div class="pe-kinfo" hidden></div>
 <div class="pe-movonly">
 <label class="pe-row"><span>Übergang zu diesem Bild</span><select class="pe-te" title="Wie die Figur zu diesem Bild kommt">${Object.entries(EASE_UI).map(([v, l]) => `<option value="${v}" title="${esc(EASE_HELP[v])}">${esc(l)}</option>`).join('')}</select></label>
 ${easeGuide()}
@@ -342,7 +344,7 @@ ${easeGuide()}
       } else msg.textContent = 'Noch keine Pose kopiert (Strg+C im Bild, das du kopieren willst).';
     });
     d.addEventListener('keydown', (ev) => {
-      if (!S || S.k === 0 || S.keys.length < 2 || !/^Arrow(Left|Right)$/.test(ev.key)) return;
+      if (!S || S.kata || S.k === 0 || S.keys.length < 2 || !/^Arrow(Left|Right)$/.test(ev.key)) return;
       if (ev.target.closest('input, textarea, select')) return;
       ev.preventDefault();
       const seg = (S.tm[S.k].t - S.tm[S.k - 1].t) * S.dur;
@@ -370,9 +372,12 @@ ${easeGuide()}
 
   // Bewegungen: jedes Schlüsselbild (keys in js/figur-posen.js) lässt sich bearbeiten, Start ist das Kernbild.
   // Geänderte Bilder bleiben beim Wechseln erhalten und landen alle zusammen in der Ausgabe.
-  function open(key, title) {
+  // opt.def: eigener Ablauf (Bewegung einer Kata, Ablauf nur für Kata); opt.kata: Bewegung einer Kata (openKata);
+  // opt.back: von dort aus geöffnet – „←“ führt zurück
+  function open(key, title, opt) {
+    opt = opt || {};
     const id = String(key).split(':').slice(0, 2).join(':');
-    const e = SK.fig3d.entry(id);
+    const e = SK.fig3d.entry(id, opt.def);
     const best = e.d.best == null ? 1 : e.d.best;
     // Eigene Liste: Halten fügt Bilder ein oder entfernt sie – die Bewegung der App bleibt unberührt
     const keys = e.d.keys.slice();
@@ -389,7 +394,14 @@ ${easeGuide()}
     const tm = tk.map((x) => Object.assign({}, x));
     const dur0 = e.d.dur || 1.6;
     const d = dialog();
-    S = { id, title: title || id, e, keys, frames, k0, k0app, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true };
+    S = { id, title: title || id, e, keys, frames, k0, k0app, kcam: null, tk, tm, dur0, dur: dur0, speed: 1, best, edits, undos: {}, sel: 'body', cam: Object.assign({}, e.cam, { target: e.cam.target.slice() }), dlg: d, mirrored: String(key).endsWith(':m'), fit: true, kata: opt.kata || null, back: opt.back || null };
+    d.classList.toggle('pe-kata', !!S.kata);
+    const bb = d.querySelector('.pe-back');
+    bb.hidden = !S.back;
+    if (S.back) {
+      bb.textContent = `← ${S.back.M.kata.name} ${S.back.M.n}`;
+      bb.title = `Zurück zur Bewegung ${S.back.M.n} der ${S.back.M.kata.name}`;
+    }
     // Gehaltene Bilder: gleiche Pose wie das Bild davor – im Editor kein eigenes Bild, sondern „Halten“ beim Bild davor
     // (beim ersten Bild: „Pause am Anfang“). Bleiben mindestens zwei Bilder übrig.
     S.hid = new Set();
@@ -407,13 +419,68 @@ ${easeGuide()}
     // Standbild: keine Zeitleiste, kein Timing
     d.querySelector('.pe-tl').hidden = keys.length < 2;
     d.querySelector('.pe-movonly').hidden = keys.length < 2;
-    tab(TAB);
+    tab(S.kata && TAB === 'treffer' ? 'koerper' : TAB);
+    kinfo();
     d.querySelector('.pe-msg').textContent = '';
     if (!d.open) d.showModal();
     goFrame(k0);
     S.clean = S.text;
     if (LAST && LAST.id === id && LAST.text !== S.text) d.querySelector('.pe-msg').innerHTML = 'Nicht kopierte Änderungen vom letzten Mal: <button type="button" class="pe-sm" data-pe="restore">Wiederherstellen</button>';
     requestAnimationFrame(() => draw());
+  }
+  // Bewegung einer Kata (Momentaufnahme aus SK.kataFigur.moment): die Bilder Start, Ausholen …, Ende (★), Zurück im
+  // Körperrahmen der Endstellung. Die Zeitleiste zeigt die Bilder gleichmäßig verteilt; Zeiten und Übergänge sind fest,
+  // ▶ spielt die Bewegung, wie sie in der App läuft. Die Füße lassen sich nur im Bild „Ende“ verschieben (davor gehören sie
+  // zur Bewegung davor bzw. zum gerechneten Schritt). Die Ausgabe nennt Kata, Bewegung, Herkunft und „Gilt für“.
+  function openKata(M, was) {
+    const n = M.frames.length;
+    const span = M.t1 - M.t0 || 1;
+    const keys = M.frames.map((f, i) => ({ t: n > 1 ? Math.round((i / (n - 1)) * 1e4) / 1e4 : 0, p: M.at(f.t), e: i ? 'io' : undefined }));
+    const end = M.frames.findIndex((f) => f.ende);
+    const def = { keys, best: keys[end].t, dur: span, view: 'front3' };
+    // Spur der Zeitleiste (gleichmäßig) ↔ Anteil der echten Bewegung (Abspielen, Spulen)
+    const real = M.frames.map((f) => (f.t - M.t0) / span);
+    const even = keys.map((k) => k.t);
+    const map = (xs, ys) => (u) => {
+      if (n < 2) return u;
+      let i = 0;
+      while (i < n - 2 && u > xs[i + 1]) i++;
+      const w = xs[i + 1] - xs[i] || 1;
+      return clamp(ys[i] + ((u - xs[i]) / w) * (ys[i + 1] - ys[i]), 0, 1);
+    };
+    open(`kb:${M.kata.id}-${M.n}`, `${M.kata.name} ${M.n}`, {
+      def,
+      kata: { M, end, names: M.frames.map((f) => f.name), gilt: (was && was.gilt) || 'hier', toTrack: map(real, even), fromTrack: map(even, real) },
+    });
+    if (was && was.dirty) {
+      const r = importText(was.text);
+      S.dlg.querySelector('.pe-msg').textContent = /^Importiert/.test(r) ? 'Deine Änderungen an dieser Bewegung sind wieder da.' : r;
+    }
+  }
+  // Füße nur im Bild „Ende“ beweglich
+  const footLocked = (id) => !!(S && S.kata && S.k !== S.kata.end && (id === 'fL' || id === 'fR'));
+  // Reiter Bild bei einer Kata: woher die Bewegung kommt, „Gilt für“, Arm-Ablauf öffnen
+  function kinfo() {
+    const box = S.dlg.querySelector('.pe-kinfo');
+    box.hidden = !S.kata;
+    if (!S.kata) { box.innerHTML = ''; return; }
+    const M = S.kata.M;
+    const q = M.quelle;
+    const self = `${M.kata.name} ${M.n}`;
+    const use = q && q.def ? SK.kataFigur.nutzung(q.def).filter((x) => x !== self) : [];
+    const auch = [use.length ? `auch in ${use.join(', ')}` : '', q && q.lexikon ? 'im Lexikon' : ''].filter(Boolean).join(' und ');
+    const arme = q && q.def
+      ? `Ablauf <code>${esc(q.def)}</code> (${q.lexikon ? 'Lexikon' : 'nur für Kata'})${q.gespiegelt ? ', hier gespiegelt' : ''}${q.tritt ? `, Tritt <code>${esc(q.tritt)}</code>` : ''}${auch ? `<br><span class="muted">${esc(auch)}</span>` : '<br><span class="muted">kommt nur hier vor</span>'}`
+      : 'keine eigene Technik der Figur';
+    const g = S.kata.gilt;
+    const canOpen = q && q.def && SK.kataFigur.defOf(q.def);
+    box.innerHTML = `<h4>Woher kommt das?</h4>
+<p class="small"><b>Bewegung ${M.n}:</b> ${esc(M.stand || '')} · ${esc(M.tech || '')}</p>
+<p class="small"><b>Arme:</b> ${arme}</p>
+<p class="small"><b>Stand:</b> ${esc(M.stand || '–')} – Stand der Figur <code>${esc(M.standFigur || '?')}</code> auf den Plätzen der Bodenkarte. Die Füße lassen sich nur im Bild „Ende“ verschieben.</p>
+<div class="pe-row"><span>Gilt für</span><div class="pe-gilt" role="group" aria-label="Gilt für"><button type="button" data-pe="gilt-hier" aria-pressed="${g === 'hier'}" title="Nur diese Stelle dieser Kata ändern">nur hier</button><button type="button" data-pe="gilt-ueberall" aria-pressed="${g === 'ueberall'}" title="Den Ablauf bzw. Stand selbst ändern – überall, wo er vorkommt">überall</button></div></div>
+${canOpen ? `<button type="button" class="pe-wide" data-pe="kdef" title="Den Arm-Ablauf selbst im Editor öffnen (← führt hierher zurück)">Arm-Ablauf öffnen (${esc(q.def)})</button>` : ''}
+<p class="small muted">▶ zeigt die Bewegung, wie sie jetzt in der App läuft – ohne deine Änderungen. Zeiten und Übergänge lassen sich hier nicht ändern.</p>`;
   }
   // Gleiche Pose wie das Bild davor (Halten): beim Bearbeiten beide meinen
   const holdOf = (i) => { let j = i; while (j > 0 && same(rounded(S.frames[j - 1]), rounded(S.frames[i]))) j--; return j; };
@@ -442,9 +509,9 @@ ${easeGuide()}
     const h = holdOf(S.k);
     const isK = S.k === S.k0;
     const edS = ed.filter(shown);
-    const head = n > 1 ? `Bild ${nr(S.k)} von ${nTot()}${isK ? ' · Kernbild ★' : ''}` : 'Standbild';
+    const head = S.kata ? `${S.kata.names[S.k]} · Bild ${nr(S.k)} von ${nTot()}${isK ? ' ★' : ''}` : n > 1 ? `Bild ${nr(S.k)} von ${nTot()}${isK ? ' · Kernbild ★' : ''}` : 'Standbild';
     d.querySelector('.pe-bh').textContent = head;
-    d.querySelector('.pe-kh').textContent = `${partOf(S.sel).label}${n > 1 ? ` · Bild ${nr(S.k)}${isK ? ' ★' : ''}` : ''}`;
+    d.querySelector('.pe-kh').textContent = `${partOf(S.sel).label}${S.kata ? ` · ${S.kata.names[S.k]}` : n > 1 ? ` · Bild ${nr(S.k)}${isK ? ' ★' : ''}` : ''}`;
     d.querySelector('.pe-finfo').innerHTML = [isK && S.k0 !== S.k0app ? 'Kernbild neu gewählt' : '', h !== S.k ? `gleiche Pose wie Bild ${nr(h)}` : '', edS.length ? `<span class="pe-ed">geändert: Bild ${edS.map(nr).join(', ')}</span>` : ''].filter(Boolean).join(' · ');
     // Kamera fürs Kernbild: nur über den Knopf übernommen, Drehen zum Anschauen ändert nichts
     const kc = S.kcam || camInfo0();
@@ -477,11 +544,12 @@ ${easeGuide()}
     // Beim Ziehen bleibt der Maßstab vom Beginn des Ziehens, damit die Punkte nicht unter dem Finger wegspringen
     const scS = S.drag ? S.drag.scS : total || 1;
     const pos = (t) => `${clamp(sec(t) / scS, 0, 1) * 100}%`;
+    const tipOf = (i, x, hold) => `Bild ${nr(i)} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${nr(holdOf(i))}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}`;
     tr.innerHTML = S.tm.map((x, i) => {
       if (!shown(i)) return `<span class="pe-pause" data-a="${S.tm[i - 1].t}" data-b="${x.t}" title="${ownerOf(i) === 0 ? 'Pause am Anfang' : `Bild ${nr(i)} hält`}: ${((x.t - S.tm[ownerOf(i)].t) * S.dur).toFixed(2)} s"></span>`;
       const seg = i && x.e === 'kime' ? `<span class="pe-seg" data-a="${S.tm[i - 1].t}" data-b="${x.t}"></span>` : '';
       const hold = i && holdOf(i) !== i;
-      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}" title="Bild ${nr(i)} · nach ${sec(x.t).toFixed(2)} s${i ? ` · ${((x.t - S.tm[i - 1].t) * S.dur).toFixed(2)} s vom Bild davor · ${EASE_UI[x.e] || x.e}` : ''}${i === S.k0 ? ' · Kernbild' : ''}${hold ? ` · hält Bild ${nr(holdOf(i))}` : ''}${i ? ' – ziehen ändert die Zeit vom Bild davor, die Bilder danach rücken mit' : ''}"><span>${nr(i)}</span></button>`;
+      return `${seg}<button type="button" class="pe-mk${i === S.k ? ' sel' : ''}${i === S.k0 ? ' kern' : ''}${hold ? ' hold' : ''}${ed.includes(i) ? ' ed' : ''}" role="radio" aria-checked="${i === S.k}" data-mk="${i}"${S.kata && !/^Zwischenbild/.test(S.kata.names[i]) ? ` data-l="${esc(S.kata.names[i])}"` : ''} title="${S.kata ? esc(S.kata.names[i]) : tipOf(i, x, hold)}"><span>${nr(i)}</span></button>`;
     }).join('') + `<span class="pe-tick">0 s</span><button type="button" class="pe-endh" data-endh="1" title="Ziehen: ganze Bewegung gleichmäßig schneller (nach links) oder langsamer (nach rechts)"><b aria-hidden="true">⟷</b> ${total.toFixed(2)} s</button><span class="pe-head" hidden><span class="pe-hk" data-hk="1" title="Ziehen: die Bewegung vor- und zurückspulen"></span></span><span class="pe-dlab" hidden></span>`;
     // Balken: beim Abspielen (auch angehalten) an seiner Stelle, sonst beim gewählten Bild
     headAt(S.play ? S.play.u || 0 : (S.tm[S.k].t - S.tm[0].t) / (S.tm[n - 1].t - S.tm[0].t || 1));
@@ -546,7 +614,7 @@ ${easeGuide()}
         tr.setPointerCapture(ev.pointerId);
         if (S.play && !S.play.paused) S.play.paused = true;
         const b = tr.getBoundingClientRect();
-        const u = S.play ? S.play.u : (ev.clientX - b.left) / b.width;
+        const u = S.play ? (S.kata ? S.kata.toTrack(S.play.u) : S.play.u) : (ev.clientX - b.left) / b.width;
         if (!S.play) newRun().paused = true;
         frames();
         seek(u);
@@ -576,7 +644,7 @@ ${easeGuide()}
         // Maus: sofort wählen und ziehen
         ev.preventDefault();
         if (i !== S.k) goFrame(i);
-        g = { i, armed: true, x0: ev.clientX, id: ev.pointerId, moved: false };
+        g = { i, armed: !S.kata, x0: ev.clientX, y0: ev.clientY, id: ev.pointerId, moved: false };
         tr.setPointerCapture(ev.pointerId);
         return;
       }
@@ -591,6 +659,7 @@ ${easeGuide()}
         seek((ev.clientX - b.left) / b.width);
         return;
       }
+      if (S.kata && !g.touch) return;
       if (!g.armed) {
         // Touch vor dem Halten bewegt: das ist Wischen (Scrollen), kein Ziehen
         if (Math.abs(ev.clientX - g.x0) > 8 || Math.abs(ev.clientY - g.y0) > 8) { clearTimeout(g.timer); g = null; }
@@ -659,6 +728,7 @@ ${easeGuide()}
   function goFrame(i) {
     if (S.k != null) keep();
     S.k = i;
+    if (footLocked(S.sel)) S.sel = 'body';
     S.orig = clone(S.frames[i]);
     S.P = clone(S.edits[i] || S.frames[i]);
     S.undo = S.undos[i] || (S.undos[i] = []);
@@ -784,11 +854,17 @@ ${easeGuide()}
   function headAt(u) {
     const ph = S.dlg.querySelector('.pe-head');
     // Zeitleiste reicht vom ersten bis zum letzten Bild: der Balken steht beim Anteil der abgelaufenen Bewegung
-    if (ph) { ph.hidden = false; ph.style.left = `${clamp(u, 0, 1) * 100}%`; ph.classList.toggle('idle', !S.play); }
+    if (ph) { ph.hidden = false; ph.style.left = `${clamp(S.kata ? S.kata.toTrack(u) : u, 0, 1) * 100}%`; ph.classList.toggle('idle', !S.play); }
   }
   // Abspielen vorbereiten: die Bewegung mit allen Änderungen, am Anfang
   function newRun() {
     keep();
+    if (S.kata) {
+      // Kata: die Bewegung, wie sie in der App läuft (u = Anteil der echten Zeit vom Bild Start bis zum letzten Bild)
+      const M = S.kata.M;
+      const tl = (t) => M.at(M.t0 + t * (M.t1 - M.t0));
+      return (S.play = { tl, t0: 0, t1: 1, u: 0, pose: tl(0) });
+    }
     const K = effKeys();
     const tl = E.timeline(K, S.e.d.fix);
     const t0 = K[0].t;
@@ -799,11 +875,11 @@ ${easeGuide()}
   function seek(u) {
     const run = S.play || newRun();
     run.paused = true;
-    run.u = clamp(u, 0, 1);
+    run.u = clamp(S.kata ? S.kata.fromTrack(u) : u, 0, 1);
     run.pose = run.tl(run.t0 + (run.t1 - run.t0) * run.u);
     headAt(run.u);
     const lab = S.dlg.querySelector('.pe-dlab');
-    if (lab) { lab.hidden = false; lab.classList.add('seek'); lab.textContent = `${(run.u * (run.t1 - run.t0) * S.dur).toFixed(2)} s`; lab.style.left = `${run.u * 100}%`; }
+    if (lab) { lab.hidden = false; lab.classList.add('seek'); lab.textContent = `${(run.u * (run.t1 - run.t0) * S.dur).toFixed(2)} s`; lab.style.left = `${clamp(u, 0, 1) * 100}%`; }
     S.fast = true;
     draw();
   }
@@ -962,6 +1038,20 @@ ${easeGuide()}
   // „Ganze Bewegung“: jedes Bild vollständig, zum Übernehmen der kompletten Bewegung.
   // Die Kamera gilt fürs Kernbild: nur was mit „Ansicht als Kamera fürs Kernbild“ übernommen wurde (sonst die Kamera der App).
   const EASE = { fl: 'fließend', io: 'weich', in: 'anlaufen', out: 'auslaufen', kime: 'Kime', lin: 'gleichmäßig' };
+  // Kopf der Ausgabe bei einer Kata: was es ist, woher es kommt, wofür die Änderung gelten soll, worauf sich die Werte beziehen
+  function kataLines() {
+    const M = S.kata.M;
+    const q = M.quelle;
+    const zahl = (v) => String(Math.round(v * 100) / 100).replace('.', ',');
+    return [
+      `Kata: ${M.kata.name} (${M.kata.id}), Bewegung ${M.n}: ${M.stand} · ${M.tech} – Takt ${zahl(M.beat)} s`,
+      `Gilt für: ${S.kata.gilt === 'ueberall' ? 'überall (den Ablauf bzw. Stand selbst ändern)' : 'nur diese Stelle'}`,
+      `Arme: ${q && q.def ? `${q.def} (${q.lexikon ? 'Lexikon' : 'nur Kata'}), Seite ${q.seite}${q.gespiegelt ? ', gespiegelt' : ''}, ab ${q.from}${q.tritt ? `, Tritt ${q.tritt}` : ''}${q.opt.length ? `, Optionen ${q.opt.join(' ')}` : ''}` : 'keine Technik der Figur'}`,
+      `Stand: ${M.stand || '–'} → Stand der Figur ${M.standFigur || '?'}`,
+      `Bezug: Endstellung mit Blick nach vorn, Nullpunkt zwischen den Knöcheln (Körperrichtung in der Kata ${Math.round(M.byaw)}°); Füße nur im Bild Ende geändert`,
+      `Bilder: ${S.kata.names.join(', ')} (Zeit ab Start: ${M.frames.map((f) => zahl(f.t - M.t0)).join(', ')} s)`,
+    ];
+  }
   function text() {
     keep();
     const changedParts = (P, O) => PARTS.filter((p) => FIELDS[p.id].some((f) => !same(rounded(get(P, f), f.split('.').pop()), rounded(get(O, f), f.split('.').pop())))).map((p) => p.label);
@@ -971,7 +1061,8 @@ ${easeGuide()}
     const k0t = Math.round(S.tm[S.k0].t * 1000) / 1000;
     const lines = [`Bewegungs-Editor · ${S.id} · ${S.title}${S.mirrored ? ' (Figur ungespiegelt)' : ''}${n > 1 ? ` · ${all ? `ganze Bewegung, alle ${nTot()} Bilder` : `Bewegung mit ${nTot()} Bildern`}, Kernbild = Bild ${nr(S.k0)} (t = ${k0t})${S.k0 !== S.k0app ? `, neu gewählt (bisher Bild ${nr(S.k0app)})` : ''}${n > 1 ? ` · Dauer ${(S.dur * (S.tm[n - 1].t - S.tm[0].t)).toFixed(2)} s (dur ${Math.round(S.dur * 10000) / 10000}${Math.abs(S.dur - S.dur0) > 1e-6 ? `, bisher ${S.dur0}` : ''})` : ''}` : ''}`];
     const kc = S.kcam || camInfo0();
-    lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
+    if (S.kata) lines.push(...kataLines());
+    else lines.push(`Kamera${n > 1 ? ' fürs Kernbild' : ''}: Drehung ${kc.y}°, Neigung ${kc.p}°${S.kcam ? '' : ' (wie in der App)'}`);
     // Pause am Anfang statt eines eigenen Bildes (im Code: Bild 1 noch einmal zum Zeitpunkt t der Pause)
     if (S.hit || S.hit0) lines.push(...hitLines());
     if (PZ()) lines.push(`Pause am Anfang: ${holdSec(0).toFixed(2)} s (t = ${Math.round(S.tm[holdEnd(0)].t * 1000) / 1000})${secChanged(holdEnd(0)) ? ', geändert' : ''}`);
@@ -988,9 +1079,9 @@ ${easeGuide()}
         // Gleiche Pose wie ein früheres Bild (gehalten oder übernommen): nur als Verweis, der Import liest ihn
         const same0 = S.keys.map((_, j) => j).find((j) => j < i && shown(j) && same(rounded(P), rounded(S.edits[j] || S.frames[j])));
         const hold = same0 != null;
-        const ease = i ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : '';
+        const ease = i && !S.kata ? `, Übergang ${EASE[S.tm[i].e] || S.tm[i].e}` : '';
         const hs = i && holdEnd(i) > i ? `, hält ${holdSec(i).toFixed(2)} s bis t = ${Math.round(S.tm[holdEnd(i)].t * 1000) / 1000}` : '';
-        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}${hs}) – ${hold ? `gleiche Pose wie Bild ${nr(same0)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
+        lines.push('', `Bild ${nr(i)} von ${nTot()} (t = ${tt}${ease}${i === S.k0 ? ', Kernbild' : ''}${hs})${S.kata ? ` ${S.kata.names[i]}` : ''} – ${hold ? `gleiche Pose wie Bild ${nr(same0)}` : `geändert: ${ch.length ? ch.join(', ') : 'nichts'}`}`);
         if (!hold) lines.push(lit(diff(P)));
         return;
       }
@@ -1237,6 +1328,11 @@ ${easeGuide()}
       S.hitAll = /alle Techniken/.test(L[hl]);
       hpanel();
     }
+    if (S.kata) {
+      const gl = L.find((l) => /^Gilt für: /.test(l));
+      if (gl) S.kata.gilt = /überall/.test(gl) ? 'ueberall' : 'hier';
+      kinfo();
+    }
     const at = S.k;
     S.k = null;
     goFrame(at);
@@ -1282,6 +1378,28 @@ ${easeGuide()}
       draw();
     }
     if (a === 'play') return play();
+    if (a === 'gilt-hier' || a === 'gilt-ueberall') {
+      S.kata.gilt = a === 'gilt-hier' ? 'hier' : 'ueberall';
+      kinfo();
+      text();
+      return;
+    }
+    // Arm-Ablauf der Kata-Bewegung öffnen; die Bewegung samt Änderungen bleibt für „←“ gemerkt
+    if (a === 'kdef') {
+      const M = S.kata.M;
+      const q = M.quelle;
+      const back = { M, text: S.text, dirty: dirty(), gilt: S.kata.gilt };
+      if (q.lexikon) open(q.def, q.def, { back });
+      else open(`kd:${q.def}`, `${q.def} (Ablauf nur für Kata)`, { def: SK.kataFigur.defOf(q.def), back });
+      S.dlg.querySelector('.pe-msg').textContent = `Arm-Ablauf ${q.def}${q.gespiegelt ? ' – in der Kata gespiegelt' : ''}. ← führt zurück zu ${M.kata.name} ${M.n}.`;
+      return;
+    }
+    if (a === 'back') {
+      if (!S.back) return;
+      if (dirty() && !window.confirm('Zurück zur Kata? Deine Änderungen an diesem Ablauf sind noch nicht kopiert.')) return;
+      openKata(S.back.M, S.back);
+      return;
+    }
     if (a === 'stop') return stop();
     if (a === 'slow') {
       S.speed = S.speed < 1 ? 1 : 0.25;
@@ -1471,7 +1589,7 @@ ${easeGuide()}
   const COL = { L: '#1565c0', R: '#c62828', C: '#2e7d32' };
   function spots() {
     const J = E.solve(S.P);
-    return PARTS.map((p) => ({ p, w: p.pt(J), q: S.C.project(p.pt(J)) }));
+    return PARTS.filter((p) => !footLocked(p.id)).map((p) => ({ p, w: p.pt(J), q: S.C.project(p.pt(J)) }));
   }
   function handles(ctx, C, r) {
     const J = E.solve(S.P);
@@ -1602,5 +1720,5 @@ ${easeGuide()}
 
   // state: offener Editor (für Tests)
   window.addEventListener('beforeunload', (ev) => { if (dirty()) { ev.preventDefault(); ev.returnValue = ''; } });
-  SK.poseEditor = { enabled, setEnabled, open, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, elbowSpread, setElbowSpread, state: () => S };
+  SK.poseEditor = { enabled, setEnabled, open, openKata, diff, setPoint, loc, footRoll, setFootRoll, legTwist, setLegTwist, elbowSpread, setElbowSpread, state: () => S };
 })();

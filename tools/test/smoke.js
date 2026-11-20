@@ -126,6 +126,28 @@
           if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist weit weg leer');
           sw.querySelector('[data-view=karte]').click();
           log.push(`Kata-Figur: ${app.querySelector('.ans-fig-cam').textContent}, ${cv.width}×${cv.height}`);
+          // Bearbeiten-Modus: ✎ nur mit eingeschaltetem Modus (Einstellungen) – öffnet die gezeigte Bewegung im Editor
+          sw.querySelector('[data-view=figur]').click();
+          if (app.querySelector('.ans-edit') && !app.querySelector('.ans-edit').hidden) throw new Error('Kata-Trainer: ✎ ohne Bearbeiten-Modus');
+          SK.poseEditor.setEnabled(true);
+          try {
+            location.hash = '#/ansage/heian-shodan/9';
+            await wait();
+            app.querySelector('.ans-view [data-view=figur]').click();
+            await frame();
+            const eb = app.querySelector('.ans-edit');
+            if (!eb || eb.hidden || eb.textContent !== '✎ 9') throw new Error('Kata-Trainer: ✎ 9 fehlt im Bearbeiten-Modus');
+            // (ohne auf das Zeichnen zu warten: ein Bild des Editors kostet mit Software-WebGL sechs Sekunden)
+            eb.click();
+            const S = SK.poseEditor.state();
+            if (!S || !S.kata || S.kata.M.n !== 9 || S.keys.length < 3 || S.kata.names[S.k] !== 'Ende' || !/\nGilt für: nur diese Stelle\n/.test(S.text)) throw new Error('Kata-Trainer: ✎ öffnet die Bewegung nicht im Editor');
+            if (!S.dlg.classList.contains('pe-kata') || S.dlg.querySelector('[data-tab=treffer]').offsetParent) throw new Error('Kata-Editor: Reiter Treffer bei einer Kata sichtbar');
+            log.push(`Kata-Editor: ${S.kata.names.join(', ')}`);
+            S.dlg.close();
+            app.querySelector('.ans-view [data-view=karte]').click();
+          } finally {
+            SK.poseEditor.setEnabled(false);
+          }
         }
       }
       // Lexikon-Karte: Aussprache-Knopf und „Kommt vor in …“; die Stelle öffnet den Kata-Trainer bei dieser Bewegung

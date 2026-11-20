@@ -1328,8 +1328,8 @@
         ? [el(
           'section',
           { class: 'card' },
-          el('h3', { text: 'Bewegungs-Editor' }),
-          el('p', { class: 'muted small', text: 'Für Korrekturen an den 3D-Figuren: In der Großansicht einer Figur erscheint „✎ Bearbeiten“. Dort lassen sich jedes Bild einer Bewegung (Hände, Füße, Ellbogen, Knie, Körper), Zeitpunkte und Übergänge, Kernbild und Kamera einstellen, abspielen und als Text kopieren.' }),
+          el('h3', { text: 'Bearbeiten-Modus' }),
+          el('p', { class: 'muted small', text: 'Für Korrekturen an den 3D-Figuren. Im Lexikon erscheint in der Großansicht einer Figur „✎ Bearbeiten“: Dort lassen sich jedes Bild einer Bewegung (Hände, Füße, Ellbogen, Knie, Körper), Zeitpunkte und Übergänge, Kernbild und Kamera einstellen, abspielen und als Text kopieren. Im Kata-Trainer erscheint in der Ansicht „Figur“ beim Anhalten „✎“: Es öffnet die gezeigte Bewegung der Kata im Editor. Außerdem zeigt der Kata-Trainer dann Kata, an denen gerade gebaut wird (Etikett „Figur · Vorschau“).' }),
           el(
             'label',
             { class: 'pe-switch' },
@@ -1338,7 +1338,7 @@
               checked: SK.poseEditor.enabled(),
               onchange: (ev) => SK.poseEditor.setEnabled(ev.target.checked),
             }),
-            ' Bewegungs-Editor einschalten'
+            ' Bearbeiten-Modus einschalten'
           )
         )]
         : []),
@@ -1407,7 +1407,7 @@
             'span',
             {},
             el('span', { class: 'grade-name', text: k.name }),
-            fig ? el('span', { class: 'fig-tag', title: 'Mit animierter Figur', html: `${FIG_ICO}Figur` }) : null,
+            fig ? el('span', { class: 'fig-tag', title: SK.kataFigur.vorschau(k) ? 'Vorschau: Figur noch nicht freigegeben (Bearbeiten-Modus)' : 'Mit animierter Figur', html: `${FIG_ICO}Figur${SK.kataFigur.vorschau(k) ? ' · Vorschau' : ''}` }) : null,
             el('span', { class: 'grade-sub muted small', text: `${k.moves} Bewegungen · Kiai bei ${k.kiai.join(' und ')}${g ? ` · Prüfung ${g.name}` : ''}` })
           )
         )

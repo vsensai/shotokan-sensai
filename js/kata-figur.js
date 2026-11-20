@@ -751,6 +751,26 @@
 
   /* ---------- Die ganze Kata ---------- */
   // opt.beat: Abstand zweier Zählzeiten in Sekunden (2 = Training, wie in der Kata-Ansage)
+  // Technik der Figur zu einer Bewegung (Eintrag in TECH)
+  const techFor = (k, st) => (TECH.find(([rx, , nur]) => rx.test(st.tech) && (!nur || nur.test(`${st.stance} ${st.note || ''} · ${k.name} #${st.n}`))) || [])[1];
+  // Bilder des Arm-Ablaufs einer Technik als Anteile der Bewegung (für den Bewegungs-Editor): der Ablauf beginnt bei u0 und
+  // endet bei 1; jedes Bild ab „from“ außer dem letzten (das ist die Endstellung)
+  function armBilder(tech, u0) {
+    const d = tech && tech.def && defOf(tech.def);
+    if (!d || d.keys.length < 2) return [];
+    const ta = tech.from || 0;
+    const tb = d.keys[d.keys.length - 1].t;
+    if (tb - ta < 1e-6) return [];
+    return [...new Set(d.keys.filter((k) => k.t >= ta - 1e-9 && k.t < tb - 1e-9).map((k) => Math.round((u0 + ((k.t - ta) / (tb - ta)) * (1 - u0)) * 1e4) / 1e4))];
+  }
+  // Woher die Arme einer Bewegung kommen (für den Bewegungs-Editor): Ablauf, Seite, ob gespiegelt, Optionen
+  function quelleOf(tech, side) {
+    if (!tech) return null;
+    const def = tech.def || tech.ganz || (tech.vor && tech.vor.def) || null;
+    const opt = Object.keys(tech).filter((o) => !['def', 'side', 'from', 'dur', 'vor'].includes(o));
+    return { def, lexikon: !!(def && D[def]), seite: side, gespiegelt: !!(tech.side && side !== tech.side), from: tech.from, tritt: tech.tritt || null, opt };
+  }
+
   function build(k, opt) {
     const beat = (opt && opt.beat) || 2;
     stepEase = beat > 1 ? EXPLOSIV : WEICH;
@@ -839,7 +859,7 @@
     // Naore: zurück in die Yoi-Haltung – außer die Kata endet anders (Kanku Dai: Fäuste vor den Oberschenkeln)
     const naoreUp = /fäuste vor den oberschenkeln/i.test(k.naore || '') ? upper(S.hachiji) : yoiUp;
     let cur = key(steps[0].pose, 'Musubi-dachi', null, musubi);
-    const techOf = (st) => (TECH.find(([rx, , nur]) => rx.test(st.tech) && (!nur || nur.test(`${st.stance} ${st.note || ''} · ${k.name} #${st.n}`))) || [])[1];
+    const techOf = (st) => techFor(k, st);
     // Bewegungen mit einem ersten Teil (zuvor): er läuft als eigene Bewegung davor, in derselben Zählzeit
     const lauf = [];
     steps.forEach((st, i) => {
@@ -870,7 +890,12 @@
       lauf.push(Object.assign({}, st, { stance: tm[1], tech: tm[2], note: '', pose: p1, slow: false, teil: 1 }));
       lauf.push(Object.assign({}, st, { t: t2, pose: Object.assign({}, m, { turn: m.turn - p1.turn }), teil: 2, von: st.t }));
     });
+    // erster Teil (zuvor): seine Endzeit gehört zur Anzeige der ganzen Bewegung
+    let teil1 = null;
+    // Körperrichtung am Ende jeder Anzeige (für den Bewegungs-Editor): die Stellung, mit der die nächste beginnt
+    const richtung = () => { const lm = marks[marks.length - 1]; if (lm && lm.byaw == null) lm.byaw = cur.byaw; };
     lauf.forEach((st, i) => {
+      richtung();
       const next = lauf[i + 1];
       const gap = next ? next.t - st.t : 3;
       if (st.kind === 'name') return;
@@ -920,7 +945,13 @@
       let look = m.look == null ? null : wrap(m.body - m.look);
       if (look === -180 && m.turn > 0) look = 180;
       // (bei zwei Teilen gilt die Anzeige für beide zusammen)
-      const mark = (t1) => { if (st.teil !== 1) marks.push({ t: st.von != null ? st.von : st.t, t1, n: st.n, kan: st.kan, ro: st.ro, text: `${st.stance} · ${st.tech}`, kiai: st.kiai }); };
+      // info (für den Bewegungs-Editor): Stand, Technik, Herkunft der Arme, Zeit des Ausholens (aus), des ersten Teils (teil1)
+      const mark = (t1, extra) => {
+        if (st.teil === 1) { teil1 = t1; return; }
+        const info = Object.assign({ stand: st.stance, tech: st.tech, quelle: quelleOf(tech, side) }, extra, teil1 != null ? { teil1 } : {});
+        teil1 = null;
+        marks.push({ t: st.von != null ? st.von : st.t, t1, n: st.n, kan: st.kan, ro: st.ro, text: `${st.stance} · ${st.tech}`, kiai: st.kiai, info });
+      };
       if (tech && tech.tritt) {
         // Fußtritt: erst an den Platz und das Knie anziehen (Standfuß rückt, falls nötig, zuerst), dann Tritt und zurück
         // zum angezogenen Knie – dort bleibt das Bein, bis die nächste Bewegung es absetzt
@@ -952,7 +983,7 @@
           segs.push(segment(cur, knee, { t0: st.t, t1: tA, arms: calm(cur.up, knee.up), first: s }));
         }
         segs.push({ t0: tA, t1: st.t + dK, at: (u) => K.pose(u, upAt(u)) });
-        mark(st.t + dK);
+        mark(st.t + dK, { aus: tA, ausName: 'Knie', tritt: { t0: tA, t1: st.t + dK, s: ko } });
         cur = { low: K.low(1), byaw, up: upAt(1) };
         if (byaw !== neu) cur = reframe(cur, neu);
         return;
@@ -1081,11 +1112,12 @@
         const tk2 = track(tech, side);
         const k2 = key(Object.assign({}, m, { turn: null }), st.stance, k1, tk2(1));
         segs.push(steady(segment(k1, k2, { t0: at(w3), t1: at(1), arms: part(k1.up, tk2, (1 - w3) * total), teilen: true })));
-        mark(at(1));
+        mark(at(1), { aus: at(w2), ausName: 'Teil 1' });
         cur = k2;
         return;
       }
       const uS = tech && tech.lang ? 0.1 : tech && tech.schlag ? clamp(1 - tech.schlag / d, 0.22, 0.8) : clamp(1 - STRIKE / d, 0.3, 0.8);
+      let zw = []; // Bilder des Arm-Ablaufs als Anteile der Bewegung (Ausholen und Zwischenbilder im Editor)
       let arms;
       let end;
       if (tech && tech.halten) {
@@ -1123,6 +1155,7 @@
           // Godan 14 nach dem Gedan-barai), wird der Unterschied im ersten Drittel weich ausgeblendet, statt erst in die
           // Anfangshaltung des Ablaufs zu gehen
           const uP = tech.lang ? 0 : 0.35;
+          if (defOf(tech.def).keys.length > 1) zw = armBilder(tech, uP);
           const t0 = upper(tr(0));
           const c0 = upper(cur.up);
           const vor = (a, f) => {
@@ -1146,6 +1179,7 @@
         } else {
           const pre = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: tr(0) }]);
           arms = (u) => (u < uS ? upper(pre(u)) : tr((u - uS) / (1 - uS)));
+          zw = armBilder(tech, uS);
         }
       }
       if (look != null) {
@@ -1193,7 +1227,7 @@
         }
       }
       segs.push(seg);
-      mark(st.t + d);
+      mark(st.t + d, { zw: zw.map((u) => st.t + u * d) });
       cur = nk;
       if (tech && tech.schnapp) {
         // kurz stehen lassen, dann zurück – das zählt nicht mehr zur Bewegung (ends: der Treffer)
@@ -1201,9 +1235,11 @@
         const back = track(tech, side)(0);
         const rest = { low: nk.low, byaw: nk.byaw, up: look == null ? back : M(back, { look }) };
         segs.push(Object.assign(segment(nk, rest, { t0, t1: t0 + Math.min(0.28, 0.3 * gap), arms: calm(nk.up, rest.up) }), { nach: true }));
+        if (st.teil !== 1) marks[marks.length - 1].info.zurueck = t0 + Math.min(0.28, 0.3 * gap);
         cur = rest;
       }
     });
+    richtung();
     steps.forEach((st, i) => segs.forEach((sg) => { if (!sg.nach && sg.t0 >= st.t - 1e-9 && (i + 1 >= steps.length || sg.t0 < steps[i + 1].t - 1e-9)) ends[i] = Math.max(ends[i], sg.t1); }));
     const dur = segs[segs.length - 1].t1 + 1;
     function pose(t) {
@@ -1259,10 +1295,67 @@
     return out;
   }
 
+  /* ---------- Momentaufnahme für den Bewegungs-Editor ---------- */
+  // Bewegung n des fertigen Ablaufs als wenige Bilder: Start (Stellung davor), Ausholen bzw. Knie bzw. Teil 1, Ende (die
+  // Zählzeit) und, falls die Technik zurückschnappt, Zurück. Die Figur steht dabei im Körperrahmen der Endstellung: Mitte
+  // zwischen den Knöcheln am Nullpunkt, Körperrichtung nach vorn (+z) – wie die Posen in js/figur-posen.js. Arme, Hüftdrehung,
+  // Oberkörper und Blick sind damit genau die Werte der Abläufe; Füße und Hüfte liegen relativ zur Endstellung.
+  const standOf = (stance) => (STAND.find(([rx]) => rx.test(stance || '')) || [])[1] || null;
+  function moment(anim, n) {
+    const mk = anim.marks.find((m) => m.n === n);
+    if (!mk) return null;
+    const I = mk.info || {};
+    const fr = [{ name: 'Start', t: mk.t }];
+    const add1 = (name, t) => { if (t != null && t > mk.t + 0.02 && t < mk.t1 - 0.02) fr.push({ name, t }); };
+    add1('Teil 1', I.teil1);
+    add1(I.ausName || 'Ausholen', I.aus);
+    (I.zw || []).forEach((t, i) => add1(i ? `Zwischenbild ${i}` : 'Ausholen', t));
+    // Tritt: das Bild, in dem der Fuß am weitesten von der Hüfte weg ist
+    if (I.tritt) {
+      let best = null;
+      for (let i = 1; i < 40; i++) {
+        const t = I.tritt.t0 + ((I.tritt.t1 - I.tritt.t0) * i) / 40;
+        const J = E.solve(anim.pose(t));
+        const a = J['ankle' + I.tritt.s];
+        const dd = Math.hypot(a[0] - J.pel[0], a[1] - J.pel[1], a[2] - J.pel[2]);
+        if (!best || dd > best.d) best = { t, d: dd };
+      }
+      if (best) add1('Tritt', best.t);
+    }
+    fr.sort((a, b) => a.t - b.t);
+    fr.push({ name: 'Ende', t: mk.t1, ende: true });
+    if (I.zurueck) fr.push({ name: 'Zurück', t: I.zurueck });
+    const { rotate, move } = SK.fig3dPose;
+    const Pe = E.full(anim.pose(mk.t1));
+    const c = [(Pe.L.x + Pe.R.x) / 2, (Pe.L.z + Pe.R.z) / 2];
+    const byaw = mk.byaw || 0;
+    const at = (t) => E.full(move(rotate(anim.pose(t), -byaw, c), -c[0], -c[1]));
+    return { kata: anim.kata, n, beat: anim.beat, kan: mk.kan, ro: mk.ro, kiai: !!mk.kiai, stand: I.stand, standFigur: standOf(I.stand), tech: I.tech, quelle: I.quelle, frames: fr, t0: fr[0].t, t1: fr[fr.length - 1].t, byaw: wrap(byaw), at };
+  }
+  // Wo ein Ablauf in den Kata vorkommt (freigegebene und Vorschau): „Heian Shodan 9“ …
+  function nutzung(def) {
+    const out = [];
+    KATA.concat(VORSCHAU).forEach((id) => {
+      const k = SK.kata[id];
+      if (!k || !k.ansage) return;
+      SK.ansageTimeline(k, 2, true).forEach((st) => {
+        if (st.kind !== 'move') return;
+        const t = techFor(k, st);
+        if (t && (t.def === def || t.ganz === def || (t.vor && t.vor.def === def))) out.push(`${k.name} ${st.n}`);
+      });
+    });
+    return out;
+  }
+
   /* ---------- Bühne für den Kata-Trainer ---------- */
   // Freigegebene Kata: Ablauf von Hand durchgesehen, alle Stände und Techniken haben eine Figur (validate.js prüft das)
   const KATA = ['heian-shodan', 'heian-nidan', 'heian-sandan', 'heian-yondan', 'heian-godan', 'tekki-shodan', 'bassai-dai', 'kanku-dai'];
-  const can = (k) => KATA.includes(k.id) && !!k.ansage && E.ok();
+  // Vorschau: Kata, an denen gerade gebaut wird – nur im Bearbeiten-Modus (Einstellungen) im Kata-Trainer zu sehen, mit dem
+  // Etikett „Figur · Vorschau“; zum Freigeben von hier nach KATA
+  const VORSCHAU = [];
+  const bearbeiten = () => !!(SK.poseEditor && SK.poseEditor.enabled());
+  const vorschau = (k) => VORSCHAU.includes(k.id) && !KATA.includes(k.id);
+  const can = (k) => (KATA.includes(k.id) || (vorschau(k) && bearbeiten())) && !!k.ansage && E.ok();
   // Kamera (die erste gilt beim Start): yaw 0 = von vorne (die Figur schaut am Anfang zur Kamera), 180 = von hinten (links bleibt links)
   const CAMS = [
     ['Von vorne', { yaw: -22, pitch: 16, dist: 6.2 }],
@@ -1537,8 +1630,10 @@
       freeze() { moving = false; request(); },
       time: () => t * lupe,
       zoom: (z) => (z == null ? zoom : setZoom(z)),
+      // gerechneter Ablauf des gewählten Takts (für den Bewegungs-Editor)
+      anim: () => anim,
     };
   }
 
-  SK.kataFigur = { build, check, SCALE, KATA, can, stage };
+  SK.kataFigur = { build, check, SCALE, KATA, VORSCHAU, can, vorschau, stage, moment, nutzung, defOf };
 })();

@@ -3670,6 +3670,100 @@ main:fullscreen .ans-wrap {
   font-size: 0.95rem;
 }
 
+/* Bewegung einer Kata im Editor (✎ im Kata-Trainer): keine Zeiten, Übergänge, Trefferfläche oder Kamera; Namen unter den
+   Bildern der Zeitleiste */
+.pe-kata [data-tab="treffer"],
+.pe-kata .pe-movonly > label.pe-row,
+.pe-kata .pe-easehelp,
+.pe-kata .pe-pauserow,
+.pe-kata .pe-ttouch,
+.pe-kata .pe-tthint,
+.pe-kata .pe-total,
+.pe-kata .pe-camrow,
+.pe-kata [data-pe="fbest"],
+.pe-kata .pe-endh,
+.pe-kata .pe-tick {
+  display: none !important;
+}
+
+.pe-kata .pe-mk {
+  cursor: pointer;
+}
+
+/* (der Stern fürs Kernbild entfällt: das Kernbild ist immer „Ende“) */
+.pe-kata .pe-mk.kern::after {
+  content: none;
+}
+
+.pe-kata .pe-mk::before {
+  content: attr(data-l);
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pe-kinfo {
+  margin: 0.3rem 0 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.pe-kinfo h4 {
+  margin: 0 0 0.3rem;
+  font-size: 0.85rem;
+}
+
+.pe-kinfo p {
+  margin: 0.25rem 0;
+}
+
+.pe-kinfo code {
+  font-size: 0.75rem;
+}
+
+/* Gilt für: Auswahl wie die anderen Umschalter (grau, das Gewählte dunkel) */
+.pe-gilt {
+  display: flex;
+}
+
+.pe-gilt button {
+  min-height: 30px;
+  padding: 0.1rem 0.7rem;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pe-gilt button:first-child {
+  border-right: 0;
+  border-radius: 999px 0 0 999px;
+}
+
+.pe-gilt button:last-child {
+  border-radius: 0 999px 999px 0;
+}
+
+.pe-gilt button[aria-pressed="true"] {
+  background: var(--sel);
+  border-color: var(--sel);
+  color: var(--sel-ink);
+}
+
+.pe-back {
+  flex: none;
+}
+
 .pe-sm {
   min-height: 28px;
   padding: 0.1rem 0.55rem;

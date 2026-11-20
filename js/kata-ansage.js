@@ -798,7 +798,9 @@
     // Vollbild direkt auf dem Bild (wie der Knopf unten): ganze Seite, der Kasten nutzt dann die volle Breite
     const fsCan = document.fullscreenEnabled;
     const fsIcon = fsCan ? el('button', { class: 'ans-fs', type: 'button', 'aria-pressed': 'false', text: '⛶', onclick: () => toggleFs() }) : null;
-    const tools = fsIcon || viewSw ? el('div', { class: 'ans-tools' }, fsIcon, viewSw) : null;
+    // Bearbeiten-Modus (Einstellungen): ✎ öffnet die gezeigte Bewegung im Bewegungs-Editor – nur bei angehaltener Ansage
+    const editBtn = fig && SK.poseEditor ? el('button', { class: 'ans-fs ans-edit', type: 'button', hidden: true, onclick: () => openEdit() }) : null;
+    const tools = fsIcon || viewSw ? el('div', { class: 'ans-tools' }, editBtn, fsIcon, viewSw) : null;
     const mapBox = el('div', { class: 'ans-map' }, map, fig && fig.node, chips, tools);
     const cHint = el('div', { class: 'ans-hint' });
     const cTech = el('div', { class: 'ans-tech muted' });
@@ -994,6 +996,7 @@
       const s = steps[i];
       if (!s) return;
       fill(s);
+      editUi();
       stage.classList.toggle('kiai', !!s.kiai);
       if (view !== 'figur') map.innerHTML = SK.embusenSvg(k, s.pose, i ? s.prev : null, map.clientWidth / map.clientHeight || mapBox.clientWidth / mapBox.clientHeight || null);
       const firstMove = steps.findIndex((x) => x.kind === 'move');
@@ -1020,9 +1023,28 @@
       else fit();
       fig.on(view !== 'karte');
       if (view !== 'figur') render(idx);
+      editUi();
       if (view === 'karte') return;
       if (running) { fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe); fig.run((performance.now() - base) / 1000); }
       else figShow();
+    }
+    function editUi() {
+      if (!editBtn) return;
+      const s = steps[idx];
+      const on = SK.poseEditor.enabled() && view !== 'karte' && !running && !!s && s.kind === 'move';
+      editBtn.hidden = !on;
+      if (!on) return;
+      editBtn.textContent = `✎ ${s.n}`;
+      editBtn.title = `Bewegung ${s.n} im Bewegungs-Editor öffnen`;
+      editBtn.setAttribute('aria-label', editBtn.title);
+    }
+    function openEdit() {
+      const s = steps[idx];
+      if (!s || s.kind !== 'move') return;
+      if (running) pause();
+      fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe);
+      const M = SK.kataFigur.moment(fig.anim(), s.n);
+      if (M) SK.poseEditor.openKata(M);
     }
     function figShow(move) {
       if (view === 'karte') return;
@@ -1098,6 +1120,7 @@
       else { idx = i; render(i); figShow(true); }
     }
     function ui() {
+      editUi();
       playBtn.textContent = running ? '❚❚ Pause' : idx > 0 && idx < steps.length - 1 ? '▶ Weiter zählen' : '▶ Start';
     }
 
@@ -1125,7 +1148,7 @@
     document.addEventListener('visibilitychange', onVisibility);
     // Tastatur am PC: Leertaste Start/Pause, ← → eine Ansage zurück/weiter, F Vollbild
     function onKey(ev) {
-      if (lexDlg.open || ev.ctrlKey || ev.metaKey || ev.altKey || /INPUT|SELECT|TEXTAREA/.test(ev.target.tagName)) return;
+      if (lexDlg.open || (ev.target.closest && ev.target.closest('dialog')) || ev.ctrlKey || ev.metaKey || ev.altKey || /INPUT|SELECT|TEXTAREA/.test(ev.target.tagName)) return;
       if (ev.code === 'Space' && ev.target.tagName !== 'BUTTON') playBtn.click();
       else if (ev.code === 'ArrowLeft') prevBtn.click();
       else if (ev.code === 'ArrowRight') nextBtn.click();
@@ -1188,7 +1211,10 @@
       stage.classList.add(`ans-in-${SK.ansageSlide}`);
       SK.ansageSlide = null;
     }
+    // Vorschau (Bearbeiten-Modus): Figur noch nicht freigegeben – mit Stand, damit man sieht, ob eine Änderung angekommen ist
+    const vorschauOut = fig && SK.kataFigur.vorschau(k) ? el('p', { class: 'muted small ans-info', text: `Vorschau – die Figur dieser Kata ist noch nicht freigegeben · Stand v${SK.VERSION} (${SK.VERSION_DATE}, ${SK.VERSION_TIME} Uhr)` }) : null;
     const wrap = el('div', { class: 'ans-wrap' }, stage, lexDlg, controls,
+      vorschauOut,
       infoOut,
       fold('optionen', 'Bewegungen und Legende',
         track,
