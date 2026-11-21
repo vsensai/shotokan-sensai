@@ -1249,9 +1249,11 @@
       if (tech && tech.schnapp) {
         // kurz stehen lassen, dann zurück – das zählt nicht mehr zur Bewegung (ends: der Treffer)
         const t0 = st.t + d + Math.min(0.1, 0.08 * gap);
-        const back = track(tech, side)(0);
-        const rest = { low: nk.low, byaw: nk.byaw, up: look == null ? back : M(back, { look }) };
-        segs.push(Object.assign(segment(nk, rest, { t0, t1: t0 + Math.min(0.28, 0.3 * gap), arms: calm(nk.up, rest.up) }), { nach: true }));
+        // zurück auf derselben Bahn wie zum Treffer, nur rückwärts (nicht auf dem kürzesten Weg quer hinüber)
+        const tr = track(tech, side);
+        const mitBlick = (p) => (look == null ? p : M(p, { look }));
+        const rest = { low: nk.low, byaw: nk.byaw, up: mitBlick(tr(0)) };
+        segs.push(Object.assign(segment(nk, rest, { t0, t1: t0 + Math.min(0.28, 0.3 * gap), arms: (u) => mitBlick(tr(1 - smooth(u))) }), { nach: true }));
         if (st.teil !== 1) marks[marks.length - 1].info.zurueck = t0 + Math.min(0.28, 0.3 * gap);
         cur = rest;
       }
