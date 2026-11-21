@@ -1010,7 +1010,8 @@
     }
 
     // Ansicht Karte, beides oder Figur. Die Figur läuft nach derselben Uhr wie die Ansage: zählt sie, bewegt sich die Figur mit;
-    // steht sie, zeigt die Figur die Endstellung der aktuellen Ansage – beim Weiterschalten von Hand deren Bewegung einmal.
+    // steht sie, zeigt die Figur die Endstellung der aktuellen Ansage – beim Weiterschalten von Hand deren Bewegung einmal
+    // (schnappt die Technik danach zurück, auch das; das Standbild beim Antippen zeigt dagegen den Treffer = Zählstellung).
     function setView(v) {
       view = fig && VIEWS.includes(v) ? v : 'karte';
       if (!fig) return;
@@ -1050,7 +1051,7 @@
     function figShow(move) {
       if (view === 'karte') return;
       fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe);
-      if (move) fig.run(steps[idx].t, fig.end(idx));
+      if (move) fig.run(steps[idx].t, fig.fertig(idx)); // mit Zurückschnappen (Uraken), wie in der Kata
       else fig.show(fig.end(idx));
     }
 

@@ -801,7 +801,8 @@
     const warn = [];
     const segs = [];
     const marks = [];
-    const ends = steps.map((st) => st.t); // je Ansage: Zeitpunkt, zu dem ihre Bewegung fertig ist
+    const ends = steps.map((st) => st.t); // je Ansage: Zeitpunkt, zu dem ihre Bewegung fertig ist (Zählstellung)
+    const fertig = steps.map((st) => st.t); // dazu das Zurückschnappen danach (schnapp) – so weit spielt ein Schritt von Hand
     // Körperrichtung der Stellung m, fortlaufend gezählt (immer in der Drehrichtung der Kata)
     const turnOf = (m, prev, stance) => {
       const turn = m.turn != null && prev ? -m.turn : prev ? wrap(-m.body - prev.byaw) : -m.body;
@@ -1249,7 +1250,11 @@
       }
     });
     richtung();
-    steps.forEach((st, i) => segs.forEach((sg) => { if (!sg.nach && sg.t0 >= st.t - 1e-9 && (i + 1 >= steps.length || sg.t0 < steps[i + 1].t - 1e-9)) ends[i] = Math.max(ends[i], sg.t1); }));
+    steps.forEach((st, i) => segs.forEach((sg) => {
+      if (sg.t0 < st.t - 1e-9 || (i + 1 < steps.length && sg.t0 >= steps[i + 1].t - 1e-9)) return;
+      if (!sg.nach) ends[i] = Math.max(ends[i], sg.t1);
+      fertig[i] = Math.max(fertig[i], sg.t1);
+    }));
     const dur = segs[segs.length - 1].t1 + 1;
     function pose(t) {
       let i = 0;
@@ -1267,7 +1272,7 @@
       const sg = segs[i];
       return sg.A ? Math.min(0.6, sg.A.low.h - 0.06, sg.B.low.h - 0.06) : 0.6;
     };
-    return { kata: k, beat, dur, pose, marks, markAt, ends, warn, tief, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
+    return { kata: k, beat, dur, pose, marks, markAt, ends, fertig, warn, tief, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
   }
 
   // Prüfung des fertigen Ablaufs: jedes Bild rechenbar, Füße am Boden erreichen ihren Platz, keine Sprünge
@@ -1640,6 +1645,8 @@
       },
       // Zeitpunkt, zu dem die Bewegung der Ansage i fertig ist
       end: (i) => anim.ends[i] * lupe,
+      // … samt Zurückschnappen danach (Uraken in Heian Sandan) – Ende einer von Hand weitergeschalteten Bewegung
+      fertig: (i) => anim.fertig[i] * lupe,
       // ab Zeitpunkt a in Echtzeit laufen, bis b (ohne b: bis zum Schluss)
       run(a, b) { t0 = t = a / lupe; tEnd = b == null ? anim.dur : b / lupe; clock = performance.now(); moving = tEnd > t0; E.quality.begin(); request(); },
       // Standbild zum Zeitpunkt a
