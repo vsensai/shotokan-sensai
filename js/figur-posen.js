@@ -1093,6 +1093,13 @@
     M(FK, { hR: [-0.3, 0.24, 0.1], eR: [-1, 0, 0], pR: [0.7, 0.5, -0.5] }),
     M(FK, { hR: [-0.63, -0.03, 0.05], eR: [-0.4, -1, 0], pR: [1, 0, 0] }),
   ], { eff: 'fistR' });
+  // Heian Sandan 18, erster Teil (Kiba-dachi wie in 17): der rechte Arm geht schnell gestreckt zur rechten Seite – in die
+  // Richtung des folgenden Schritts – und öffnet die Hand: Handfläche zum eigenen Körper, Finger nach oben (greift)
+  KATA['greifen-sandan'] = T(M(FK, { hR: [-0.2, -0.3, 0.08], eR: [-1, -0.15, 0.2] }),
+    M(FK, { hR: [-0.74, -0.03, 0.06], eR: [0, -1, 0], oR: 1, fR: [0, 1, 0], pR: [1, 0, 0] }));
+  // … zweiter Teil: Schritt mit Oi-zuki (Endhaltung wie im Lexikon) – die greifende Hand (hier links, die Kata spiegelt)
+  // schließt sich und zieht schon mit dem Schritt heran, dann an die Hüfte zurück, während die andere Faust stößt
+  KATA['oi-zuki-greifen'] = T(M(OI_END, { hR: H.hip, hL: [0.13, -0.1, 0.42], eL: [0.2, -1, 0] }), OI_END);
   // Heian Sandan 19, 20 im Kiba-dachi: die rechte Faust stößt über die linke Schulter nach hinten oben (Koho-tsukiage),
   // zugleich schlägt der linke Ellbogen nach hinten (Ushiro-enpi) – die linke Faust zieht dabei weit zurück an die Hüfte
   KATA['tsukiage-enpi'] = T(M(KB, { hL: [0.22, -0.3, 0.2], eL: [0.4, -1, 0.2], hR: H.hip }),

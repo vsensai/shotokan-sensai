@@ -150,6 +150,7 @@
   // an ihrem Platz, danach wechselt nur der Stand (Heian Godan 21, 23: Angriff im Zenkutsu-dachi, dann Gewicht zurück).
   // bleibt: die Arme bleiben, wie sie sind – nur Blick oder Füße wechseln (Tekki: Kao Migi-muki, Kreuzschritt);
   // offen (mit bleibt): der Oberkörper dreht dabei um so viele Grad zum Blick hin (Bassai Dai 41);
+  // (zuvor 'stehen' mit teil1: [Stand, Technik]: erster Teil ohne Hinweis der Kata, Füße und Blick bleiben – Heian Sandan 18)
   // zuvor: die Bewegung hat laut Hinweis der Kata („Teil 1: Stand, Technik“) einen ersten Teil, der als eigene Bewegung
   // davor läuft, zeit Sekunden lang (höchstens knapp die halbe Zählzeit). 'wende': auf der Stelle zur Blickrichtung drehen,
   // die Füße bleiben an ihren alten Plätzen (Bassai Dai 25); 'tritt': Tritt auf dem Standbein der Bewegung, auf halbem Weg
@@ -219,6 +220,9 @@
     [/zenwan .*sokumen chudan-uke/i, { def: 'zenwan-uke-gegen', side: 'L', from: 0.25, direkt: true, erst: true }],
     [/gedan-barai/i, { def: 'gedan-barai-kiba', side: 'R', from: 0.25 }, /kiba/i],
     [/gedan-barai/i, { def: 'mv:gedan-barai', side: 'L', from: 0.25 }],
+    // Heian Sandan 18: erst greift die rechte Hand zur Seite des Schritts (Teil 1, Füße bleiben), dann Schritt mit Oi-zuki
+    [/oi-zuki/i, { def: 'oi-zuki-greifen', side: 'R', from: 0.25, zuvor: 'stehen', teil1: ['Kiba-dachi', 'Migi offene Hand greift'], zeit: 0.35 }, /heian sandan #18$/i],
+    [/offene hand greift/i, { def: 'greifen-sandan', side: 'R', from: 0.25 }],
     [/oi-zuki/i, { def: 'mv:oi-zuki', side: 'R', from: 0.38, direkt: true }],
     [/age-uke/i, { def: 'mv:age-uke', side: 'R', from: 0.25 }],
     [/kentsui tate-mawashi-uchi/i, { def: 'tc:tettsui-uchi', side: 'R', from: 0.15, lang: true, dur: 1.0 }],
@@ -872,14 +876,17 @@
     const lauf = [];
     steps.forEach((st, i) => {
       const tech = st.kind === 'move' ? techOf(st) : null;
-      const tm = tech && tech.zuvor && /^Teil 1: ([^,]+), (.+)$/.exec(st.note || '');
+      const tm = tech && tech.zuvor && (tech.teil1 ? [null, ...tech.teil1] : /^Teil 1: ([^,]+), (.+)$/.exec(st.note || ''));
       if (!tm) { lauf.push(st); return; }
       const m = st.pose;
       const pv = steps[i - 1].pose;
       const gap = steps[i + 1] ? steps[i + 1].t - st.t : 3;
       const norm = (d) => ((d % 360) + 360) % 360;
       let p1;
-      if (tech.zuvor === 'wende') {
+      if (tech.zuvor === 'stehen') {
+        // Füße und Blick bleiben, wo sie sind – nur die Arme arbeiten (Heian Sandan 18: die Hand greift vor dem Schritt)
+        p1 = { f: pv.f, body: pv.body, look: pv.look, turn: 0 };
+      } else if (tech.zuvor === 'wende') {
         // auf der Stelle zur Blickrichtung drehen (in der Drehrichtung der Bewegung): der Fuß, der dann vorn steht, zeigt
         // dorthin und trägt, der hintere steht schräg
         const body = m.look != null ? m.look : m.body;
@@ -1224,7 +1231,7 @@
       // bleibt der Oberkörper stehen, bleibt auch der Blick, wo er ist
       if (tech && tech.halten && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
       // blickt der Kopf schon dorthin, wohin sich der Körper wendet (Bassai Dai 41 → 42), läuft er nicht noch voraus
-      else if (Math.abs(nk.byaw - cur.byaw) > 90 && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
+      else if (Math.abs(nk.byaw - cur.byaw) >= 90 - 1e-6 && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
       if (m.via) {
         const s = m.via[0] ? 'R' : 'L';
         seg.via = { s, c: [-m.via[1] * SCALE, m.via[2] * SCALE], rel: wrap(-m.via[3] + m.body) };
