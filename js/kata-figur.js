@@ -32,19 +32,19 @@
   const ST_AUF = 0.72; // hier setzt der Fuß auf,
   const ST_HOCH = 0.42; // so hoch kommt der Fuß (Meter)
   const HOCH = 0.38; // so hoch kommt der Fuß beim Stampfen (Fumikomi): Knie hoch, dann fällt er hart auf seinen Platz
-  // Fumikomi mit dem Knie vor dem Körper (kniehoch, Heian Sandan 12, 14, 16): Anteile des Schritts (nach dem Eindrehen) –
-  // bis KV_A kommt das Knie direkt vor dem Körper am Standbein hoch, bis KV_H hält es kurz, dann stampft der Fuß schnell
-  // und kraftvoll nach vorn auf seinen Platz
-  const KV_A = 0.42;
-  const KV_H = 0.54;
+  // Fumikomi mit dem Knie vor dem Körper (kniehoch, Heian Sandan 12, 14, 16): Anteile des Schritts – bis KV_A kommt das
+  // Knie vor dem Körper hoch; schon ab KV_V, noch während es steigt, geht der Fuß nach vorn und stampft dann schnell und
+  // kraftvoll auf seinen Platz. Kein Halten oben: das Hochziehen geht fließend ins Stampfen über
+  const KV_A = 0.46;
+  const KV_V = 0.34;
   const KV_Y = 0.28; // so hoch kommt der Fuß dabei (Meter) – der Unterschenkel hängt senkrecht unter dem Knie
   const KV_VOR = 0.36; // so weit vor dem Standbein (in Schrittrichtung) steht er dabei: Oberschenkel waagerecht
   const KV_WEICH = 0.05; // weiche Grenze der Hüfthöhe, wo ein Bein nicht mehr reicht (Meter)
-  const KV_DREH = 0.2; // erst so weit (Anteil) ins Stampfen hinein dreht alles in den Stand
-  const kvHoch = (u) => (u < KV_A ? smooth(u / KV_A) : u < KV_H ? 1 : 1 - ((u - KV_H) / (1 - KV_H)) ** 3);
+  const KV_DREH = 0.63; // erst ab hier (Anteil) dreht alles in den Stand
+  const kvHoch = (u) => (u < KV_A ? smooth(u / KV_A) : 1 - ((u - KV_A) / (1 - KV_A)) ** 3);
   const kvAuf = (u) => (u < KV_A ? smooth(u / KV_A) : 1);
-  // nach vorn: aus dem Halten ohne Ruck anlaufen, dann schnell; hinunter wird er immer schneller (kvHoch)
-  const kvVor = (u) => (u < KV_H ? 0 : smooth((u - KV_H) / (1 - KV_H)));
+  // nach vorn: weich anlaufen, dann schnell; hinunter wird er immer schneller (kvHoch)
+  const kvVor = (u) => (u < KV_V ? 0 : smooth((u - KV_V) / (1 - KV_V)));
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
   const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
   const STRIKE = 0.17; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
@@ -170,7 +170,7 @@
   // der Drehung (Bassai Dai 28: Mikazuki-geri, dann erst der Ellbogen);
   // drehung: langsame Bewegung, deren Hüfte schon nach diesem Anteil fertig gedreht ist (sonst über die ganze Bewegung);
   // kniehoch: beim Fumikomi kommt das Knie erst direkt vor dem Körper am Standbein hoch, hält kurz, dann stampft der Fuß
-  // schnell nach vorn (Heian Sandan 12, 14, 16; KV_A, KV_H);
+  // schnell nach vorn (Heian Sandan 12, 14, 16; KV_A, KV_V);
   // heran: der Fuß, der den Platz wechselt, zieht erst zum Standfuß heran und geht von dort hinaus (Halbkreis, Bassai Dai 6);
   // Ein dritter Eintrag beschränkt die Zuordnung auf Stände, Hinweise der Kata (note) oder den Namen der Kata, auf die er
   // passt, mit „#Nummer“ am Ende auch auf eine einzelne Bewegung (der erste passende Eintrag gilt)
@@ -514,7 +514,7 @@
         // p1: bis hier das Eindrehen in die Schrittrichtung (entfällt, wenn der Körper schon so steht); p3: ab hier die Drehung in den Stand
         const p1 = Math.abs(rel) > 5 ? 0.24 : 0;
         // (Knie vor dem Körper: das Eindrehen in den Stand beginnt mit dem Stampfen)
-        const p3 = o.knieVor ? p1 + (KV_H + KV_DREH * (1 - KV_H)) * (1 - p1) : 0.74;
+        const p3 = o.knieVor ? p1 + KV_DREH * (1 - p1) : 0.74;
         seg.yawAt = (u) => (u < p1 ? lerp(A.byaw, yawMid, smooth(u / p1)) : u < p3 ? yawMid : lerp(yawMid, B.byaw, smooth((u - p3) / (1 - p3))));
         seg.feet[s].u0 = p1;
         // die Hüfte geht genau mit dem Fuß mit – liefe sie schon beim Eindrehen los, hinge das hintere Bein weit zurück
@@ -589,7 +589,7 @@
     if (seg.kv) {
       const pl = seg.feet[seg.kv.s];
       const uk = clamp((u - pl.u0) / (pl.u1 - pl.u0));
-      pel = kvVor(uk) > 0 ? mix(seg.kv.pk, B.low.pel, kvVor(uk)) : mix(A.low.pel, seg.kv.pk, kvAuf(uk));
+      pel = add(mix(A.low.pel, seg.kv.pk, kvAuf(uk)), mul(sub(B.low.pel, seg.kv.pk), kvVor(uk)));
     }
     if (seg.ab) pel = mix(A.low.pel, B.low.pel, u < ST_KNIE ? 0.08 * smooth(u / ST_KNIE) : 0.08 + 0.92 * smooth(clamp((u - ST_KNIE) / (0.94 - ST_KNIE))));
     ['L', 'R'].forEach((s) => {
@@ -630,11 +630,11 @@
       const so = seg.sole && seg.sole[s];
       P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
       if (wl) Object.assign(P[s], wl(P[s]));
-      // Fumikomi mit dem Knie vor dem Körper: hoch am Standbein, kurz halten, dann schnell nach vorn und hart hinunter
+      // Fumikomi mit dem Knie vor dem Körper: hoch vor dem Körper und ohne Halt weiter, schnell nach vorn und hart hinunter
       if (seg.kv && seg.kv.s === s) {
         const wv = kvVor(uf);
         const hoch = kvHoch(uf);
-        const cc = wv > 0 ? mix(seg.kv.kp, fb.c, wv) : mix(fa.c, seg.kv.kp, kvAuf(uf));
+        const cc = add(mix(fa.c, seg.kv.kp, kvAuf(uf)), mul(sub(fb.c, seg.kv.kp), wv));
         const yw = byaw + lerp(fa.rel, fb.rel, wv);
         const ak = sub(cc, mul(fwd(yw), FOOT_MID));
         Object.assign(P[s], { x: ak[0], z: ak[1], y: lerp(fa.y, fb.y, wv) + KV_Y * hoch, yaw: yw, pitch: lerp(fa.pitch, fb.pitch, wv) - 25 * hoch });
@@ -658,7 +658,7 @@
       const pl = seg.feet[seg.kv.s];
       const uk = clamp((u - pl.u0) / (pl.u1 - pl.u0));
       const hm = lerp(A.low.h, B.low.h, 0.5);
-      h = kvVor(uk) > 0 ? lerp(hm, B.low.h, kvVor(uk)) : lerp(A.low.h, hm, kvAuf(uk));
+      h = lerp(A.low.h, hm, kvAuf(uk)) + (B.low.h - hm) * kvVor(uk);
     }
     if (seg.ab) {
       // Knie hoch auf dem Standbein (leicht gebeugt), dann sinkt die Hüfte mit dem Aufsetzen in den Stand
