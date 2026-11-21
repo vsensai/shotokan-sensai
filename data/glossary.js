@@ -192,6 +192,11 @@
     ['Kamae', 'Kampfhaltung (Oberbegriff, z. B. Chudan-, Gedan-, Shuto-Kamae)', 'begriff'],
     ['Ura-shomen', 'Rückseite – die Richtung entgegengesetzt zur Vorderseite (Shomen)', 'begriff', null, PDF2(45)],
     ['Bunkai', 'Anwendung / Analyse der Kata-Techniken', 'begriff'],
+    ['Hidari', 'Links – vor dem Stand: das linke Bein steht vorn (Kokutsu-dachi: trägt das Gewicht); vor der Technik: der linke Arm bzw. das linke Bein', 'begriff', null, PDF(6)],
+    ['Migi', 'Rechts – vor dem Stand: das rechte Bein steht vorn (Kokutsu-dachi: trägt das Gewicht); vor der Technik: der rechte Arm bzw. das rechte Bein', 'begriff', null, PDF(6)],
+    ['Sokumen', 'Seite – die Technik geht zur Seite (z. B. Hidari Sokumen: zur linken Seite)', 'begriff', null, PDF(6)],
+    ['Saken', 'Linke Faust (gleiches Schriftzeichen wie Hidari, anders gelesen)', 'begriff', null, PDF(18)],
+    ['Uken', 'Rechte Faust (gleiches Schriftzeichen wie Migi, anders gelesen)', 'begriff', null, PDF(19)],
   ];
 
   // Erstes Vorkommen in den Kata des Buches (Reihenfolge SK.kataOrder), nur wo das Buch die Technik beim Namen nennt.
@@ -286,7 +291,14 @@
     'Koshi-kamae': 'Beide Fäuste an der Hüfte übereinander',
     'Ura-shomen': 'Richtung nach hinten, entgegengesetzt zur Vorderseite der Kata',
     'Kaisho Yama-gamae': 'Haltung mit offenen Händen: Unterarme senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe',
+    'Hidari': 'Links',
+    'Migi': 'Rechts',
+    'Sokumen': 'Seite – die Technik geht zur Seite',
+    'Saken': 'Linke Faust',
+    'Uken': 'Rechte Faust',
   };
+  // Seitenangaben stehen in fast jeder Bewegung: im Kata-Trainer nicht antippbar, auf der Karte kein „Kommt vor in …“
+  const OHNE_STELLEN = new Set(['Hidari', 'Migi', 'Sokumen', 'Saken', 'Uken']);
 
   // Aussprache: Lesung je Wortteil in Hiragana (mit den langen Vokalen, die die lateinische Schreibweise der App weglässt:
   // Jodan = じょうだん). Die japanische Stimme liest lateinische Schrift nicht als Japanisch – sie bekommt diese Lesung.
@@ -295,18 +307,18 @@
     age: 'あげ', ashi: 'あし', awase: 'あわせ', ayumi: 'あゆみ', barai: 'ばらい', bunkai: 'ぶんかい', choku: 'ちょく', chudan: 'ちゅうだん',
     dachi: 'だち', deai: 'であい', do: 'どう', dojo: 'どうじょう', dome: 'どめ', enbusen: 'えんぶせん', enpi: 'えんぴ', fudo: 'ふどう', fumikae: 'ふみかえ', fumikomi: 'ふみこみ',
     furi: 'ふり', gamae: 'がまえ', gedan: 'げだん', geri: 'げり', gyaku: 'ぎゃく', hachiji: 'はちじ', haishu: 'はいしゅ', haisoku: 'はいそく',
-    haito: 'はいとう', haiwan: 'はいわん', hajime: 'はじめ', hangetsu: 'はんげつ', hanmi: 'はんみ', hasami: 'はさみ', heisoku: 'へいそく',
+    haito: 'はいとう', haiwan: 'はいわん', hajime: 'はじめ', hangetsu: 'はんげつ', hanmi: 'はんみ', hasami: 'はさみ', heisoku: 'へいそく', hidari: 'ひだり',
     hiji: 'ひじ', hikite: 'ひきて', hiza: 'ひざ', hizakutsu: 'ひざくつ', ippon: 'いっぽん', jishi: 'じし', josokutei: 'じょうそくてい',
     juji: 'じゅうじ', kagi: 'かぎ', kaisho: 'かいしょう', kakato: 'かかと', kake: 'かけ', kakiwake: 'かきわけ', kamae: 'かまえ', keage: 'けあげ',
     kekomi: 'けこみ', ken: 'けん', kiai: 'きあい', kiba: 'きば', kime: 'きめ', kiritsu: 'きりつ', kizami: 'きざみ', kohai: 'こうはい', kogeki: 'こうげき',
     koko: 'ここう', kokutsu: 'こうくつ', komura: 'こむら', kosa: 'こうさ', koshi: 'こし', maai: 'まあい', mae: 'まえ', manji: 'まんじ',
-    mawashi: 'まわし', mawatte: 'まわって', mikazuki: 'みかづき', mizunagare: 'みずながれ', mokuso: 'もくそう', morote: 'もろて',
+    mawashi: 'まわし', mawatte: 'まわって', migi: 'みぎ', mikazuki: 'みかづき', mizunagare: 'みずながれ', mokuso: 'もくそう', morote: 'もろて',
     musubi: 'むすび', nagashi: 'ながし', namigaeshi: 'なみがえし', naore: 'なおれ', neko: 'ねこ', nidan: 'にだん', ni: 'に', no: 'の', nukite: 'ぬきて',
     oi: 'おい', okuri: 'おくり', otagai: 'おたがい', orishiki: 'おりしき', osae: 'おさえ', otoshi: 'おとし', rei: 'れい', ren: 'れん', renoji: 'れのじ',
-    sabaki: 'さばき', sanbon: 'さんぼん', sanchin: 'さんちん', sashi: 'さし', seiken: 'せいけん', seiza: 'せいざ', sensei: 'せんせい', senpai: 'せんぱい', shaho: 'しゃほう', shiai: 'しあい',
-    shizentai: 'しぜんたい', shomen: 'しょうめん', te: 'て', shuto: 'しゅとう', sokuto: 'そくとう', sonoba: 'そのば', soto: 'そと', sukui: 'すくい',
+    sabaki: 'さばき', saken: 'さけん', sanbon: 'さんぼん', sanchin: 'さんちん', sashi: 'さし', seiken: 'せいけん', seiza: 'せいざ', sensei: 'せんせい', senpai: 'せんぱい', shaho: 'しゃほう', shiai: 'しあい',
+    shizentai: 'しぜんたい', shomen: 'しょうめん', te: 'て', shuto: 'しゅとう', sokumen: 'そくめん', sokuto: 'そくとう', sonoba: 'そのば', soto: 'そと', sukui: 'すくい',
     sun: 'すん', suri: 'すり', tai: 'たい', tate: 'たて', teiji: 'ていじ', teisho: 'ていしょう', teisoku: 'ていそく', tettsui: 'てっつい',
-    tsugi: 'つぎ', tsukami: 'つかみ', uchi: 'うち', uchiotoshi: 'うちおとし', uke: 'うけ', ura: 'うら', uraken: 'うらけん', ushiro: 'うしろ',
+    tsugi: 'つぎ', tsukami: 'つかみ', uchi: 'うち', uchiotoshi: 'うちおとし', uke: 'うけ', uken: 'うけん', ura: 'うら', uraken: 'うらけん', ushiro: 'うしろ',
     yama: 'やま', yame: 'やめ', waza: 'わざ', yoi: 'ようい', yoko: 'よこ', yori: 'より', zanshin: 'ざんしん', zenkutsu: 'ぜんくつ', zenwan: 'ぜんわん',
     zuki: 'づき',
   };
@@ -327,6 +339,7 @@
 
   SK.glossary = E.map(([t, de, cat, img, src]) => {
     const e = { t, de, qde: QUIZ[t] || de, cat, img: img || null, src: src || ALLG, kana: kana(t) };
+    if (OHNE_STELLEN.has(t)) e.ohneStellen = true;
     const z = ERST[t];
     if (z) e.erst = { kata: z[0], n: z[1], buch: z[2] || '', wort: z[4] || '' };
     return e;

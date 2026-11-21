@@ -692,6 +692,7 @@
     // „Nagashi-uke (Te-nagashi)“, der Buchname „Kentsui …-uchi“ zu „Tettsui-uchi“, „Kosa-uke“ zu „Juji-uke“
     const alt = SK.glossaryAlt || (() => '');
     SK.glossary.forEach((e) => {
+      if (e.ohneStellen) return; // Seitenangaben (Hidari, Migi, Sokumen, Saken, Uken) bleiben Füllwörter
       [...e.t.split(' / '), ...(alt(e) ? [alt(e)] : [])].forEach((name) => {
         if (/[()]/.test(name)) return;
         const w = norm(name);
