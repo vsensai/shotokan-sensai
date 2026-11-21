@@ -37,8 +37,8 @@
   // kraftvoll auf seinen Platz. Kein Halten oben: das Hochziehen geht fließend ins Stampfen über
   const KV_A = 0.46;
   const KV_V = 0.34;
-  const KV_Y = 0.28; // so hoch kommt der Fuß dabei (Meter) – der Unterschenkel hängt senkrecht unter dem Knie
-  const KV_VOR = 0.36; // so weit vor dem Standbein (in Schrittrichtung) steht er dabei: Oberschenkel waagerecht
+  const KV_Y = 0.42; // so hoch kommt der Fuß dabei (Meter) – das Knie steht dann über Hüfthöhe
+  const KV_VOR = 0.32; // so weit vor dem Standbein (in Schrittrichtung) steht er dabei
   const KV_WEICH = 0.05; // weiche Grenze der Hüfthöhe, wo ein Bein nicht mehr reicht (Meter)
   const KV_DREH = 0.63; // erst ab hier (Anteil) dreht alles in den Stand
   const kvHoch = (u) => (u < KV_A ? smooth(u / KV_A) : 1 - ((u - KV_A) / (1 - KV_A)) ** 3);
