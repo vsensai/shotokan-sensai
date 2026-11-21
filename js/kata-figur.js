@@ -1413,6 +1413,7 @@
     let lupe = 1;
     let clock = 0;
     let moving = false;
+    let dann = null; // danach gleich weiter: [a, b] (run mit drittem Wert)
     let drag = null;
     let rough = false;
     let raf = 0;
@@ -1579,7 +1580,8 @@
       if (!on || !node.isConnected) return;
       if (moving) {
         t = Math.min(tEnd, t0 + (now - clock) / 1000 / lupe);
-        if (t >= tEnd) moving = false;
+        if (t >= tEnd && dann) { t0 = t = dann[0] / lupe; tEnd = dann[1] / lupe; clock = now; dann = null; }
+        else if (t >= tEnd) moving = false;
       }
       draw();
       if (moving) E.quality.tick(now, cv.width * cv.height);
@@ -1647,11 +1649,12 @@
       end: (i) => anim.ends[i] * lupe,
       // … samt Zurückschnappen danach (Uraken in Heian Sandan) – Ende einer von Hand weitergeschalteten Bewegung
       fertig: (i) => anim.fertig[i] * lupe,
-      // ab Zeitpunkt a in Echtzeit laufen, bis b (ohne b: bis zum Schluss)
-      run(a, b) { t0 = t = a / lupe; tEnd = b == null ? anim.dur : b / lupe; clock = performance.now(); moving = tEnd > t0; E.quality.begin(); request(); },
+      // ab Zeitpunkt a in Echtzeit laufen, bis b (ohne b: bis zum Schluss); mit weiter = [a2, b2] danach ohne Halt von a2 bis b2
+      // (die Wartezeit dazwischen fällt weg)
+      run(a, b, weiter) { t0 = t = a / lupe; tEnd = b == null ? anim.dur : b / lupe; dann = weiter || null; clock = performance.now(); moving = tEnd > t0 || !!dann; E.quality.begin(); request(); },
       // Standbild zum Zeitpunkt a
-      show(a) { t = a / lupe; moving = false; request(); },
-      freeze() { moving = false; request(); },
+      show(a) { t = a / lupe; moving = false; dann = null; request(); },
+      freeze() { moving = false; dann = null; request(); },
       time: () => t * lupe,
       zoom: (z) => (z == null ? zoom : setZoom(z)),
       // gerechneter Ablauf des gewählten Takts (für den Bewegungs-Editor)

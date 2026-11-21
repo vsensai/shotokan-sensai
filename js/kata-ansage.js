@@ -1051,8 +1051,13 @@
     function figShow(move) {
       if (view === 'karte') return;
       fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe);
-      if (move) fig.run(steps[idx].t, fig.fertig(idx)); // mit Zurückschnappen (Uraken), wie in der Kata
-      else fig.show(fig.end(idx));
+      if (!move) { fig.show(fig.end(idx)); return; }
+      // Steht die Figur noch mitten in der vorigen Bewegung (Standbild im Treffer, Pause), spielt sie diese erst zu Ende –
+      // sonst spränge der Uraken in Heian Sandan beim Weiterschalten von der Zählstellung in die zurückgezogene Haltung
+      const vor = idx - 1;
+      const jetzt = fig.time();
+      if (vor >= 0 && jetzt >= steps[vor].t - 1e-6 && jetzt < fig.fertig(vor) - 1e-3) fig.run(jetzt, fig.fertig(vor), [steps[idx].t, fig.fertig(idx)]);
+      else fig.run(steps[idx].t, fig.fertig(idx)); // mit Zurückschnappen (Uraken), wie in der Kata
     }
 
     function buildTrack() {
