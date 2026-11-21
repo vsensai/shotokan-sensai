@@ -37,7 +37,8 @@
   // und kraftvoll nach vorn auf seinen Platz
   const KV_A = 0.42;
   const KV_H = 0.54;
-  const KV_Y = 0.5; // so hoch kommt der Fuß dabei (Meter)
+  const KV_Y = 0.28; // so hoch kommt der Fuß dabei (Meter) – der Unterschenkel hängt senkrecht unter dem Knie
+  const KV_VOR = 0.36; // so weit vor dem Standbein (in Schrittrichtung) steht er dabei: Oberschenkel waagerecht
   const KV_WEICH = 0.05; // weiche Grenze der Hüfthöhe, wo ein Bein nicht mehr reicht (Meter)
   const KV_DREH = 0.2; // erst so weit (Anteil) ins Stampfen hinein dreht alles in den Stand
   const kvHoch = (u) => (u < KV_A ? smooth(u / KV_A) : u < KV_H ? 1 : 1 - ((u - KV_H) / (1 - KV_H)) ** 3);
@@ -532,15 +533,18 @@
         }
         seg.lookAbs = [A.byaw + A.up.look, B.byaw + B.up.look];
         if (o.knieVor) {
-          // Punkt, über dem das Knie hochkommt: auf der Höhe des Standfußes (ein wenig voraus), beim Vorbeigehen neben ihm;
-          // die Hüfte steht dabei über dem Standfuß
+          // Wo der Fuß hochkommt: auf seiner Spur auf der Höhe des Standfußes (beim Vorbeigehen neben ihm), von dort ein Stück
+          // in Schrittrichtung vor – so steht das Knie vor dem Körper auf Hüfthöhe. Die Hüfte steht dabei über dem Standfuß
           const a = A.low[s].c;
           const ab = sub(B.low[s].c, a);
           const sp = A.low[other(s)].c;
-          let kp = add(a, mul(ab, clamp(dot(sub(sp, a), ab) / dot(ab, ab), 0.15, 0.6)));
+          let spur = add(a, mul(ab, clamp(dot(sub(sp, a), ab) / dot(ab, ab), 0, 0.6)));
           const pl = seg.feet[s];
-          if (pl.k > 0) kp = mix(kp, pl.near, pl.k);
-          seg.kv = { s, kp, pk: mix(sp, kp, 0.25) };
+          if (pl.k > 0) spur = mix(spur, pl.near, pl.k);
+          const kp = add(spur, mul(fw, Math.min(KV_VOR, 0.6 * len(sub(B.low[s].c, spur)))));
+          seg.kv = { s, kp, pk: mix(sp, spur, 0.3) };
+          // das Anheben beginnt gleich mit dem Eindrehen – sonst stünde das Bein dazwischen kurz still
+          pl.u0 = 0;
         }
       }
     }
