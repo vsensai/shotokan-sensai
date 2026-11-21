@@ -36,10 +36,14 @@
   // bis KV_A kommt das Knie direkt vor dem Körper am Standbein hoch, bis KV_H hält es kurz, dann stampft der Fuß schnell
   // und kraftvoll nach vorn auf seinen Platz
   const KV_A = 0.42;
-  const KV_H = 0.56;
-  const kvHoch = (u) => (u < KV_A ? smooth(u / KV_A) : u < KV_H ? 1 : 1 - ((u - KV_H) / (1 - KV_H)) ** 2);
+  const KV_H = 0.54;
+  const KV_Y = 0.5; // so hoch kommt der Fuß dabei (Meter)
+  const KV_WEICH = 0.05; // weiche Grenze der Hüfthöhe, wo ein Bein nicht mehr reicht (Meter)
+  const KV_DREH = 0.2; // erst so weit (Anteil) ins Stampfen hinein dreht alles in den Stand
+  const kvHoch = (u) => (u < KV_A ? smooth(u / KV_A) : u < KV_H ? 1 : 1 - ((u - KV_H) / (1 - KV_H)) ** 3);
   const kvAuf = (u) => (u < KV_A ? smooth(u / KV_A) : 1);
-  const kvVor = (u) => (u < KV_H ? 0 : 1 - (1 - (u - KV_H) / (1 - KV_H)) ** 2);
+  // nach vorn: aus dem Halten ohne Ruck anlaufen, dann schnell; hinunter wird er immer schneller (kvHoch)
+  const kvVor = (u) => (u < KV_H ? 0 : smooth((u - KV_H) / (1 - KV_H)));
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
   const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
   const STRIKE = 0.17; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
@@ -509,7 +513,7 @@
         // p1: bis hier das Eindrehen in die Schrittrichtung (entfällt, wenn der Körper schon so steht); p3: ab hier die Drehung in den Stand
         const p1 = Math.abs(rel) > 5 ? 0.24 : 0;
         // (Knie vor dem Körper: das Eindrehen in den Stand beginnt mit dem Stampfen)
-        const p3 = o.knieVor ? p1 + KV_H * (1 - p1) : 0.74;
+        const p3 = o.knieVor ? p1 + (KV_H + KV_DREH * (1 - KV_H)) * (1 - p1) : 0.74;
         seg.yawAt = (u) => (u < p1 ? lerp(A.byaw, yawMid, smooth(u / p1)) : u < p3 ? yawMid : lerp(yawMid, B.byaw, smooth((u - p3) / (1 - p3))));
         seg.feet[s].u0 = p1;
         // die Hüfte geht genau mit dem Fuß mit – liefe sie schon beim Eindrehen los, hinge das hintere Bein weit zurück
@@ -629,7 +633,7 @@
         const cc = wv > 0 ? mix(seg.kv.kp, fb.c, wv) : mix(fa.c, seg.kv.kp, kvAuf(uf));
         const yw = byaw + lerp(fa.rel, fb.rel, wv);
         const ak = sub(cc, mul(fwd(yw), FOOT_MID));
-        Object.assign(P[s], { x: ak[0], z: ak[1], y: lerp(fa.y, fb.y, wv) + (seg.hochY || HOCH) * hoch, yaw: yw, pitch: lerp(fa.pitch, fb.pitch, wv) - 25 * hoch });
+        Object.assign(P[s], { x: ak[0], z: ak[1], y: lerp(fa.y, fb.y, wv) + KV_Y * hoch, yaw: yw, pitch: lerp(fa.pitch, fb.pitch, wv) - 25 * hoch });
       }
       // Stampfschritt aus dem Stand: Knie hoch (Fuß fast noch über seinem Platz), dann weit nach vorn und hart hinunter
       if (seg.ab && seg.ab.s === s) {
@@ -662,7 +666,11 @@
       const r = len(sub([P[s].x, P[s].z], hip));
       // neigt sich der Oberkörper zur Seite (roll), steht ein Hüftgelenk höher – das Bein muss trotzdem reichen
       const tilt = A.up.roll || B.up.roll ? Math.max(0, (s === 'L' ? -1 : 1) * HIP * Math.sin(up.roll * RAD)) + 0.004 : 0;
-      h = Math.min(h, P[s].y + Math.sqrt(Math.max(0.01, LEG * LEG - r * r)) - tilt);
+      const reach = P[s].y + Math.sqrt(Math.max(0.01, LEG * LEG - r * r)) - tilt;
+      // Knie vor dem Körper (kv): die Grenze weich abgerundet, sonst ruckt die Hüfte, wenn das hintere Bein beim Eindrehen
+      // nicht mehr reicht und beim Abheben wieder frei wird (an den Enden der Bewegung hart wie sonst)
+      const wk = seg.kv ? ramp(0, 0.12, u) * (1 - ramp(0.88, 1, u)) : 0;
+      h = wk > 0 ? lerp(Math.min(h, reach), -KV_WEICH * Math.log(Math.exp(-h / KV_WEICH) + Math.exp(-reach / KV_WEICH)), wk) : Math.min(h, reach);
     });
     P.pelvis = [pel[0], h, pel[1]];
     return E.full(P);
