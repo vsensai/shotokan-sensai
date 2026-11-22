@@ -1433,7 +1433,108 @@
   // des Lexikons losspringt
   KATA['ryoken-mune-mae'] = STILL(M(S.zks, { hR: ND_START.hR, hL: ND_START.hL, eR: ND_START.eR, eL: ND_START.eL }));
 
+  /* ---------- Hüfteinsatz: die Hüfte arbeitet bei Abwehr, Stoß und Schlag mit ---------- */
+  // Die Kraft kommt aus der Körpermitte (Tanden): die Hüfte dreht bzw. schiebt zuerst, Oberkörper und Arm folgen und
+  // kommen zusammen im Ziel an. Die Abläufe unten ersetzen die gleichnamigen des Lexikons. Die freigegebenen Kata behalten
+  // bis zur Abnahme durch den Nutzer die Abläufe davor (BISHER → SK.fig3dKataBisher; js/kata-figur.js nimmt sie zuerst).
+  const BISHER = {};
+  const NEU = (id, def) => { if (!(id in BISHER)) BISHER[id] = D[id]; D[id] = def; };
+  const mixv = (a, b, u) => (typeof a === 'number' ? a + (b - a) * u : Array.isArray(a) ? a.map((x, i) => mixv(x, b[i], u))
+    : isObj(a) ? Object.fromEntries(Object.keys(a).map((k) => [k, mixv(a[k], b[k], u)])) : u < 0.5 ? a : b);
+  const HUEFTE = ['pelvis', 'yaw', 'roll', 'L', 'R', 'w'];
+  const RUMPF = ['chest', 'lean', 'tilt'];
+  // Zwischenbild „Hüfte voraus“: Hüfte und Füße schon zu h, der Oberkörper zu r, die Arme erst zu a ihres Weges
+  function VORAUS_BILD(pa, pb, h = 0.65, r = 0.5, a = 0.3) {
+    const fa = E.full(pa);
+    const fb = E.full(pb);
+    const o = {};
+    for (const k in fb) o[k] = mixv(fa[k], fb[k], HUEFTE.includes(k) ? h : RUMPF.includes(k) ? r : a);
+    return o;
+  }
+  // Vor jeden Kime nach einem Halten, bei dem die Hüfte dreht, das Zwischenbild setzen (bei 40 % der Zeit, Anlauf 'in')
+  function VORAUS(def) {
+    const K = def.keys;
+    const same = (x, y) => JSON.stringify(E.full(x)) === JSON.stringify(E.full(y));
+    const out = [];
+    K.forEach((k, i) => {
+      if (k.e === 'kime' && i > 1 && same(K[i - 1].p, K[i - 2].p) && Math.abs(E.full(k.p).yaw - E.full(K[i - 1].p).yaw) >= 8)
+        out.push({ t: K[i - 1].t + 0.4 * (k.t - K[i - 1].t), p: VORAUS_BILD(K[i - 1].p, k.p), e: 'in' });
+      out.push(k);
+    });
+    return M(def, { keys: out });
+  }
+  const P_ZKS = S.zks.pelvis;
+  // Hüfte des Zenkutsu-dachi auf yaw drehen; über Shomen hinaus zur Gegenseite (Gyaku-hanmi) rückt sie etwas zurück und
+  // tiefer, sonst reicht das gestreckte hintere Bein nicht mehr bis zum Fuß
+  const ausholen = (p, yaw, o) => {
+    const f = E.full(p);
+    const g = f.yaw * yaw < 0 ? Math.abs(yaw) : 0;
+    return M(p, { yaw, pelvis: [f.pelvis[0], f.pelvis[1] - 0.002 * g, P_ZKS[2] - 0.006 * g] }, o);
+  };
+  const keysMit = (id, f) => M(D[id], { keys: D[id].keys.map(f) });
+
+  // Grundabwehren im Zenkutsu-dachi: ausgeholt wird mit der Hüfte frontal (Shomen, beim Gedan-barai und Uchi-uke etwas
+  // darüber hinaus zur Gegenseite), mit der Abwehr und dem Hikite dreht sie in den Hanmi
+  NEU('mv:age-uke', M(D['mv:age-uke'], { keys: [{ t: 0, p: ausholen(AU_PREP, 0) }, { t: 0.25, p: ausholen(AU_PREP, 0) },
+    { t: 0.31, p: ausholen(AU_MID, 26), e: 'in' }, D['mv:age-uke'].keys[3]] }));
+  NEU('mv:gedan-barai', M(D['mv:gedan-barai'], { keys: [{ t: 0, p: ausholen(GB_PREP, 12) }, { t: 0.25, p: ausholen(GB_PREP, 12) },
+    { t: 0.31, p: ausholen(GB_MID, -22), e: 'in' }, D['mv:gedan-barai'].keys[3]] }));
+  NEU('mv:soto-uke', VORAUS(keysMit('mv:soto-uke', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, 0) }) : k))));
+  NEU('mv:uchi-uke', VORAUS(keysMit('mv:uchi-uke', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, -10) }) : k))));
+  // Abwehren im Kokutsu-dachi: ausgeholt mit der Hüfte fast frontal, mit der Abwehr dreht sie in den Hanmi (65°)
+  ['tc:shuto-uke', 'tc:morote-uke', 'tc:haiwan-uke', 'tc:manji-uke'].forEach((id) =>
+    NEU(id, VORAUS(keysMit(id, (k, i) => (i < 2 ? M(k, { p: M(k.p, { yaw: -20 }) }) : k)))));
+  // Nagashi-uke: die Hüfte dreht mit der wischenden Hand weiter in den Hanmi und nimmt den Körper aus der Linie;
+  // die Hand bleibt dabei im Raum, wo sie war (ruhig, in einem Zug)
+  ['tc:te-nagashi-uke', 'tc:gedan-nagashi-uke'].forEach((id) =>
+    NEU(id, keysMit(id, (k, i) => M(k, { p: EINDREHEN(k.p, i < 2 ? 8 : -15) }))));
+  // Uchi-nagashi-uke: die Hüfte dreht mit zur Seite des abwehrenden linken Arms (wie in Tekki Shodan)
+  NEU('tc:uchi-nagashi-uke', keysMit('tc:uchi-nagashi-uke', (k, i) => M(k, { p: M(k.p, { yaw: [0, 0, 6, 12, 15][i] }) })));
+  // Tettsui-uchi: die Hüfte dreht mit dem Oberkörper zur Mitte ein (Summe aus Hüfte und Oberkörper wie bisher – die Arme
+  // bleiben, wo sie waren)
+  NEU('tc:tettsui-uchi', FLOW([
+    M(MZK, { hR: [-0.1, -0.12, 0.42], hL: L(H.hip) }),
+    M(MZK, { hL: L(H.hip), hR: [-0.1, 0.2, 0.32], pR: [1, 0, 0] }),
+    M(MZK, { yaw: 34, chest: -6, hL: L(H.hip), hR: [-0.2, 0.42, 0.02], eR: [-0.6, 0.3, -0.3], pR: [1, 0, 0] }),
+    M(MZK, { yaw: 26, chest: -11, hL: L(H.hip), hR: [-0.03, 0.0, 0.5], pR: [1, 0, 0] }),
+  ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3', dur: 1.3 })));
+  // Yama-zuki: die Hüfte dreht mit fast ganz nach vorn, statt nur den Oberkörper zu drehen (Oberkörper zeigt wie bisher
+  // gerade zum Gegner)
+  NEU('tc:yama-zuki', keysMit('tc:yama-zuki', (k, i) => (i === 2 ? M(k, { p: M(k.p, { yaw: -10, chest: 10, pelvis: [0, 0.7, 0.12] }) }) : k)));
+  // Age-enpi: aus dem Hanmi (Faust an der Hüfte) dreht die Hüfte nach vorn, dann steigt der Ellbogen
+  NEU('tc:age-enpi', FLOW([
+    M(S.zk, { hL: L(H.hip), hR: H.hip, eR: [-0.3, -0.5, -1] }),
+    M(S.zks, { hL: L(H.hip), hR: [-0.07, -0.14, 0.28], eR: [0.15, -1, 0.4], pR: [1, 0, 0] }),
+    M(S.zks, { hL: L(H.hip), hR: [-0.05, 0.04, 0.24], eR: [0.25, -0.3, 1], pR: [1, 0, 0] }),
+    M(S.zks, { hL: L(H.hip), hR: [0.0, 0.3, -0.03], eR: [0.4, 1, 0.6], pR: [1, 0, 0] }),
+  ], M(hit('elbowR', 'Ellbogen'), { eff: 'fistR', view: 'front3' })));
+  // Ushiro-enpi: beim Ausholen nach vorn kommt die rechte Hüfte mit vor, mit dem Ellbogen nach hinten dreht sie kräftig
+  // zurück in den Hanmi
+  const UE_H = [-15, -15, 15, 15, -15, -40];
+  NEU('tc:ushiro-enpi', keysMit('tc:ushiro-enpi', (k, i) => M(k, { p: UE_H[i] < -20 ? M(k.p, { yaw: UE_H[i], pelvis: [0, 0.7, 0.1] }) : ausholen(M(k.p, { yaw: -40 }), UE_H[i]) })));
+  // Ushiro-geri: die Hüfte richtet sich gerade (Rücken zum Ziel), der Tritt geht in einer Linie aus der Hüfte nach hinten;
+  // Blick über die rechte Schulter
+  const US_CH_H = M(US_CH, { yaw: -5, chest: 0, look: -160 });
+  NEU('mv:ushiro-geri', K(KAMAE_K, US_CH_H, M(US_CH_H, { lean: 35, R: { x: -0.08, z: -0.72, y: 0.82, yaw: 0, pitch: -90, kp: [0, -1, 0.2], tu: 1 } }), M(hit('heelR', 'Ferse'), { eff: 'heelR', view: 'side' })));
+  // Kizami-geri: die Hüfte schiebt in den Tritt nach vorn, statt zurückzuweichen
+  NEU('tc:kizami-geri', keysMit('tc:kizami-geri', (k) => (E.full(k.p).pelvis[2] < -0.01 ? M(k, { p: M(k.p, { pelvis: [0, 0.82, 0.05], lean: -14 }) }) : k)));
+  // Wendung mit Knie hoch (Furi-enpi, Uchiotoshi, Teisho-uke): die Hüfte bleibt beim Drehen tief, das Standbein gebeugt
+  const TIEF = (p, y) => BAL(M(p, { pelvis: [E.full(p).pelvis[0], y, E.full(p).pelvis[2]] }), 'L');
+  NEU('tc:furi-enpi', keysMit('tc:furi-enpi', (k, i) => (i === 2 ? M(k, { p: TIEF(k.p, 0.75) }) : k)));
+  NEU('tc:uchiotoshi', keysMit('tc:uchiotoshi', (k, i) => (i === 2 ? M(k, { p: TIEF(k.p, 0.75) }) : k)));
+  NEU('tc:teisho-uke', keysMit('tc:teisho-uke', (k, i) => (i === 2 ? M(k, { p: TIEF(k.p, 0.73) }) : k)));
+  // Otoshi-enpi und Otoshi-zuki: der Körper sinkt mit in den Schlag
+  NEU('tc:otoshi-enpi', keysMit('tc:otoshi-enpi', (k, i) => (i === 2 ? M(k, { p: M(k.p, { pelvis: [0, 0.63, 0] }) }) : k)));
+  NEU('tc:otoshi-zuki', keysMit('tc:otoshi-zuki', (k, i) => (i === 2 ? M(k, { p: M(k.p, { pelvis: [0, 0.65, P_ZKS[2]] }) }) : k)));
+  // Sanbon- und Ren-zuki: aus der Kamae mit Hüfte fast frontal, damit auch der erste Stoß mit der vorderen Hand aus der
+  // Hüfte kommt (sie dreht dabei in den Hanmi)
+  NEU('tc:sanbon-zuki', VORAUS(keysMit('tc:sanbon-zuki', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, 10) }) : k))));
+  NEU('tc:ren-zuki', VORAUS(keysMit('tc:ren-zuki', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, -10) }) : k))));
+  // Hüfte voraus bei den übrigen Techniken, deren Hüfte dreht
+  ['mv:gyaku-zuki', 'tc:tate-zuki', 'tc:ura-zuki', 'tc:nukite', 'tc:kizami-zuki', 'tc:shuto-uchi', 'tc:haito-uchi', 'tc:yama-zuki'].forEach((id) => NEU(id, VORAUS(D[id])));
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
+  SK.fig3dKataBisher = BISHER;
   SK.fig3dPose = { M, mirror, rotate, move, S, H };
 })();

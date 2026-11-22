@@ -304,7 +304,9 @@
     // sind am Körper, wenn der Fuß trifft (mit)
     'kekomi-gedan': { def: 'yoko-kekomi-gedan', side: 'R', a: 0.27, b: 0.53, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.35 },
   };
-  const defOf = (id) => D[id] || (SK.fig3dKata || {})[id];
+  // Abläufe, die das Lexikon seit der Überarbeitung des Hüfteinsatzes anders zeigt: die freigegebenen Kata behalten die
+  // Fassung davor (SK.fig3dKataBisher), bis der Nutzer die neue in der Kata gesehen und abgenommen hat
+  const defOf = (id) => (SK.fig3dKataBisher || {})[id] || D[id] || (SK.fig3dKata || {})[id];
   // Yoi-Haltung der Kata (Text „yoi“ in den Kata-Daten) → Haltung in SK.fig3dKata
   const YOI = [[/linke handfläche auf dem rücken der rechten hand/i, 'yoi-kafukubu'], [/rechte faust in der .*linken hand/i, 'yoi-faust-in-hand'], [/offene hände vor dem unterbauch/i, 'yoi-kanku']];
   // Arme, Hüftdrehung (yaw, bezogen auf die Körperrichtung), Oberkörper und Kopf (look, bezogen auf die Körperrichtung)
