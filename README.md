@@ -54,7 +54,7 @@ Das Kata-PDF und alle daraus extrahierten Texte (`tools/out/`) sind per `.gitign
 
 - Japan Karate Association: *Karate-Do Kata Vol. 1* (2003)
 - Japan Karate Association: *Karate-Do Kata Vol. 2* (2008) – daraus nur Hangetsu
-- DJKB-Prüfungsordnung (Stand Juli 2013), DJKB-Übersichten Prüfungsprogramm Kihon/Kata/Kumite – djkb.com
+- DJKB-Prüfungsordnung JKA-Karate für Kyu- und Dan-Prüfungen (Stand 2026) – djkb.com
 - Fiore Tartaglia: *Karate kompakt – Grundlagen im Überblick* (aus „Die Karate-Essenz“) – nur Fakten in eigenen Worten, keine Bilder oder Texte des Heftes; die Grafiken sind eigene Zeichnungen
 - Allgemeines Wissen u. a. nach Wikipedia (Shōtōkan, Gichin Funakoshi, Japan Karate Association)
 

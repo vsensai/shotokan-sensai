@@ -56,7 +56,7 @@
   L.mc('In welchem Jahr wurde die JKA gegründet?', ['1949', '1922', '1957', '1968'], '');
   L.mc('Wofür steht die Abkürzung DJKB?', ['Deutscher JKA-Karate Bund', 'Deutscher Judo- und Karate-Bund', 'Deutscher Jugend-Karate-Bund', 'Deutsche JKA-Kata-Bühne'], '');
   L.mc('Welche Rolle hat der DJKB in Deutschland?', ['Fachverband für traditionelles Shotokan-Karate und offizielle Vertretung der JKA', 'Olympischer Dachverband aller Kampfsportarten', 'Verband für Vollkontakt-Karate', 'Nur ein Wettkampfveranstalter'], '');
-  L.mc('Wer unterzeichnete die DJKB-Prüfungsordnung (Stand 2013) als Chefausbilder?', ['Hideo Ochi', 'Masatoshi Nakayama', 'Gichin Funakoshi', 'Motokuni Sugiura'], '', S.po);
+  L.mc('Wer unterzeichnet die DJKB-Prüfungsordnung (Stand 2026) als Chefausbilder?', ['Hideo Ochi', 'Masatoshi Nakayama', 'Gichin Funakoshi', 'Motokuni Sugiura'], '', S.po);
   L.mc('Wer war langjähriger Chefausbilder der JKA und schrieb „Best Karate“?', ['Masatoshi Nakayama', 'Gichin Funakoshi', 'Hideo Ochi', 'Anko Itosu'], '');
   L.mc('Wie wird Funakoshi im JKA-Kata-Buch bezeichnet?', ['Grand Master of the Japan Karate Association', 'Chief Instructor of DJKB', 'President of WKF', 'Founder of Kyokushin'], '', S.pdf);
   L.mc('Welches ist das offizielle Kata-Lehrbuch der JKA?', ['Karate-Do Kata (Shihan-kai)', 'Dynamic Karate', 'Karate-Do Nyumon', 'Bubishi'], '', S.pdf);
@@ -147,7 +147,7 @@
 
   // Im Quiz „Kihon – Hand“ (ki-tsuki) mit Tsuki, Uke und Uchi
   L = SK.qb('ki-tsuki', S.allg);
-  L.mc('Wie heißt die zum 8. Kyu geforderte Wendung nach Shuto-uke im Kihon?', ['Beidarmiger Gedan-barai in Zk', 'Age-uke in Kb', 'Soto-uke in Kk', 'Shuto-uke in Zk'], '', S.po);
+  L.mc('Wie heißt die zum 8. Kyu geforderte Wendung nach Shuto-uke im Kihon?', ['Gedan-barai in Zk', 'Age-uke in Kb', 'Soto-uke in Kk', 'Shuto-uke in Zk'], '', S.po);
   L.mc('Was gilt laut Grundprinzip für eine Abwehr ohne schnellen Konter?', ['Sie ist unvollständig – außer man verzichtet bewusst aus taktischen Gründen darauf', 'Sie ist immer die beste Lösung', 'Sie ist in Prüfungen verboten', 'Sie heißt Kime'], '', S.kompakt);
 
   L = SK.qb('ki-tsuki', S.allg);
@@ -173,15 +173,18 @@
   L.mc('Was ist „Okuri-Jiyu-Ippon-Kumite“?', ['Jiyu-Ippon-Kumite mit einem Folgeangriff', 'Jiyu-Ippon-Kumite ohne Ansage des Angriffsziels', 'Jiyu-Ippon-Kumite gegen zwei Angreifer', 'Jiyu-Ippon-Kumite nur mit Fußtechniken'], 'Theoriebegriff zum 1. Kyu.');
   L.mc('Was ist „Happo-Kumite“?', ['Kumite in acht Richtungen (gegen mehrere Angreifer)', 'Kumite mit fünf Angriffen', 'Kumite im Kniestand', 'Kumite mit verbundenen Augen'], 'Theoriebegriff zum 2. Dan.');
   L.mc('Was ist „Jiyu-Kumite“?', ['Freikampf', 'Einschritt-Kumite', 'Fünfschritt-Kumite', 'Kata-Anwendung'], '');
-  L.order('Ordne die Kumite-Formen nach ihrem ersten Auftreten in der DJKB-Prüfungsordnung (früheste zuerst):', ['Kihon-Ippon-Kumite (9. Kyu)', 'Gohon-Kumite (8. Kyu)', 'Jiyu-Ippon-Kumite (2. Kyu)', 'Jiyu-Kumite (2. Dan)'], '');
+  L.order('Ordne die Kumite-Formen nach ihrem ersten Auftreten in der DJKB-Prüfungsordnung (früheste zuerst):', ['Gohon-Kumite (9. Kyu)', 'Kihon-Ippon-Kumite (7. Kyu)', 'Jiyu-Ippon-Kumite (5. Kyu)', 'Jiyu-Kumite (2. Dan)'], '');
   L.multi('Welche Formen zählt die Prüfungsordnung zu „sämtlichen Formen des Partnertrainings unserer Stilrichtung“?', ['Gohon-Kumite', 'Kihon-Ippon-Kumite', 'Kaeshi-Ippon-Kumite', 'Jiyu-Ippon-Kumite', 'Okuri-Jiyu-Ippon-Kumite', 'Jiyu-Kumite'], ['Sanbon-Kumite mit Waffen', 'Randori im Liegen'], '');
   L.mc('Wie viele Angriffe führt der Angreifer beim Gohon-Kumite fortlaufend aus?', ['5', '3', '1', '7'], '');
   L.mc('Was folgt beim Gohon-Kumite nach der fünften Abwehr?', ['Gegenangriff Chudan-Gyaku-zuki mit Kiai', 'Ein Fußfeger', 'Die Verbeugung', 'Ein weiterer Block'], '');
+  L.mc('Ab welchem Grad wird laut DJKB-Prüfungsordnung Jiyu-Ippon-Kumite geprüft?', ['Ab dem 5. Kyu', 'Ab dem 7. Kyu', 'Ab dem 2. Kyu', 'Ab dem 1. Dan'], 'Zum 5. und 4. Kyu kann der Prüfer zusätzlich Kihon-Ippon-Kumite prüfen.');
+  L.mc('Ab welchem Grad werden im Jiyu-Ippon-Kumite mindestens 3 verschiedene Kontertechniken verlangt?', ['Ab dem 2. Kyu', 'Ab dem 5. Kyu', 'Ab dem 3. Kyu', 'Ab dem 1. Dan'], '');
+  L.mc('Welche Kumite-Formen werden zum 7. Kyu geprüft?', ['Gohon-Kumite und Kihon-Ippon-Kumite', 'Nur Gohon-Kumite', 'Kihon-Ippon-Kumite und Jiyu-Ippon-Kumite', 'Nur Jiyu-Ippon-Kumite'], '');
   L.mc('Aus welcher Stellung beginnt der Angreifer beim Gohon-Kumite (8. Kyu)?', ['Aus Zk (Gedan-Kamae links), erster Angriff rechts', 'Aus Kiba-dachi', 'Aus Shizentai', 'Aus Kokutsu-dachi'], '');
   L.mc('In welcher Stellung steht der Verteidiger zu Beginn des Gohon-Kumite?', ['Hachiji-dachi (Shizentai)', 'Zenkutsu-dachi', 'Kiba-dachi', 'Kokutsu-dachi'], '');
 
   L = SK.qb('ku-prinzipien', S.po);
-  L.mc('Warum wird im Kihon der Stufe I (9.–7. Kyu) nur vorwärts geübt?', ['Damit sich Anfänger besser auf die Stellung konzentrieren können', 'Weil rückwärts zu gefährlich ist', 'Weil der Platz fehlt', 'Weil Rückwärtsbewegungen nicht prüfungsrelevant sind'], '');
+  L.mc('Worauf soll sich der Anfänger im Kihon der Stufe I (9.–7. Kyu) vor allem konzentrieren?', ['Auf seine Stellung – vorwärts wie rückwärts in der jeweils richtigen Stellung', 'Auf möglichst hohe Fußtritte', 'Auf schnelle Kombinationen', 'Auf das Kiai'], 'Geübt wird in einfachen Vorwärts- und Rückwärtsbewegungen.');
   L.mc('Was ist in Stufe I beim Kumite unbedingt zu beachten?', ['Die korrekte Distanz bei Angriff, Abwehr und Konter', 'Möglichst viele Kombinationen', 'Freie Technikwahl', 'Sprungtechniken'], '');
   L.mc('Wo soll der Abwehrende in Stufe I den Angriff blocken?', ['Dicht vor seinem Körper, kraftvoll', 'Möglichst weit vom Körper entfernt', 'Gar nicht – nur ausweichen', 'Mit beiden Händen über dem Kopf'], '');
   L.mc('Worauf wird in Stufe II (6.–4. Kyu) besonderer Wert gelegt?', ['Hüftdrehung in der Abwehr und kraftvoller Konter aus derselben Stellung', 'Konter aus einer anderen Stellung', 'Freikampf', 'Kata-Bunkai'], '');

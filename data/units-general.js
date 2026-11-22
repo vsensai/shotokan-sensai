@@ -1,5 +1,5 @@
 /* Allgemeine Lerneinheiten (Etikette, Geschichte, Begriffe, Stände, Kihon, Kumite).
-   Quellen: DJKB-Prüfungsordnung 2013, allgemeines Shotokan-Wissen. */
+   Quellen: DJKB-Prüfungsordnung (Stand 2026), allgemeines Shotokan-Wissen. */
 (function () {
   'use strict';
   const G = SK.gfx;
@@ -238,9 +238,9 @@
           id: 'ku-formen', title: 'Kumite-Formen', minGrade: '9kyu',
           learn: () => `
             <ul>
-              <li><b>Gohon-Kumite</b> – Fünfschritt-Kumite: 5 Angriffe fortlaufend, 5 Abwehren, dann Gegenangriff mit Kiai (DJKB: 8. und 7. Kyu).</li>
-              <li><b>Kihon-Ippon-Kumite</b> – Einschritt-Grundkumite: ein angesagter Angriff, Abwehr und Konter (DJKB: 9. Kyu sowie 6.–3. Kyu).</li>
-              <li><b>Jiyu-Ippon-Kumite</b> – freies Einschritt-Kumite aus Chudan-Kamae (DJKB: 2. Kyu bis 1. Dan).</li>
+              <li><b>Gohon-Kumite</b> – Fünfschritt-Kumite: 5 Angriffe fortlaufend, 5 Abwehren, dann Gegenangriff mit Kiai (DJKB: 9. bis 7. Kyu).</li>
+              <li><b>Kihon-Ippon-Kumite</b> – Einschritt-Grundkumite: ein angesagter Angriff, Abwehr und Konter (DJKB: 7. und 6. Kyu, zum 5. und 4. Kyu nach Ermessen des Prüfers).</li>
+              <li><b>Jiyu-Ippon-Kumite</b> – freies Einschritt-Kumite aus Chudan-Kamae (DJKB: 5. Kyu bis 1. Dan; ab dem 2. Kyu mindestens 3 verschiedene Konter).</li>
               <li><b>Okuri-Jiyu-Ippon-Kumite</b> – Jiyu-Ippon-Kumite mit Folgeangriff (Theorie 1. Kyu).</li>
               <li><b>Kaeshi-Ippon-Kumite</b> – Einschritt-Kumite mit Gegenangriff des Verteidigers und erneuter Abwehr.</li>
               <li><b>Jiyu-Kumite</b> – freier Kampf (DJKB: ab 2. Dan, alternativ Jiyu-Ippon je nach Alter).</li>
@@ -253,8 +253,8 @@
           learn: () => `
             <p>Aus den Vorbemerkungen der DJKB-Prüfungsordnung:</p>
             <ul>
-              <li><b>Stufe I (9.–7. Kyu)</b>: Kihon nur vorwärts, damit sich Anfänger auf die Stellung konzentrieren können. Im Kumite zielgenau und mit korrekter Distanz – der Abwehrende blockt dicht vor seinem Körper kraftvoll.</li>
-              <li><b>Stufe II (6.–4. Kyu)</b>: Hüftdrehung in der Abwehr und kraftvoller Konter; Abwehr und Konter aus der gleichen Stellung.</li>
+              <li><b>Stufe I (9.–7. Kyu)</b>: Kihon in einfachen Vorwärts- und Rückwärtsbewegungen – der Anfänger konzentriert sich vor allem auf die richtige Stellung. Im Kumite zielgenau und mit korrekter Distanz – der Abwehrende blockt dicht vor seinem Körper kraftvoll.</li>
+              <li><b>Stufe II (6.–4. Kyu)</b>: Hüftdrehung in der Abwehr und kraftvoller Konter; Abwehr und Konter aus der gleichen Stellung. Zum 6. Kyu Kihon-Ippon-, zum 5. und 4. Kyu Jiyu-Ippon-Kumite.</li>
               <li>Kihon-Ippon: Der Angreifer greift so an, als gäbe es nur eine Chance; der Verteidiger steht zunächst ruhig in <b>Shizentai</b> – das schult die psychische Stabilität.</li>
               <li><b>Stufe III (3. Kyu – Dan)</b>: Konter aus einer <i>anderen</i> Stellung als die Abwehr – der Stellungswechsel verstärkt den Konter (Gewichtsverlagerung und Hüftdrehung).</li>
               <li>Jiyu-Ippon-Kumite schult Distanz, Timing, schnelle Entscheidungen und das Überwinden eigener Unsicherheiten. Der Abwehrende darf den Abstand nicht vergrößern, sondern blockt bzw. weicht auf kurzer Distanz aus und kontert kraftvoll.</li>

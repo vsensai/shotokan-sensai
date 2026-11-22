@@ -1096,13 +1096,13 @@
           'a',
           { class: 'grade', href: `#/exam/${g.id}` },
           el('span', { class: `belt ${g.cls}` }),
-          el('span', {}, el('span', { class: 'grade-name', text: g.name }), el('span', { class: 'grade-sub muted small', text: `${g.belt} · ${kata} · ${g.kumite.form}` }))
+          el('span', {}, el('span', { class: 'grade-name', text: g.name }), el('span', { class: 'grade-sub muted small', text: `${g.belt} · ${kata} · ${[g.kumite].concat(g.kumite.dazu || []).map((k) => k.form).join(' + ')}` }))
         )
       );
     });
     app.append(
       el('h1', { text: 'Prüfungen' }),
-      el('p', { class: 'muted', text: 'DJKB-Prüfungsprogramm je Gürtel – genau das, was in der Prüfung verlangt wird: Kihon, Kata und Kumite nach der DJKB-Prüfungsordnung (Stand Juli 2013) und den DJKB-Übersichten.' }),
+      el('p', { class: 'muted', text: 'DJKB-Prüfungsprogramm je Gürtel – genau das, was in der Prüfung verlangt wird: Kihon, Kata und Kumite nach der DJKB-Prüfungsordnung (Stand 2026).' }),
       list,
       el('p', { class: 'muted small', text: 'Angaben ohne Gewähr – maßgeblich ist die jeweils gültige DJKB-Prüfungsordnung.' })
     );
@@ -1154,15 +1154,18 @@
       ];
     }
     if (tab === 'kumite') {
-      const k = g.kumite;
-      const jiyu = k.form === 'Jiyu-Ippon-Kumite';
+      // Eine Kumite-Form je Block; der 7. Kyu hat zwei (Gohon- und Kihon-Ippon-Kumite, `dazu`)
+      const forms = [g.kumite].concat(g.kumite.dazu || []);
+      const jiyu = forms.some((k) => k.form === 'Jiyu-Ippon-Kumite');
       return [
-        el('h3', { text: k.form }),
-        k.ziel ? el('p', { class: 'prog-ziel' }, el('b', { text: 'Ziel: ' }), k.ziel) : '',
-        k.text ? k.text.map((t) => el('p', { text: t })) : '',
-        k.angriff ? [el('h4', { text: `Angriff (Kogeki)${k.angriffVon ? ` – ${k.angriffVon}` : ''}` }), plainList(k.angriff)] : '',
-        k.abwehr ? [el('h4', { text: 'Abwehr (Uke)' }), k.abwehrNote ? el('p', { class: 'prog-reps', text: k.abwehrNote }) : '', plainList(k.abwehr)] : '',
-        k.ablauf ? [el('h4', { text: 'Ablauf' }), plainList(k.ablauf)] : '',
+        forms.map((k) => [
+          el('h3', { text: k.form }),
+          k.text ? k.text.map((t) => el('p', { text: t })) : '',
+          k.angriff ? [el('h4', { text: `Angriff (Kogeki)${k.angriffVon ? ` – ${k.angriffVon}` : ''}` }), plainList(k.angriff)] : '',
+          k.abwehr ? [el('h4', { text: 'Abwehr (Uke)' }), plainList(k.abwehr)] : '',
+          k.ablauf ? [el('h4', { text: 'Ablauf' }), plainList(k.ablauf)] : '',
+          k.hinweis ? el('p', { class: 'muted', text: k.hinweis }) : '',
+        ]),
         stufe ? focusBox(`Schwerpunkte ${stufe.name}`, stufe.kumite) : '',
         jiyu ? focusBox('Jiyu-Ippon-Kumite – worauf es ankommt', SK.examJiyuIppon) : '',
       ];
@@ -1200,7 +1203,7 @@
     function show() {
       bar.querySelectorAll('.tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === examTab)));
       panel.innerHTML = '';
-      panel.append(...[examPanel(g, examTab)].flat(3).filter(Boolean));
+      panel.append(...[examPanel(g, examTab)].flat(Infinity).filter(Boolean));
     }
     show();
     const prev = pages[pos - 1];
@@ -1208,10 +1211,10 @@
     app.append(
       el('nav', { class: 'crumbs' }, el('a', { href: '#/exam', text: 'Prüfungen' }), ' › ', el('span', { text: g.name })),
       el('h1', {}, el('span', { class: `belt big ${g.cls}` }), ` ${g.name}`),
-      el('p', { class: 'muted' }, g.belt, g.wait ? [el('br'), `Wartezeit/Voraussetzung: ${g.wait}`] : ''),
+      el('p', { class: 'muted', text: g.belt }),
       bar,
       panel,
-      el('p', { class: 'src', text: `Quelle: ${SK.sources.po}; ${SK.sources.ueb}` }),
+      el('p', { class: 'src', text: `Quelle: ${SK.sources.po}` }),
       el(
         'nav',
         { class: 'pager' },
