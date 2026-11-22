@@ -1533,6 +1533,45 @@
   // Hüfte voraus bei den übrigen Techniken, deren Hüfte dreht
   ['mv:gyaku-zuki', 'tc:tate-zuki', 'tc:ura-zuki', 'tc:nukite', 'tc:kizami-zuki', 'tc:shuto-uchi', 'tc:haito-uchi', 'tc:yama-zuki'].forEach((id) => NEU(id, VORAUS(D[id])));
 
+  // Hüftvibration: auch wo die Hüfte am Ende steht wie vorher, federt sie zu Beginn der Bewegung kurz gegen die Technik
+  // und schnappt mit der Kime zurück (o.yaw Grad, bei beidarmigen Techniken o.z/o.y Meter: kurz zurück und hoch, dann
+  // vor und gesetzt). Nur bei schnellen Techniken – langsame bleiben ruhig. Abläufe mit Halten vor der Kime bekommen ein
+  // Bild bei 35 % der Zeit (Hüfte ganz ausgefedert, Arme erst bei 30 %), fließende Abläufe (FLOW) einen Bogen über alle
+  // Bilder: ausfedern bis 30 % des Weges, dann zurück bis zum Treffer.
+  function IMPULS(def, o) {
+    const K = def.keys;
+    const auf = (p, b) => {
+      const f = E.full(p);
+      return M(p, { yaw: f.yaw + (o.yaw || 0) * b, pelvis: [f.pelvis[0], f.pelvis[1] + (o.y || 0) * b, f.pelvis[2] + (o.z || 0) * b] });
+    };
+    if (K.filter((k) => k.e === 'lin').length > 4) {
+      const t0 = K[1].t;
+      const t1 = K[K.length - 1].t;
+      const bogen = (u) => (u < 0.3 ? Math.sin((Math.PI / 2) * (u / 0.3)) : Math.cos((Math.PI / 2) * ((u - 0.3) / 0.7)));
+      return M(def, { keys: K.map((k, i) => (i < 2 ? k : M(k, { p: auf(k.p, bogen((k.t - t0) / (t1 - t0))) }))) });
+    }
+    const same = (x, y) => JSON.stringify(E.full(x)) === JSON.stringify(E.full(y));
+    const out = [];
+    K.forEach((k, i) => {
+      if (k.e === 'kime' && i > 1 && same(K[i - 1].p, K[i - 2].p)) {
+        out.push({ t: K[i - 1].t + 0.35 * (k.t - K[i - 1].t), p: auf(VORAUS_BILD(K[i - 1].p, k.p, 0, 0, 0.3), 1), e: 'out' });
+        const pe = E.full(k.p).pelvis;
+        out.push(o.setzen ? M(k, { p: M(k.p, { pelvis: [pe[0], pe[1] - o.setzen, pe[2]] }) }) : k);
+      } else out.push(k);
+    });
+    return M(def, { keys: out });
+  }
+  // Ein Arm: die Hüfte federt auf der Seite des Arms kurz zurück (rechter Arm: negativ), bei Techniken zur Seite (Uraken,
+  // Yoko-enpi) zuerst kurz zur Gegenseite
+  [['tc:choku-zuki', -7], ['tc:kagi-zuki', -7], ['tc:osae-uke', -6], ['tc:tsukami-uke', -6], ['tc:uraken-uchi', 7]].forEach(([id, yaw]) => NEU(id, IMPULS(D[id], { yaw })));
+  // Yoko-enpi: Hüfte federt beim Ausholen kurz nach links, mit dem Schlag schiebt sie etwas zur Seite des Ellbogens nach
+  NEU('tc:yoko-enpi', keysMit('tc:yoko-enpi', (k, i) => (i === 2 ? M(k, { p: M(k.p, { yaw: 6 }) }) : i === 3 ? M(k, { p: M(k.p, { pelvis: [-0.02, 0.68, 0] }) }) : k)));
+  // Beide Arme: kurz zurück und hoch, mit der Kime vor und etwas gesetzt
+  ['tc:morote-zuki', 'tc:awase-zuki', 'tc:juji-uke'].forEach((id) => NEU(id, IMPULS(D[id], { z: -0.03, y: 0.015, setzen: 0.015 })));
+  NEU('tc:hasami-uchi', IMPULS(D['tc:hasami-uchi'], { z: -0.03, y: 0.015 }));
+  // Otoshi-enpi und Otoshi-zuki: vor dem Absinken kommt die Hüfte kurz hoch
+  ['tc:otoshi-enpi', 'tc:otoshi-zuki'].forEach((id) => NEU(id, IMPULS(D[id], { y: 0.025 })));
+
   SK.fig3dDefs = D;
   SK.fig3dKata = KATA;
   SK.fig3dKataBisher = BISHER;
