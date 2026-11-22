@@ -486,6 +486,18 @@
     });
   }
 
+  // Haiwan: Rückseite des Unterarms – dieselbe Armhaltung wie Zenwan, die Finger zeigen in die Beuge,
+  // Handrücken und Unterarmrücken liegen außen; markiert ist die Außenkante des Unterarms
+  function haiwan() {
+    return bild('Arm', (z) => {
+      const a = arm(z, [44, 194], -104, -23, { y: [70, 200], fingerInnen: true, falte: [[40, 35], [32, 34.5], [24, 32]], s: 1.22, aermel: 84 });
+      const kante = linie(a.g.T2, [[26, 1], [60, 1.5], [96, 3]]);
+      return `${titel('rechter Arm von der Seite', 100)}
+        ${a.out}${z.schein(kante, 26, '#e53935', 0.2, a.haut)}${a.aermel}
+        ${legende([['Rückseite des Unterarms']])}`;
+    });
+  }
+
   // Rechtes Bein von außen, Knie gehoben: S = Kniespitze, w1 = Richtung zur Hüfte, w2 = zum Fuß
   function hiza() {
     return bild('Bein', (z) => {
@@ -516,6 +528,6 @@
     seiken: () => faust('seiken'), uraken: () => faust('uraken'), tettsui: () => faust('tettsui'),
     shuto: () => hand('shuto'), haito: () => hand('haito'), nukite: () => hand('nukite'), teisho: () => hand('teisho'), haishu: () => hand('haishu'),
     koshi: () => fuss('koshi'), kakato: () => fuss('kakato'), haisoku: () => fuss('haisoku'), sokuto: () => fuss('sokuto'),
-    hiji, hiza, zenwan,
+    hiji, hiza, zenwan, haiwan,
   };
 })();
