@@ -76,6 +76,16 @@
     const dx = x - sx * Math.cos(a), wz = -sx * Math.sin(a), dy = y + 0.035;
     return aim(p, [x, y, wz + Math.sqrt(Math.max(0, 0.556 * 0.556 - dx * dx - dy * dy))]);
   }
+  // Hüfte um deg Grad weiterdrehen (wie yaw), Arme bleiben dabei im Raum, wo sie sind: Hände, Ellbogen und Handrichtungen
+  // stehen in Brustkoordinaten und drehen deshalb um denselben Winkel zurück
+  function EINDREHEN(p, deg) {
+    const f = E.full(p);
+    const a = (deg * Math.PI) / 180;
+    const r = (v) => (v ? [v[0] * Math.cos(a) - v[2] * Math.sin(a), v[1], v[0] * Math.sin(a) + v[2] * Math.cos(a)] : v);
+    const o = { yaw: f.yaw + deg };
+    ['hL', 'hR', 'eL', 'eR', 'pL', 'pR', 'fL', 'fR'].forEach((k) => { if (p[k]) o[k] = r(p[k]); });
+    return M(p, o);
+  }
   // Stoßhand(e) markieren: Faust dreht sich erst am Ende des Stoßes (Wert 1 = 180°, 0,5 = senkrechte Faust)
   const TWIST = (def, sides, amt = 1) => M(def, { keys: def.keys.map((k) => M(k, { p: M(k.p, ...sides.split('').map((c) => ({ ['s' + c]: amt }))) })) });
   // Ellbogen-Richtungen (Brustkoordinaten)
@@ -528,11 +538,14 @@
   // Rot markiert ist die Stelle des linken Unterarms, die beim Wegschieben den angreifenden Arm berührt (hit.t);
   // das Standbild zeigt die Ausgangsstellung (best: 0)
   const W_KK = (v) => aim(S.kk, v);
+  // Die Hüfte dreht dabei ein (zum Gegner hin, SNU_EIN Grad) – die Hände bleiben im Raum, wo sie waren; erst der Stoß zur
+  // Seite danach (Heian Nidan 3, kokutsu-zuki) dreht sie wieder heraus in den Hanmi des Kokutsu-dachi
+  const SNU_EIN = 40;
   D['tc:soto-nagashi-uke'] = FLOW([
     HAIWAN_END,
-    M(S.kk, { hL: [0.32, 0.22, 0.3], eL: [0.5, -1, 0.2], pL: [-0.4, 0, 0.9], hR: [-0.12, 0.24, 0.2], eR: [-1, -0.3, 0.1] }),
-    M(S.kk, { hL: [0.02, 0.2, 0.36], eL: [0.3, -1, 0.4], pL: [-1, 0, 0.3], hR: [-0.05, -0.02, 0.26], eR: [-1, -0.4, 0.2] }),
-    M(S.kk, { hL: [-0.15, 0.1, 0.03], eL: [0.8, -0.8, 0.5], pL: [-0.5, 0, -0.9], hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }),
+    EINDREHEN(M(S.kk, { hL: [0.32, 0.22, 0.3], eL: [0.5, -1, 0.2], pL: [-0.4, 0, 0.9], hR: [-0.12, 0.24, 0.2], eR: [-1, -0.3, 0.1] }), SNU_EIN / 3),
+    EINDREHEN(M(S.kk, { hL: [0.02, 0.2, 0.36], eL: [0.3, -1, 0.4], pL: [-1, 0, 0.3], hR: [-0.05, -0.02, 0.26], eR: [-1, -0.4, 0.2] }), (SNU_EIN * 2) / 3),
+    EINDREHEN(M(S.kk, { hL: [-0.15, 0.1, 0.03], eL: [0.8, -0.8, 0.5], pL: [-0.5, 0, -0.9], hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }), SNU_EIN),
   ], M(hit('elbowL', 'Unterarm'), { hit: { t: 0.62 }, best: 0, eff: 'fistL', view: 'front', yaw: -100 }));
   // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn – nur der Block, der Uraken danach gehört nicht dazu:
   // aus dem Ende von 8 (linke Faust an der Hüfte, rechts Chudan Uchi-uke) streckt sich der rechte Arm weit schräg nach unten,
