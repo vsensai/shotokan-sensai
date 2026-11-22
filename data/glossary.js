@@ -125,8 +125,8 @@
 
     ['Ashi-sabaki', 'Fußarbeit: alle Schritte, mit denen man Distanz und Richtung ändert', 'ashi', null, KO],
     ['Ayumi-ashi', 'Normaler Schritt: der hintere Fuß wird zum vorderen (die Beine wechseln); bei Ständen mit Breite kommt er in der Schrittmitte zum Standbein (Bogen)', 'ashi', as('ayumi-ashi'), KO],
-    ['Suri-ashi', 'Gleitschritt: der vordere Fuß gleitet vor, der hintere zieht nach – die Beinstellung bleibt', 'ashi', as('suri-ashi'), PO],
-    ['Yori-ashi', 'Beide Füße gleiten gemeinsam, der Stand bleibt erhalten', 'ashi', as('yori-ashi'), PDF(38)],
+    ['Suri-ashi', 'Gleitschritt in zwei Teilen: erst gleitet der vordere Fuß vor (der Stand wird kurz länger), dann zieht der hintere nach – die Beinstellung bleibt; rückwärts gleitet der hintere Fuß zuerst', 'ashi', as('suri-ashi'), PO],
+    ['Yori-ashi', 'Gleitschritt in einem Zug: der hintere Fuß stößt ab, beide Füße gleiten fast gleichzeitig – der Stand bleibt die ganze Zeit gleich lang', 'ashi', as('yori-ashi'), PDF(38)],
     ['Tai-sabaki', 'Körperausweichbewegung', 'ashi', as('tai-sabaki'), PO],
 
 

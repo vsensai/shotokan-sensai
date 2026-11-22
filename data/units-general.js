@@ -172,8 +172,9 @@
             <h4>Die Unterschiede</h4>
             <ul>
               <li>Beim normalen Schritt (<b>Ayumi-ashi</b>) wechseln die Beine: der hintere Fuß wird zum vorderen. Bei Ständen mit Breite (z. B. Zenkutsu-dachi) kommen die Füße in der Mitte des Schritts zusammen – der Fuß beschreibt einen Bogen.</li>
-              <li>Beim Gleitschritt (<b>Suri-ashi</b>) wechseln sie nicht: der vordere Fuß gleitet vor, der hintere zieht nach – vorne bleibt vorne. So kommt man schnell in die Distanz, z. B. mit Kizami-zuki.</li>
-              <li>Bei <b>Yori-ashi</b> gleiten beide Füße gleichzeitig, der Stand bleibt – für kleine Distanzänderungen, Rhythmuswechsel und um einen Angriff zu verschleiern. Kommt in vielen Kata vor (z. B. Heian Sandan, Tekki).</li>
+              <li>Beim Gleitschritt (<b>Suri-ashi</b>) wechseln sie nicht: erst gleitet der vordere Fuß vor, dann zieht der hintere nach – vorne bleibt vorne. Rückwärts geht es umgekehrt, der hintere Fuß gleitet zuerst. So kommt man schnell in die Distanz, z. B. mit Kizami-zuki.</li>
+              <li>Bei <b>Yori-ashi</b> stößt der hintere Fuß ab und beide Füße gleiten fast gleichzeitig, in einem Zug – der Stand bleibt die ganze Zeit gleich – für kleine Distanzänderungen, Rhythmuswechsel und um einen Angriff zu verschleiern. Kommt in vielen Kata vor (z. B. Heian Sandan, Bassai Dai, Kanku Dai, Jion, Enpi).</li>
+              <li><b>Suri-ashi oder Yori-ashi?</b> Beim Suri-ashi sind es zwei Schritte nacheinander, der Stand wird zwischendurch länger. Beim Yori-ashi gleitet der ganze Körper in einem Zug, der Stand bleibt immer gleich lang.</li>
               <li><b>Tai-sabaki</b> ist kein Schritt nach vorne oder hinten, sondern eine kreisförmige Drehung aus der Angriffslinie – im Kumite und bei Partnerübungen.</li>
             </ul>
             <a class="area area-begriffe lex-ziel" href="#/lexikon/ashi"><h3>Alle Fußbewegungen im Lexikon</h3><p>Mit Fußbild von oben zum Abspielen</p><span class="area-go" aria-hidden="true">›</span></a>`,

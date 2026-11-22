@@ -122,7 +122,7 @@
         { L: [86, 64, 0], R: [134, 156, 25] },
       ],
       nums: [[62, 96, 1], [160, 186, 2]],
-      lines: ['von oben: der vordere Fuß gleitet vor (1), der hintere', 'zieht nach (2) – vorne bleibt vorne'],
+      lines: ['von oben: der vordere Fuß gleitet vor (1) – der Stand', 'wird länger –, dann zieht der hintere nach (2)'],
     }),
 
 
@@ -132,7 +132,7 @@
         { L: [86, 156, 0], R: [134, 240, 25] },
         { L: [86, 92, 0], R: [134, 176, 25] },
       ],
-      lines: ['von oben: beide Füße gleiten gleichzeitig,', 'der Stand bleibt dabei unverändert'],
+      lines: ['von oben: der hintere Fuß stößt ab, beide gleiten', 'in einem Zug – der Stand bleibt immer gleich lang'],
     }),
 
     'tai-sabaki': () => sabaki('Tai-sabaki', {

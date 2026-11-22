@@ -134,7 +134,8 @@
   L = SK.qb('da-ashi', S.kompakt);
   L.mc('Warum beschreibt der hintere Fuß beim Schritt in Zenkutsu-dachi einen Bogen?', ['Der Stand hat Breite – in der Mitte des Schritts kommen die Füße zusammen', 'Damit der Schritt länger wird', 'Um den Partner zu fegen', 'Weil man dabei springt'], '');
   L.mc('Was unterscheidet Suri-ashi von Ayumi-ashi?', ['Bei Suri-ashi wechseln die Beine nicht – der vordere Fuß gleitet vor, der hintere zieht nach', 'Bei Suri-ashi springt man', 'Bei Suri-ashi gleiten beide Füße gleichzeitig', 'Es gibt keinen Unterschied'], '');
-  L.mc('Wofür eignet sich Yori-ashi (beide Füße gleiten gleichzeitig) besonders?', ['Kleine Distanzänderungen, Rhythmuswechsel und das Verschleiern eines Angriffs', 'Große Strecken in kurzer Zeit', 'Drehungen um 180°', 'Den Gruß'], '');
+  L.mc('Was unterscheidet Yori-ashi von Suri-ashi?', ['Bei Yori-ashi bleibt der Stand immer gleich lang – bei Suri-ashi wird er kurz länger (erst vorne, dann hinten)', 'Bei Yori-ashi wechseln die Beine', 'Bei Yori-ashi springt man', 'Bei Suri-ashi stampft der Fuß auf'], '');
+  L.mc('Wofür eignet sich Yori-ashi (Gleitschritt in einem Zug) besonders?', ['Kleine Distanzänderungen, Rhythmuswechsel und das Verschleiern eines Angriffs', 'Große Strecken in kurzer Zeit', 'Drehungen um 180°', 'Den Gruß'], '');
   L.mc('Warum muss man Fußarbeit eigens üben?', ['Weil die richtige Distanz für Abwehr und Konter davon abhängt', 'Weil sie in Prüfungen nicht vorkommt', 'Damit die Kata schneller vorbei ist', 'Weil die Hände sonst ermüden'], '');
 
   // ---------- Kihon ----------
