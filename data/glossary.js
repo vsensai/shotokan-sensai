@@ -182,9 +182,10 @@
     ['Zanshin', 'Wache Aufmerksamkeit nach der Technik', 'begriff', null, PO],
     ['Maai', 'Kampfdistanz', 'begriff', null, PO],
     ['Deai', 'Kontern im Moment des gegnerischen Angriffs', 'begriff', null, PO],
-    ['Kogeki', 'Angriff', 'begriff', null, PO],
-    ['Uke', 'Abwehr (auch: der Abwehrende)', 'begriff', null, PO],
-    ['Kime-waza', 'Entscheidende, abschließende Technik', 'begriff', null, PO],
+    ['Kogeki', 'Angriff – im Dojo auch der Angreifer (Gegenstück zu Uke, dem Abwehrenden)', 'begriff', null, PO],
+    ['Uke', 'Abwehr – auch der Abwehrende (Gegenstück zu Kogeki, dem Angreifer)', 'begriff', null, PO],
+    ['Kime-waza', 'Entscheidende Technik: der Konter (Gegenangriff) nach der Abwehr – blitzschnell und mit voller Kraft (Kime) ins gewählte Ziel', 'begriff', null, PO],
+    ['Waza', 'Technik (als Wortteil, z. B. Kime-waza: entscheidende Technik)', 'begriff'],
     ['Sun-dome', 'Technik kurz vor dem Ziel abstoppen', 'begriff', null, PO],
     ['Shiai', 'Wettkampf', 'begriff'],
     ['Enbusen', 'Bewegungslinie einer Kata', 'begriff', null, PDF(4)],
@@ -279,6 +280,10 @@
   // Quiz-Fassung der Bedeutung, wo die Lexikon-Bedeutung den Namen (oder ein Namensteil) verrät –
   // „Wie heißt: …?“ und die Antworten zu „Was ist …?“ nutzen diesen Text. validate.js prüft das.
   const QUIZ = {
+    'Kogeki': 'Angriff – im Dojo auch der Angreifer, Gegenstück zum Abwehrenden',
+    'Uke': 'Abwehr – auch der Abwehrende, Gegenstück zum Angreifer',
+    'Kime-waza': 'Entscheidende Technik: der Konter nach der Abwehr, blitzschnell und mit voller Kraft ins gewählte Ziel',
+    'Waza': 'Technik (als Wortteil in vielen Begriffen)',
     'Ashi-zenkutsu': 'Kleine Vorwärtsstellung (kürzer und schmaler), z. B. in Gyaku-hanmi',
     'Nukite': 'Speerhand-Stoß mit den Fingerspitzen',
     'Tettsui-uchi': 'Hammerfaustschlag',
