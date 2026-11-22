@@ -55,6 +55,8 @@
     jodan: [0.0, 0.03, 0.52],
     gedan: [-0.37, -0.55, 0.14],
     gedanPrep: [0.12, 0.02, 0.1],
+    // Uchi-uke: die Faust holt direkt an der Gegenhüfte aus (Gürtelhöhe, wie ein Schwert ziehen), nicht unter der Achsel
+    uchiPrep: [0.15, -0.32, 0.16],
     guardF: [-0.06, -0.1, 0.42],
     guardR: [-0.02, -0.2, 0.18],
     // Yoi: Arme gestreckt, Fäuste knapp vor den Oberschenkeln
@@ -91,6 +93,8 @@
   // Ellbogen-Richtungen (Brustkoordinaten)
   const UP_OUT = [-0.45, 0.3, 0.15];
   const DOWN_FWD = [-0.1, -0.6, 0.3];
+  // Ellbogen beim Ausholen des Uchi-uke: vor dem Bauch, nach vorn unten
+  const E_UCHI = [-0.4, -0.7, 0.5];
 
   /* ---------- Stände (linker Fuß vorne, wo es einen vorderen gibt) ---------- */
   const W = (k) => {
@@ -462,7 +466,7 @@
   const GB_MID = M(S.zk, { hL: [0.08, -0.26, 0.38], hR: [-0.12, -0.28, 0.22] });
   D['mv:gedan-barai'] = M({ keys: [{ t: 0, p: GB_PREP }, { t: 0.25, p: GB_PREP }, { t: 0.31, p: GB_MID, e: 'in' }, { t: 0.37, p: ZK_G, e: 'kime' }], best: 1, dur: 1.6, eff: 'fistL', view: 'front3' }, hit('fistL', 'Unterarm'));
   D['mv:soto-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [-0.45, 0.06, -0.06] }), M(MZK, { hL: L(H.hip), hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm innen'), { eff: 'fistR', view: 'front3' }));
-  D['mv:uchi-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [0.12, -0.2, 0.25], eR: [-0.5, -0.6, 0.5] }), M(MZK, { hL: L(H.hip), hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm außen'), { eff: 'fistR', view: 'front3' }));
+  D['mv:uchi-uke'] = T(M(MZK, { hL: L(H.chudan), hR: H.uchiPrep, eR: E_UCHI }), M(MZK, { hL: L(H.hip), hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm außen'), { eff: 'fistR', view: 'front3' }));
   // Shuto-uke: Blockhand holt am gegenüberliegenden Ohr aus, die andere Hand ist nach vorn gestreckt –
   // die Oberarme liegen dabei vor der Brust fast übereinander
   D['tc:shuto-uke'] = T(M(S.kk, { oL: 1, oR: 1, hL: [-0.13, 0.2, 0.1], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], hR: [0.12, -0.12, 0.48], eR: [-0.2, -0.6, 0.4], pR: [0, -1, 0] }), KK_SHUTO, M(hit('tipL', 'Handkante'), { eff: 'wristL', view: 'front3' }));
@@ -1081,7 +1085,7 @@
   // Fäuste: Finger- und Handflächenrichtung des Heisoku-dachi (offene Hände hängen seitlich) nicht übernehmen – sonst
   // zeigen die Fäuste in jeder Technik stur nach unten und die Handgelenke knicken (Bassai Dai 25)
   const UG = M(S.heisoku, { oL: 0, oR: 0, fL: [0, 0, 0], fR: [0, 0, 0], pL: [0, 0, 0], pR: [0, 0, 0] });
-  KATA['uchi-gedan-uke'] = T(M(UG, { hR: [0.13, -0.3, 0.2], eR: [-0.5, -0.6, 0.5], hL: [-0.13, 0.08, 0.2], eL: [0.4, -0.8, 0.5] }),
+  KATA['uchi-gedan-uke'] = T(M(UG, { hR: H.uchiPrep, eR: E_UCHI, hL: [-0.13, 0.08, 0.2], eL: [0.4, -0.8, 0.5] }),
     M(UG, { hR: [-0.22, 0.0, 0.3], eR: DOWN_FWD, hL: stretch([0.22, -0.52, 0.2], 'L') }));
   // Heian Sandan 9 im Kiba-dachi: Kentsui Chudan Uchi-mawashi-uchi zur linken Seite – die Faust holt vor der rechten
   // Schulter aus und schlägt im waagerechten Bogen nach außen, Arm fast gestreckt, Handrücken oben (die Kleinfingerseite trifft)
@@ -1214,7 +1218,7 @@
   // (Handrücken oben), direkt an der Hüfte; der linke Unterarm liegt dicht vor dem Bauch (wie im Lexikon)
   KATA['koshi-kamae-tekki'] = STILL(M(KB, KOSHI_KAMAE));
   // 8, 22: Chudan Uchi-uke im Kiba-dachi, Körper gerade nach vorn (Ende wie der Beginn des Uchi-nagashi-uke im Lexikon)
-  KATA['uchi-uke-kiba'] = T(M(KB, { hL: [0.1, -0.15, 0.4], hR: [0.12, -0.2, 0.25], eR: [-0.5, -0.6, 0.5] }), UN1);
+  KATA['uchi-uke-kiba'] = T(M(KB, { hL: [0.1, -0.15, 0.4], hR: H.uchiPrep, eR: E_UCHI }), UN1);
   // 9, 23: erst Uchi-nagashi-uke Jodan links mit Gedan-uke rechts (Ablauf des Lexikons), dann schlägt die linke Faust als
   // Uraken nach vorn auf Gesichtshöhe (Faust gerade, Handrücken zum Ziel); der rechte Unterarm kommt waagerecht vor die
   // Brust, die rechte Faust liegt unter dem linken Ellbogen (Suihei-kamae)
@@ -1240,7 +1244,7 @@
   // 1: Uchi-uke im Kosa-dachi, Oberkörper halb seitlich (Hanmi); die offene linke Hand stützt mit dem Mittelfinger an der
   // Innenseite des rechten Handgelenks (Soede). Beide Hände holen an der linken Hüfte aus und gehen zusammen hinaus
   const SOE = M(S.kosa, { yaw: 35, oL: 1 });
-  KATA['soede-uchi-uke'] = T(M(SOE, { hR: [0.14, -0.3, 0.2], eR: [-0.5, -0.6, 0.5], hL: [0.23, -0.3, 0.13], fL: [-1, 0.2, 0.3], pL: [0, -0.3, -1] }),
+  KATA['soede-uchi-uke'] = T(M(SOE, { hR: H.uchiPrep, eR: E_UCHI, hL: [0.24, -0.32, 0.09], fL: [-1, 0.2, 0.3], pL: [0, -0.3, -1] }),
     M(SOE, { hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD, hL: [-0.2, -0.04, 0.29], eL: [0.4, -1, 0.1], fL: [-1, 0.25, 0.1], pL: [0, -0.3, -1] }));
   // 6: erst schöpft die rechte Faust tief von links nach rechts und etwas hoch (Gedan Sukui-uke, Bahn wie im Lexikon),
   // dann holt sie hinter dem Ohr aus und wehrt als Soto-uke ab – ein Zug, zusammen mit dem Fuß
