@@ -1086,15 +1086,17 @@
 
     /* ---------- Abläufe nur für die Kata als Figur (js/kata-figur.js) – stehen nicht im Lexikon ---------- */
     const KATA = {};
-    // Heian Shodan 4: Tettsui mit großem Bogen – aus dem Gedan-barai schwingt die Faust vor dem Bauch nach links und vor dem
-    // Gesicht links hoch, über den Kopf und schlägt dann schnell und dynamisch ins Ziel (Ausholen ruhiger, Schlag schnell).
+    // Heian Shodan 4: Tettsui mit großem Bogen – aus dem Gedan-barai schwingt die Faust vor dem Bauch nach links, steigt
+    // links vorn und vor dem Gesicht hoch (der Arm bleibt dabei vor Brust und Kopf), oben mit dem Ellbogen nach rechts
+    // außen über den Kopf und schlägt dann schnell und dynamisch ins Ziel.
     // Am Ende der Arm wie im Lexikon: deutlich gebeugt (gut 85 % gestreckt)
     const TS = (t, chest, o, e) => ({ t, e, p: M(MZK, { chest, hL: L(H.hip) }, o) });
     KATA['tettsui-heian-shodan'] = M(hit('fistR', 'Hammerfaust'), { keys: [
       { t: 0, p: MZK_G },
-      TS(0.3, 4, { hR: [0.06, -0.16, 0.38], eR: [-0.3, -0.8, 0.3] }, 'fl'),
-      TS(0.55, 8, { hR: [0.27, 0.2, 0.34], eR: [-0.1, -0.3, 1], pR: [1, 0, 0] }, 'fl'),
-      TS(0.8, -12, { hR: [0.06, 0.46, 0.05], eR: [-0.6, 0.4, 0.1], pR: [1, 0, 0] }, 'fl'),
+      TS(0.25, 4, { hR: [0.06, -0.16, 0.4], eR: [-0.3, -0.8, 0.3] }, 'fl'),
+      TS(0.45, 8, { hR: [0.12, 0.12, 0.45], eR: [-0.1, -0.3, 1], pR: [1, 0, 0] }, 'fl'),
+      TS(0.62, 0, { hR: [0.0, 0.42, 0.32], eR: [-0.3, 0.2, 1], pR: [1, 0, 0] }, 'fl'),
+      TS(0.78, -12, { hR: [-0.15, 0.45, 0.1], eR: [-0.7, 0.4, 0], pR: [1, 0, 0] }, 'fl'),
       TS(1, -25, { hR: [-0.04, 0.0, 0.46], pR: [1, 0, 0] }, 'kime'),
     ], best: 1, dur: 1, eff: 'fistR', view: 'side3' });
     // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
