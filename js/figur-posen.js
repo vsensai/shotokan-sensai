@@ -1039,7 +1039,7 @@
   /* ---------- Gestreckte Arme am Ende: überall nur ein minimaler Knick im Ellbogen ---------- */
   // Arme, die am Ende fast gestreckt sind (ab 97 %), und die hier genannten Schlag-/Abwehrarme werden auf 99 % gebracht
   const GESTRECKT = { 'tc:tettsui-uchi': 'R', 'tc:shuto-uchi': 'R', 'tc:haito-uchi': 'R', 'tc:tate-shuto-uke': 'L', 'tc:teisho-uke': 'R', 'tc:awase-zuki': 'L' };
-  Object.keys(D).forEach((id) => {
+  function strecken(id) {
     const d = D[id];
     if (!d.keys || d.still) return;
     const last = d.keys[d.keys.length - 1];
@@ -1052,7 +1052,8 @@
       if (r >= 0.97 || (GESTRECKT[id] || '').includes(sd)) upd['h' + sd] = stretch(h, sd);
     });
     if (Object.keys(upd).length) last.p = M(last.p, upd);
-  });
+  }
+  Object.keys(D).forEach(strecken);
 
   // Feineinstellung der Fläche nur für diese Technik (aus dem Bewegungs-Editor, Reiter „Treffer“):
   // x, y, z Versatz im Körperteil-Rahmen (m), rot Drehung um Unterarm/Unterschenkel (°), r Größe (m) – siehe figur-app.js (FL)
@@ -1444,7 +1445,13 @@
   // kommen zusammen im Ziel an. Die Abläufe unten ersetzen die gleichnamigen des Lexikons. Die freigegebenen Kata behalten
   // bis zur Abnahme durch den Nutzer die Abläufe davor (BISHER → SK.fig3dKataBisher; js/kata-figur.js nimmt sie zuerst).
   const BISHER = {};
-  const NEU = (id, def) => { if (!(id in BISHER)) BISHER[id] = D[id]; D[id] = def; };
+  // Der neue Ablauf übernimmt Trefferfläche (fl, sides, adj) und gestreckten Arm am Ende wie oben für alle Abläufe
+  const NEU = (id, def) => {
+    if (!(id in BISHER)) BISHER[id] = D[id];
+    const alt = D[id].hit;
+    D[id] = alt && alt.fl && def.hit && !def.hit.fl ? M(def, { hit: M(alt, def.hit) }) : def;
+    strecken(id);
+  };
   const mixv = (a, b, u) => (typeof a === 'number' ? a + (b - a) * u : Array.isArray(a) ? a.map((x, i) => mixv(x, b[i], u))
     : isObj(a) ? Object.fromEntries(Object.keys(a).map((k) => [k, mixv(a[k], b[k], u)])) : u < 0.5 ? a : b);
   const HUEFTE = ['pelvis', 'yaw', 'roll', 'L', 'R', 'w'];
@@ -1497,13 +1504,14 @@
   // Uchi-nagashi-uke: die Hüfte dreht mit zur Seite des abwehrenden linken Arms (wie in Tekki Shodan)
   NEU('tc:uchi-nagashi-uke', keysMit('tc:uchi-nagashi-uke', (k, i) => M(k, { p: M(k.p, { yaw: [0, 0, 6, 12, 15][i] }) })));
   // Tettsui-uchi: mit dem Ausholen über den Kopf dreht die Hüfte weit heraus (tiefer in den Hanmi), mit dem Schlag kräftig
-  // zur Mitte ein; der Oberkörper folgt. Im Ziel steht die Faust wie bisher (Summe aus Hüfte und Oberkörper 15°)
+  // zur Mitte ein; der Oberkörper folgt. Im Ziel steht die Faust wie bisher (Summe aus Hüfte und Oberkörper 15°). Etwas
+  // schneller als die alte Fassung (1,0 statt 1,3 s)
   NEU('tc:tettsui-uchi', FLOW([
     M(MZK, { hR: [-0.1, -0.12, 0.42], hL: L(H.hip) }),
     M(MZK, { yaw: 50, chest: -3, hL: L(H.hip), hR: [-0.1, 0.2, 0.32], pR: [1, 0, 0] }),
     M(MZK, { yaw: 60, chest: -8, hL: L(H.hip), hR: [-0.2, 0.42, 0.02], eR: [-0.6, 0.3, -0.3], pR: [1, 0, 0] }),
     M(MZK, { yaw: 12, chest: 3, hL: L(H.hip), hR: [-0.03, 0.0, 0.5], pR: [1, 0, 0] }),
-  ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3', dur: 1.3 })));
+  ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3', dur: 1.0 })));
   // Yama-zuki: die Hüfte dreht mit fast ganz nach vorn, statt nur den Oberkörper zu drehen (Oberkörper zeigt wie bisher
   // gerade zum Gegner)
   NEU('tc:yama-zuki', keysMit('tc:yama-zuki', (k, i) => (i === 2 ? M(k, { p: M(k.p, { yaw: -10, chest: 10, pelvis: [0, 0.7, 0.12] }) }) : k)));
@@ -1580,7 +1588,7 @@
 
   /* ---------- Korrekturen des Nutzers am Lexikon (die freigegebenen Kata behalten die Fassung davor, BISHER) ---------- */
   // Uraken-uchi: dynamischer wie eine Peitsche – der Ellbogen führt zur Seite, der Unterarm schnellt hart ins Ziel und
-  // schnappt sofort zurück (Faust vor der rechten Schulter, Ellbogen bleibt zur Seite). Die Hüfte federt beim Ausholen
+  // schnappt sofort zurück an die rechte Brustwarze, Faustrücken oben, Ellbogen zur Seite. Die Hüfte federt beim Ausholen
   // kurz zur Gegenseite und dreht mit dem Treffer etwas zur Seite des Schlags
   const UR = (yaw, o) => M(KB, { yaw, look: -90 }, o);
   const UR0 = UR(0, { hR: [0.16, -0.06, 0.2], eR: [-0.6, -0.2, 0.8], pR: [0.3, 0, -1] });
@@ -1590,32 +1598,38 @@
     { t: 0.39, p: UR(8, { hR: [-0.12, 0.0, 0.22], eR: [-1, 0.2, 0.1], pR: [0.5, 0, -0.87] }), e: 'fl' },
     { t: 0.44, p: UR(3, { hR: [-0.48, 0.0, 0.18], eR: [-1, 0.25, -0.2], pR: [0.8, 0, 0.5] }), e: 'fl' },
     { t: 0.48, p: UR_HIT, e: 'kime' }, { t: 0.52, p: UR_HIT },
-    { t: 0.64, p: UR(-2, { hR: [-0.3, 0.02, 0.2], eR: [-1, 0.2, 0], pR: [0.6, 0, -0.8] }), e: 'kime' },
+    { t: 0.64, p: UR(-2, { hR: [-0.1, -0.1, 0.21], eR: [-1, -0.2, -0.1], pR: [0, -1, 0] }), e: 'kime' },
   ], best: 0.48, dur: 1 }));
-  // Furi-enpi: der Schritt ist schneller – Knie hoch in 0,3 s statt 0,6 s, Aufstampfen und Ellbogen gleich danach
+  // Furi-enpi: der Schritt ist schneller – Knie hoch in 0,3 s statt 0,6 s, Aufstampfen und Ellbogen gleich danach; das
+  // Knie kommt dabei höher (Oberschenkel etwa waagerecht)
+  const FEY = 0.6, FEP = -30;
   const FE_T = [0, 0.12, 0.27, 0.34, 0.385, 0.43];
-  NEU('tc:furi-enpi', keysMit('tc:furi-enpi', (k, i) => M(k, { t: FE_T[i] })));
+  NEU('tc:furi-enpi', keysMit('tc:furi-enpi', (k, i) => M(k, { t: FE_T[i] }, i === 2 ? { p: BAL(M(k.p, { R: { y: FEY, pitch: FEP, kp: [-0.2, 1, 1] } }), 'L') } : {})));
   // Gedan-nagashi-uke größer: die Faust holt weiter außen links aus und wischt bis vor die rechte Hüfte, die Hüfte dreht
-  // stärker mit (die Faust bleibt dabei im Raum, wo sie ist)
+  // stärker mit (die Faust bleibt dabei im Raum, wo sie ist). Die rechte Hand bleibt in der Kamae mit Abstand vor dem
+  // Solarplexus (dreht mit dem Körper, statt an die Brust zu rücken)
+  const GNU_R = { hR: [-0.03, -0.16, 0.32], eR: [-0.7, -0.6, 0.2] };
   NEU('tc:gedan-nagashi-uke', M(D['tc:gedan-nagashi-uke'], { keys: [GNU_HAND(0.5, 0.3), GNU_HAND(0.5, 0.3), GNU_HAND(-0.22, 0.42)]
-    .map((h, i) => M(D['tc:gedan-nagashi-uke'].keys[i], { p: EINDREHEN(M(TNU, h), i < 2 ? 14 : -24) })) }));
-  // Osae-uke größer: die offene Hand kommt von Brusthöhe und drückt bis unter den Gürtel, der Körper sinkt etwas mit
-  NEU('tc:osae-uke', IMPULS(T(M(S.zks, { hL: L(H.hip), hR: [0.0, 0.08, 0.4], oR: 1, pR: [0, -1, 0], fR: [0.4, 0, 1] }),
-    M(S.zks, { hL: L(H.hip), hR: [0.03, -0.44, 0.34], oR: 1, pR: [0, -1, 0], fR: [0.5, -0.1, 1] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' })), { yaw: -6, setzen: 0.02 }));
-  // Sukui-uke dynamischer: Schritt und Schöpfen in einem schnellen Zug (gut 0,4 s statt 1,2 s), Kime am Ende
-  NEU('tc:sukui-uke', FLOW([SU0, SU1, SU2, SU3], M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3' })));
-  // Kake-uke: die Arme steckten beim Kreuzen ineinander. Ausgeholt liegt der linke Arm tiefer unter dem rechten Ellbogen,
-  // der rechte Unterarm etwas höher und weiter vorn. Beim Hakenschlag schwingt der linke Arm zuerst tief unter dem
-  // rechten Unterarm hindurch nach vorn (KU_LOS), erst wenn er auf der linken Seite ist, zieht die rechte Faust zur Hüfte
-  const KU_AUS2 = M(KB, { look: 90, oL: 1, hL: stretch([-0.36, -0.42, 0.3], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.16, -0.04, 0.26], eR: [-0.6, 0, 0.5] });
-  const KU_ZUR2 = M(KB, { look: 90, oL: 1, hL: [0.3, -0.32, 0.4], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [0.0, -0.14, 0.26], eR: [-0.6, -0.8, 0] });
-  const KU_LOS = M(KU_AUS2, { hL: [-0.05, -0.42, 0.42], eL: [0.3, -1, 0.3], pL: [0, -1, 0.3], fL: [-0.6, 0, 1] });
+    .map((h, i) => M(D['tc:gedan-nagashi-uke'].keys[i], { p: M(EINDREHEN(M(TNU, h), i < 2 ? 14 : -24), GNU_R) })) }));
+  // Osae-uke größer: die offene Hand holt bis auf Brusthöhe aus (Ellbogen seitlich, Handgelenk gerade) und drückt bis auf
+  // Gürtelhöhe, der Körper sinkt etwas mit
+  NEU('tc:osae-uke', IMPULS(T(M(S.zks, { hL: L(H.hip), hR: [0.0, 0.06, 0.38], eR: [-0.9, -0.35, 0.1], oR: 1, pR: [0, -1, 0] }),
+    M(S.zks, { hL: L(H.hip), hR: [0.02, -0.37, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' })), { yaw: -6, setzen: 0.02 }));
+  // Sukui-uke dynamischer: Schritt und Schöpfen in einem Zug (0,65 s statt 1,2 s), Kime am Ende
+  NEU('tc:sukui-uke', FLOW([SU0, SU1, SU2, SU3], M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3', dur: 1.0 })));
+  // Kake-uke: beide Arme holen zugleich gestreckt und waagerecht zur rechten Seite aus, der rechte direkt über dem linken
+  // (der linke, offene Hand, unter dem rechten Unterarm); dann ziehen beide zugleich: die rechte Faust zur Hüfte, der linke
+  // Arm hakt zur linken Seite. Der linke Arm bleibt dabei immer unter bzw. vor dem rechten, die Ärmel berühren sich nicht
+  const KU_A = { look: 90, oL: 1, pL: [0, -1, 0], fL: [-1, 0, 0.3] };
+  const KU_AUS3 = M(KB, KU_A, { hL: stretch([-0.32, -0.28, 0.42], 'L'), hR: stretch([-0.3, -0.03, 0.46], 'R'), eR: [-0.3, -1, 0], eL: [0.2, -1, 0.2] });
+  const KU_HOL = M(KB, KU_A, { hL: [0.0, -0.32, 0.3], eL: [0.4, -1, 0.3], hR: [-0.22, -0.18, 0.34], eR: [-0.6, -0.8, 0] });
+  const KU_ZUG = M(KB, { look: 90, oL: 1, hL: [0.2, -0.3, 0.46], eL: [0.5, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.32, -0.14, 0.12], eR: [-0.6, -0.8, -0.3] });
   const KUK = D['tc:kake-uke'].keys;
-  NEU('tc:kake-uke', M(D['tc:kake-uke'], { keys: [KUK[0], KUK[1], KUK[2], M(KUK[3], { p: KU_AUS2 }), M(KUK[4], { p: KU_AUS2 }),
-    { t: 0.5, p: KU_LOS, e: 'fl' }, M(KUK[5], { p: KU_ZUR2 }), KUK[6]] }));
+  NEU('tc:kake-uke', M(D['tc:kake-uke'], { keys: [KUK[0], KUK[1], M(KUK[2], { p: KU_HOL }), M(KUK[3], { p: KU_AUS3 }), M(KUK[4], { p: KU_AUS3 }),
+    M(KUK[5], { p: KU_ZUG }), KUK[6]] }));
   // Soto-nagashi-uke: in der Endstellung steckte der linke Unterarm im Oberkörper (Faust hinter dem rechten Ohr) – die
-  // Faust bleibt neben dem rechten Ohr, aber vor dem Kopf, der Ellbogen weiter vorn: der Unterarm liegt vor der Brust
-  NEU('tc:soto-nagashi-uke', FLOW(SNU.slice(0, 3).concat([EINDREHEN(M(S.kk, { hL: [-0.14, 0.17, 0.18], eL: [0.5, -0.7, 1], pL: [-0.5, 0, -0.9],
+  // Faust endet am rechten Ohr (auf Ohrhöhe, knapp davor), der Ellbogen weiter vorn: der Unterarm liegt vor der Brust
+  NEU('tc:soto-nagashi-uke', FLOW(SNU.slice(0, 3).concat([EINDREHEN(M(S.kk, { hL: [-0.11, 0.1, 0.17], eL: [0.5, -0.7, 1], pL: [-0.5, 0, -0.9],
     hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }), SNU_EIN)]), SNU_OPT));
 
   SK.fig3dDefs = D;
