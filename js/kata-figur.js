@@ -61,6 +61,15 @@
   const REAR = 0.98;
   const FRONT = 0.26;
   const RISE = 0.06; // so viel höher darf die Hüfte dafür in einem sehr kurzen Stand stehen (Meter)
+  // Zenkutsu-dachi: das vordere Knie steht über dem Fußballen, knapp hinter der Zehenspitze – das Kniegelenk KNIE_VOR Meter
+  // vor dem Knöchel (die Zehenspitze liegt gut 0,19 m davor). Vorher stand das Schienbein senkrecht, in langen Ständen
+  // kippte es sogar nach hinten. Dafür rückt die Hüfte vor und sinkt, höchstens um KNIE_TIEF (sonst wird der Stand zu
+  // tief; lange Stände kürzt ZKMAX). Von vorne gesehen steht das Knie über der Fußachse, höchstens KNIE_AUSSEN Grad aus
+  // der Fußrichtung gedreht – vorher kippte es um 5 bis 23 cm nach innen
+  const KNIE_VOR = 0.1;
+  const KNIE_TIEF = 0.08;
+  const KNIE_AUSSEN = 40;
+  const ZKMAX = 1.02; // längster Zenkutsu-dachi (Meter zwischen den Fußmitten)
   // Längster Stand der Figur (Meter zwischen den Fußmitten). Die Fußskizzen zeichnen einzelne Stände deutlich länger, als die
   // Beine der Figur reichen (Heian Nidan 1–6, 15, 25: 1,3 bis 1,5 m) – die Hüfte sänke dort bis auf Kniehöhe. Heian Shodan
   // bleibt mit höchstens 1,24 m darunter und damit unverändert.
@@ -384,8 +393,46 @@
     return low.h > 0.85 || (low.key === 'hizaShomen' && want > low.h + LEVEL) ? want : clamp(want, low.h - LEVEL, low.h + LEVEL);
   }
 
-  // Zenkutsu-dachi: hinteres Bein strecken (REAR), indem die Hüfte entlang der Standlinie nach vorne rückt. yaw: Hüftdrehung
-  function rearLeg(low, yaw) {
+  // Knie des Beins q, wie Figur3D es rechnet (Oberschenkel und Schienbein je 0,44 m): Hüftgelenk hp (x, z) auf Höhe h,
+  // Knöchel an (x, z) auf Höhe y, Kniestellung pole (Welt). Ergebnis: Mitte des Kniekreises, seine Achse und sein Radius
+  function kneeCircle(hp, h, an, y) {
+    const H = [hp[0], h, hp[1]];
+    let d = [an[0] - H[0], y - h, an[1] - H[2]];
+    const dist = Math.min(Math.hypot(...d), 0.88 * 0.999);
+    const dn = d.map((v) => v / Math.hypot(...d));
+    d = dn.map((v) => v * dist);
+    const x = dist / 2;
+    return { c: H.map((v, i) => v + dn[i] * x), dn, r: Math.sqrt(Math.max(0, 0.44 * 0.44 - x * x)) };
+  }
+  const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const norm3 = (a) => { const l = Math.hypot(...a) || 1; return a.map((v) => v / l); };
+  // Zenkutsu-dachi: Knie über der Fußachse (nicht nach innen gekippt): Kniestellung so, dass das Knie von vorne gesehen
+  // senkrecht über der Längsachse des Fußes steht. f: Fußrichtung (Welt, x z). Ergebnis: Kniestellung (Welt) und Knie
+  function kneeOverFoot(K, an, f) {
+    const side = [f[1], 0, -f[0]];
+    const e1 = norm3(((p) => p.map((v, i) => v - K.dn[i] * dot3(p, K.dn)))([f[0], 0.15, f[1]]));
+    const e2 = cross3(K.dn, e1);
+    const p = dot3(e1, side) * K.r, q = dot3(e2, side) * K.r;
+    const want = -((K.c[0] - an[0]) * side[0] + (K.c[2] - an[1]) * side[2]);
+    const R = Math.hypot(p, q);
+    // höchstens KNIE_AUSSEN Grad aus der Richtung des Fußes heraus drehen
+    let phi = 0;
+    if (R > 1e-6) {
+      const a0 = Math.atan2(q, p), w = Math.acos(clamp(want / R, -1, 1));
+      const c1 = wrap((a0 + w) / RAD) * RAD, c2 = wrap((a0 - w) / RAD) * RAD;
+      phi = Math.abs(c1) < Math.abs(c2) ? c1 : c2;
+      phi = clamp(phi, -KNIE_AUSSEN * RAD, KNIE_AUSSEN * RAD);
+    }
+    const e = e1.map((v, i) => v * Math.cos(phi) + e2[i] * Math.sin(phi));
+    return { pole: e, knee: K.c.map((v, i) => v + e[i] * K.r) };
+  }
+
+  // Zenkutsu-dachi: hinteres Bein strecken (REAR), indem die Hüfte entlang der Standlinie nach vorne rückt. Dann das
+  // vordere Knie vor bis über den Fußballen (KNIE_VOR): Hüfte weiter vor und so viel tiefer, dass das hintere Bein so
+  // gestreckt bleibt (höchstens KNIE_TIEF tiefer). Zuletzt die Kniestellung über die Fußachse. yaw: Hüftdrehung,
+  // byaw: Körperrichtung (die Kniestellung der Stellung ist auf sie bezogen)
+  function rearLeg(low, yaw, byaw) {
     if (low.key !== 'zk') return;
     const lp = [Math.cos(yaw * RAD), -Math.sin(yaw * RAD)];
     const s = low.ext.L > low.ext.R ? 'L' : 'R';
@@ -396,15 +443,29 @@
     const need2 = (REAR * 0.88) ** 2 - (low.h - low[s].y) ** 2;
     const v = sub(hip(s), low.ank[s]);
     const c = dot(v, v) - need2;
-    if (need2 <= 0 || c >= 0) return;
-    const b = dot(v, axis);
-    const room = dot(sub(low.ank[o], hip(o)), axis) - FRONT;
-    const x = Math.max(0, Math.min(-b + Math.sqrt(b * b - c), room, 0.25));
-    low.pel = add(low.pel, mul(axis, x));
-    // reicht das bei einem sehr kurzen Stand nicht (Heian Godan 8–11: knapp 0,8 m), steht die Hüfte etwas höher
-    const r2 = dot(sub(hip(s), low.ank[s]), sub(hip(s), low.ank[s]));
-    const top = low[s].y + Math.sqrt(Math.max(0, (REAR * 0.88) ** 2 - r2));
-    if (top > low.h) low.h = Math.min(top, low.h + RISE);
+    if (need2 > 0 && c < 0) {
+      const b = dot(v, axis);
+      const room = dot(sub(low.ank[o], hip(o)), axis) - FRONT;
+      const x = Math.max(0, Math.min(-b + Math.sqrt(b * b - c), room, 0.25));
+      low.pel = add(low.pel, mul(axis, x));
+      // reicht das bei einem sehr kurzen Stand nicht (Heian Godan 8–11: knapp 0,8 m), steht die Hüfte etwas höher
+      const r2 = dot(sub(hip(s), low.ank[s]), sub(hip(s), low.ank[s]));
+      const top = low[s].y + Math.sqrt(Math.max(0, (REAR * 0.88) ** 2 - r2));
+      if (top > low.h) low.h = Math.min(top, low.h + RISE);
+    }
+    const f = fwd(byaw + low[o].rel);
+    const an = low.ank[o];
+    const knee = () => kneeOverFoot(kneeCircle(hip(o), low.h, an, low[o].y), an, f);
+    const vor = () => { const k = knee().knee; return (k[0] - an[0]) * f[0] + (k[2] - an[1]) * f[1]; };
+    const h0 = low.h;
+    for (let i = 0; i < 80 && vor() < KNIE_VOR; i++) {
+      const pel = low.pel, h = low.h;
+      low.pel = add(low.pel, mul(axis, 0.005));
+      const r = len(sub(hip(s), low.ank[s]));
+      low.h = Math.min(low.h, low[s].y + Math.sqrt(Math.max(0, (REAR * 0.88) ** 2 - r * r)));
+      if (h0 - low.h > KNIE_TIEF) { low.pel = pel; low.h = h; break; }
+    }
+    low[o] = Object.assign({}, low[o], { kp: rotY(knee().pole, -byaw) });
   }
 
   // Hand nicht durch den Rumpf: Wechselt eine Hand zwischen zwei Haltungen die Seite (Hüfte → Ohr der anderen Seite), führt
@@ -467,7 +528,7 @@
     let lead = null;
     // Vorsprung des vorderen Fußes (Anteil der Dauer); bei einem weiten Yori-ashi (über 0,6 m, Bassai Dai 24) kleiner – sonst
     // stünden die Füße unterwegs weiter auseinander, als die Beine reichen, und die Hüfte sackte ab
-    const vsp = both && o.gleich && Math.max(way.L, way.R) > 0.6 ? 0.14 : 0.28;
+    const vsp = both && o.gleich && Math.max(way.L, way.R) > 0.6 ? 0.08 : 0.28;
     if (both && o.gleich) {
       lead = dot(sub(B.low.L.c, A.low.L.c), sub(A.low.L.c, A.low.R.c)) > 0 ? 'L' : 'R';
       seg.share = { L: 0.5, R: 0.5 };
@@ -789,7 +850,11 @@
           over = changed = true;
           return;
         }
-        const max = reno ? RENOJI : KOSAST.test(st.stance) ? KOSA : eig ? eig[1] : (KIBA[id] && /kiba/i.test(st.stance) ? KIBA[id] : MAXLEN);
+        // Zenkutsu-dachi höchstens ZKMAX lang (auch wo die Kata eine eigene Länge hat – Bassai Dai), sonst käme das vordere
+        // Knie nicht über den Fuß
+        const zk = /zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance);
+        const max0 = reno ? RENOJI : KOSAST.test(st.stance) ? KOSA : eig ? eig[1] : (KIBA[id] && /kiba/i.test(st.stance) ? KIBA[id] : MAXLEN);
+        const max = zk ? Math.min(max0, ZKMAX) : max0;
         // ein zu kurzer Zenkutsu-dachi wird länger: beide Plätze rücken je zur Hälfte auseinander
         if (/zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance) && l < MINZK - 1e-4) {
           const push = mul(d, (0.5 * (MINZK - l)) / l);
@@ -876,7 +941,7 @@
       const byaw = turnOf(m, prev, stance);
       const low = lower(m, stance, warn, k.id, force);
       low.h = height(low, byaw + up.yaw);
-      rearLeg(low, byaw + up.yaw);
+      rearLeg(low, byaw + up.yaw, byaw);
       return { low, byaw, up };
     };
     // Übergang der Haltung in d Sekunden (ruhig)

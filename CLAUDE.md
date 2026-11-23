@@ -75,7 +75,7 @@ Werkzeug: `node tools/kata-figur.js` (`ablauf`, `pruefen`, `stand`, `vergleich`,
 7. **Freigeben erst auf sein Wort:** Kata von `VORSCHAU` nach `KATA` verschieben, in `tools/test/smoke.js` die „nicht freigegebene Kata“ auf die nächste umstellen, Version `minor`.
 
 Was der Nutzer bisher korrigiert hat (gilt auch für die nächsten Kata):
-- Zenkutsu-dachi: hinteres Bein fast durchgedrückt (`REAR`), nicht zu kurz (`MINZK`).
+- Zenkutsu-dachi: hinteres Bein fast durchgedrückt (`REAR`), nicht zu kurz (`MINZK`). Vorderes Knie über dem Fußballen, knapp hinter der Zehenspitze – nicht dahinter (`KNIE_VOR`, Hüfte dafür bis `KNIE_TIEF` tiefer, Stand höchstens `ZKMAX`), und von vorne gesehen über der Fußachse, nicht nach innen gekippt (`kneeOverFoot`).
 - Schritt mit Fumikomi: erst drehen beide Füße in die Laufrichtung, dann Schritt mit hohem Knie und geraden Knien, erst kurz vor dem Aufstampfen dreht alles in den Stand.
 - Yori-ashi: vorderer Fuß geht voraus, der andere zieht sofort nach – nicht beide gleichzeitig (sieht aus wie Schweben).
 - Langsame Bewegungen: die Hüfte dreht in einem Zug, keine Gegenbewegung; bleibt der Oberkörper stehen, bewegt sich die Hüfte nicht.
