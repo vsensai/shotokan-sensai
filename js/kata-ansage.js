@@ -508,9 +508,25 @@
     }
     return [cx - hx, cx + hx, cy - hy, cy + hy].map((v) => v * U);
   }
-  SK.embusenSvg = function (k, pose, prev, aspect) {
+  // Nahansicht (kleine Karte auf der Figur): Ausschnitt um die Stellung und die Füße davor, damit die Füße groß genug sind
+  function near(k, pose, prev, aspect) {
+    const pts = pose.f.concat(prev ? prev.f : [], pose.via ? [[pose.via[1], pose.via[2]]] : []);
+    const xs = pts.map((f) => f[0]);
+    const ys = pts.map((f) => f[1]);
+    const cx = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const cy = (Math.min(...ys) + Math.max(...ys)) / 2;
+    let hx = Math.max(NEAR_R, (Math.max(...xs) - Math.min(...xs)) / 2 + 0.4);
+    let hy = Math.max(NEAR_R, (Math.max(...ys) - Math.min(...ys)) / 2 + 0.4);
+    if (aspect) {
+      if (hx / hy < aspect) hx = hy * aspect;
+      else hy = hx / aspect;
+    }
+    return [cx - hx, cx + hx, cy - hy, cy + hy].map((v) => v * U);
+  }
+  const NEAR_R = 0.85; // halbe Breite der Nahansicht (Karteneinheiten)
+  SK.embusenSvg = function (k, pose, prev, aspect, nah) {
     const a = k.ansage;
-    const [x0, x1, y0, y1] = bounds(k, aspect);
+    const [x0, x1, y0, y1] = nah ? near(k, pose, prev, aspect) : bounds(k, aspect);
     let g = '';
     for (let x = Math.ceil(x0 / 50) * 50; x <= x1; x += 50) g += `M${x} ${-y1} V${-y0}`;
     for (let y = Math.ceil(y0 / 50) * 50; y <= y1; y += 50) g += `M${x0} ${-y} H${x1}`;
@@ -999,7 +1015,7 @@
       fill(s);
       editUi();
       stage.classList.toggle('kiai', !!s.kiai);
-      if (view !== 'figur') map.innerHTML = SK.embusenSvg(k, s.pose, i ? s.prev : null, map.clientWidth / map.clientHeight || mapBox.clientWidth / mapBox.clientHeight || null);
+      map.innerHTML = SK.embusenSvg(k, s.pose, i ? s.prev : null, map.clientWidth / map.clientHeight || mapBox.clientWidth / mapBox.clientHeight || null, view === 'figur');
       const firstMove = steps.findIndex((x) => x.kind === 'move');
       const cur = s.kind === 'move' ? s.n : i < firstMove ? 0 : Infinity;
       track.querySelectorAll('.ans-dot').forEach((d) => {
@@ -1018,13 +1034,14 @@
       saveView(view);
       const wasWide = wrap.classList.contains('ans-wide');
       viewSw.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
-      map.hidden = view === 'figur';
+      // In der Ansicht Figur liegt dieselbe Karte klein unten links auf dem Bild (ans-solo)
       mapBox.classList.toggle('ans-both', view === 'beide');
+      mapBox.classList.toggle('ans-solo', view === 'figur');
       // Mit Figur darf der Kasten auf großen Bildschirmen breiter werden als die Karte allein
       if (wrap.classList.toggle('ans-wide', view !== 'karte') !== wasWide && wrap.isConnected) reserve();
       else fit();
       fig.on(view !== 'karte');
-      if (view !== 'figur') render(idx);
+      render(idx);
       editUi();
       if (view === 'karte') return;
       if (running) { fig.beat(TEMPI[tempo].beat, TEMPI[tempo].lupe); fig.run((performance.now() - base) / 1000); }

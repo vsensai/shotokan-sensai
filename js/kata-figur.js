@@ -1549,18 +1549,16 @@
   // gemessenen Bildrate), im Stand scharf; PX_STILL nur bei „flüssig“ (wie früher)
   const PX_STILL = 1000000;
 
-  // Liefert die Bühne: node (Leinwand, kleine Karte, Kamera-Knopf) und die Steuerung. Die Zeit t läuft in Sekunden wie in
+  // Liefert die Bühne: node (Leinwand, Kamera-Knopf; die kleine Karte darauf ist die Bodenkarte der Ansage) und die Steuerung. Die Zeit t läuft in Sekunden wie in
   // SK.ansageTimeline(k, beat, true); gerechnet wird erst mit dem ersten beat().
   function stage(k) {
     const { el } = SK.util;
     const cv = el('canvas', { class: 'ans-fig-cv', role: 'img', 'aria-label': `${k.name} als 3D-Figur` });
-    const mapCv = el('canvas', { class: 'ans-fig-map', width: '192', height: '192', 'aria-hidden': 'true' });
     const camBtn = el('button', { class: 'ans-fig-cam', type: 'button', title: 'Blickwinkel wechseln' });
     const zoomBtn = (d, text, label) => el('button', { type: 'button', 'data-zoom': String(d), text, 'aria-label': label, title: label, onclick: () => setZoom(zoom + d * ZOOM_STEP) });
     const zoomBar = el('div', { class: 'ans-fig-zoom', role: 'group', 'aria-label': 'Zoom' }, zoomBtn(-1, '−', 'Weiter weg (ganzer Bereich)'), zoomBtn(1, '+', 'Näher heran (folgt der Figur)'));
-    const node = el('div', { class: 'ans-fig', hidden: true }, cv, mapCv, el('div', { class: 'ans-fig-bar' }, camBtn, zoomBar));
+    const node = el('div', { class: 'ans-fig', hidden: true }, cv, el('div', { class: 'ans-fig-bar' }, camBtn, zoomBar));
     const ctx = cv.getContext('2d');
-    const mg = mapCv.getContext('2d');
     const anims = new Map();
     let anim = null;
     let camIdx = 0;
@@ -1701,38 +1699,6 @@
       ctx.clearRect(0, 0, w, h);
       E.draw(ctx, w, h, P, view, { mode: 0, style: 0, decals });
       rough = fast;
-      mini(J);
-    }
-    // Kleine Karte: Embusen von oben (vorne ist oben, links ist links), Füße und Blickrichtung
-    function mini(J) {
-      const S = mapCv.width;
-      const ext = anim.lines.reduce((a, l) => [Math.min(a[0], l[0], l[2]), Math.max(a[1], l[0], l[2]), Math.min(a[2], l[1], l[3]), Math.max(a[3], l[1], l[3])], [1e9, -1e9, 1e9, -1e9]);
-      const sc = S / (Math.max(ext[1] - ext[0], ext[3] - ext[2]) + 1.4);
-      const X = (x) => S / 2 - (x - (ext[0] + ext[1]) / 2) * sc;
-      const Y = (z) => S / 2 - (z - (ext[2] + ext[3]) / 2) * sc;
-      mg.clearRect(0, 0, S, S);
-      mg.lineCap = 'round';
-      mg.strokeStyle = '#b9b2a6';
-      mg.lineWidth = 2.5;
-      anim.lines.forEach((l) => { mg.beginPath(); mg.moveTo(X(l[0]), Y(l[1])); mg.lineTo(X(l[2]), Y(l[3])); mg.stroke(); });
-      ['L', 'R'].forEach((s) => {
-        const a = J['heel' + s];
-        const b = J['toe' + s];
-        mg.strokeStyle = grounded(J, s) ? '#1f2328' : '#9a948a';
-        mg.lineWidth = 7;
-        mg.beginPath();
-        mg.moveTo(X(a[0]), Y(a[2]));
-        mg.lineTo(X(b[0]), Y(b[2]));
-        mg.stroke();
-      });
-      const hx = X(J.head[0]);
-      const hy = Y(J.head[2]);
-      mg.fillStyle = '#c62828';
-      mg.beginPath();
-      mg.moveTo(hx - J.hf[0] * 20, hy - J.hf[2] * 20);
-      mg.lineTo(hx + J.hl[0] * 7, hy + J.hl[2] * 7);
-      mg.lineTo(hx - J.hl[0] * 7, hy - J.hl[2] * 7);
-      mg.fill();
     }
     // Ein Bild je Bildwechsel des Browsers; die Zeit läuft nach der Uhr (Echtzeit, auch wenn ein Bild länger dauert)
     function frame(now) {
