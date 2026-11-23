@@ -468,9 +468,11 @@
     ], M(hit('fistR', 'Hammerfäuste'), { eff: 'fistR', view: 'front3' }));
 
     /* ---------- Abwehr ---------- */
-    // Age-uke: die abwehrende Faust steigt vor der Brust auf (innen), die andere zieht außen vorbei zur Hüfte
+    // Age-uke: die Arme gehen vor dem Körper gekreuzt aneinander vorbei – in der Mitte der Bewegung stehen beide Unterarme
+    // etwa 45° schräg (Fäuste oben, Ellbogen unten) und kreuzen sich mittig vor der Brust; der abwehrende Arm steigt außen
+    // (weiter vorn), der andere wird innen eng am Körper zur Hüfte geführt
     const AU_PREP = M(MZK, { hR: H.hip, hL: [0.06, 0.28, 0.22], eL: L(UP_OUT) });
-    const AU_MID = M(MZK, { hR: [-0.06, -0.04, 0.3], eR: [-0.4, -0.6, 0.4], hL: [0.12, 0.04, 0.4], eL: [0.5, -0.6, 0.3] });
+    const AU_MID = M(MZK, { hR: [0.06, -0.02, 0.4], eR: [-0.3, -0.9, 0.4], hL: [-0.04, -0.09, 0.14], eL: [1, -0.8, -0.2] });
     D['mv:age-uke'] = M({ keys: [{ t: 0, p: AU_PREP }, { t: 0.25, p: AU_PREP }, { t: 0.31, p: AU_MID, e: 'in' }, { t: 0.37, p: M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), e: 'kime' }], best: 1, dur: 1.6, eff: 'fistR', view: 'front3' }, hit('elbowR', 'Unterarm'));
     // Gedan-barai: Faust holt an der Gegenschulter auf Höhe des eigenen Ohrs aus (GB_OHR, auch im Kiba-dachi), Ellbogen vor
     // dem Körper; die Bahn führt deutlich vor dem Bauch schräg nach unten, damit Arm und Faust nicht in den Oberkörper tauchen
