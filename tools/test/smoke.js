@@ -97,8 +97,7 @@
           sw.querySelector('[data-view=figur]').click();
           await frame();
           const cv = app.querySelector('.ans-fig-cv');
-          if (app.querySelector('.ans-fig').hidden || !(cv.width > 100)) throw new Error('Kata-Trainer: Figur erscheint nicht');
-          if (!app.querySelector('.ans-solo .ans-map-svg svg') || app.querySelector('.ans-map-svg').hidden) throw new Error('Kata-Trainer: Bodenkarte auf der Figur fehlt');
+          if (app.querySelector('.ans-fig').hidden || !app.querySelector('.ans-map-svg').hidden || !(cv.width > 100)) throw new Error('Kata-Trainer: Figur erscheint nicht');
           const lit = () => { const d = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height).data; let n = 0; for (let i = 3; i < d.length; i += 400) if (d[i]) n++; return n; };
           if (!lit()) throw new Error('Kata-Trainer: Bild der Figur ist leer');
           if (!app.querySelector('.ans-wrap').classList.contains('ans-wide')) throw new Error('Kata-Trainer: Figur bekommt nicht die breite Ansicht');

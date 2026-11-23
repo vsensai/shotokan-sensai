@@ -2029,7 +2029,7 @@ main:fullscreen .ans-wrap {
   color: var(--ok);
 }
 
-/* Figur statt Karte (js/kata-figur.js): Leinwand füllt den Kasten, Blickwinkel-Knopf und (nur Figur) die Bodenkarte liegen darauf */
+/* Figur statt Karte (js/kata-figur.js): Leinwand füllt den Kasten, kleine Karte und Blickwinkel-Knopf liegen darauf */
 .ans-fig {
   position: absolute;
   inset: 0;
@@ -2044,6 +2044,57 @@ main:fullscreen .ans-wrap {
   height: 100%;
   touch-action: pan-y;
   cursor: grab;
+}
+
+.ans-fig-map {
+  position: absolute;
+  left: 0.4rem;
+  bottom: 0.4rem;
+  width: 84px;
+  height: 84px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 253, 249, 0.88);
+  pointer-events: none;
+}
+
+.ans-fig-cam,
+.ans-fs,
+.ans-fig-zoom button,
+.ans-view button {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  min-height: 2rem;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.ans-fig-cam {
+  border-radius: 999px;
+}
+
+/* Oben links auf der Figur: Blickwinkel und Zoom */
+.ans-fig-bar {
+  position: absolute;
+  left: 0.4rem;
+  top: 0.4rem;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.ans-fig-zoom {
+  display: flex;
+}
+
+.ans-fig-zoom button {
+  min-width: 2rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .ans-fig-zoom button:first-child {
@@ -2080,27 +2131,8 @@ main:fullscreen .ans-wrap {
   top: 45%;
 }
 
-/* Nur Figur: dieselbe Bodenkarte klein unten links auf dem Bild, ohne Raster und Beschriftung */
-.ans-solo .ans-map-svg {
-  position: absolute;
-  left: 0.4rem;
-  bottom: 0.4rem;
-  z-index: 1;
-  width: clamp(112px, 30%, 168px);
-  height: auto;
-  aspect-ratio: 1;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.ans-solo .ans-map-svg svg {
-  border-radius: 0;
-}
-
-.ans-solo .emb-grid,
-.ans-solo .emb-txt {
+/* die kleine Karte auf der Figur braucht es neben der großen nicht */
+.ans-both .ans-fig-map {
   display: none;
 }
 
