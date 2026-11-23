@@ -473,7 +473,10 @@
     // (weiter vorn), der andere wird innen eng am Körper zur Hüfte geführt
     const AU_PREP = M(MZK, { hR: H.hip, hL: [0.06, 0.28, 0.22], eL: L(UP_OUT) });
     const AU_MID = M(MZK, { hR: [0.06, -0.02, 0.4], eR: [-0.3, -0.9, 0.4], hL: [-0.04, -0.09, 0.14], eL: [1, -0.8, -0.2] });
-    D['mv:age-uke'] = M({ keys: [{ t: 0, p: AU_PREP }, { t: 0.25, p: AU_PREP }, { t: 0.31, p: AU_MID, e: 'in' }, { t: 0.37, p: M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), e: 'kime' }], best: 1, dur: 1.6, eff: 'fistR', view: 'front3' }, hit('elbowR', 'Unterarm'));
+    // danach gleitet die innere Faust gerade und dicht am Körper zur Hüfte, der Ellbogen geht eng am Körper nach hinten (ohne
+    // nach außen auszuschwenken); die Blockfaust steigt weiter vorn
+    const AU_HALB = M(MZK, { hR: [0.07, 0.17, 0.31], eR: [-0.45, -0.1, 0.45], hL: [0.1, -0.24, 0.17], eL: [0.3, -0.6, -0.8] });
+    D['mv:age-uke'] = M({ keys: [{ t: 0, p: AU_PREP }, { t: 0.25, p: AU_PREP }, { t: 0.31, p: AU_MID, e: 'in' }, { t: 0.34, p: AU_HALB, e: 'fl' }, { t: 0.37, p: M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), e: 'kime' }], best: 1, dur: 1.6, eff: 'fistR', view: 'front3' }, hit('elbowR', 'Unterarm'));
     // Gedan-barai: Faust holt an der Gegenschulter auf Höhe des eigenen Ohrs aus (GB_OHR, auch im Kiba-dachi), Ellbogen vor
     // dem Körper; die Bahn führt deutlich vor dem Bauch schräg nach unten, damit Arm und Faust nicht in den Oberkörper tauchen
     const GB_OHR = 0.17;
@@ -1083,9 +1086,17 @@
 
     /* ---------- Abläufe nur für die Kata als Figur (js/kata-figur.js) – stehen nicht im Lexikon ---------- */
     const KATA = {};
-    // Heian Shodan 4: Tettsui wie bisher, am Ende aber mit dem Arm wie im Lexikon – deutlich gebeugt (gut 85 % gestreckt),
-    // nicht auf 99 % gestreckt
-    KATA['tettsui-heian-shodan'] = M(D['tc:tettsui-uchi'], { keys: D['tc:tettsui-uchi'].keys.map((k, i, a) => (i === a.length - 1 ? M(k, { p: M(k.p, { hR: [-0.04, 0.0, 0.46] }) }) : k)) });
+    // Heian Shodan 4: Tettsui mit großem Bogen – aus dem Gedan-barai schwingt die Faust vor dem Bauch nach links und vor dem
+    // Gesicht links hoch, über den Kopf und schlägt dann schnell und dynamisch ins Ziel (Ausholen ruhiger, Schlag schnell).
+    // Am Ende der Arm wie im Lexikon: deutlich gebeugt (gut 85 % gestreckt)
+    const TS = (t, chest, o, e) => ({ t, e, p: M(MZK, { chest, hL: L(H.hip) }, o) });
+    KATA['tettsui-heian-shodan'] = M(hit('fistR', 'Hammerfaust'), { keys: [
+      { t: 0, p: MZK_G },
+      TS(0.3, 4, { hR: [0.06, -0.16, 0.38], eR: [-0.3, -0.8, 0.3] }, 'fl'),
+      TS(0.55, 8, { hR: [0.27, 0.2, 0.34], eR: [-0.1, -0.3, 1], pR: [1, 0, 0] }, 'fl'),
+      TS(0.8, -12, { hR: [0.06, 0.46, 0.05], eR: [-0.6, 0.4, 0.1], pR: [1, 0, 0] }, 'fl'),
+      TS(1, -25, { hR: [-0.04, 0.0, 0.46], pR: [1, 0, 0] }, 'kime'),
+    ], best: 1, dur: 1, eff: 'fistR', view: 'side3' });
     // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
     // Bewegungs-Editor, MG_KIME)
     KATA['mae-geri-chudan'] = M(D['mv:mae-geri'], { keys: D['mv:mae-geri'].keys.map((k) => (k.e === 'kime' ? { t: k.t, e: k.e, p: MG_KIME } : k)) });
@@ -1510,7 +1521,7 @@
     // Grundabwehren im Zenkutsu-dachi: ausgeholt wird mit der Hüfte frontal (Shomen, beim Gedan-barai und Uchi-uke etwas
     // darüber hinaus zur Gegenseite), mit der Abwehr und dem Hikite dreht sie in den Hanmi
     NEU('mv:age-uke', M(D['mv:age-uke'], { keys: [{ t: 0, p: ausholen(AU_PREP, 0) }, { t: 0.25, p: ausholen(AU_PREP, 0) },
-      { t: 0.31, p: ausholen(AU_MID, 26), e: 'in' }, D['mv:age-uke'].keys[3]] }));
+      { t: 0.31, p: ausholen(AU_MID, 26), e: 'in' }, { t: 0.34, p: ausholen(AU_HALB, 34), e: 'fl' }, D['mv:age-uke'].keys[4]] }));
     NEU('mv:gedan-barai', M(D['mv:gedan-barai'], { keys: [{ t: 0, p: ausholen(GB_PREP, 12) }, { t: 0.25, p: ausholen(GB_PREP, 12) },
       { t: 0.31, p: ausholen(GB_MID, -22), e: 'in' }, D['mv:gedan-barai'].keys[3]] }));
     NEU('mv:soto-uke', VORAUS(keysMit('mv:soto-uke', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, 0) }) : k))));
