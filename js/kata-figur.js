@@ -254,6 +254,7 @@
     [/offene hand greift/i, { def: 'greifen-sandan', side: 'R', from: 0.25 }],
     [/oi-zuki/i, { def: 'mv:oi-zuki', side: 'R', from: 0.38, direkt: true }],
     [/age-uke/i, { def: 'mv:age-uke', side: 'R', from: 0.25 }],
+    [/kentsui tate-mawashi-uchi/i, { def: 'tettsui-heian-shodan', side: 'R', from: 0.15, lang: true, dur: 1.0 }, /heian shodan #4$/i],
     [/kentsui tate-mawashi-uchi/i, { def: 'tc:tettsui-uchi', side: 'R', from: 0.15, lang: true, dur: 1.0 }],
     [/shuto .*uke/i, { def: 'tc:shuto-uke', side: 'L', from: 0.25 }],
     [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25 }, /offenen händen/i],

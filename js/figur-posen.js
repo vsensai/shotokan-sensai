@@ -472,9 +472,10 @@
     const AU_PREP = M(MZK, { hR: H.hip, hL: [0.06, 0.28, 0.22], eL: L(UP_OUT) });
     const AU_MID = M(MZK, { hR: [-0.06, -0.04, 0.3], eR: [-0.4, -0.6, 0.4], hL: [0.12, 0.04, 0.4], eL: [0.5, -0.6, 0.3] });
     D['mv:age-uke'] = M({ keys: [{ t: 0, p: AU_PREP }, { t: 0.25, p: AU_PREP }, { t: 0.31, p: AU_MID, e: 'in' }, { t: 0.37, p: M(MZK, { hL: L(H.hip), hR: [0.06, 0.28, 0.22], eR: UP_OUT }), e: 'kime' }], best: 1, dur: 1.6, eff: 'fistR', view: 'front3' }, hit('elbowR', 'Unterarm'));
-    // Gedan-barai: Faust holt an der Gegenschulter (Ohrhöhe) aus, Ellbogen vor dem Körper; die Bahn führt deutlich vor dem
-    // Bauch schräg nach unten, damit Arm und Faust nicht in den Oberkörper tauchen
-    const GB_PREP = M(S.zk, { hL: [-0.13, 0.1, 0.24], eL: [0.1, -0.5, 0.8], hR: H.chudan });
+    // Gedan-barai: Faust holt an der Gegenschulter auf Höhe des eigenen Ohrs aus (GB_OHR, auch im Kiba-dachi), Ellbogen vor
+    // dem Körper; die Bahn führt deutlich vor dem Bauch schräg nach unten, damit Arm und Faust nicht in den Oberkörper tauchen
+    const GB_OHR = 0.17;
+    const GB_PREP = M(S.zk, { hL: [-0.13, GB_OHR, 0.24], eL: [0.1, -0.5, 0.8], hR: H.chudan });
     const GB_MID = M(S.zk, { hL: [0.08, -0.26, 0.38], hR: [-0.12, -0.28, 0.22] });
     D['mv:gedan-barai'] = M({ keys: [{ t: 0, p: GB_PREP }, { t: 0.25, p: GB_PREP }, { t: 0.31, p: GB_MID, e: 'in' }, { t: 0.37, p: ZK_G, e: 'kime' }], best: 1, dur: 1.6, eff: 'fistL', view: 'front3' }, hit('fistL', 'Unterarm'));
     D['mv:soto-uke'] = T(M(MZK, { hL: L(H.chudan), hR: [-0.45, 0.06, -0.06] }), M(MZK, { hL: L(H.hip), hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), M(hit('elbowR', 'Unterarm innen'), { eff: 'fistR', view: 'front3' }));
@@ -1080,6 +1081,9 @@
 
     /* ---------- Abläufe nur für die Kata als Figur (js/kata-figur.js) – stehen nicht im Lexikon ---------- */
     const KATA = {};
+    // Heian Shodan 4: Tettsui wie bisher, am Ende aber mit dem Arm wie im Lexikon – deutlich gebeugt (gut 85 % gestreckt),
+    // nicht auf 99 % gestreckt
+    KATA['tettsui-heian-shodan'] = M(D['tc:tettsui-uchi'], { keys: D['tc:tettsui-uchi'].keys.map((k, i, a) => (i === a.length - 1 ? M(k, { p: M(k.p, { hR: [-0.04, 0.0, 0.46] }) }) : k)) });
     // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
     // Bewegungs-Editor, MG_KIME)
     KATA['mae-geri-chudan'] = M(D['mv:mae-geri'], { keys: D['mv:mae-geri'].keys.map((k) => (k.e === 'kime' ? { t: k.t, e: k.e, p: MG_KIME } : k)) });
@@ -1172,8 +1176,9 @@
     KATA['juji-osae-uke'] = T(M(S.zks, HANDS_HIP), M(S.zks, { oL: 1, oR: 1,
       hR: [-0.15, -0.23, 0.24], eR: [-1, -0.5, -0.3], pR: [0, 1, 0], fR: [0, 0, 1],
       hL: [-0.115, -0.195, 0.27], eL: [1, -0.4, 0.3], pL: [0, -1, 0], fL: [-1, 0, 0] }));
-    // 13: Gedan-barai zur rechten Seite im Kiba-dachi – die Faust holt an der linken Schulter aus und fegt über das rechte Knie
-    KATA['gedan-barai-kiba'] = T(M(KB, { look: -90, hR: [0.13, 0.08, 0.2], eR: [-0.4, -0.8, 0.5], hL: [0.3, -0.25, 0.25] }),
+    // 13: Gedan-barai zur rechten Seite im Kiba-dachi – die Faust holt an der linken Schulter auf Ohrhöhe aus und fegt über das
+    // rechte Knie
+    KATA['gedan-barai-kiba'] = T(M(KB, { look: -90, hR: [0.13, GB_OHR, 0.2], eR: [-0.4, -0.8, 0.5], hL: [0.3, -0.25, 0.25] }),
       M(KB, { look: -90, hR: stretch([-0.5, -0.5, 0.06], 'R') }));
     // 17: Morote-uke zur rechten Seite im Kosa-dachi (der Körper steht quer, Blick über die rechte Schulter): der rechte Arm
     // wehrt seitlich ab, die linke Faust stützt am rechten Ellbogen
