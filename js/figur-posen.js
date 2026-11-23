@@ -1503,15 +1503,19 @@
     NEU(id, keysMit(id, (k, i) => M(k, { p: EINDREHEN(k.p, i < 2 ? 8 : -15) }))));
   // Uchi-nagashi-uke: die Hüfte dreht mit zur Seite des abwehrenden linken Arms (wie in Tekki Shodan)
   NEU('tc:uchi-nagashi-uke', keysMit('tc:uchi-nagashi-uke', (k, i) => M(k, { p: M(k.p, { yaw: [0, 0, 6, 12, 15][i] }) })));
-  // Tettsui-uchi: mit dem Ausholen über den Kopf dreht die Hüfte weit heraus (tiefer in den Hanmi), mit dem Schlag kräftig
-  // zur Mitte ein; der Oberkörper folgt. Im Ziel steht die Faust wie bisher (Summe aus Hüfte und Oberkörper 15°). Etwas
-  // schneller als die alte Fassung (1,0 statt 1,3 s)
-  NEU('tc:tettsui-uchi', FLOW([
-    M(MZK, { hR: [-0.1, -0.12, 0.42], hL: L(H.hip) }),
-    M(MZK, { yaw: 50, chest: -3, hL: L(H.hip), hR: [-0.1, 0.2, 0.32], pR: [1, 0, 0] }),
-    M(MZK, { yaw: 60, chest: -8, hL: L(H.hip), hR: [-0.2, 0.42, 0.02], eR: [-0.6, 0.3, -0.3], pR: [1, 0, 0] }),
-    M(MZK, { yaw: 12, chest: 3, hL: L(H.hip), hR: [-0.03, 0.0, 0.5], pR: [1, 0, 0] }),
-  ], M(hit('fistR', 'Hammerfaust'), { eff: 'fistR', view: 'side3', dur: 1.0 })));
+  // Tettsui-uchi: mit dem Ausholen über den Kopf dreht die Hüfte weit heraus (tief in den Hanmi, Oberkörper mit), dann
+  // schnappt sie mit dem Schlag hart zur Mitte ein und der Arm peitscht hinterher. Im Ziel steht die Faust wie bisher
+  // (Summe aus Hüfte und Oberkörper 15°)
+  const TTA = 62, TTB = 80, TTC = 6;
+  const TT = (yaw, chest, o) => M(MZK, { yaw, chest, hL: L(H.hip), pR: [1, 0, 0] }, o);
+  const TT0 = M(MZK, { hR: [-0.1, -0.12, 0.42], hL: L(H.hip) });
+  NEU('tc:tettsui-uchi', M(hit('fistR', 'Hammerfaust'), { keys: [
+    { t: 0, p: TT0 }, { t: 0.3, p: TT0 },
+    { t: 0.42, p: TT(TTA, -4, { hR: [-0.1, 0.2, 0.32] }), e: 'fl' },
+    { t: 0.52, p: TT(TTB, -10, { hR: [-0.2, 0.42, 0.02], eR: [-0.6, 0.3, -0.3] }), e: 'fl' },
+    { t: 0.57, p: TT(TTB - 30, -6, { hR: [-0.16, 0.38, 0.16], eR: [-0.6, 0.3, -0.1] }), e: 'fl' },
+    { t: 0.63, p: TT(TTC, 15 - TTC, { hR: [-0.03, 0.0, 0.5] }), e: 'kime' },
+  ], best: 0.63, dur: 1, eff: 'fistR', view: 'side3' }));
   // Yama-zuki: die Hüfte dreht mit fast ganz nach vorn, statt nur den Oberkörper zu drehen (Oberkörper zeigt wie bisher
   // gerade zum Gegner)
   NEU('tc:yama-zuki', keysMit('tc:yama-zuki', (k, i) => (i === 2 ? M(k, { p: M(k.p, { yaw: -10, chest: 10, pelvis: [0, 0.7, 0.12] }) }) : k)));
@@ -1606,24 +1610,25 @@
   const FE_T = [0, 0.12, 0.27, 0.34, 0.385, 0.43];
   NEU('tc:furi-enpi', keysMit('tc:furi-enpi', (k, i) => M(k, { t: FE_T[i] }, i === 2 ? { p: BAL(M(k.p, { R: { y: FEY, pitch: FEP, kp: [-0.2, 1, 1] } }), 'L') } : {})));
   // Gedan-nagashi-uke größer: die Faust holt weiter außen links aus und wischt bis vor die rechte Hüfte, die Hüfte dreht
-  // stärker mit (die Faust bleibt dabei im Raum, wo sie ist). Die rechte Hand bleibt in der Kamae mit Abstand vor dem
-  // Solarplexus (dreht mit dem Körper, statt an die Brust zu rücken)
-  const GNU_R = { hR: [-0.03, -0.16, 0.32], eR: [-0.7, -0.6, 0.2] };
+  // stärker mit (die Faust bleibt dabei im Raum, wo sie ist). Die rechte Hand steht zu Beginn in der Kamae mit Abstand
+  // vor dem Solarplexus und zieht mit der Abwehr als Hikite an die Hüfte
   NEU('tc:gedan-nagashi-uke', M(D['tc:gedan-nagashi-uke'], { keys: [GNU_HAND(0.5, 0.3), GNU_HAND(0.5, 0.3), GNU_HAND(-0.22, 0.42)]
-    .map((h, i) => M(D['tc:gedan-nagashi-uke'].keys[i], { p: M(EINDREHEN(M(TNU, h), i < 2 ? 14 : -24), GNU_R) })) }));
+    .map((h, i) => M(D['tc:gedan-nagashi-uke'].keys[i], { p: M(EINDREHEN(M(TNU, h), i < 2 ? 14 : -24),
+      i < 2 ? { hR: [-0.03, -0.16, 0.32], eR: [-0.7, -0.6, 0.2] } : { hR: H.hip, eR: [-0.3, -0.5, -1] }) })) }));
   // Osae-uke größer: die offene Hand holt bis auf Brusthöhe aus (Ellbogen seitlich, Handgelenk gerade) und drückt bis auf
   // Gürtelhöhe, der Körper sinkt etwas mit
   NEU('tc:osae-uke', IMPULS(T(M(S.zks, { hL: L(H.hip), hR: [0.0, 0.06, 0.38], eR: [-0.9, -0.35, 0.1], oR: 1, pR: [0, -1, 0] }),
     M(S.zks, { hL: L(H.hip), hR: [0.02, -0.37, 0.32], oR: 1, pR: [0, -1, 0] }), M(hit('wristR', 'Handfläche'), { eff: 'wristR', view: 'front3' })), { yaw: -6, setzen: 0.02 }));
   // Sukui-uke dynamischer: Schritt und Schöpfen in einem Zug (0,65 s statt 1,2 s), Kime am Ende
   NEU('tc:sukui-uke', FLOW([SU0, SU1, SU2, SU3], M(hit('elbowR', 'Unterarm'), { eff: 'fistR', view: 'front3', dur: 1.0 })));
-  // Kake-uke: beide Arme holen zugleich gestreckt und waagerecht zur rechten Seite aus, der rechte direkt über dem linken
-  // (der linke, offene Hand, unter dem rechten Unterarm); dann ziehen beide zugleich: die rechte Faust zur Hüfte, der linke
-  // Arm hakt zur linken Seite. Der linke Arm bleibt dabei immer unter bzw. vor dem rechten, die Ärmel berühren sich nicht
+  // Kake-uke: beide Arme holen zugleich waagerecht übereinander aus – oben der rechte Unterarm quer vor der Brust, die Faust
+  // ganz links; darunter der linke Arm gestreckt nach rechts (offene Hand). Dann ziehen beide zugleich: die rechte Faust
+  // bleibt oben, bis der linke Arm unter ihr nach links durch ist, und geht dann zur Hüfte, der linke Arm hakt zur linken
+  // Seite. Beim Ausholen kommt die rechte Faust oben, die linke Hand unten vorbei – die Ärmel berühren sich nicht
   const KU_A = { look: 90, oL: 1, pL: [0, -1, 0], fL: [-1, 0, 0.3] };
-  const KU_AUS3 = M(KB, KU_A, { hL: stretch([-0.32, -0.28, 0.42], 'L'), hR: stretch([-0.3, -0.03, 0.46], 'R'), eR: [-0.3, -1, 0], eL: [0.2, -1, 0.2] });
-  const KU_HOL = M(KB, KU_A, { hL: [0.0, -0.32, 0.3], eL: [0.4, -1, 0.3], hR: [-0.22, -0.18, 0.34], eR: [-0.6, -0.8, 0] });
-  const KU_ZUG = M(KB, { look: 90, oL: 1, hL: [0.2, -0.3, 0.46], eL: [0.5, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.32, -0.14, 0.12], eR: [-0.6, -0.8, -0.3] });
+  const KU_AUS3 = M(KB, KU_A, { hL: stretch([-0.34, -0.26, 0.44], 'L'), eL: [0.2, -1, 0.2], hR: [0.2, 0.06, 0.3], eR: [-0.8, -0.15, 0.2] });
+  const KU_HOL = M(KB, KU_A, { hL: [0.04, -0.36, 0.3], eL: [0.4, -1, 0.3], hR: [-0.04, -0.06, 0.3], eR: [-0.7, -0.5, 0.2] });
+  const KU_ZUG = M(KB, { look: 90, oL: 1, hL: [0.18, -0.3, 0.46], eL: [0.5, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.14, 0.03, 0.22], eR: [-0.8, -0.4, 0] });
   const KUK = D['tc:kake-uke'].keys;
   NEU('tc:kake-uke', M(D['tc:kake-uke'], { keys: [KUK[0], KUK[1], M(KUK[2], { p: KU_HOL }), M(KUK[3], { p: KU_AUS3 }), M(KUK[4], { p: KU_AUS3 }),
     M(KUK[5], { p: KU_ZUG }), KUK[6]] }));
