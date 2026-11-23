@@ -315,7 +315,11 @@
   };
   // Abläufe, die das Lexikon seit der Überarbeitung des Hüfteinsatzes anders zeigt: die freigegebenen Kata behalten die
   // Fassung davor (SK.fig3dKataBisher), bis der Nutzer die neue in der Kata gesehen und abgenommen hat
-  const defOf = (id) => (SK.fig3dKataBisher || {})[id] || D[id] || (SK.fig3dKata || {})[id];
+  // Die Kata stehen auf dem Zenkutsu-dachi des Lexikons vor v1.91.8 (Knie über dem Knöchel; Hüfte und Knie rechnet
+  // rearLeg selbst): Stände und Abläufe kommen aus dem eigens dafür gebauten Lexikon (SK.fig3dKataLexikon, erst bei Bedarf)
+  let kataLex = null;
+  const lex = () => kataLex || (kataLex = SK.fig3dKataLexikon ? SK.fig3dKataLexikon() : { D, KATA: SK.fig3dKata || {}, BISHER: SK.fig3dKataBisher || {}, pose: SK.fig3dPose });
+  const defOf = (id) => lex().BISHER[id] || lex().D[id] || lex().KATA[id];
   // Yoi-Haltung der Kata (Text „yoi“ in den Kata-Daten) → Haltung in SK.fig3dKata
   const YOI = [[/linke handfläche auf dem rücken der rechten hand/i, 'yoi-kafukubu'], [/rechte faust in der .*linken hand/i, 'yoi-faust-in-hand'], [/offene hände vor dem unterbauch/i, 'yoi-kanku']];
   // Arme, Hüftdrehung (yaw, bezogen auf die Körperrichtung), Oberkörper und Kopf (look, bezogen auf die Körperrichtung)
@@ -349,7 +353,7 @@
       const v = fwd(byaw);
       if (Math.abs(dot(d, v)) > Math.abs(d[0] * v[1] - d[1] * v[0])) key = 'hizakutsu';
     }
-    let c = E.full(S[key || 'hachiji']);
+    let c = E.full(lex().pose.S[key || 'hachiji']);
     if (KNIE[id] && KNIE[id][key]) c = E.full(M(c, { L: { kp: KNIE[id][key] } }));
     // welcher Fuß steht vorne? Passt das nicht zum Stand der Figur (meist links vorne, Kosa-dachi rechts): spiegeln
     const ahead = dot(sub(feet[1].c, feet[0].c), fwd(byaw));
