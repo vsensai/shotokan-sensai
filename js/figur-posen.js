@@ -1528,9 +1528,9 @@
       { t: 0.31, p: ausholen(GB_MID, -22), e: 'in' }, D['mv:gedan-barai'].keys[3]] }));
     NEU('mv:soto-uke', VORAUS(keysMit('mv:soto-uke', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, 0) }) : k))));
     NEU('mv:uchi-uke', VORAUS(keysMit('mv:uchi-uke', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, -10) }) : k))));
-    // Abwehren im Kokutsu-dachi: ausgeholt mit der Hüfte fast frontal, mit der Abwehr dreht sie in den Hanmi (65°)
+    // Abwehren im Kokutsu-dachi: ausgeholt mit der Hüfte frontal (Shomen), mit der Abwehr dreht sie in den Hanmi (65°)
     ['tc:shuto-uke', 'tc:morote-uke', 'tc:haiwan-uke', 'tc:manji-uke'].forEach((id) =>
-      NEU(id, VORAUS(keysMit(id, (k, i) => (i < 2 ? M(k, { p: M(k.p, { yaw: -20 }) }) : k)))));
+      NEU(id, VORAUS(keysMit(id, (k, i) => (i < 2 ? M(k, { p: M(k.p, { yaw: 0 }) }) : k)))));
     // Nagashi-uke: die Hüfte dreht mit der wischenden Hand weiter in den Hanmi und nimmt den Körper aus der Linie;
     // die Hand bleibt dabei im Raum, wo sie war (ruhig, in einem Zug)
     ['tc:te-nagashi-uke', 'tc:gedan-nagashi-uke'].forEach((id) =>
@@ -1664,6 +1664,11 @@
     // Faust endet am rechten Ohr (auf Ohrhöhe, knapp davor), der Ellbogen weiter vorn: der Unterarm liegt vor der Brust
     NEU('tc:soto-nagashi-uke', FLOW(SNU.slice(0, 3).concat([EINDREHEN(M(S.kk, { hL: [-0.11, 0.1, 0.17], eL: [0.5, -0.7, 1], pL: [-0.5, 0, -0.9],
       hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }), SNU_EIN)]), SNU_OPT));
+
+    // Vom Nutzer für die Kata abgenommen: beim Vorgehen bleibt die Hüfte gerade und dreht erst mit dem Block in den Hanmi –
+    // die Kata nehmen dafür die Fassung des Lexikons (Hüfteinsatz) statt der davor
+    ['mv:age-uke', 'mv:gedan-barai', 'mv:uchi-uke', 'mv:soto-uke', 'tc:shuto-uke', 'tc:morote-uke', 'tc:haiwan-uke', 'tc:manji-uke']
+      .forEach((id) => delete BISHER[id]);
 
     return { D, KATA, BISHER, pose: { M, mirror, rotate, move, S, H } };
   }
