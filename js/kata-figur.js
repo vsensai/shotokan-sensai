@@ -119,6 +119,11 @@
   const KOSA = S.kosamae ? Math.abs(S.kosamae.L.x - S.kosamae.R.x) : 0.3;
   const KVOR = S.kosamae ? Math.abs(S.kosamae.L.z - S.kosamae.R.z) : 0;
   const KOSAST = /ashi-mae kosa$/i;
+  // Kosa-dachi (gekreuzter Fuß hinter dem Standfuß): Die Skizze zeichnet die Füße doppelt so weit auseinander wie den Stand
+  // (seitlich 0,26 bis 0,44 m statt 0,1 m) – die Figur steht so eng wie im Lexikon (S.kosa). Es rückt der Fuß, der in der
+  // nächsten Bewegung weitergeht (meist der gekreuzte; Heian Godan 19 der Standfuß, weil der gekreuzte im Zenkutsu-dachi 20
+  // stehen bleibt) – so ändert sich keine andere Stellung
+  const KOSADACHI = /kosa-dachi/i;
   // Stampfen aus dem Kreuzschritt (Tekki 2, 8, 22): erst kommt das Knie vor dem Körper hoch, dann stampft der Fuß zur Seite
   const KKNIE = [1, 0.8]; // Richtung des Knies (Anteil nach vorn, zur Seite des Schritts)
   const KHOCH = 0.45; // so hoch kommt der Fuß dabei (Meter; sonst HOCH)
@@ -828,6 +833,24 @@
       steps.forEach((st, j) => {
         const f = st.pose.f;
         if (st.kind !== 'move' || !f[0][3] || !f[1][3]) return;
+        if (KOSADACHI.test(st.stance) && S.kosa) {
+          const nx = node[j + 1];
+          const bleibt = [0, 1].map((i) => !!nx && nx[i] === node[j][i]);
+          const i = bleibt[0] !== bleibt[1] ? (bleibt[0] ? 1 : 0) : f[0][3] < f[1][3] ? 0 : 1;
+          const o = 1 - i;
+          const K = E.full(/^hidari/i.test(st.stance) ? mirror(S.kosa) : S.kosa);
+          const lexAnk = [[K.L.x, K.L.z], [K.R.x, K.R.z]];
+          const rot = cdiv(fwd(-st.pose.body), [0, 1]);
+          const A = pts[node[j][o]];
+          const ankA = sub([-A[0] * SCALE, A[1] * SCALE], mul(fwd(-f[o][2]), FOOT_MID));
+          const c = add(add(ankA, cmul(rot, sub(lexAnk[i], lexAnk[o]))), mul(fwd(-f[i][2]), FOOT_MID));
+          const want = [-c[0] / SCALE, c[1] / SCALE];
+          if (len(sub(want, pts[node[j][i]])) > 1e-5) {
+            pts[node[j][i]] = want;
+            over = changed = true;
+          }
+          return;
+        }
         const [a, b] = node[j].map((q) => pts[q]);
         const d = sub(b, a);
         const l = len(d) * SCALE;
