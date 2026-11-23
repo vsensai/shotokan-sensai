@@ -97,7 +97,12 @@
   // gleitet der linke Fuß in den Kokutsu-dachi 3; auf dessen Plätzen stehen 4 bis 9 (der „etwas breitere“ Hachiji-dachi
   // und der Hizakutsu), deshalb ist er so lang wie der Kokutsu-dachi der Figur. Der tiefe Kokutsu-dachi 44 entsteht aus
   // dem langen Stand des Ude-tate: der linke Fuß rückt heran
+  // Heian Sandan 2, 5, 11: Die Karte stellt die Füße im Heisoku-dachi 20 cm auseinander, und weil die langen
+  // Kokutsu-dachi 1, 4, 7 gekürzt werden, wandert der stehende Fuß mit – in 2 stand der rechte Fuß 15 cm vor dem linken,
+  // in 5 der linke 10 cm vor dem rechten und die Beine steckten ineinander. 'neben': der ankommende Fuß setzt sich genau
+  // neben den stehenden (geschlossen wie im Lexikon, quer zur Körperrichtung)
   const BREITE = {
+    'heian-sandan': [[/heisoku/i, 0.115, 'neben']],
     'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12], [/hachiji/i, 0.7, 'R']],
     'kanku-dai': [[/hachiji-dachi #[12]$/i, 0.368], [/kokutsu-dachi #3$/i, 0.8, 'neu'], [/kokutsu-dachi #44$/i, 0.95, 'neu']],
   };
@@ -268,6 +273,8 @@
     [/shihon-nukite/i, { def: 'tc:nukite', side: 'R', from: 0.25, direkt: true }],
     [/jodan uchi-uke \+ .*gedan-uke/i, { def: 'tc:manji-uke', side: 'L', from: 0.25, vor: { stand: 'Zenkutsu-dachi', def: 'nagashi-shuto-gedan', side: 'L', from: 0.25 } }],
     [/uchi-uke \+ .*gedan-uke/i, { def: 'uchi-gedan-uke', side: 'R', from: 0.25, erst: true }],
+    [/chudan uchi-uke/i, { def: 'uchi-uke-gyaku', side: 'R', from: 0.25 }, /gyaku-hanmi/i],
+    [/chudan uchi-uke/i, { def: 'uchi-uke-kk', side: 'R', from: 0.25 }, /kokutsu/i],
     [/chudan uchi-uke/i, { def: 'mv:uchi-uke', side: 'R', from: 0.25 }],
     [/sokumen chudan morote-uke/i, { def: 'morote-uke-seite', side: 'R', from: 0.25 }],
     [/morote-uke/i, { def: 'morote-uke-zk', side: 'L', from: 0.25 }, /zenkutsu/i],
@@ -869,6 +876,22 @@
           const an = [0, 1].filter((i) => node[j][i] !== node[j - 1][i]);
           return an.length === 1 ? (an[0] ? [0, 1] : [1, 0]) : null;
         };
+        // 'neben': der ankommende Fuß setzt sich genau neben den stehenden – quer zur Körperrichtung, auf gleicher Höhe
+        if (eig && eig[2] === 'neben' && j) {
+          const an = [0, 1].filter((i) => node[j][i] !== node[j - 1][i]);
+          if (an.length === 1) {
+            const i = an[0];
+            const r = ((st.pose.body + 90) * Math.PI) / 180;
+            const g = (eig[1] / SCALE) * (i ? 1 : -1);
+            const s = pts[node[j][1 - i]];
+            const want = [s[0] + Math.sin(r) * g, s[1] + Math.cos(r) * g];
+            if (len(sub(want, pts[node[j][i]])) > 1e-5) {
+              pts[node[j][i]] = want;
+              over = changed = true;
+            }
+            return;
+          }
+        }
         const lang = (LAENGE[id] || []).find(([rx]) => rx.test(name));
         if (lang && l < lang[1] - 1e-4) {
           const push = mul(d, (lang[1] - l) / l);

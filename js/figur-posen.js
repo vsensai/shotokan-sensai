@@ -1670,6 +1670,24 @@
     ['mv:age-uke', 'mv:gedan-barai', 'mv:uchi-uke', 'mv:soto-uke', 'tc:shuto-uke', 'tc:morote-uke', 'tc:haiwan-uke', 'tc:manji-uke']
       .forEach((id) => delete BISHER[id]);
 
+    // Uchi-uke (rechter Arm) mit anderer Hüftdrehung: Hüfte auf yaw(alter Wert), der Blockarm bleibt dabei im Raum, wo er
+    // im Lexikon ist; die andere Hand (Hikite an der Hüfte) bleibt am Körper
+    const UCHI_DREH = (yaw, o) => M(D['mv:uchi-uke'], { keys: D['mv:uchi-uke'].keys.map((k) => {
+      const y = E.full(k.p).yaw;
+      const p = EINDREHEN(k.p, yaw(y) - y);
+      ['hL', 'eL', 'pL', 'fL'].forEach((q) => { if (k.p[q]) p[q] = k.p[q]; });
+      return M(k, { p: M(p, o) });
+    }) });
+    // Heian Nidan 16, 19: Uchi-uke im Ashi-zenkutsu mit der Hüfte im Gyaku-hanmi – wie im Lexikon, aber die Hüfte dreht
+    // nur 25° statt 40° heraus (wie Kanku Dai 16, 21, 36; mit 40° im kurzen Stand sah sie zu verdreht aus)
+    KATA['uchi-uke-gyaku'] = UCHI_DREH((y) => (y > 0 ? y * (25 / 40) : y));
+    // Heian Sandan 1, 4 und Heian Godan 1, 4: Uchi-uke im Kokutsu-dachi wie die Abwehren im Kokutsu-dachi des Lexikons
+    // (Shuto-uke, Morote-uke): ausgeholt mit der Hüfte frontal (Shomen), mit der Abwehr dreht sie in den Hanmi des
+    // Kokutsu-dachi (65°) – vorher nahmen sie den Ablauf aus dem Zenkutsu-dachi (Hüfte nur 40°, sie schoss beim Wenden
+    // über die Mitte hinaus und drehte zurück)
+    const MKK = mirror(S.kk);
+    KATA['uchi-uke-kk'] = UCHI_DREH((y) => (y > 0 ? y * (65 / 40) : 0), { pelvis: MKK.pelvis, L: MKK.L, R: MKK.R, w: MKK.w });
+
     return { D, KATA, BISHER, pose: { M, mirror, rotate, move, S, H } };
   }
 
