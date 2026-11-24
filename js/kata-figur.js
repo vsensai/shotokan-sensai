@@ -218,7 +218,9 @@
   // (Bassai Dai 38, 39: Sukui-uke);
   // ganz: Ablauf des Lexikons samt Beinen und Hüfte (Sprung), ab Schlüsselbild von – er wird an die Plätze der Kata gelegt
   // wechsel (langsame Bewegung): der Stand wechselt bis zu diesem Anteil der Zeit schnell zu 80 % (Gewichtsverlagerung,
-  // die Arme gehen dabei in die Ausholhaltung), der Rest des Standes läuft langsam mit der Armtechnik (Heian Yondan 2)
+  // die Arme gehen dabei in die Ausholhaltung), der Rest des Standes läuft langsam mit der Armtechnik (Heian Yondan 2);
+  // zwischen (langsame Bewegung): { u, p } – Zwischenbild auf dem Weg in die Ausholhaltung beim Anteil u dieses Weges,
+  // p mit Werten der Arme (echte Seiten, Bezug wie im Editor)
   // hikiteBleibt (mit direkt): die Hand der Gegenseite bleibt beim Wenden im Raum stehen, wo sie ist (vorn), statt mit dem
   // Körper zur Seite zu drehen, und zieht erst mit dem Stoß an die Hüfte (Heian Sandan 10 nach dem Kentsui)
   const TECH = [
@@ -286,7 +288,8 @@
     [/kentsui tate-mawashi-uchi/i, { def: 'tettsui-heian-shodan', side: 'R', from: 0, lang: true, dur: 0.8 }, /heian shodan #4$/i],
     [/kentsui tate-mawashi-uchi/i, { def: 'tc:tettsui-uchi', side: 'R', from: 0.15, lang: true, dur: 1.0 }],
     [/shuto .*uke/i, { def: 'tc:shuto-uke', side: 'L', from: 0.25 }],
-    [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25, wechsel: 0.25 }, /heian yondan #2$/i],
+    // (zwischen: der rechte Arm sinkt aus dem Haiwan-uke von 1 im Bogen vor dem Körper, der Ellbogen geht gleich mit nach unten)
+    [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25, wechsel: 0.25, zwischen: { u: 0.45, p: { hR: [0.02, -0.02, 0.32], eR: [-0.9, -0.6, 0.3] } } }, /heian yondan #2$/i],
     [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25 }, /offenen händen/i],
     [/haiwan/i, { def: 'tc:haiwan-uke', side: 'L', from: 0.25 }],
     [/soto-nagashi-uke/i, { def: 'tc:soto-nagashi-uke', side: 'L', from: 0.513, lang: true, dur: 0.55, erst: true }],
@@ -1415,7 +1418,10 @@
         else if (st.slow) {
           // langsam: ruhig in die Ausholhaltung, dann der Ablauf über den Rest (Haltungen ohne Ablauf: einfach hinein)
           const uA = tech.wechsel || 0.35;
-          const pre = E.timeline([{ t: 0, p: cur.up }, { t: uA, p: tr(0) }]);
+          // zwischen: Zwischenbild auf dem Weg in die Ausholhaltung (Arm sinkt im Bogen, Ellbogen geht mit)
+          const zb = tech.zwischen;
+          const gerade = zb && E.timeline([{ t: 0, p: cur.up }, { t: 1, p: tr(0), e: 'lin' }]);
+          const pre = E.timeline(zb ? [{ t: 0, p: cur.up }, { t: uA * zb.u, p: M(upper(gerade(zb.u)), zb.p), e: 'fl' }, { t: uA, p: tr(0), e: 'kime' }] : [{ t: 0, p: cur.up }, { t: uA, p: tr(0) }]);
           // Die Hüfte dreht dabei in einem Zug von der alten in die neue Stellung, im Gleichschritt mit der Wendung – nähme
           // sie die Hüftstellung der Ausholhaltung mit, drehte sie erst kräftig gegen die Wendung und dann zurück
           const y0 = cur.up.yaw;
