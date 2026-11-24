@@ -112,8 +112,11 @@
   // in 5 der linke 10 cm vor dem rechten und die Beine steckten ineinander. 'neben': der ankommende Fuß setzt sich genau
   // neben den stehenden (geschlossen wie im Lexikon, quer zur Körperrichtung). Der Kokutsu-dachi 1 und 4 (Skizze 1,47 m)
   // ist etwas länger als KKMAX – mit 1,05 m stand das vordere Bein dem Nutzer zu weit hinten
+  // Heian Godan 3, 6: Die Skizze zeigt nur einen Abdruck – in 3 standen die Füße aufeinander (Knöchel 2 cm auseinander);
+  // wie in Heian Sandan geschlossen nebeneinander
   const BREITE = {
     'heian-sandan': [[/heisoku/i, 0.115, 'neben'], [/kokutsu-dachi #[14]$/i, 1.15]],
+    'heian-godan': [[/heisoku/i, 0.115, 'neben']],
     'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12], [/hachiji/i, 0.7, 'R']],
     'kanku-dai': [[/hachiji-dachi #[12]$/i, 0.368], [/kokutsu-dachi #3$/i, 0.8, 'neu'], [/kokutsu-dachi #44$/i, 0.95, 'neu']],
   };
