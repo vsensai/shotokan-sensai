@@ -319,7 +319,7 @@
   // anMin bleibt (sonst würde das Bein unglaubwürdig schnell)
   const TRITT = {
     mae: { def: 'mae-geri-chudan', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
-    'yoko-keage': { def: 'yoko-geri-keage', side: 'R', a: 0.32, b: 0.68, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.5 },
+    'yoko-keage': { def: 'yoko-geri-keage', side: 'R', a: 0.32, b: 0.68, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.5, kniefuss: 0 },
     'mae-jodan': { def: 'mv:mae-geri', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
     // Kanku Dai 17, 22, 37: aus dem Ashi-zenkutsu hat die Hüfte einen weiten Weg bis über den Standfuß – im schnellsten
     // Takt bleibt dafür mehr Zeit (sonst wie mae-jodan)
@@ -832,11 +832,19 @@
       const hand = (h) => [h[0], (h[1] + h[0] * Math.sin(r)) / Math.cos(r), h[2]];
       return M(up, { yaw, roll, lean: lerp(up.lean, p.lean, f), chest: f < 1 ? up.chest + 0.6 * (up.yaw - yaw) : p.chest, hL: hand(up.hL), hR: hand(up.hR) }, look == null ? null : { look });
     };
+    // Knie des Standbeins (kniefuss): zeigt über den Fuß, wie die Karte ihn stellt, nur kniefuss Grad nach außen – mit dem
+    // Knie des Lexikons knickte es beim Yoko-geri-keage gut 50° neben den nach vorn zeigenden Fuß weg (Heian Yondan 5, 8;
+    // ebenso Heian Nidan 7, Kanku Dai 10, 26, 29, 51)
+    const kpS = (p) => {
+      const k = p[s].kp;
+      if (tr.kniefuss == null) return k;
+      return rotY([0, k[1], Math.hypot(k[0], k[2])], rel + (s === 'L' ? tr.kniefuss : -tr.kniefuss));
+    };
     // Stellung mit angezogenem Knie (u = 0 vor, 1 nach dem Tritt) als Bild für die Übergänge davor und danach
     const low = (u) => {
       const { p, pel, ank } = at(u);
       const low = { pel, h: p.pelvis[1], w: s === 'L' ? [1, 0] : [0, 1] };
-      low[s] = { c: mid, rel, y: p[s].y, pitch: 0, tu: 0, kp: p[s].kp };
+      low[s] = { c: mid, rel, y: p[s].y, pitch: 0, tu: 0, kp: kpS(p) };
       low[o] = { c: add(ank, mul(fwd(byaw + p[o].yaw), FOOT_MID)), rel: p[o].yaw, y: p[o].y, pitch: p[o].pitch, tu: p[o].tu, kp: p[o].kp, sole: p[o].sole };
       return low;
     };
@@ -848,7 +856,7 @@
       P.yaw = byaw + up.yaw;
       P.look = byaw + up.look;
       P.pelvis = [pel[0], p.pelvis[1], pel[1]];
-      P[s] = { x: ankS[0], z: ankS[1], y: p[s].y, yaw: byaw + rel, pitch: 0, tu: 0, kp: rotY(p[s].kp, byaw), sole: [0, 0, 0] };
+      P[s] = { x: ankS[0], z: ankS[1], y: p[s].y, yaw: byaw + rel, pitch: 0, tu: 0, kp: rotY(kpS(p), byaw), sole: [0, 0, 0] };
       P[o] = { x: ank[0], z: ank[1], y: p[o].y, yaw: byaw + p[o].yaw, pitch: p[o].pitch, tu: p[o].tu, kp: rotY(p[o].kp, byaw), sole: rotY(p[o].sole, byaw) };
       // steht die Hüfte anders als im Lexikon, reicht das gestreckte Bein evtl. nicht ganz bis zum Ziel: Fuß dorthin, wo es hinreicht
       const J = E.solve(E.full(P));
