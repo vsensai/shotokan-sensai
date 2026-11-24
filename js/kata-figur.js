@@ -109,9 +109,10 @@
   // Heian Sandan 2, 5, 11: Die Karte stellt die Füße im Heisoku-dachi 20 cm auseinander, und weil die langen
   // Kokutsu-dachi 1, 4, 7 gekürzt werden, wandert der stehende Fuß mit – in 2 stand der rechte Fuß 15 cm vor dem linken,
   // in 5 der linke 10 cm vor dem rechten und die Beine steckten ineinander. 'neben': der ankommende Fuß setzt sich genau
-  // neben den stehenden (geschlossen wie im Lexikon, quer zur Körperrichtung)
+  // neben den stehenden (geschlossen wie im Lexikon, quer zur Körperrichtung). Der Kokutsu-dachi 1 und 4 (Skizze 1,47 m)
+  // ist etwas länger als KKMAX – mit 1,05 m stand das vordere Bein dem Nutzer zu weit hinten
   const BREITE = {
-    'heian-sandan': [[/heisoku/i, 0.115, 'neben']],
+    'heian-sandan': [[/heisoku/i, 0.115, 'neben'], [/kokutsu-dachi #[14]$/i, 1.15]],
     'bassai-dai': [[/hizakutsu/i, 1.12], [/heisoku/i, 0.115], [/^(hidari|migi) zenkutsu/i, 1.12], [/hachiji/i, 0.7, 'R']],
     'kanku-dai': [[/hachiji-dachi #[12]$/i, 0.368], [/kokutsu-dachi #3$/i, 0.8, 'neu'], [/kokutsu-dachi #44$/i, 0.95, 'neu']],
   };
@@ -948,7 +949,8 @@
         const zk = /zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance);
         const max0 = reno ? RENOJI : KOSAST.test(st.stance) ? KOSA : eig ? eig[1] : (KIBA[id] && /kiba/i.test(st.stance) ? KIBA[id] : MAXLEN);
         const kk = /kokutsu/i.test(st.stance);
-        const max = zk ? Math.min(max0, ZKMAX) : kk ? Math.min(max0, KKMAX) : max0;
+        // (ein eigener Eintrag in BREITE darf einen Kokutsu-dachi auch länger als KKMAX machen – Heian Sandan 1, 4)
+        const max = zk ? Math.min(max0, ZKMAX) : kk && !eig ? Math.min(max0, KKMAX) : max0;
         // ein zu kurzer Zenkutsu-dachi wird länger: beide Plätze rücken je zur Hälfte auseinander
         if (/zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance) && l < MINZK - 1e-4) {
           const push = mul(d, (0.5 * (MINZK - l)) / l);
