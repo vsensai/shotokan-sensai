@@ -1161,12 +1161,13 @@
     /* Heian Yondan */
     // Hizakutsu nach vorn gedreht (Bewegung 11) als Stand für die Kata – die Beine aus dem Lexikon-Bild
     S.hizaShomen = { pelvis: HZ.pelvis, yaw: 0, L: HZ.L, R: HZ.R, w: HZ.w };
-    // 1, 2: Haiwan-uke mit offenen Händen, langsam. Die Hände kommen von der rechten Hüfte vor den Körper, bis sich die
-    // Fingerspitzen mittig treffen (Unterarme waagerecht, Ellbogen zur Seite, nichts liegt übereinander), steigen so
+    // 1, 2: Haiwan-uke mit offenen Händen, langsam. Zuerst öffnen sich die Hände: die rechte bleibt etwa, wo sie im Yoi
+    // ist (vor dem Oberschenkel, kein Ellbogen nach hinten), die linke kommt mit kleiner Lücke daneben. Von dort steigen
+    // sie vor den Körper, bis sich die Fingerspitzen mittig treffen (Unterarme waagerecht, Ellbogen zur Seite, nichts liegt übereinander), steigen so
     // zusammen bis vor das Kinn, und erst dann geht jeder Arm in seine Stellung – kein Ellbogen geht dem Unterarm voraus
     {
       const HW = D['tc:haiwan-uke'].keys;
-      const HW0 = HW[0].p;
+      const HW0 = M(HW[0].p, { hR: [-0.16, -0.52, 0.19], eR: [-0.3, -1, 0.1], fR: [0, -1, 0.4], pR: [0, 0, -1], hL: [-0.03, -0.5, 0.23], eL: [0.3, -1, 0.2], fL: [0, -1, 0.4], pL: [0, 0, -1] });
       const HW1 = HW[HW.length - 1].p;
       const spitzen = (y, z) => M(HW0, { hL: [0.125, y, z], eL: [1, -0.35, 0], fL: [-1, 0, 0.15], pL: [0, -0.4, -1], hR: [-0.125, y, z], eR: [-1, -0.35, 0], fR: [1, 0, 0.15], pR: [0, -0.4, -1] });
       const MITTE = spitzen(-0.1, 0.3);
