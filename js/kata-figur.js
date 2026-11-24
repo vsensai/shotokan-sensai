@@ -208,6 +208,8 @@
   // schlag: eigene Dauer (Sekunden) des Teils nach dem Ausholen statt STRIKE – für einen großen Bogen mit Pause davor
   // (Bassai Dai 38, 39: Sukui-uke);
   // ganz: Ablauf des Lexikons samt Beinen und Hüfte (Sprung), ab Schlüsselbild von – er wird an die Plätze der Kata gelegt
+  // hikiteBleibt (mit direkt): die Hand der Gegenseite bleibt beim Wenden im Raum stehen, wo sie ist (vorn), statt mit dem
+  // Körper zur Seite zu drehen, und zieht erst mit dem Stoß an die Hüfte (Heian Sandan 10 nach dem Kentsui)
   const TECH = [
     // Kanku Dai
     [/hitai-mae-ue/i, { def: 'kanku-himmel', side: 'L', from: 0, lang: true }],
@@ -267,6 +269,7 @@
     // Heian Sandan 18: erst greift die rechte Hand zur Seite des Schritts (Teil 1, Füße bleiben), dann Schritt mit Oi-zuki
     [/oi-zuki/i, { def: 'oi-zuki-greifen', side: 'R', from: 0.25, zuvor: 'stehen', teil1: ['Kiba-dachi', 'Migi offene Hand greift'], zeit: 0.35 }, /heian sandan #18$/i],
     [/offene hand greift/i, { def: 'greifen-sandan', side: 'R', from: 0.25 }],
+    [/oi-zuki/i, { def: 'mv:oi-zuki', side: 'R', from: 0.38, direkt: true, hikiteBleibt: true }, /heian sandan #10$/i],
     [/oi-zuki/i, { def: 'mv:oi-zuki', side: 'R', from: 0.38, direkt: true }],
     [/age-uke/i, { def: 'mv:age-uke', side: 'R', from: 0.25 }],
     [/kentsui tate-mawashi-uchi/i, { def: 'tettsui-heian-shodan', side: 'R', from: 0, lang: true, dur: 0.8 }, /heian shodan #4$/i],
@@ -699,6 +702,16 @@
     const up = seg.arms(u);
     const P = { w: [lerp(A.low.w[0], B.low.w[0], eb), lerp(A.low.w[1], B.low.w[1], eb)] };
     UP.forEach((k) => (P[k] = up[k]));
+    if (seg.halteHand) {
+      // die Hand bleibt im Raum stehen, solange der Körper unter ihr wendet, und geht erst mit dem Stoß ihren Weg
+      const { s, uS } = seg.halteHand;
+      const f = 1 - smooth(clamp((u - uS) / (1 - uS)));
+      // Brustrahmen der Bewegung: jetzt (cn) und der gehaltene (ch, am Anfang der Bewegung, mit dem Stoß zu cn hin)
+      const cn = byaw + up.yaw + up.chest;
+      const ch = lerp(cn, A.byaw + A.up.yaw + A.up.chest, f);
+      const umrechnen = (v) => rotY(v, ch - cn);
+      ['h', 'e', 'p', 'f'].forEach((k) => { const v = P[k + s]; if (Array.isArray(v) && (v[0] || v[2])) P[k + s] = umrechnen(v); });
+    }
     P.hL = clear(P.hL);
     P.hR = clear(P.hR);
     P.yaw = byaw + up.yaw;
@@ -1435,6 +1448,7 @@
       }
       const nk = key(m, st.stance, cur, end, tech && tech.stand);
       const o = { t0: st.t, t1: st.t + d, arms };
+      if (tech && tech.direkt && tech.hikiteBleibt) o.halteHand = { s: side === 'R' ? 'L' : 'R', uS };
       if (st.slow) o.ease = smooth;
       // Wechseln beide Füße den Platz, geht zuerst der, mit dem die Füße dazwischen näher beieinander stehen (Heian Sandan 19:
       // erst der rechte neben den linken, dann der linke hinaus); beim Yori-ashi gleiten beide zugleich
