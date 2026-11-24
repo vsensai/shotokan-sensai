@@ -1283,14 +1283,17 @@
     KATA['soede-uchi-uke'] = T(M(SOE, { hR: H.uchiPrep, eR: E_UCHI, hL: [0.24, -0.32, 0.09], fL: [-1, 0.2, 0.3], pL: [0, -0.3, -1] }),
       M(SOE, { hR: [-0.3, 0.0, 0.3], eR: DOWN_FWD, hL: [-0.2, -0.04, 0.29], eL: [0.4, -1, 0.1], fL: [-1, 0.25, 0.1], pL: [0, -0.3, -1] }));
     // 6: erst schöpft die rechte Faust tief von links nach rechts und etwas hoch (Gedan Sukui-uke, Bahn wie im Lexikon),
-    // dann holt sie hinter dem Ohr aus und wehrt als Soto-uke ab – ein Zug, zusammen mit dem Fuß
+    // dann holt sie hinter dem Ohr aus und wehrt als Soto-uke ab – ein Zug, zusammen mit dem Fuß. Nach dem Bewegungs-Editor:
+    // am Ende des Schöpfens die Faust etwas tiefer; beim Ausholen die Faust weiter außen neben dem Kopf und die Hüfte fast
+    // gerade (Shomen, 7°), erst mit dem Soto-uke dreht sie in den Hanmi. Das Schöpfen endet etwas früher (0,5 statt 0,54), so
+    // bleibt für den weiteren Weg zum Ausholen genug Zeit – sonst springt die Faust im schnellsten Takt
     const SS = (o) => M(MZK, { hL: L(H.hip) }, o);
     KATA['sukui-soto-uke'] = { keys: [
       { t: 0, p: SS({ hR: SU0.hR, eR: SU0.eR }) },
       { t: 0.2, p: SS({ hR: SU1.hR, eR: SU1.eR }), e: 'fl' },
       { t: 0.38, p: SS({ hR: SU2.hR, eR: SU2.eR }), e: 'fl' },
-      { t: 0.54, p: SS({ hR: SU3.hR, eR: SU3.eR, pR: SU3.pR }), e: 'fl' },
-      { t: 0.8, p: SS({ hL: L(H.chudan), hR: [-0.45, 0.06, -0.06] }), e: 'fl' },
+      { t: 0.5, p: SS({ hR: [-0.249, -0.369, 0.424], eR: SU3.eR, pR: SU3.pR }), e: 'fl' },
+      { t: 0.8, p: SS({ yaw: 5.2, hL: L(H.chudan), hR: [-0.709, 0.117, 0.046] }), e: 'fl' },
       { t: 1, p: SS({ hR: [-0.03, 0.0, 0.32], eR: DOWN_FWD }), e: 'kime' },
     ] };
     // 18: Ryosho Tsukami-uke, langsam und kraftvoll aus dem Shuto-uke. Die rechte Hand beginnt: Die linke bleibt zunächst
