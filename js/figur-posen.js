@@ -123,10 +123,10 @@
       zks: zkKata ? { pelvis: [0, 0.7, 0.13], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 4 }, R: { x: -0.13, z: -0.5, yaw: -32 }, w: [0.7, 0.3] }
         : { pelvis: [0, 0.66, 0.27], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 4 }, R: { x: -0.13, z: -0.37, yaw: -32 }, w: [0.7, 0.3] },
       ashizk: { pelvis: [0, 0.78, 0.08], yaw: -25, L: { x: 0.1, z: 0.42, yaw: 4 }, R: { x: -0.11, z: -0.38, yaw: -25 }, w: [0.7, 0.3] },
-      // Kokutsu-dachi wie im Bewegungs-Editor eingestellt (Standbild im Lexikon): tief, gut 1 m lang, die Hüfte über gut einem
-      // Drittel des Standes vom hinteren Fuß aus (Gewicht hinten), hinteres Knie knapp rechtwinklig, vorderer Fuß flach.
-      // Gilt für alle Abläufe im Kokutsu-dachi und die Kata (vorher 8 cm höher, 82 cm lang, Hüfte fast in der Mitte)
-      kk: { pelvis: [-0.012, 0.674, -0.037], yaw: -65, L: { x: 0.075, z: 0.635, yaw: 0, kp: [0.052, 0.776, 0.628] }, R: { x: -0.02, z: -0.4, yaw: -90, kp: [-1, 0.1, 0.3] }, w: [0.3, 0.7] },
+      // Kokutsu-dachi (Standbild im Lexikon, alle Abläufe im Kokutsu-dachi und die Kata): tief, gut 1 m lang, die Hüfte über
+      // knapp einem Drittel des Standes vom hinteren Fuß aus (Gewicht hinten), hinteres Knie rechtwinklig und über den Zehen
+      // nach außen gedrückt (nicht schräg nach vorn), vorderes Knie leicht gebeugt, vorderer Fuß flach
+      kk: { pelvis: [-0.012, 0.65, -0.08], yaw: -65, L: { x: 0.075, z: 0.635, yaw: 0, kp: [0.052, 0.776, 0.628] }, R: { x: -0.02, z: -0.4, yaw: -90, kp: [-1, 0.1, -0.3] }, w: [0.3, 0.7] },
       kb: { pelvis: [0, 0.68, 0], yaw: 0, L: { x: 0.42, z: 0, yaw: 5, kp: [1, 0, 0.5] }, R: { x: -0.42, z: 0, yaw: -5, kp: [-1, 0, 0.5] }, w: [0.5, 0.5] },
       neko: { pelvis: [0, 0.72, -0.02], yaw: -35, L: { x: 0.04, z: 0.3, y: 0.11, yaw: 0, pitch: -28 }, R: { x: -0.07, z: -0.08, yaw: -30, kp: [-0.4, 0, 1] }, w: [0.1, 0.9] },
       fudo: { pelvis: [0, 0.66, 0.08], yaw: -45, L: { x: 0.12, z: 0.6, yaw: 0 }, R: { x: -0.16, z: -0.45, yaw: -45, kp: [-0.6, 0, 0.6] }, w: [0.5, 0.5] },

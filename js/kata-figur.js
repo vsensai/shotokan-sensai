@@ -63,6 +63,9 @@
   // Kokutsu-dachi (kokutsu): die Hüfte darf in einem langen Stand höchstens KK_VOR nach vorn rücken und höchstens KK_TIEF
   // tiefer stehen als im Stand der Figur (Meter); mit frontaler Hüfte soll das vordere Bein noch reichen (KK_REICHT:
   // Abstand Hüftgelenk–Knöchel)
+  // Längster Kokutsu-dachi (Meter zwischen den Fußmitten, etwa der Stand der Figur): Die Karte zeichnet ihn bis 1,25 m lang –
+  // dann reichte das vordere Bein nur, wenn die Hüfte nach vorn rückte, und das Gewicht stünde nicht mehr hinten
+  const KKMAX = 1.08;
   const KK_VOR = 0.15;
   const KK_TIEF = 0.04;
   const KK_REICHT = 0.88 * 0.99;
@@ -390,7 +393,10 @@
       let rel = force ? F.yaw : wrap(ft.yaw - byaw);
       if (dreh && Math.abs(rel) > dreh) return { c: ft.c, rel: Math.sign(rel) * dreh, y: F.y, pitch: F.pitch, tu: F.tu, kp: [Math.sin(Math.sign(rel) * dreh * RAD), 0.15, Math.cos(dreh * RAD)] };
       // Knie: wie im Stand der Figur vorgegeben, sonst in Fußrichtung (beides bezogen auf die Körperrichtung)
-      const kp = Math.hypot(...F.kp) > 0.01 ? F.kp.map((v) => v / Math.hypot(...F.kp)) : [Math.sin(rel * RAD), 0.15, Math.cos(rel * RAD)];
+      let kp = Math.hypot(...F.kp) > 0.01 ? F.kp.map((v) => v / Math.hypot(...F.kp)) : [Math.sin(rel * RAD), 0.15, Math.cos(rel * RAD)];
+      // Kokutsu-dachi: das Knie dreht mit dem Fuß der Karte – das hintere Knie drückt so über die Zehen nach außen, auch
+      // wo der hintere Fuß weniger als 90° zur Seite zeigt
+      if (/^kk/.test(key)) kp = rotY(kp, rel - F.yaw);
       return { c: ft.c, rel, y: F.y, pitch: F.pitch, tu: F.tu, kp };
     };
     // wie weit die Beine im Stand der Figur gestreckt sind (Anteil der Beinlänge)
@@ -496,7 +502,7 @@
   // Stand zeichnet – die Hüfte steht dafür höher oder tiefer, aber höchstens KK_TIEF tiefer als im Stand (vorher blieb sie
   // auf der Höhe des Standes, in langen Ständen wurde das vordere Bein fast gerade und der Stand hoch). Wäre das vordere
   // Bein dann gestreckter als im Stand der Figur, rückt die Hüfte in kleinen Stücken nach vorn, bis es passt (höchstens
-  // KK_VOR) – in den langen Ständen der Karte (1,2 m, Heian Nidan 1–6) steht sie deshalb etwas mittiger als im Lexikon
+  // KK_VOR) – das betrifft vor allem Stände nahe KKMAX
   function kokutsu(low, yaw, byaw) {
     const lpOf = (y) => [Math.cos(y * RAD), -Math.sin(y * RAD)];
     const lp = lpOf(yaw), lpS = lpOf(byaw);
@@ -859,7 +865,7 @@
     return { low: Object.assign({}, K.low, { L: foot(K.low.L), R: foot(K.low.R) }), byaw, up: M(K.up, { yaw: K.up.yaw - d, look: K.up.look - d }) };
   }
 
-  // Zu lange Stände kürzen (MAXLEN), zu kurze Zenkutsu-dachi verlängern (MINZK): Jeder Fuß hat einen Platz, solange er stehen bleibt. Ist ein Stand zu lang, rücken
+  // Zu lange Stände kürzen (MAXLEN, Zenkutsu-dachi ZKMAX, Kokutsu-dachi KKMAX), zu kurze Zenkutsu-dachi verlängern (MINZK): Jeder Fuß hat einen Platz, solange er stehen bleibt. Ist ein Stand zu lang, rücken
   // seine beiden Plätze aufeinander zu, jeder um die Hälfte – so verteilt sich die Kürzung auf die Stände davor und danach,
   // statt dass ein Fuß allein weit neben der Karte landet. Rei, Yoi und Naore zählen nicht (sie bekommen die Breite der Figur).
   function shorten(steps, id) {
@@ -942,7 +948,8 @@
         // Knie nicht über den Fuß
         const zk = /zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance);
         const max0 = reno ? RENOJI : KOSAST.test(st.stance) ? KOSA : eig ? eig[1] : (KIBA[id] && /kiba/i.test(st.stance) ? KIBA[id] : MAXLEN);
-        const max = zk ? Math.min(max0, ZKMAX) : max0;
+        const kk = /kokutsu/i.test(st.stance);
+        const max = zk ? Math.min(max0, ZKMAX) : kk ? Math.min(max0, KKMAX) : max0;
         // ein zu kurzer Zenkutsu-dachi wird länger: beide Plätze rücken je zur Hälfte auseinander
         if (/zenkutsu/i.test(st.stance) && !/ashi-zenkutsu/i.test(st.stance) && l < MINZK - 1e-4) {
           const push = mul(d, (0.5 * (MINZK - l)) / l);
