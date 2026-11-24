@@ -123,7 +123,10 @@
       zks: zkKata ? { pelvis: [0, 0.7, 0.13], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 4 }, R: { x: -0.13, z: -0.5, yaw: -32 }, w: [0.7, 0.3] }
         : { pelvis: [0, 0.66, 0.27], yaw: 0, L: { x: 0.12, z: 0.62, yaw: 4 }, R: { x: -0.13, z: -0.37, yaw: -32 }, w: [0.7, 0.3] },
       ashizk: { pelvis: [0, 0.78, 0.08], yaw: -25, L: { x: 0.1, z: 0.42, yaw: 4 }, R: { x: -0.11, z: -0.38, yaw: -25 }, w: [0.7, 0.3] },
-      kk: { pelvis: [0, 0.74, -0.04], yaw: -65, L: { x: 0.0, z: 0.42, yaw: 0, kp: [0.2, 0.1, 1] }, R: { x: -0.02, z: -0.4, yaw: -90, kp: [-1, 0.1, 0.3] }, w: [0.3, 0.7] },
+      // Kokutsu-dachi wie im Bewegungs-Editor eingestellt (Standbild im Lexikon): tief, gut 1 m lang, die Hüfte über gut einem
+      // Drittel des Standes vom hinteren Fuß aus (Gewicht hinten), hinteres Knie knapp rechtwinklig, vorderer Fuß flach.
+      // Gilt für alle Abläufe im Kokutsu-dachi und die Kata (vorher 8 cm höher, 82 cm lang, Hüfte fast in der Mitte)
+      kk: { pelvis: [-0.012, 0.674, -0.037], yaw: -65, L: { x: 0.075, z: 0.635, yaw: 0, kp: [0.052, 0.776, 0.628] }, R: { x: -0.02, z: -0.4, yaw: -90, kp: [-1, 0.1, 0.3] }, w: [0.3, 0.7] },
       kb: { pelvis: [0, 0.68, 0], yaw: 0, L: { x: 0.42, z: 0, yaw: 5, kp: [1, 0, 0.5] }, R: { x: -0.42, z: 0, yaw: -5, kp: [-1, 0, 0.5] }, w: [0.5, 0.5] },
       neko: { pelvis: [0, 0.72, -0.02], yaw: -35, L: { x: 0.04, z: 0.3, y: 0.11, yaw: 0, pitch: -28 }, R: { x: -0.07, z: -0.08, yaw: -30, kp: [-0.4, 0, 1] }, w: [0.1, 0.9] },
       fudo: { pelvis: [0, 0.66, 0.08], yaw: -45, L: { x: 0.12, z: 0.6, yaw: 0 }, R: { x: -0.16, z: -0.45, yaw: -45, kp: [-0.6, 0, 0.6] }, w: [0.5, 0.5] },
@@ -319,11 +322,9 @@
       oL: 1, oR: 1, hL: [0.12, 0.3, 0.2], eL: [1, 0.2, 0.2], pL: [0, 0.4, 1], fL: [-1, 0.15, 0],
       hR: [-0.02, 0.0, 0.53], eR: [-1, -0.3, 0.1], pR: [0, 1, 0], fR: [0.8, 0, 0.6] };
     D['st:hizakutsu'] = { keys: [{ t: 0, p: HZ }], best: 0, still: true, view: 'front3', labels: true };
-    // Kokutsu-dachi im Bewegungs-Editor eingestellt (nur das Standbild im Lexikon, die Abläufe mit S.kk bleiben): tiefer,
-    // vorderer Fuß flach am Boden,
-    // Knie über dem Fuß; Shuto-uke mit Handfläche der vorderen Hand nach vorn, hintere Hand Handfläche unten
-    const KK_ST = { pelvis: [-0.012, 0.674, -0.037], yaw: -65, L: { x: 0.075, z: 0.635, yaw: 0, kp: [0.052, 0.776, 0.628] }, R: { x: -0.02, z: -0.4, yaw: -90, kp: [-1, 0.1, 0.3] },
-      hL: [0.43, -0.14, 0.16], hR: [0.015, -0.28, 0.22], eL: [-0.116, -0.558, -0.188], eR: [-0.7, -0.6, 0.2], oL: 1, oR: 1, pL: [0, 0, 1], pR: [0, -1, 0], fL: [0.54, 0.8, 0.25], fR: [0.6, 0, 0.6], w: [0.3, 0.7] };
+    // Standbild Kokutsu-dachi (Stand S.kk, im Bewegungs-Editor eingestellt): Shuto-uke mit Handfläche der vorderen Hand
+    // nach vorn, hintere Hand Handfläche unten
+    const KK_ST = M(S.kk, { hL: [0.43, -0.14, 0.16], hR: [0.015, -0.28, 0.22], eL: [-0.116, -0.558, -0.188], eR: [-0.7, -0.6, 0.2], oL: 1, oR: 1, pL: [0, 0, 1], pR: [0, -1, 0], fL: [0.54, 0.8, 0.25], fR: [0.6, 0, 0.6] });
     D['st:kokutsu'] = M(D['st:kokutsu'], { keys: [{ t: 0, p: KK_ST }] });
 
     /* ---------- Fauststöße ---------- */
@@ -1454,7 +1455,7 @@
     // 44: tiefer Kokutsu-dachi (Hüfte tiefer als üblich); die vordere Schwerthand wehrt Gedan ab – der Arm gestreckt über
     // dem vorderen Knie –, die hintere liegt mit der Handfläche nach oben vor der Brust (wie beim Shuto-uke). Finger in der
     // Linie des Unterarms (keine feste Fingerrichtung, sonst knickt das Handgelenk beim Ausholen und in der Bewegung)
-    S.kkTief = M(S.kk, { pelvis: [0, 0.67, -0.04] });
+    S.kkTief = M(S.kk, { pelvis: [S.kk.pelvis[0], S.kk.pelvis[1] - 0.06, S.kk.pelvis[2]] });
     KATA['shuto-gedan-uke'] = T(M(S.kk, { oL: 1, oR: 1, hL: [-0.13, 0.2, 0.1], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], hR: [0.12, -0.12, 0.48], eR: [-0.2, -0.6, 0.4], pR: [0, -1, 0] }),
       M(S.kk, SHUTO_END, { hL: stretch([0.4, -0.5, 0.17], 'L'), eL: [0.6, -0.3, -0.6], pL: [-0.9, -0.4, 0] }));
     // 55: Uraken Tate-mawashi-uchi zur Seite auf Kopfhöhe (Jodan) im Kiba-dachi – Bahn wie in Heian Sandan 13, die Faust
@@ -1531,9 +1532,16 @@
       { t: 0.31, p: ausholen(GB_MID, -22), e: 'in' }, D['mv:gedan-barai'].keys[3]] }));
     NEU('mv:soto-uke', VORAUS(keysMit('mv:soto-uke', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, 0) }) : k))));
     NEU('mv:uchi-uke', VORAUS(keysMit('mv:uchi-uke', (k, i) => (i < 2 ? M(k, { p: ausholen(k.p, -10) }) : k))));
-    // Abwehren im Kokutsu-dachi: ausgeholt mit der Hüfte frontal (Shomen), mit der Abwehr dreht sie in den Hanmi (65°)
+    // Abwehren im Kokutsu-dachi: ausgeholt mit der Hüfte frontal (Shomen), mit der Abwehr dreht sie in den Hanmi (65°).
+    // Frontal rückt das vordere Hüftgelenk zurück – im tiefen, langen Kokutsu-dachi reichte das vordere Bein dann nicht
+    // mehr bis zum Fuß: die Hüfte steht dabei KK_SHOMEN weiter vorn
+    const KK_SHOMEN = 0.04;
     ['tc:shuto-uke', 'tc:morote-uke', 'tc:haiwan-uke', 'tc:manji-uke'].forEach((id) =>
-      NEU(id, VORAUS(keysMit(id, (k, i) => (i < 2 ? M(k, { p: M(k.p, { yaw: 0 }) }) : k)))));
+      NEU(id, VORAUS(keysMit(id, (k, i) => {
+        if (i >= 2) return k;
+        const f = E.full(k.p);
+        return M(k, { p: M(k.p, { yaw: 0, pelvis: [f.pelvis[0], f.pelvis[1], f.pelvis[2] + KK_SHOMEN] }) });
+      }))));
     // Nagashi-uke: die Hüfte dreht mit der wischenden Hand weiter in den Hanmi und nimmt den Körper aus der Linie;
     // die Hand bleibt dabei im Raum, wo sie war (ruhig, in einem Zug)
     ['tc:te-nagashi-uke', 'tc:gedan-nagashi-uke'].forEach((id) =>

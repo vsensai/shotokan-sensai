@@ -87,6 +87,7 @@ Was der Nutzer bisher korrigiert hat (gilt auch für die nächsten Kata):
 - Schlägt oder wehrt eine Technik zur Seite, dreht die Hüfte mit zur Seite der Technik, nicht nur der Oberkörper (Tekki Shodan 3, 11, 13).
 - Beim Vorgehen bleibt die Hüfte gerade (Shomen, auch im Kokutsu-dachi) und dreht erst im letzten Moment mit dem Block in den Hanmi – nicht schon im Schritt. Eigene Kata-Abläufe (z. B. `morote-uke-zk`, `haiwan-uke-offen`) und Oi-zuki bleiben auf Wunsch des Nutzers vorerst, wie sie sind.
 - Heisoku-dachi: Füße geschlossen und genau nebeneinander (Heian Sandan: `BREITE` mit `'neben'`), nicht 20 cm breit wie auf der Karte und nicht versetzt.
+- Kokutsu-dachi tief und mit dem Gewicht hinten wie das Standbild im Lexikon (`S.kk`): hinteres Knie knapp rechtwinklig, Hüfte über gut einem Drittel des Standes vom hinteren Fuß aus; `kokutsu()` in `js/kata-figur.js` hält das hintere Knie auf allen Längen der Karte so gebeugt (Grenzen `KK_TIEF`, `KK_VOR`, `KK_REICHT`).
 - Gyaku-hanmi nicht übertreiben: Hüfte 25° zur Gegenseite (Heian Nidan 16, 19; Kanku Dai 16, 21, 36). Abwehren im Kokutsu-dachi enden im Hanmi des Kokutsu-dachi (65°) wie im Lexikon, auch Uchi-uke (`uchi-uke-kk`).
 - Haltungen genau nach der Kata: Yoi in Tekki mit gestreckten Armen, die Handflächen mittig genau übereinander; im Koshi-kamae liegen die Fäuste genau übereinander.
 

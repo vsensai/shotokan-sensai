@@ -60,6 +60,12 @@
   // vorderen Knöchel bleibt (das Knie soll nicht über die Zehen hinaus)
   const REAR = 0.98;
   const FRONT = 0.26;
+  // Kokutsu-dachi (kokutsu): die Hüfte darf in einem langen Stand höchstens KK_VOR nach vorn rücken und höchstens KK_TIEF
+  // tiefer stehen als im Stand der Figur (Meter); mit frontaler Hüfte soll das vordere Bein noch reichen (KK_REICHT:
+  // Abstand Hüftgelenk–Knöchel)
+  const KK_VOR = 0.15;
+  const KK_TIEF = 0.04;
+  const KK_REICHT = 0.88 * 0.99;
   const RISE = 0.06; // so viel höher darf die Hüfte dafür in einem sehr kurzen Stand stehen (Meter)
   // Zenkutsu-dachi: das vordere Knie steht über dem Fußballen, knapp hinter der Zehenspitze – das Kniegelenk KNIE_VOR Meter
   // vor dem Knöchel (die Zehenspitze liegt gut 0,19 m davor). Vorher stand das Schienbein senkrecht, in langen Ständen
@@ -391,7 +397,7 @@
     const J = E.solve(c);
     const ext = {};
     ['L', 'R'].forEach((s) => (ext[s] = Math.hypot(...J['hip' + s].map((v, i) => v - J['ankle' + s][i])) / 0.88));
-    return { key, pel: add(ank[1], cmul(a, sub([c.pelvis[0], c.pelvis[2]], cr))), h: c.pelvis[1], ext, ank: { L: ank[0], R: ank[1] }, L: foot(c.L, feet[0]), R: foot(c.R, feet[1]), w: [feet[0].w, feet[1].w] };
+    return { key, rear: c.L.z < c.R.z ? 'L' : 'R', pel: add(ank[1], cmul(a, sub([c.pelvis[0], c.pelvis[2]], cr))), h: c.pelvis[1], ext, ank: { L: ank[0], R: ank[1] }, L: foot(c.L, feet[0]), R: foot(c.R, feet[1]), w: [feet[0].w, feet[1].w] };
   }
   // Hüfthöhe einer Stellung: Ein Bein, das im Stand der Figur (fast) gestreckt ist, bleibt es auch – ist der Stand der Karte
   // kürzer oder länger als der der Figur, steht die Hüfte entsprechend höher oder tiefer (sonst knickt das hintere Bein ein)
@@ -450,6 +456,7 @@
   // gestreckt bleibt (höchstens KNIE_TIEF tiefer). Zuletzt die Kniestellung über die Fußachse. yaw: Hüftdrehung,
   // byaw: Körperrichtung (die Kniestellung der Stellung ist auf sie bezogen)
   function rearLeg(low, yaw, byaw) {
+    if (/^kk/.test(low.key)) return kokutsu(low, yaw, byaw);
     if (low.key !== 'zk') return;
     const lp = [Math.cos(yaw * RAD), -Math.sin(yaw * RAD)];
     const s = low.ext.L > low.ext.R ? 'L' : 'R';
@@ -483,6 +490,36 @@
       if (h0 - low.h > KNIE_TIEF) { low.pel = pel; low.h = h; break; }
     }
     low[o] = Object.assign({}, low[o], { kp: rotY(knee().pole, -byaw) });
+  }
+
+  // Kokutsu-dachi: das hintere Knie ist so stark gebeugt wie im Stand der Figur (Lexikon), gleich wie lang die Karte den
+  // Stand zeichnet – die Hüfte steht dafür höher oder tiefer, aber höchstens KK_TIEF tiefer als im Stand (vorher blieb sie
+  // auf der Höhe des Standes, in langen Ständen wurde das vordere Bein fast gerade und der Stand hoch). Wäre das vordere
+  // Bein dann gestreckter als im Stand der Figur, rückt die Hüfte in kleinen Stücken nach vorn, bis es passt (höchstens
+  // KK_VOR) – in den langen Ständen der Karte (1,2 m, Heian Nidan 1–6) steht sie deshalb etwas mittiger als im Lexikon
+  function kokutsu(low, yaw, byaw) {
+    const lpOf = (y) => [Math.cos(y * RAD), -Math.sin(y * RAD)];
+    const lp = lpOf(yaw), lpS = lpOf(byaw);
+    const s = low.rear;
+    const o = s === 'L' ? 'R' : 'L';
+    const hip = (q, l = lp) => add(low.pel, mul(l, q === 'L' ? HIP : -HIP));
+    const dR = low.ext[s] * 0.88, dF = low.ext[o] * 0.88;
+    const line = sub(low.ank[o], low.ank[s]);
+    const axis = mul(line, 1 / len(line));
+    const tief = low.h - KK_TIEF;
+    const hoch = () => { const r = len(sub(hip(s), low.ank[s])); return r < dR * 0.95 ? Math.max(tief, low[s].y + Math.sqrt(dR * dR - r * r)) : null; };
+    // (auch mit frontaler Hüfte – so holen Abwehren im Kokutsu-dachi aus, und so dreht sie oft in die nächste Bewegung –
+    // soll das vordere Bein noch reichen, sonst sackt die Hüfte dabei ab)
+    const vorn = (h) => Math.hypot(len(sub(hip(o), low.ank[o])), h - low[o].y);
+    const shomen = (h) => Math.hypot(len(sub(hip(o, lpS), low.ank[o])), h - low[o].y);
+    const pel0 = low.pel;
+    let h = hoch();
+    for (let i = 0; h != null && i < KK_VOR / 0.005 && (vorn(h) > dF || shomen(h) > KK_REICHT); i++) {
+      low.pel = add(low.pel, mul(axis, 0.005));
+      h = hoch();
+    }
+    if (h == null) low.pel = pel0;
+    else low.h = h;
   }
 
   // Hand nicht durch den Rumpf: Wechselt eine Hand zwischen zwei Haltungen die Seite (Hüfte → Ohr der anderen Seite), führt
