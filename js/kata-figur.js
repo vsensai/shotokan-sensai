@@ -27,6 +27,7 @@
   const LEG = 0.88 * 0.99; // so weit reicht ein Bein von der Hüfte zum Knöchel
   const HIP = 0.09; // Hüftgelenk seitlich neben der Beckenmitte
   const PASS = 0.15; // Abstand der Fußmitten, wenn ein Fuß am Standfuß vorbeigleitet
+  const UM = 0.24; // … wenn er um den Standfuß herum geht, der über die Ferse dreht (Abstand der Fußmitte vom Knöchel)
   const LIFT = 0.025; // so hoch hebt der gleitende Fuß ab (Suri-ashi: fast gar nicht)
   const ST_KNIE = 0.36; // Stampfschritt aus dem Stand (Bassai Dai 1): bis hier kommt das Knie hoch,
   const ST_AUF = 0.72; // hier setzt der Fuß auf,
@@ -125,6 +126,11 @@
   // Richtung des vorderen Knies je Kata und Stand (Brustkoordinaten des Standes der Figur, vorderes Bein links): Im
   // Kokutsu-dachi zeigt es bei der Figur gut 15° nach außen – in Bassai Dai 14–17 knickte es damit sichtbar weg
   const KNIE = { 'bassai-dai': { kk: [0, 0.1, 1] } };
+  // Fuß dreht nur über die Ferse und bleibt an seinem Platz aus der Bewegung davor (je Kata, „Stand #Nummer“ und Fuß): Die
+  // Skizze zeichnet die Füße doppelt so groß wie die Schritte – dreht ein Fuß dort über die Ferse, rückt seine Mitte weit
+  // zur Seite, und die Figur machte daraus einen Schritt. Heian Godan 23: Wendung im Heisoku-dachi über die Fersen, der
+  // linke Fuß bleibt stehen, nur der rechte geht vor
+  const FERSE = { 'heian-godan': [[/kokutsu-dachi #23$/i, 'L']] };
   const KREUZ = 0.28; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
   // Kreuzschritt (Ashi-mae Kosa): die Füße stehen dicht nebeneinander, der kreuzende ein Stück weiter vorn – so eng, wie es
   // geht, ohne dass die Hosenbeine ineinander geraten (aus dem Stand der Figur, S.kosamae). KOSA: so weit stehen die
@@ -568,24 +574,32 @@
   /* ---------- Ein Abschnitt: von Stellung A nach Stellung B ---------- */
   // Wie gleitet der Fuß s von A nach B? Liegt der Standfuß auf dem Weg, führt die Bahn dicht an ihm vorbei (Füße kommen
   // zusammen); gleitet der Fuß nur von ihm weg (Ausfallschritt zur Seite), geht er gerade.
-  function footPlan(A, B, s, o, u0, u1, kreuz, heran) {
+  const ankOf = (K, s) => sub(K.low[s].c, mul(fwd(K.byaw + K.low[s].rel), FOOT_MID));
+  const drehFuss = (A, B, s) => len(sub(ankOf(B, s), ankOf(A, s))) < 0.03 && Math.abs(wrap(B.byaw + B.low[s].rel - A.byaw - A.low[s].rel)) > 20;
+  function footPlan(A, B, s, o, u0, u1, kreuz, heran, ferse) {
     const a = A.low[s].c;
     const b = B.low[s].c;
     const moved = len(sub(b, a)) > 1e-6;
     const plan = { moved, u0, u1, mid: mix(a, b, 0.5), k: 0 };
-    if (!moved || len(sub(B.low[o].c, A.low[o].c)) > 1e-6) return plan;
-    const sp = A.low[o].c;
+    // Fuß, der nur über die Ferse dreht (der Knöchel bleibt, nur die Fußmitte rückt mit der Drehung): er hebt nicht ab und
+    // dreht um den Knöchel (ferse: nur in Bewegungen in zwei Teilen, Heian Godan 21, 23) – für den anderen Fuß steht er
+    if (moved && ferse && drehFuss(A, B, s)) { plan.dreh = true; return plan; }
+    if (!moved || (len(sub(B.low[o].c, A.low[o].c)) > 1e-6 && !(ferse && drehFuss(A, B, o)))) return plan;
+    // (dreht der andere Fuß nur über die Ferse, geht dieser Fuß mit der Drehung um seinen Knöchel herum – auf der Seite,
+    // zu der sich der Körper dreht, mit Abstand für das Bein: Heian Godan 23, Wendung im Heisoku-dachi)
+    const um = ferse && drehFuss(A, B, o);
+    const sp = um ? ankOf(A, o) : A.low[o].c;
     const ab = sub(b, a);
     const tau = dot(sub(sp, a), ab) / dot(ab, ab);
     const off = sub(add(a, mul(ab, tau)), sp); // vom Standfuß zur Bahn
     // (heran: auch wenn die gerade Bahn weit am Standfuß vorbeiführt – der Fuß beschreibt einen Halbkreis über ihn)
-    const k = heran ? 1 : ramp(0.05, 0.25, tau) * (1 - ramp(0.75, 0.95, tau)) * (1 - ramp(0.35, 0.7, len(off)));
+    const k = heran || um ? 1 : ramp(0.05, 0.25, tau) * (1 - ramp(0.75, 0.95, tau)) * (1 - ramp(0.35, 0.7, len(off)));
     if (k <= 0) return plan;
     // Seite, auf der der Fuß vorbeigeht: wie die gerade Bahn; läuft sie genau über den Standfuß, die eigene Körperseite
     const yawMid = lerp(A.byaw, B.byaw, 0.5);
     const own = mul([Math.cos(yawMid * RAD), -Math.sin(yawMid * RAD)], s === 'L' ? 1 : -1);
-    let n = len(off) > 0.03 ? mul(off, 1 / len(off)) : own;
-    let pass = PASS;
+    let n = len(off) > 0.03 && !um ? mul(off, 1 / len(off)) : own;
+    let pass = um ? UM : PASS;
     // Kreuzschritt zur Seite (kreuz: +1 vorne, −1 hinten vorbei): der Fuß geht vor bzw. hinter dem Standfuß vorbei, mit
     // Abstand für die ganze Fußlänge
     if (kreuz) { n = mul(fwd(yawMid), kreuz); pass = KREUZ; plan.gerade = true; }
@@ -609,7 +623,8 @@
     const cut = both && o.teilen ? clamp(way[first] / (way.L + way.R), 0.3, 0.7) : 0.5;
     // … rückt dabei ein Fuß nur wenig nach (unter einem halben Meter und weniger als ein Drittel des anderen Wegs – der
     // Drehfuß einer Wendung), geschieht das während des Schritts und nicht davor
-    const nach = both && o.teilen && Math.min(way.L, way.R) < 0.5 && 3 * Math.min(way.L, way.R) < Math.max(way.L, way.R);
+    // (ebenso ein Fuß, der nur über die Ferse dreht)
+    const nach = both && o.teilen && ((Math.min(way.L, way.R) < 0.5 && 3 * Math.min(way.L, way.R) < Math.max(way.L, way.R)) || (o.ferse && (drehFuss(A, B, 'L') || drehFuss(A, B, 'R'))));
     const gleich = o.gleich || nach;
     if (both && o.teilen && !gleich) seg.share = { L: way.L / (way.L + way.R), R: way.R / (way.L + way.R) };
     // Yori-ashi (gleich): der Fuß in Laufrichtung geht voraus, der andere stößt ab und zieht sofort nach – die Wege
@@ -643,7 +658,7 @@
     seg.feet = {};
     ['L', 'R'].forEach((s) => {
       const [u0, u1] = seg.ab ? (s === lead ? [0, ST_AUF] : [ST_AUF - 0.1, 0.94]) : lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
-      seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz, o.heran);
+      seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz, o.heran, o.ferse);
     });
     // Hüfte: beim Vorbeigleiten über dem Standbein (zwischen den Füßen), sonst gerade hinüber
     const pl = seg.feet.L.k > seg.feet.R.k ? seg.feet.L : seg.feet.R;
@@ -762,9 +777,11 @@
       const ef = pl.moved ? seg.ease(uf) : eb;
       let c = pl.moved ? via(fa.c, pl.mid, fb.c, ef) : fa.c;
       let rel = lerp(fa.rel, fb.rel, ef);
+      // Drehen über die Ferse: der Knöchel bleibt, die Fußmitte kreist um ihn
+      if (pl.dreh) c = add(mix(ankOf(A, s), ankOf(B, s), ef), mul(fwd(byaw + rel), FOOT_MID));
       // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
-      let y = lerp(fa.y, fb.y, ef) + (pl.moved ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
+      let y = lerp(fa.y, fb.y, ef) + (pl.moved && !pl.dreh ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
       const v = seg.via && seg.via.s === s ? seg.via : null;
       let wl = null;
       if (v && seg.welle) {
@@ -916,6 +933,23 @@
   // seine beiden Plätze aufeinander zu, jeder um die Hälfte – so verteilt sich die Kürzung auf die Stände davor und danach,
   // statt dass ein Fuß allein weit neben der Karte landet. Rei, Yoi und Naore zählen nicht (sie bekommen die Breite der Figur).
   function shorten(steps, id) {
+    // Füße, die nur über die Ferse drehen (FERSE): Platz wie davor, die Mitte rückt nur um die Drehung um den Knöchel
+    // (Karte: Richtung a zeigt nach [sin a, cos a]; der Knöchel liegt FOOT_MID hinter der Fußmitte) – auch in den Bewegungen
+    // danach, in denen der Fuß laut Karte stehen bleibt
+    const ferse = steps.map((st, j) => [0, 1].map((i) => j > 0 && st.kind === 'move' && (FERSE[id] || []).some(([rx, s]) => s === 'LR'[i] && rx.test(`${st.stance} #${st.n}`))));
+    let changed = false;
+    ferse.forEach((x, j) => x.forEach((on, i) => {
+      if (!on) return;
+      const pf = steps[j - 1].pose.f[i];
+      const alt = steps[j].pose.f[i];
+      const dir = (a) => [Math.sin(a * RAD), Math.cos(a * RAD)];
+      const neu = add(pf, mul(sub(dir(alt[2]), dir(pf[2])), FOOT_MID / SCALE));
+      steps = steps.slice();
+      for (let q = j; q < steps.length && steps[q].pose && steps[q].pose.f[i][0] === alt[0] && steps[q].pose.f[i][1] === alt[1]; q++) {
+        steps[q] = Object.assign({}, steps[q], { pose: Object.assign({}, steps[q].pose, { f: steps[q].pose.f.map((y, w) => (w === i ? neu.concat(y.slice(2)) : y)) }) });
+      }
+      changed = true;
+    }));
     const node = [];
     const pts = [];
     steps.forEach((st, j) => node.push([0, 1].map((i) => {
@@ -925,7 +959,6 @@
       pts.push([f[0], f[1]]);
       return pts.length - 1;
     })));
-    let changed = false;
     for (let pass = 0; pass < 60; pass++) {
       let over = false;
       steps.forEach((st, j) => {
@@ -1008,7 +1041,8 @@
         }
         if (l <= max + 1e-4) return;
         const cut = mul(d, (l - max) / l);
-        const part = reno ? (f[0][3] < f[1][3] ? [1, 0] : [0, 1]) : neu(eig) || [0.5, 0.5];
+        // (ein Fuß, der nur über die Ferse dreht, bleibt an seinem Platz)
+        const part = reno ? (f[0][3] < f[1][3] ? [1, 0] : [0, 1]) : ferse[j][0] ? [0, 1] : ferse[j][1] ? [1, 0] : neu(eig) || [0.5, 0.5];
         pts[node[j][0]] = add(a, mul(cut, part[0]));
         pts[node[j][1]] = sub(b, mul(cut, part[1]));
         over = changed = true;
@@ -1374,25 +1408,30 @@
         const steady = (sg) => { const l = [sg.A.byaw + sg.A.up.look, sg.B.byaw + sg.B.up.look]; if (Math.abs(l[1] - l[0]) < 20) sg.lookAbs = l; return sg; };
         let k0 = cur;
         if (wende) {
-          // Drehfuß ist das Bein, das am Ende trägt; der andere Fuß geht um ihn herum auf die andere Seite
+          // Drehfuß ist das Bein, das am Ende trägt: Er dreht über die Ferse und steht danach schon an seinem Platz der
+          // Bewegung – in Teil 1 bleibt er stehen, nur der andere Fuß geht vor. Der andere Fuß dreht mit und steht danach
+          // geschlossen neben ihm auf der anderen Seite (die Füße tauschen beim Drehen die Seiten, sonst stünden sie gekreuzt)
           const pf = pv.pose.f;
           const piv = m.f[0][3] >= m.f[1][3] ? 0 : 1;
           const body = (((pv.pose.body + 2 * m.turn) % 360) + 360) % 360;
-          const m0 = { f: [0, 1].map((q) => (q === piv ? [pf[q][0], pf[q][1], body, 0.5] : [2 * pf[piv][0] - pf[q][0], 2 * pf[piv][1] - pf[q][1], body, 0.5])), body, turn: 2 * m.turn };
+          const pz = m.f[piv];
+          const m0 = { f: [0, 1].map((q) => (q === piv ? [pz[0], pz[1], body, 0.5] : [pz[0] + pf[piv][0] - pf[q][0], pz[1] + pf[piv][1] - pf[q][1], body, 0.5])), body, turn: 2 * m.turn };
           const mir = upper(flip(cur.up));
           const cross = E.timeline([{ t: 0, p: cur.up }, { t: 0.5, p: M(cur.up, { hL: [-0.1, -0.08, 0.22], hR: [0.1, -0.1, 0.25], eL: [0.7, -0.7, 0.2], eR: [-0.7, -0.7, 0.2], yaw: 0, look: (cur.up.look + mir.look) / 2 }) }, { t: 1, p: mir }]);
           k0 = key(m0, 'Heisoku-dachi', cur, mir);
-          segs.push(steady(segment(cur, k0, { t0: st.t, t1: at(w0), arms: (u) => upper(cross(u)), teilen: true })));
+          segs.push(steady(segment(cur, k0, { t0: st.t, t1: at(w0), arms: (u) => upper(cross(u)), teilen: true, ferse: true })));
         }
         const b = m.body * RAD;
         const front = (m.f[1][0] - m.f[0][0]) * Math.sin(b) + (m.f[1][1] - m.f[0][1]) * Math.cos(b) > 0 ? 1 : 0;
-        const m1 = { f: m.f.map((x, q) => [x[0], x[1], q === front ? m.body : m.body + (q === 1 ? 35 : -35), q === front ? 0.7 : 0.3]), body: m.body, turn: wende ? -m.turn : m.turn };
+        // (der hintere Fuß dreht dabei über die Ferse: sein Knöchel bleibt, wo er im Stand der Bewegung steht)
+        const ferse = (x, a) => [x[0] + (Math.sin(a * RAD) - Math.sin(x[2] * RAD)) * (FOOT_MID / SCALE), x[1] + (Math.cos(a * RAD) - Math.cos(x[2] * RAD)) * (FOOT_MID / SCALE)];
+        const m1 = { f: m.f.map((x, q) => (q === front ? [x[0], x[1], m.body, 0.7] : ferse(x, m.body + (q === 1 ? 35 : -35)).concat([m.body + (q === 1 ? 35 : -35), 0.3]))), body: m.body, turn: wende ? -m.turn : m.turn };
         const tk1 = track(tech.vor, side);
         const k1 = key(m1, tech.vor.stand, k0, tk1(1));
-        segs.push(steady(segment(k0, k1, { t0: at(w1), t1: at(w2), arms: part(k0.up, tk1, (w2 - w1) * total), teilen: true })));
+        segs.push(steady(segment(k0, k1, { t0: at(w1), t1: at(w2), arms: part(k0.up, tk1, (w2 - w1) * total), teilen: true, ferse: true })));
         const tk2 = track(tech, side);
         const k2 = key(Object.assign({}, m, { turn: null }), st.stance, k1, tk2(1));
-        segs.push(steady(segment(k1, k2, { t0: at(w3), t1: at(1), arms: part(k1.up, tk2, (1 - w3) * total), teilen: true })));
+        segs.push(steady(segment(k1, k2, { t0: at(w3), t1: at(1), arms: part(k1.up, tk2, (1 - w3) * total), teilen: true, ferse: true })));
         mark(at(1), { aus: at(w2), ausName: 'Teil 1' });
         cur = k2;
         return;
