@@ -65,7 +65,7 @@
   // Abstand Hüftgelenk–Knöchel)
   // Längster Kokutsu-dachi (Meter zwischen den Fußmitten, etwa der Stand der Figur): Die Karte zeichnet ihn bis 1,25 m lang –
   // dann reichte das vordere Bein nur, wenn die Hüfte nach vorn rückte, und das Gewicht stünde nicht mehr hinten
-  const KKMAX = 1.08;
+  const KKMAX = 1.05;
   const KK_VOR = 0.15;
   const KK_TIEF = 0.04;
   const KK_REICHT = 0.88 * 0.99;
@@ -393,10 +393,9 @@
       let rel = force ? F.yaw : wrap(ft.yaw - byaw);
       if (dreh && Math.abs(rel) > dreh) return { c: ft.c, rel: Math.sign(rel) * dreh, y: F.y, pitch: F.pitch, tu: F.tu, kp: [Math.sin(Math.sign(rel) * dreh * RAD), 0.15, Math.cos(dreh * RAD)] };
       // Knie: wie im Stand der Figur vorgegeben, sonst in Fußrichtung (beides bezogen auf die Körperrichtung)
-      let kp = Math.hypot(...F.kp) > 0.01 ? F.kp.map((v) => v / Math.hypot(...F.kp)) : [Math.sin(rel * RAD), 0.15, Math.cos(rel * RAD)];
-      // Kokutsu-dachi: das Knie dreht mit dem Fuß der Karte – das hintere Knie drückt so über die Zehen nach außen, auch
-      // wo der hintere Fuß weniger als 90° zur Seite zeigt
-      if (/^kk/.test(key)) kp = rotY(kp, rel - F.yaw);
+      // (Kokutsu-dachi: die Kniescheibe hinten zeigt so immer genau zur Seite, 90° zur Körperrichtung – auch wo die Karte
+      // den hinteren Fuß etwas anders dreht)
+      const kp = Math.hypot(...F.kp) > 0.01 ? F.kp.map((v) => v / Math.hypot(...F.kp)) : [Math.sin(rel * RAD), 0.15, Math.cos(rel * RAD)];
       return { c: ft.c, rel, y: F.y, pitch: F.pitch, tu: F.tu, kp };
     };
     // wie weit die Beine im Stand der Figur gestreckt sind (Anteil der Beinlänge)
