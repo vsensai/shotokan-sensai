@@ -127,7 +127,10 @@
       // knapp 30 % des Standes vom hinteren Fuß aus (Gewicht hinten), hinteres Knie rechtwinklig gebeugt, die Kniescheibe
       // zeigt genau zur Seite (90° zur Blickrichtung, über die Zehen), vorderes Knie leicht gebeugt, vorderer Fuß flach
       kk: { pelvis: [-0.012, 0.655, -0.11], yaw: -65, L: { x: 0.075, z: 0.6, yaw: 0, kp: [0.052, 0.776, 0.628] }, R: { x: -0.02, z: -0.4, yaw: -90, kp: [-1, 0.1, 0.06] }, w: [0.3, 0.7] },
-      kb: { pelvis: [0, 0.68, 0], yaw: 0, L: { x: 0.42, z: 0, yaw: 5, kp: [1, 0, 0.5] }, R: { x: -0.42, z: 0, yaw: -5, kp: [-1, 0, 0.5] }, w: [0.5, 0.5] },
+      // Kiba-dachi nach dem JKA-Lehrbild: Zehen leicht nach innen (8°), die Knie drücken nach außen und stehen über den
+      // Zehen (von vorne über dem Fuß, von der Seite knapp über der Zehenspitze), Oberschenkel etwa 40° schräg, Rücken
+      // senkrecht. (Vorher Hüfte 9 cm tiefer, Oberschenkel fast waagerecht, Knie außerhalb der Füße, Zehen leicht nach außen.)
+      kb: { pelvis: [0, 0.77, -0.02], yaw: 0, L: { x: 0.42, z: 0, yaw: -8, kp: [1, 0, 0.75] }, R: { x: -0.42, z: 0, yaw: 8, kp: [-1, 0, 0.75] }, w: [0.5, 0.5] },
       neko: { pelvis: [0, 0.72, -0.02], yaw: -35, L: { x: 0.04, z: 0.3, y: 0.11, yaw: 0, pitch: -28 }, R: { x: -0.07, z: -0.08, yaw: -30, kp: [-0.4, 0, 1] }, w: [0.1, 0.9] },
       fudo: { pelvis: [0, 0.66, 0.08], yaw: -45, L: { x: 0.12, z: 0.6, yaw: 0 }, R: { x: -0.16, z: -0.45, yaw: -45, kp: [-0.6, 0, 0.6] }, w: [0.5, 0.5] },
       // Hangetsu schulterbreit, Sanchin hüftbreit (Füße nicht auf einer Linie)

@@ -36,7 +36,7 @@
     ['Hachiji-dachi', 'Natürlicher Stand: Füße schulterbreit, Fußspitzen leicht nach außen', 'stand', st('hachiji')],
     ['Zenkutsu-dachi', 'Vorwärtsstellung: vorderes Knie gebeugt, hinteres Bein gestreckt, Gewicht vorne', 'stand', st('zenkutsu')],
     ['Kokutsu-dachi', 'Rückwärtsstellung: Gewicht überwiegend auf dem hinteren Bein, hinterer Fuß quer', 'stand', st('kokutsu')],
-    ['Kiba-dachi', 'Reiterstellung: breit, Füße parallel, Gewicht gleich verteilt', 'stand', st('kiba')],
+    ['Kiba-dachi', 'Reiterstellung: breit, Zehen leicht nach innen, die Knie drücken nach außen und stehen über den Zehen, Oberschenkel innen angespannt, Rücken gerade, Gewicht gleich verteilt', 'stand', st('kiba')],
     ['Kosa-dachi', 'Kreuzstand: Beine gekreuzt, hinterer Fuß hinter der vorderen Ferse', 'stand', st('kosa')],
     ['Neko-ashi-dachi', 'Katzenfußstand: fast das gesamte Gewicht auf dem hinteren Bein', 'stand', st('neko')],
     ['Fudo-dachi', 'Unbeweglicher Stand: beide Knie gebeugt, Gewicht ausgeglichen (auch Sochin-dachi)', 'stand', st('fudo')],

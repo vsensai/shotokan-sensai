@@ -398,6 +398,17 @@
     return (w) => upper(tl(lerp(tech.from, t1, clamp(w))));
   }
 
+  // Hüfthöhe im Kiba-dachi nach der Breite der Karte (Knöchel zu Knöchel): Die Knie stehen wie im JKA-Lehrbild über den
+  // Zehen (Knie über dem Knöchel, KB_KNIE vor ihm) – je breiter der Stand, desto tiefer die Hüfte. Höchstens so hoch wie im
+  // Lexikon (0,84 m breit), höchstens so tief wie KB_TIEF: Die Kata stehen meist 1,0 bis 1,25 m breit (Skizze), dort bleibt
+  // die Hüfte auf der Höhe davor (die Knie stehen dann knapp innerhalb der Füße)
+  const KB_KNIE = 0.12;
+  const KB_TIEF = 0.68;
+  function kibaH(w, hoch) {
+    const r2 = (w / 2 - HIP) ** 2 + KB_KNIE * KB_KNIE;
+    const h = 0.075 + Math.sqrt(0.44 * 0.44 - KB_KNIE * KB_KNIE) + Math.sqrt(Math.max(0, 0.44 * 0.44 - r2));
+    return clamp(h, KB_TIEF, hoch);
+  }
   // Stand der Figur auf die Füße der Karte legen. m: Stellung der Ansage, stance: Name des Standes
   function lower(m, stance, warn, id, force) {
     let key = force || (STAND.find(([rx]) => rx.test(stance)) || [])[1];
@@ -438,7 +449,7 @@
     const J = E.solve(c);
     const ext = {};
     ['L', 'R'].forEach((s) => (ext[s] = Math.hypot(...J['hip' + s].map((v, i) => v - J['ankle' + s][i])) / 0.88));
-    return { key, rear: c.L.z < c.R.z ? 'L' : 'R', pel: add(ank[1], cmul(a, sub([c.pelvis[0], c.pelvis[2]], cr))), h: c.pelvis[1], ext, ank: { L: ank[0], R: ank[1] }, L: foot(c.L, feet[0]), R: foot(c.R, feet[1]), w: [feet[0].w, feet[1].w] };
+    return { key, rear: c.L.z < c.R.z ? 'L' : 'R', pel: add(ank[1], cmul(a, sub([c.pelvis[0], c.pelvis[2]], cr))), h: key === 'kb' ? kibaH(len(sub(ank[0], ank[1])), c.pelvis[1]) : c.pelvis[1], ext, ank: { L: ank[0], R: ank[1] }, L: foot(c.L, feet[0]), R: foot(c.R, feet[1]), w: [feet[0].w, feet[1].w] };
   }
   // Hüfthöhe einer Stellung: Ein Bein, das im Stand der Figur (fast) gestreckt ist, bleibt es auch – ist der Stand der Karte
   // kürzer oder länger als der der Figur, steht die Hüfte entsprechend höher oder tiefer (sonst knickt das hintere Bein ein)
