@@ -1161,8 +1161,18 @@
     /* Heian Yondan */
     // Hizakutsu nach vorn gedreht (Bewegung 11) als Stand für die Kata – die Beine aus dem Lexikon-Bild
     S.hizaShomen = { pelvis: HZ.pelvis, yaw: 0, L: HZ.L, R: HZ.R, w: HZ.w };
-    // 1, 2: Haiwan-uke mit offenen Händen
-    KATA['haiwan-uke-offen'] = M(D['tc:haiwan-uke'], { keys: D['tc:haiwan-uke'].keys.map((k) => ({ t: k.t, e: k.e, p: M(k.p, { oL: 1, oR: 1 }) })) });
+    // 1, 2: Haiwan-uke mit offenen Händen, langsam. Die Hände kommen von der rechten Hüfte vor dem Körper hoch, die
+    // Unterarme waagerecht vor der Brust gekreuzt (rechter oben, Ellbogen zur Seite); dann steigt der rechte Unterarm
+    // waagerecht vor die Stirn, der linke richtet sich auf und geht zur Seite – kein Ellbogen geht dem Unterarm voraus
+    {
+      const HW = D['tc:haiwan-uke'].keys;
+      const HW0 = HW[0].p;
+      const HW1 = HW[HW.length - 1].p;
+      const KREUZ = M(HW0, { hL: [-0.12, -0.13, 0.33], eL: [1, -0.4, 0.2], hR: [0.14, -0.04, 0.27], eR: [-1, -0.4, 0.2] });
+      const AUF = M(HW0, { hL: [0.3, 0.08, 0.22], eL: [1, -0.9, 0.3], hR: [0.08, 0.2, 0.22], eR: [-1, -0.1, 0.2], pL: [0, 0, 1], pR: [0, 0, 1] });
+      KATA['haiwan-uke-offen'] = M(D['tc:haiwan-uke'], { keys: [{ t: 0, p: HW0 }, { t: 0.25, p: HW0 }, { t: 0.29, p: KREUZ, e: 'fl' }, { t: 0.33, p: AUF, e: 'fl' }, { t: 0.37, p: HW1, e: 'kime' }]
+        .map((k) => ({ t: k.t, e: k.e, p: M(k.p, { oL: 1, oR: 1 }) })) });
+    }
     // 3: Gedan Kosa-uke – beide Fäuste stoßen von der rechten Hüfte gekreuzt nach unten vor, rechtes Handgelenk über dem linken
     KATA['gedan-kosa-uke'] = T(M(S.zks, { hR: H.hip, hL: [-0.11, -0.33, 0.04], pL: [0, -1, 0] }),
       M(S.zks, { lean: 6, hL: [-0.04, -0.47, 0.36], hR: [0.04, -0.44, 0.38], eL: [1, -0.3, 0.2], eR: [-1, -0.3, 0.2] }));
