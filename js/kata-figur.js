@@ -288,8 +288,9 @@
     [/kentsui tate-mawashi-uchi/i, { def: 'tettsui-heian-shodan', side: 'R', from: 0, lang: true, dur: 0.8 }, /heian shodan #4$/i],
     [/kentsui tate-mawashi-uchi/i, { def: 'tc:tettsui-uchi', side: 'R', from: 0.15, lang: true, dur: 1.0 }],
     [/shuto .*uke/i, { def: 'tc:shuto-uke', side: 'L', from: 0.25 }],
-    // (zwischen: der rechte Arm sinkt aus dem Haiwan-uke von 1 im Bogen vor dem Körper, der Ellbogen geht gleich mit nach unten)
-    [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25, wechsel: 0.25, zwischen: { u: 0.45, p: { hR: [0.02, -0.02, 0.32], eR: [-0.9, -0.6, 0.3] } } }, /heian yondan #2$/i],
+    // (zwischen: der rechte Arm sinkt aus dem Haiwan-uke von 1 im Bogen vor dem Körper, der Ellbogen geht gleich mit nach unten;
+    // Finger in der Linie des Unterarms und Handfläche halb gedreht – sonst schlägt sie von vorn zum Körper um, das Handgelenk knickt)
+    [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25, wechsel: 0.25, zwischen: { u: 0.45, p: { hR: [0.02, -0.02, 0.32], eR: [-0.9, -0.6, 0.3], fR: [0.88, 0.44, 0.19], pR: [0.4, -0.9, 0] } } }, /heian yondan #2$/i],
     [/haiwan/i, { def: 'haiwan-uke-offen', side: 'L', from: 0.25 }, /offenen händen/i],
     [/haiwan/i, { def: 'tc:haiwan-uke', side: 'L', from: 0.25 }],
     [/soto-nagashi-uke/i, { def: 'tc:soto-nagashi-uke', side: 'L', from: 0.513, lang: true, dur: 0.55, erst: true }],
@@ -365,6 +366,16 @@
   const YOI = [[/linke handfläche auf dem rücken der rechten hand/i, 'yoi-kafukubu'], [/rechte faust in der .*linken hand/i, 'yoi-faust-in-hand'], [/offene hände vor dem unterbauch/i, 'yoi-kanku']];
   // Arme, Hüftdrehung (yaw, bezogen auf die Körperrichtung), Oberkörper und Kopf (look, bezogen auf die Körperrichtung)
   const UP = ['hL', 'hR', 'eL', 'eR', 'oL', 'oR', 'pL', 'pR', 'fL', 'fR', 'qL', 'qR', 'sL', 'sR', 'chest', 'lean', 'roll', 'nod', 'tilt', 'look', 'yaw'];
+  // Richtung des Unterarms (Ellbogen → Handgelenk) einer Haltung im Brustrahmen (Bezug der Fingerrichtung fL/fR)
+  const unterarm = (up, q) => {
+    const P = E.full(up);
+    const J = E.solve(P);
+    const d = [0, 1, 2].map((i) => J['wrist' + q][i] - J['elbow' + q][i]);
+    const c = (P.yaw + P.chest) * RAD;
+    const v = [d[0] * Math.cos(c) - d[2] * Math.sin(c), d[1], d[0] * Math.sin(c) + d[2] * Math.cos(c)];
+    const l = Math.hypot(...v) || 1;
+    return v.map((x) => x / l);
+  };
   const upper = (p) => { const f = E.full(p); const o = {}; UP.forEach((k) => (o[k] = f[k])); return o; };
   // Seiten tauschen samt Faustdrehung beim Stoß (die kennt mirror nicht)
   const flip = (p) => { const f = E.full(p); return M(mirror(p), { sL: f.sR, sR: f.sL }); };
@@ -1421,7 +1432,10 @@
           // zwischen: Zwischenbild auf dem Weg in die Ausholhaltung (Arm sinkt im Bogen, Ellbogen geht mit)
           const zb = tech.zwischen;
           const gerade = zb && E.timeline([{ t: 0, p: cur.up }, { t: 1, p: tr(0), e: 'lin' }]);
-          const pre = E.timeline(zb ? [{ t: 0, p: cur.up }, { t: uA * zb.u, p: M(upper(gerade(zb.u)), zb.p), e: 'fl' }, { t: uA, p: tr(0), e: 'kime' }] : [{ t: 0, p: cur.up }, { t: uA, p: tr(0) }]);
+          // nennt das Zwischenbild eine Fingerrichtung, die Haltung davor aber keine: dort die tatsächliche Richtung des
+          // Unterarms eintragen – sonst blendet die neue Richtung von null aus schlagartig ein und das Handgelenk knickt
+          const ab = zb ? M(cur.up, ...['L', 'R'].filter((q) => zb.p['f' + q] && Math.hypot(...(cur.up['f' + q] || [0, 0, 0])) < 0.01).map((q) => ({ ['f' + q]: unterarm(cur.up, q) }))) : cur.up;
+          const pre = E.timeline(zb ? [{ t: 0, p: ab }, { t: uA * zb.u, p: M(upper(gerade(zb.u)), zb.p), e: 'fl' }, { t: uA, p: tr(0), e: 'kime' }] : [{ t: 0, p: cur.up }, { t: uA, p: tr(0) }]);
           // Die Hüfte dreht dabei in einem Zug von der alten in die neue Stellung, im Gleichschritt mit der Wendung – nähme
           // sie die Hüftstellung der Ausholhaltung mit, drehte sie erst kräftig gegen die Wendung und dann zurück
           const y0 = cur.up.yaw;
