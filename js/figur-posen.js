@@ -576,21 +576,28 @@
     const SNU_OPT = M(hit('elbowL', 'Unterarm'), { hit: { t: 0.62 }, best: 0, eff: 'fistL', view: 'front', yaw: -100 });
     D['tc:soto-nagashi-uke'] = FLOW(SNU, SNU_OPT);
     // Uchi-nagashi-uke wie Tekki Shodan 9 (Teil 1) im Kiba-dachi, Blick nach vorn – nur der Block, der Uraken danach gehört nicht dazu:
-    // aus dem Ende von 8 (linke Faust an der Hüfte, rechts Chudan Uchi-uke) streckt sich der rechte Arm weit schräg nach unten,
-    // genau mittig geradeaus vor dem Körper
-    // (Faustrücken oben); der linke Arm stößt erst von der Hüfte nach vorn (Faustrücken unten), sodass sich beide Arme kreuzen,
-    // und geht dann hoch – Oberarm zur Seite, Unterarm senkrecht, Faust neben dem Kopf, Faustrücken nach hinten. Beim Hochgehen
-    // zeigt die Rückseite (Haiwan) nach außen und lenkt den Jodan-Angriff ab; das Standbild zeigt diesen Moment (best)
+    // aus dem Ende von 8 (linke Faust an der Hüfte, rechts Chudan Uchi-uke) zieht der rechte Ellbogen erst an den Körper und
+    // der Arm vor die Mitte (Unterarm bleibt aufrecht), die linke Faust geht von der Hüfte vor ihm vorbei – die Arme kreuzen
+    // sich vor der Brust wie beim Age-uke, der linke außen. Dann streckt sich der rechte Arm weit schräg nach unten, genau
+    // mittig geradeaus vor dem Körper (Faustrücken oben), und der linke geht hoch – Oberarm zur Seite, Unterarm senkrecht,
+    // Faust neben dem Kopf, Faustrücken nach hinten. Beim Hochgehen zeigt die Rückseite (Haiwan) nach außen und lenkt den
+    // Jodan-Angriff ab; das Standbild zeigt diesen Moment (best)
     const UN1 = M(KB, { hL: L(H.hip), hR: [-0.22, 0.02, 0.32], eR: [-0.1, -1, 0.3] });
-    const UN_X = M(KB, { hL: [-0.06, -0.16, 0.42], eL: [0.3, -1, 0.2], pL: [0, 1, 0], hR: [-0.1, -0.32, 0.52], eR: [-1, -0.3, 0], pR: [0, -1, 0] });
+    const UN_ZIEH = M(KB, { hL: [0.09, -0.25, 0.3], eL: [0.6, -1, 0], pL: [0, 0.6, 0.4], hR: [-0.06, -0.01, 0.21], eR: [-0.3, -1, -0.1] });
+    const UN_KREUZ = M(KB, { hL: [-0.15, -0.09, 0.38], eL: [0.5, -1, 0.1], pL: [0, 1, 0], hR: [0.02, -0.02, 0.21], eR: [-0.3, -1, -0.1] });
+    const UN_LOES = M(KB, { hL: [0.03, -0.03, 0.4], eL: [0.6, -1, 0.2], pL: [-0.4, 1, 0], hR: [-0.05, -0.26, 0.42], eR: [-1, -0.6, -0.1], pR: [0, -1, 0] });
     const UN_Y = M(KB, { hL: [0.2, 0.08, 0.34], eL: [0.8, -1, 0.2], pL: [-1, 0, 0.2], hR: [-0.02, -0.4, 0.6], eR: [-1, -0.3, 0], pR: [0, -1, 0] });
     const UN2 = M(KB, { hL: [0.3, 0.2, 0.1], eL: [1, -0.5, 0.3], pL: [0, 0, 1], hR: [0, -0.42, 0.62], eR: [-1, -0.3, 0], pR: [0, -1, 0] });
-    D['tc:uchi-nagashi-uke'] = M({ keys: [
+    const UN_KEYS = [
       { t: 0, p: UN1 }, { t: 0.16, p: UN1 },
-      { t: 0.3, p: UN_X, e: 'in' },
-      { t: 0.41, p: UN_Y, e: 'lin' },
-      { t: 0.52, p: UN2, e: 'out' },
-    ], best: 0.424, dur: 1.6 }, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front', yaw: 25 }));
+      { t: 0.25, p: UN_ZIEH, e: 'fl' },
+      { t: 0.34, p: UN_KREUZ, e: 'fl' },
+      { t: 0.4, p: UN_LOES, e: 'fl' },
+      { t: 0.46, p: UN_Y, e: 'fl' },
+      { t: 0.54, p: UN2, e: 'out' },
+    ];
+    // eigene Kopie: das Strecken am Ende (strecken) ändert nur das Lexikon, nicht Tekki Shodan 9, 23
+    D['tc:uchi-nagashi-uke'] = M({ keys: UN_KEYS.map((k) => ({ ...k })), best: 0.47, dur: 1.6 }, M(hit('elbowL', 'Unterarm-Rückseite'), { eff: 'fistL', view: 'front', yaw: 25 }));
     D['tc:tsukami-uke'] = M({ keys: [{ t: 0, p: M(S.zks, HANDS_HIP) }, { t: 0.15, p: M(S.zks, HANDS_HIP) }, { t: 0.45, p: M(S.zks, { hL: L(H.hip), hR: [-0.04, 0.03, 0.5], oR: 1, pR: [0, 0, 1], fR: [0, 1, 0.3] }), e: 'kime' }, { t: 0.75, p: M(S.zks, { hL: L(H.hip), hR: [-0.12, -0.25, 0.16] }) }], best: 0.45, dur: 1.8, eff: 'wristR', view: 'side3' }, hit('wristR', 'greifen'));
     // Tate-shuto-uke wie in Bassai Dai 8–9: im etwas breiteren Hachiji-dachi aus Ryoken Migi Koshi-kamae (beide Fäuste an
     // der rechten Hüfte, linke über der rechten) geht die linke Hand geöffnet langsam und kraftvoll im Bogen nach vorn Chudan,
@@ -1272,26 +1279,11 @@
     KATA['koshi-kamae-tekki'] = STILL(M(KB, KOSHI_KAMAE));
     // 8, 22: Chudan Uchi-uke im Kiba-dachi, Körper gerade nach vorn (Ende wie der Beginn des Uchi-nagashi-uke im Lexikon)
     KATA['uchi-uke-kiba'] = T(M(KB, { hL: [0.1, -0.15, 0.4], hR: H.uchiPrep, eR: E_UCHI }), UN1);
-    // 9, 23: erst Uchi-nagashi-uke Jodan links mit Gedan-uke rechts, dann schlägt die linke Faust als Uraken nach vorn auf
-    // Gesichtshöhe (Faust gerade, Handrücken zum Ziel); der rechte Unterarm kommt waagerecht vor die Brust, die rechte Faust
-    // liegt unter dem linken Ellbogen (Suihei-kamae).
-    // Anders als im Lexikon streckt sich der rechte Arm (Uchi-uke aus 8) nicht gleich: erst zieht sein Ellbogen an den
-    // Körper und nach links vor die Mitte (Unterarm bleibt aufrecht, kommt etwas mit heran), und die linke Faust geht von der Hüfte vor dem Körper an ihm
-    // vorbei – die Arme kreuzen sich vor der Brust wie beim Age-uke, der linke außen. Erst danach streckt sich der rechte
-    // Arm schräg nach unten und der linke holt oben aus (wie bisher)
+    // 9, 23: erst Uchi-nagashi-uke Jodan links mit Gedan-uke rechts (Ablauf des Lexikons: die Arme kreuzen sich erst vor der
+    // Brust), dann schlägt die linke Faust als Uraken nach vorn auf Gesichtshöhe (Faust gerade, Handrücken zum Ziel); der
+    // rechte Unterarm kommt waagerecht vor die Brust, die rechte Faust liegt unter dem linken Ellbogen (Suihei-kamae)
     const TK_URAKEN = M(KB, { hL: [0.08, 0.07, 0.42], eL: [0.2, -1, 0.1], pL: [0, 0.3, -1], hR: [0.075, -0.2, 0.2], eR: [-1, -0.1, 0.3], pR: [0, -1, 0] });
-    const TK_ZIEH = M(KB, { hL: [0.09, -0.25, 0.3], eL: [0.6, -1, 0], pL: [0, 0.6, 0.4], hR: [-0.06, -0.01, 0.21], eR: [-0.3, -1, -0.1] });
-    const TK_KREUZ = M(KB, { hL: [-0.15, -0.09, 0.38], eL: [0.5, -1, 0.1], pL: [0, 1, 0], hR: [0.02, -0.02, 0.21], eR: [-0.3, -1, -0.1] });
-    const TK_LOES = M(KB, { hL: [0.03, -0.03, 0.4], eL: [0.6, -1, 0.2], pL: [-0.4, 1, 0], hR: [-0.05, -0.26, 0.42], eR: [-1, -0.6, -0.1], pR: [0, -1, 0] });
-    KATA['nagashi-uraken'] = { keys: [
-      { t: 0, p: UN1 }, { t: 0.16, p: UN1 },
-      { t: 0.25, p: TK_ZIEH, e: 'fl' },
-      { t: 0.34, p: TK_KREUZ, e: 'fl' },
-      { t: 0.4, p: TK_LOES, e: 'fl' },
-      { t: 0.46, p: UN_Y, e: 'fl' },
-      { t: 0.54, p: UN2, e: 'out' },
-      { t: 0.6, p: UN2 }, { t: 0.8, p: TK_URAKEN, e: 'kime' },
-    ] };
+    KATA['nagashi-uraken'] = { keys: UN_KEYS.concat([{ t: 0.6, p: UN2 }, { t: 0.8, p: TK_URAKEN, e: 'kime' }]) };
     // 11, 25: Unterarm-Abwehr zur eigenen Seite – die Arme bleiben, wie sie nach dem Uraken stehen (Faust unter dem Ellbogen),
     // Hüfte und Oberkörper drehen zur Seite der Abwehr und der Unterarm steht dabei aufrecht
     KATA['zenwan-uke-gleich'] = T(TK_URAKEN, M(TK_URAKEN, { look: 90, yaw: 30, chest: 25, hL: [0.12, 0.06, 0.36] }));
@@ -1578,7 +1570,7 @@
     ['tc:te-nagashi-uke', 'tc:gedan-nagashi-uke'].forEach((id) =>
       NEU(id, keysMit(id, (k, i) => M(k, { p: EINDREHEN(k.p, i < 2 ? 8 : -15) }))));
     // Uchi-nagashi-uke: die Hüfte dreht mit zur Seite des abwehrenden linken Arms (wie in Tekki Shodan)
-    NEU('tc:uchi-nagashi-uke', keysMit('tc:uchi-nagashi-uke', (k, i) => M(k, { p: M(k.p, { yaw: [0, 0, 6, 12, 15][i] }) })));
+    NEU('tc:uchi-nagashi-uke', keysMit('tc:uchi-nagashi-uke', (k, i) => M(k, { p: M(k.p, { yaw: [0, 0, 2, 4, 8, 12, 15][i] }) })));
     // Tettsui-uchi: mit dem Ausholen über den Kopf dreht die Hüfte weit heraus (tief in den Hanmi, Oberkörper mit), dann
     // schnappt sie mit dem Schlag hart zur Mitte ein und der Arm peitscht hinterher. Im Ziel steht die Faust wie bisher
     // (Summe aus Hüfte und Oberkörper 15°), der Arm dabei deutlich gebeugt (gut 85 % gestreckt)
