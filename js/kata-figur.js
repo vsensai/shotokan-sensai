@@ -44,10 +44,14 @@
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
   const GL_SINKEN = 0.75; // in einen tieferen Stand: bis hier ist die Hüfte unten (etwas vor dem gleitenden Fuß)
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
-  // Kamera dabei: KAM_VORAUS so weit schaut ihre Glättung voraus (3 × 0,22 s, center()); KAM_ZURUECK: so lange geht sie
-  // nach dem Gleiten zurück ins gewöhnliche Folgen, wenn keine Bewegung mehr folgt
+  // Kamera dabei: KAM_VORAUS so weit schaut ihre Glättung voraus (3 × 0,22 s, center()); KAM_ZURUECK: so lange holt sie
+  // nach dem Gleiten auf, wenn keine Bewegung mehr folgt
   const KAM_VORAUS = 0.66;
   const KAM_ZURUECK = 0.7;
+  // Springt die Zeit (Durchschalten, Abspielen ab einer anderen Stelle: über KAM_SPRUNG Sekunden des Ablaufs), gleitet die
+  // Kamera in KAM_WEICH Sekunden an die neue Stelle
+  const KAM_SPRUNG = 0.25;
+  const KAM_WEICH = 0.45;
   const ST_KNIE = 0.36; // Stampfschritt aus dem Stand (Bassai Dai 1): bis hier kommt das Knie hoch,
   const ST_AUF = 0.72; // hier setzt der Fuß auf,
   const ST_HOCH = 0.42; // so hoch kommt der Fuß (Meter)
@@ -1717,11 +1721,8 @@
       const i = segs.indexOf(sg);
       const vor = segs[i - 1];
       const nach = segs[i + 1];
-      // (stehen bleibt sie, sobald die Bewegung davor fertig ist, spätestens bevor die Glättung die neue Bewegung sieht)
-      // (aufholen: ab dem Ankommen des Fußes ruhig weiter bis zum Ende der nächsten Bewegung – so schnell wie die Kamera
-      // sonst in Tekki Shodan fährt; finge sie erst mit der nächsten Bewegung an, müsste sie doppelt so schnell fahren)
-      const e = sg.t0 + GL_FUSS[1] * (sg.t1 - sg.t0);
-      return { a: Math.max(vor ? vor.t1 : 0, sg.t0 - KAM_VORAUS), e, g: nach ? nach.t1 + KAM_VORAUS : sg.t1 + KAM_ZURUECK, H: null, G: null };
+      // (stehen bleibt sie, sobald die Bewegung davor fertig ist)
+      return { a: vor ? Math.min(vor.t1, sg.t0) : sg.t0, e: sg.t0 + GL_FUSS[1] * (sg.t1 - sg.t0), g: nach ? nach.t1 + KAM_VORAUS : sg.t1 + KAM_ZURUECK };
     });
     const blick = (t, glatt) => {
       const r = ruhe.filter((x) => x.a < t).pop();
@@ -1882,6 +1883,13 @@
     // zoomShown läuft dem Wert weich nach.
     let zoom = 1;
     let zoomShown = 1;
+    // Sprung in der Zeit (Durchschalten mit den Pfeiltasten überspringt die Pausen, in denen die Kamera der Figur nachgeht;
+    // Sprung zu einer Zählzeit): die Kamera gleitet in KAM_WEICH Sekunden an die neue Stelle, statt mit dem Bild zu springen
+    let camC = null;
+    let camVon = null;
+    let camT0 = 0;
+    let camSprung = false;
+    const springe = (neu) => { if (Math.abs(neu - t) > KAM_SPRUNG) camSprung = true; };
     let area = null;
     const pts = new Map();
     let pinch = 0;
@@ -1972,7 +1980,16 @@
       if (!on || !anim || !cw || !ch) return;
       const zooming = Math.abs(zoom - zoomShown) > 0.003;
       zoomShown = zooming ? zoomShown + (zoom - zoomShown) * 0.25 : zoom;
-      const fast = moving || !!drag || zooming;
+      let c = center(t);
+      if (camSprung && camC) { camVon = camC; camT0 = performance.now(); }
+      camSprung = false;
+      if (camVon) {
+        const f = (performance.now() - camT0) / 1000 / KAM_WEICH;
+        if (f >= 1) camVon = null;
+        else c = mix(camVon, c, smooth(f));
+      }
+      camC = c;
+      const fast = moving || !!drag || zooming || !!camVon;
       const still = E.quality.still();
       const dpr = Math.min(window.devicePixelRatio || 1, 2.5, Math.sqrt((fast ? E.quality.moving() : still == null ? PX_STILL : still) / (cw * ch)));
       const w = Math.max(120, Math.round(cw * dpr));
@@ -1980,7 +1997,6 @@
       if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
       const P = anim.pose(t);
       const J = E.solve(P);
-      const c = center(t);
       // im Hochformat weiter weg, damit auch ein breiter Stand ganz ins Bild passt; im Querformat (PC, Vollbild) näher
       // heran, dort ist seitlich genug Platz und die Figur füllt die Höhe besser
       const near = 1 - 0.2 * clamp((w / h - 1) / 0.5, 0, 1);
@@ -2041,12 +2057,12 @@
       if (!on || !node.isConnected) return;
       if (moving) {
         t = Math.min(tEnd, t0 + (now - clock) / 1000 / lupe);
-        if (t >= tEnd && dann) { t0 = t = dann[0] / lupe; tEnd = dann[1] / lupe; clock = now; dann = null; }
+        if (t >= tEnd && dann) { springe(dann[0] / lupe); t0 = t = dann[0] / lupe; tEnd = dann[1] / lupe; clock = now; dann = null; }
         else if (t >= tEnd) moving = false;
       }
       draw();
       if (moving) E.quality.tick(now, cv.width * cv.height);
-      if (moving || rough || Math.abs(zoom - zoomShown) > 0.003) request();
+      if (moving || rough || camVon || Math.abs(zoom - zoomShown) > 0.003) request();
     }
     function request() {
       if (!raf && on) raf = requestAnimationFrame(frame);
@@ -2102,6 +2118,8 @@
       // langsamer ab (Zeitlupe). Alle Zeiten unten sind dann die gedehnten der Ansage.
       beat(b, f = 1) {
         if (!anims.has(b)) anims.set(b, build(k, { beat: b }));
+        // (anderer Takt: anderer Ablauf, die Kamera gleitet hinüber)
+        if (anim && anims.get(b) !== anim) camSprung = true;
         anim = anims.get(b);
         lupe = f;
         if (!area) area = areaOf(anim);
@@ -2112,9 +2130,9 @@
       fertig: (i) => anim.fertig[i] * lupe,
       // ab Zeitpunkt a in Echtzeit laufen, bis b (ohne b: bis zum Schluss); mit weiter = [a2, b2] danach ohne Halt von a2 bis b2
       // (die Wartezeit dazwischen fällt weg)
-      run(a, b, weiter) { t0 = t = a / lupe; tEnd = b == null ? anim.dur : b / lupe; dann = weiter || null; clock = performance.now(); moving = tEnd > t0 || !!dann; E.quality.begin(); request(); },
+      run(a, b, weiter) { springe(a / lupe); t0 = t = a / lupe; tEnd = b == null ? anim.dur : b / lupe; dann = weiter || null; clock = performance.now(); moving = tEnd > t0 || !!dann; E.quality.begin(); request(); },
       // Standbild zum Zeitpunkt a
-      show(a) { t = a / lupe; moving = false; dann = null; request(); },
+      show(a) { springe(a / lupe); t = a / lupe; moving = false; dann = null; request(); },
       freeze() { moving = false; dann = null; request(); },
       time: () => t * lupe,
       zoom: (z) => (z == null ? zoom : setZoom(z)),
