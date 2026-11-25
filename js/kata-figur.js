@@ -39,9 +39,9 @@
   const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
-  // Kamera dabei: so lange (Sekunden) schwenkt sie vor dem Losgleiten auf den Standfuß, so lange geht sie danach zurück
-  // ins gewöhnliche Folgen
-  const KAM_SCHWENK = 1.2;
+  // Kamera dabei: KAM_VORAUS so weit schaut ihre Glättung voraus (3 × 0,22 s, center()); KAM_ZURUECK: mindestens so
+  // lange geht sie danach zurück ins gewöhnliche Folgen
+  const KAM_VORAUS = 0.66;
   const KAM_ZURUECK = 0.7;
   const ST_KNIE = 0.36; // Stampfschritt aus dem Stand (Bassai Dai 1): bis hier kommt das Knie hoch,
   const ST_AUF = 0.72; // hier setzt der Fuß auf,
@@ -1695,16 +1695,25 @@
       return sg.A ? Math.min(0.6, sg.A.low.h - 0.06, sg.B.low.h - 0.06) : 0.6;
     };
     // Blickpunkt der Kamera bei langsamem Heranziehen am Boden (GLEITEN): Folgte sie der Hüfte, die dabei aufs Standbein
-    // geht, wanderte der Standfuß durchs Bild – am Anfang sogar weiter als der gleitende Fuß. Stattdessen schwenkt sie,
-    // solange die Figur noch steht, auf die Hüfte der Endstellung (über dem Standfuß) und steht still, bis der Fuß da ist;
-    // danach geht sie weich zurück in das gewöhnliche Folgen. c: der gewöhnliche (geglättete) Blickpunkt
-    // (der Schwenk beginnt frühestens, wenn die Bewegung davor fertig ist – im schnellen Takt bleibt dafür weniger Zeit)
+    // geht, wanderte der Standfuß durchs Bild – am Anfang sogar weiter als der gleitende Fuß. Stattdessen bleibt sie stehen,
+    // wo sie vor der Bewegung war (ohne Schwenk), auch in der Pause danach, und geht erst mit der nächsten Bewegung weich
+    // zurück ins gewöhnliche Folgen (Bassai Dai 35, 37 stampfen ohnehin zurück an die alte Stelle).
+    // glatt(t): der gewöhnliche (geglättete) Blickpunkt
     const ruhe = segs.filter((sg) => sg.gleiten).map((sg) => {
-      const los = sg.t0 + sg.feet[sg.gleiten.s].u0 * (sg.t1 - sg.t0);
-      const vor = segs[segs.indexOf(sg) - 1];
-      return { a: Math.min(los - 0.25, Math.max(los - KAM_SCHWENK, vor ? vor.t1 : 0)), b: los, e: sg.t1, ziel: sg.B.low.pel };
+      const i = segs.indexOf(sg);
+      const vor = segs[i - 1];
+      const nach = segs[i + 1];
+      // (stehen bleibt sie, sobald die Bewegung davor fertig ist, spätestens bevor die Glättung die neue Bewegung sieht)
+      const a = Math.max(vor ? vor.t1 : 0, sg.t0 - KAM_VORAUS);
+      const f = nach ? nach.t0 : sg.t1 + 1;
+      return { a, f, g: Math.max(f + KAM_ZURUECK, nach ? nach.t1 + KAM_VORAUS : 0), H: null };
     });
-    const blick = (t, c) => ruhe.reduce((p, r) => (t <= r.a || t >= r.e + KAM_ZURUECK ? p : mix(p, r.ziel, t < r.b ? ramp(r.a, r.b, t) : 1 - ramp(r.e, r.e + KAM_ZURUECK, t))), c);
+    const blick = (t, glatt) => {
+      const r = ruhe.filter((x) => x.a < t).pop();
+      if (!r || t >= r.g) return glatt(t);
+      if (!r.H) r.H = blick(r.a, glatt);
+      return t <= r.f ? r.H : mix(r.H, glatt(t), ramp(r.f, r.g, t));
+    };
     return { kata: k, beat, dur, pose, blick, marks, markAt, ends, fertig, warn, tief, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
   }
 
@@ -1861,7 +1870,7 @@
     let pinch = 0;
 
     // Blickpunkt: Hüfte der Figur, über gut eine Sekunde geglättet (rein aus dem Zeitpunkt – auch beim Springen ruhig)
-    function center(at) {
+    function glatt(at) {
       let x = 0;
       let z = 0;
       for (let i = -3; i <= 3; i++) {
@@ -1869,8 +1878,10 @@
         x += P.pelvis[0] / 7;
         z += P.pelvis[2] / 7;
       }
-      return anim.blick ? anim.blick(at, [x, z]) : [x, z];
+      return [x, z];
     }
+    // (beim langsamen Heranziehen am Boden bleibt sie stehen – anim.blick)
+    const center = (at) => anim.blick(at, glatt);
     // Bereich, den die Figur in der Kata durchläuft: Linien der Bodenkarte und Weg der Hüfte, mit Rand für Arme und
     // Füße am Boden, dazu Kopfhöhe über dem Weg. c, r: Mitte und Radius (für den Boden).
     function areaOf(a) {
