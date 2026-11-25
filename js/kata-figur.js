@@ -44,8 +44,8 @@
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
   const GL_SINKEN = 0.75; // in einen tieferen Stand: bis hier ist die Hüfte unten (etwas vor dem gleitenden Fuß)
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
-  // Kamera dabei: KAM_VORAUS so weit schaut ihre Glättung voraus (3 × 0,22 s, center()); KAM_ZURUECK: mindestens so
-  // lange geht sie danach zurück ins gewöhnliche Folgen
+  // Kamera dabei: KAM_VORAUS so weit schaut ihre Glättung voraus (3 × 0,22 s, center()); KAM_ZURUECK: so lange geht sie
+  // nach dem Gleiten zurück ins gewöhnliche Folgen, wenn keine Bewegung mehr folgt
   const KAM_VORAUS = 0.66;
   const KAM_ZURUECK = 0.7;
   const ST_KNIE = 0.36; // Stampfschritt aus dem Stand (Bassai Dai 1): bis hier kommt das Knie hoch,
@@ -1706,25 +1706,30 @@
       const sg = segs[i];
       return sg.A ? Math.min(0.6, sg.A.low.h - 0.06, sg.B.low.h - 0.06) : 0.6;
     };
-    // Blickpunkt der Kamera bei langsam gleitendem Fuß: Folgte sie der Hüfte, die dabei aufs Standbein
-    // geht, wanderte der Standfuß durchs Bild – am Anfang sogar weiter als der gleitende Fuß. Stattdessen bleibt sie stehen,
-    // wo sie vor der Bewegung war (ohne Schwenk), auch in der Pause danach, und geht erst mit der nächsten Bewegung weich
-    // zurück ins gewöhnliche Folgen (Bassai Dai 35, 37 stampfen ohnehin zurück an die alte Stelle).
+    // Blickpunkt der Kamera bei langsam gleitendem Fuß: Folgte sie der Hüfte, die dabei aufs Standbein geht, wanderte der
+    // Standfuß durchs Bild – am Anfang sogar weiter als der gleitende Fuß. Stattdessen bleibt sie stehen, wo sie vor der
+    // Bewegung war (ohne Schwenk). Sobald der Fuß angekommen ist, holt sie ruhig und gleichmäßig auf, bis dorthin, wo sie
+    // am Ende der nächsten Bewegung ohnehin stünde: Kommt die Figur zurück (Bassai Dai 35, 37 stampfen an die alte Stelle),
+    // bewegt sie sich kaum; wandert die Figur weiter (Tekki Shodan 8 nach dem Kreuzschritt), holt sie nicht erst in der
+    // schnellen Bewegung auf einmal auf – das sah aus, als spränge das Bild.
     // glatt(t): der gewöhnliche (geglättete) Blickpunkt
     const ruhe = segs.filter((sg) => sg.gleiten).map((sg) => {
       const i = segs.indexOf(sg);
       const vor = segs[i - 1];
       const nach = segs[i + 1];
       // (stehen bleibt sie, sobald die Bewegung davor fertig ist, spätestens bevor die Glättung die neue Bewegung sieht)
-      const a = Math.max(vor ? vor.t1 : 0, sg.t0 - KAM_VORAUS);
-      const f = nach ? nach.t0 : sg.t1 + 1;
-      return { a, f, g: Math.max(f + KAM_ZURUECK, nach ? nach.t1 + KAM_VORAUS : 0), H: null };
+      // (aufholen: ab dem Ankommen des Fußes ruhig weiter bis zum Ende der nächsten Bewegung – so schnell wie die Kamera
+      // sonst in Tekki Shodan fährt; finge sie erst mit der nächsten Bewegung an, müsste sie doppelt so schnell fahren)
+      const e = sg.t0 + GL_FUSS[1] * (sg.t1 - sg.t0);
+      return { a: Math.max(vor ? vor.t1 : 0, sg.t0 - KAM_VORAUS), e, g: nach ? nach.t1 + KAM_VORAUS : sg.t1 + KAM_ZURUECK, H: null, G: null };
     });
     const blick = (t, glatt) => {
       const r = ruhe.filter((x) => x.a < t).pop();
       if (!r || t >= r.g) return glatt(t);
       if (!r.H) r.H = blick(r.a, glatt);
-      return t <= r.f ? r.H : mix(r.H, glatt(t), ramp(r.f, r.g, t));
+      if (t <= r.e) return r.H;
+      if (!r.G) r.G = glatt(r.g);
+      return mix(r.H, r.G, ramp(r.e, r.g, t));
     };
     return { kata: k, beat, dur, pose, blick, marks, markAt, ends, fertig, warn, tief, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
   }
