@@ -1276,13 +1276,13 @@
     // Gesichtshöhe (Faust gerade, Handrücken zum Ziel); der rechte Unterarm kommt waagerecht vor die Brust, die rechte Faust
     // liegt unter dem linken Ellbogen (Suihei-kamae).
     // Anders als im Lexikon streckt sich der rechte Arm (Uchi-uke aus 8) nicht gleich: erst zieht sein Ellbogen an den
-    // Körper (Unterarm bleibt aufrecht, kommt etwas mit heran), und die linke Faust geht von der Hüfte vor dem Körper an ihm
+    // Körper und nach links vor die Mitte (Unterarm bleibt aufrecht, kommt etwas mit heran), und die linke Faust geht von der Hüfte vor dem Körper an ihm
     // vorbei – die Arme kreuzen sich vor der Brust wie beim Age-uke, der linke außen. Erst danach streckt sich der rechte
     // Arm schräg nach unten und der linke holt oben aus (wie bisher)
     const TK_URAKEN = M(KB, { hL: [0.08, 0.07, 0.42], eL: [0.2, -1, 0.1], pL: [0, 0.3, -1], hR: [0.075, -0.2, 0.2], eR: [-1, -0.1, 0.3], pR: [0, -1, 0] });
-    const TK_ZIEH = M(KB, { hL: [0.07, -0.25, 0.3], eL: [0.6, -1, 0], pL: [0, 0.6, 0.4], hR: [-0.17, -0.01, 0.2], eR: [-0.4, -1, -0.3] });
-    const TK_KREUZ = M(KB, { hL: [-0.1, -0.1, 0.38], eL: [0.5, -1, 0.1], pL: [0, 1, 0], hR: [-0.15, -0.02, 0.19], eR: [-0.4, -1, -0.3] });
-    const TK_LOES = M(KB, { hL: [0.03, -0.03, 0.4], eL: [0.6, -1, 0.2], pL: [-0.4, 1, 0], hR: [-0.09, -0.26, 0.42], eR: [-1, -0.6, -0.1], pR: [0, -1, 0] });
+    const TK_ZIEH = M(KB, { hL: [0.09, -0.25, 0.3], eL: [0.6, -1, 0], pL: [0, 0.6, 0.4], hR: [-0.06, -0.01, 0.21], eR: [-0.3, -1, -0.1] });
+    const TK_KREUZ = M(KB, { hL: [-0.15, -0.09, 0.38], eL: [0.5, -1, 0.1], pL: [0, 1, 0], hR: [0.02, -0.02, 0.21], eR: [-0.3, -1, -0.1] });
+    const TK_LOES = M(KB, { hL: [0.03, -0.03, 0.4], eL: [0.6, -1, 0.2], pL: [-0.4, 1, 0], hR: [-0.05, -0.26, 0.42], eR: [-1, -0.6, -0.1], pR: [0, -1, 0] });
     KATA['nagashi-uraken'] = { keys: [
       { t: 0, p: UN1 }, { t: 0.16, p: UN1 },
       { t: 0.25, p: TK_ZIEH, e: 'fl' },
