@@ -39,6 +39,10 @@
   const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
+  // Kamera dabei: so lange (Sekunden) schwenkt sie vor dem Losgleiten auf den Standfuß, so lange geht sie danach zurück
+  // ins gewöhnliche Folgen
+  const KAM_SCHWENK = 1.2;
+  const KAM_ZURUECK = 0.7;
   const ST_KNIE = 0.36; // Stampfschritt aus dem Stand (Bassai Dai 1): bis hier kommt das Knie hoch,
   const ST_AUF = 0.72; // hier setzt der Fuß auf,
   const ST_HOCH = 0.42; // so hoch kommt der Fuß (Meter)
@@ -1690,7 +1694,18 @@
       const sg = segs[i];
       return sg.A ? Math.min(0.6, sg.A.low.h - 0.06, sg.B.low.h - 0.06) : 0.6;
     };
-    return { kata: k, beat, dur, pose, marks, markAt, ends, fertig, warn, tief, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
+    // Blickpunkt der Kamera bei langsamem Heranziehen am Boden (GLEITEN): Folgte sie der Hüfte, die dabei aufs Standbein
+    // geht, wanderte der Standfuß durchs Bild – am Anfang sogar weiter als der gleitende Fuß. Stattdessen schwenkt sie,
+    // solange die Figur noch steht, auf die Hüfte der Endstellung (über dem Standfuß) und steht still, bis der Fuß da ist;
+    // danach geht sie weich zurück in das gewöhnliche Folgen. c: der gewöhnliche (geglättete) Blickpunkt
+    // (der Schwenk beginnt frühestens, wenn die Bewegung davor fertig ist – im schnellen Takt bleibt dafür weniger Zeit)
+    const ruhe = segs.filter((sg) => sg.gleiten).map((sg) => {
+      const los = sg.t0 + sg.feet[sg.gleiten.s].u0 * (sg.t1 - sg.t0);
+      const vor = segs[segs.indexOf(sg) - 1];
+      return { a: Math.min(los - 0.25, Math.max(los - KAM_SCHWENK, vor ? vor.t1 : 0)), b: los, e: sg.t1, ziel: sg.B.low.pel };
+    });
+    const blick = (t, c) => ruhe.reduce((p, r) => (t <= r.a || t >= r.e + KAM_ZURUECK ? p : mix(p, r.ziel, t < r.b ? ramp(r.a, r.b, t) : 1 - ramp(r.e, r.e + KAM_ZURUECK, t))), c);
+    return { kata: k, beat, dur, pose, blick, marks, markAt, ends, fertig, warn, tief, lines: k.ansage.lines.map((l) => [-l[0] * SCALE, l[1] * SCALE, -l[2] * SCALE, l[3] * SCALE]) };
   }
 
   // Prüfung des fertigen Ablaufs: jedes Bild rechenbar, Füße am Boden erreichen ihren Platz, keine Sprünge
@@ -1854,7 +1869,7 @@
         x += P.pelvis[0] / 7;
         z += P.pelvis[2] / 7;
       }
-      return [x, z];
+      return anim.blick ? anim.blick(at, [x, z]) : [x, z];
     }
     // Bereich, den die Figur in der Kata durchläuft: Linien der Bodenkarte und Weg der Hüfte, mit Rand für Arme und
     // Füße am Boden, dazu Kopfhöhe über dem Weg. c, r: Mitte und Radius (für den Boden).
