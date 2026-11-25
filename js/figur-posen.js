@@ -1272,11 +1272,26 @@
     KATA['koshi-kamae-tekki'] = STILL(M(KB, KOSHI_KAMAE));
     // 8, 22: Chudan Uchi-uke im Kiba-dachi, Körper gerade nach vorn (Ende wie der Beginn des Uchi-nagashi-uke im Lexikon)
     KATA['uchi-uke-kiba'] = T(M(KB, { hL: [0.1, -0.15, 0.4], hR: H.uchiPrep, eR: E_UCHI }), UN1);
-    // 9, 23: erst Uchi-nagashi-uke Jodan links mit Gedan-uke rechts (Ablauf des Lexikons), dann schlägt die linke Faust als
-    // Uraken nach vorn auf Gesichtshöhe (Faust gerade, Handrücken zum Ziel); der rechte Unterarm kommt waagerecht vor die
-    // Brust, die rechte Faust liegt unter dem linken Ellbogen (Suihei-kamae)
+    // 9, 23: erst Uchi-nagashi-uke Jodan links mit Gedan-uke rechts, dann schlägt die linke Faust als Uraken nach vorn auf
+    // Gesichtshöhe (Faust gerade, Handrücken zum Ziel); der rechte Unterarm kommt waagerecht vor die Brust, die rechte Faust
+    // liegt unter dem linken Ellbogen (Suihei-kamae).
+    // Anders als im Lexikon streckt sich der rechte Arm (Uchi-uke aus 8) nicht gleich: erst zieht sein Ellbogen an den
+    // Körper (Unterarm bleibt aufrecht, kommt etwas mit heran), und die linke Faust geht von der Hüfte vor dem Körper an ihm
+    // vorbei – die Arme kreuzen sich vor der Brust wie beim Age-uke, der linke außen. Erst danach streckt sich der rechte
+    // Arm schräg nach unten und der linke holt oben aus (wie bisher)
     const TK_URAKEN = M(KB, { hL: [0.08, 0.07, 0.42], eL: [0.2, -1, 0.1], pL: [0, 0.3, -1], hR: [0.075, -0.2, 0.2], eR: [-1, -0.1, 0.3], pR: [0, -1, 0] });
-    KATA['nagashi-uraken'] = { keys: D['tc:uchi-nagashi-uke'].keys.concat([{ t: 0.58, p: UN2 }, { t: 0.78, p: TK_URAKEN, e: 'kime' }]) };
+    const TK_ZIEH = M(KB, { hL: [0.07, -0.25, 0.3], eL: [0.6, -1, 0], pL: [0, 0.6, 0.4], hR: [-0.17, -0.01, 0.2], eR: [-0.4, -1, -0.3] });
+    const TK_KREUZ = M(KB, { hL: [-0.1, -0.1, 0.38], eL: [0.5, -1, 0.1], pL: [0, 1, 0], hR: [-0.15, -0.02, 0.19], eR: [-0.4, -1, -0.3] });
+    const TK_LOES = M(KB, { hL: [0.03, -0.03, 0.4], eL: [0.6, -1, 0.2], pL: [-0.4, 1, 0], hR: [-0.09, -0.26, 0.42], eR: [-1, -0.6, -0.1], pR: [0, -1, 0] });
+    KATA['nagashi-uraken'] = { keys: [
+      { t: 0, p: UN1 }, { t: 0.16, p: UN1 },
+      { t: 0.25, p: TK_ZIEH, e: 'fl' },
+      { t: 0.34, p: TK_KREUZ, e: 'fl' },
+      { t: 0.4, p: TK_LOES, e: 'fl' },
+      { t: 0.46, p: UN_Y, e: 'fl' },
+      { t: 0.54, p: UN2, e: 'out' },
+      { t: 0.6, p: UN2 }, { t: 0.8, p: TK_URAKEN, e: 'kime' },
+    ] };
     // 11, 25: Unterarm-Abwehr zur eigenen Seite – die Arme bleiben, wie sie nach dem Uraken stehen (Faust unter dem Ellbogen),
     // Hüfte und Oberkörper drehen zur Seite der Abwehr und der Unterarm steht dabei aufrecht
     KATA['zenwan-uke-gleich'] = T(TK_URAKEN, M(TK_URAKEN, { look: 90, yaw: 30, chest: 25, hL: [0.12, 0.06, 0.36] }));
