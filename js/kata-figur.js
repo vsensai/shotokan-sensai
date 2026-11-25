@@ -134,6 +134,14 @@
   // zur Seite, und die Figur machte daraus einen Schritt. Heian Godan 23: Wendung im Heisoku-dachi über die Fersen, der
   // linke Fuß bleibt stehen, nur der rechte geht vor
   const FERSE = { 'heian-godan': [[/kokutsu-dachi #23$/i, 'L']] };
+  // Kreuzschritt aus dem breiten Stand: Anteil der Dauer, in dem erst das Gewicht aufs Standbein geht, wie weit die Hüfte
+  // dabei hinüberwandert (Anteil des seitlichen Abstands zum Standfuß) und ab welchem Abstand (Meter) das nötig ist
+  // (GEWICHT_U: bis dahin ist die Hüfte drüben; GEWICHT_FUSS: ab da gleitet der Fuß schon am Boden nach innen – er hebt
+  // erst ab, wenn das Gewicht drüben ist, sonst reichte das Bein im breiten Stand nicht)
+  const GEWICHT_U = 0.5;
+  const GEWICHT_FUSS = 0.12;
+  const GEWICHT = 0.8;
+  const GEWICHT_AB = 0.15;
   const KREUZ = 0.28; // Kreuzschritt: so weit vor bzw. hinter dem Standfuß geht der andere Fuß vorbei (Fußmitten, Meter)
   // Kreuzschritt (Ashi-mae Kosa): die Füße stehen dicht nebeneinander, der kreuzende ein Stück weiter vorn – so eng, wie es
   // geht, ohne dass die Hosenbeine ineinander geraten (aus dem Stand der Figur, S.kosamae). KOSA: so weit stehen die
@@ -674,6 +682,22 @@
       const [u0, u1] = seg.ab ? (s === lead ? [0, ST_AUF] : [ST_AUF - 0.1, 0.94]) : lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
       seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz, o.heran, o.ferse);
     });
+    // Kreuzschritt aus einem breiten Stand (Tekki 7, 21 aus dem Kiba-dachi): erst geht das Gewicht hinüber – die Hüfte
+    // wandert zur Seite über das Standbein –, dann löst sich der kreuzende Fuß; sonst stünde die Figur unterwegs mit der
+    // Hüfte mitten zwischen den Füßen auf einem Bein und fiele um (aus dem geschlossenen Stand, Tekki 1, entfällt das)
+    if (o.kreuz > 0 && !both) {
+      const s = ['L', 'R'].find((q) => seg.feet[q].moved);
+      if (s) {
+        const sp = A.low[other(s)].c;
+        const seite = [Math.cos(A.byaw * RAD), -Math.sin(A.byaw * RAD)];
+        const quer = dot(sub(sp, A.low.pel), seite);
+        if (Math.abs(quer) > GEWICHT_AB) {
+          seg.gewicht = { W: add(A.low.pel, mul(seite, GEWICHT * quer)) };
+          seg.feet[s].u0 = GEWICHT_FUSS;
+          seg.feet[s].spaet = true;
+        }
+      }
+    }
     // Hüfte: beim Vorbeigleiten über dem Standbein (zwischen den Füßen), sonst gerade hinüber
     const pl = seg.feet.L.k > seg.feet.R.k ? seg.feet.L : seg.feet.R;
     seg.pelMid = mix(A.low.pel, B.low.pel, 0.5);
@@ -775,6 +799,14 @@
     else P.look = byaw + up.look + clamp(B.byaw - byaw, -LEAD, LEAD) * ramp(0, 0.22, u);
     const prog = (s) => { const pl = seg.feet[s]; return seg.ease(clamp((u - pl.u0) / (pl.u1 - pl.u0))); };
     let pel = via(A.low.pel, seg.pelMid, B.low.pel, seg.share ? seg.share.L * prog('L') + seg.share.R * prog('R') : eb);
+    // Gewicht erst aufs Standbein (Kreuzschritt aus dem Kiba-dachi), dann mit dem Fuß in den Stand; die beiden Teile
+    // überlappen ein wenig, damit die Hüfte nicht anhält, bevor der Fuß losgeht
+    if (seg.gewicht) {
+      const { W } = seg.gewicht;
+      const w1 = seg.ease(clamp(u / GEWICHT_U));
+      const w2 = seg.ease(clamp((u - GEWICHT_U + 0.05) / (1 - GEWICHT_U + 0.05)));
+      pel = add(add(A.low.pel, mul(sub(W, A.low.pel), w1)), mul(sub(B.low.pel, W), w2));
+    }
     // Stampfschritt aus dem Stand: die Hüfte bleibt, solange das Knie hochkommt, über dem Standbein und geht dann mit dem
     // Schritt kraftvoll nach vorn
     if (seg.kv) {
@@ -795,7 +827,7 @@
       if (pl.dreh) c = add(mix(ankOf(A, s), ankOf(B, s), ef), mul(fwd(byaw + rel), FOOT_MID));
       // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
-      let y = lerp(fa.y, fb.y, ef) + (pl.moved && !pl.dreh ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * Math.pow(Math.sin(Math.PI * uf), 2)) : 0);
+      let y = lerp(fa.y, fb.y, ef) + (pl.moved && !pl.dreh ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * (pl.spaet ? Math.pow(Math.sin(Math.PI * ramp(0.35, 1, uf)), 2) : Math.pow(Math.sin(Math.PI * uf), 2))) : 0);
       const v = seg.via && seg.via.s === s ? seg.via : null;
       let wl = null;
       if (v && seg.welle) {
