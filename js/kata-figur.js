@@ -29,6 +29,16 @@
   const PASS = 0.15; // Abstand der Fußmitten, wenn ein Fuß am Standfuß vorbeigleitet
   const UM = 0.24; // … wenn er um den Standfuß herum geht, der über die Ferse dreht (Abstand der Fußmitte vom Knöchel)
   const LIFT = 0.025; // so hoch hebt der gleitende Fuß ab (Suri-ashi: fast gar nicht)
+  // Langsames Heranziehen eines Fußes am Boden (je Kata die Bewegungen): Mit dem Abheben um LIFT über die ganze lange
+  // Dauer schwebte der Fuß knapp über dem Boden, die Hüfte hing zwischen den Füßen und der Standfuß drehte die ganze Zeit
+  // unter dem Gewicht – das sah aus wie auf einem Laufband. Stattdessen: erst geht das Gewicht aufs Standbein (so weit das
+  // gleitende Bein reicht), dann gleitet der Fuß mit der Sohle am Boden heran, die Hüfte bleibt über dem Standbein und
+  // richtet sich mit dem Heranziehen auf; der Standfuß dreht erst zum Schluss ein
+  const GLEITEN = { 'bassai-dai': [34, 36] };
+  const GL_FUSS = [0.15, 0.88]; // Anteile der Dauer: so lange gleitet der Fuß
+  const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
+  const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
+  const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
   const ST_KNIE = 0.36; // Stampfschritt aus dem Stand (Bassai Dai 1): bis hier kommt das Knie hoch,
   const ST_AUF = 0.72; // hier setzt der Fuß auf,
   const ST_HOCH = 0.42; // so hoch kommt der Fuß (Meter)
@@ -682,6 +692,14 @@
       const [u0, u1] = seg.ab ? (s === lead ? [0, ST_AUF] : [ST_AUF - 0.1, 0.94]) : lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
       seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz, o.heran, o.ferse);
     });
+    // langsames Heranziehen am Boden (GLEITEN): der Fuß gleitet erst, wenn das Gewicht hinübergeht
+    if (o.gleiten && !both) {
+      const s = ['L', 'R'].find((q) => seg.feet[q].moved);
+      if (s) {
+        Object.assign(seg.feet[s], { u0: GL_FUSS[0], u1: GL_FUSS[1], gleitet: true });
+        seg.gleiten = { s, o: other(s) };
+      }
+    }
     // Kreuzschritt aus einem breiten Stand (Tekki 7, 21 aus dem Kiba-dachi): erst geht das Gewicht hinüber – die Hüfte
     // wandert zur Seite über das Standbein –, dann löst sich der kreuzende Fuß; sonst stünde die Figur unterwegs mit der
     // Hüfte mitten zwischen den Füßen auf einem Bein und fiele um (aus dem geschlossenen Stand, Tekki 1, entfällt das)
@@ -815,19 +833,47 @@
       pel = add(mix(A.low.pel, seg.kv.pk, kvAuf(uk)), mul(sub(B.low.pel, seg.kv.pk), kvVor(uk)));
     }
     if (seg.ab) pel = mix(A.low.pel, B.low.pel, u < ST_KNIE ? 0.08 * smooth(u / ST_KNIE) : 0.08 + 0.92 * smooth(clamp((u - ST_KNIE) / (0.94 - ST_KNIE))));
+    // langsames Heranziehen am Boden: Die Hüfte geht über den Standfuß, aber nur so weit, wie das gleitende Bein in der
+    // Höhe, auf der sie gerade ist, reicht (am Anfang mindestens so weit, wie es schon steht – sonst spränge sie); mit dem
+    // Heranziehen richtet sie sich auf, zum Schluss geht sie in die Mitte des Standes
+    let hG = null;
+    if (seg.gleiten) {
+      const g = seg.gleiten;
+      const pl = seg.feet[g.s];
+      const ef = seg.ease(clamp((u - pl.u0) / (pl.u1 - pl.u0)));
+      // Knöchel des gleitenden Fußes jetzt (dorthin reicht das Bein) und Knöchel des Standfußes (darüber kommt die Hüfte)
+      const ka = mix(sub(ankOf(A, g.s), A.low[g.s].c), sub(ankOf(B, g.s), B.low[g.s].c), ef);
+      const fk = add(via(A.low[g.s].c, pl.mid, B.low[g.s].c, ef), ka);
+      hG = lerp(A.low.h, B.low.h, ef);
+      const fy = lerp(A.low[g.s].y, B.low[g.s].y, ef);
+      const wa = smooth(clamp(u / GL_GEWICHT));
+      // (reicht das Bein schon im Stand davor kaum, geht die Hüfte nicht weiter vom Fuß weg als dort – erst mit dem Fuß)
+      const d0 = len(sub(A.low.pel, ankOf(A, g.s)));
+      const rh = Math.max(GL_REICHT * Math.sqrt(Math.max(0, LEG * LEG - (hG - fy) ** 2)), d0 * (1 - ef));
+      let p = mix(A.low.pel, ankOf(A, g.o), wa);
+      const d = sub(p, fk);
+      if (len(d) > rh) p = add(fk, mul(d, rh / len(d)));
+      pel = mix(p, B.low.pel, ramp(GL_DREH, 1, u));
+      // das Gewicht liegt dabei auf dem Standbein
+      const ws = (g.o === 'L' ? 0 : 1);
+      P.w[ws] = lerp(P.w[ws], 1, wa * (1 - ramp(GL_DREH, 1, u)));
+      P.w[1 - ws] = 1 - P.w[ws];
+    }
     ['L', 'R'].forEach((s) => {
       const fa = A.low[s];
       const fb = B.low[s];
       const pl = seg.feet[s];
       const uf = clamp((u - pl.u0) / (pl.u1 - pl.u0));
-      const ef = pl.moved ? seg.ease(uf) : eb;
+      // (langsames Heranziehen am Boden: der Standfuß dreht erst zum Schluss ein, im Raum gerechnet)
+      const steht = seg.gleiten && seg.gleiten.o === s;
+      const ef = pl.moved ? seg.ease(uf) : steht ? ramp(GL_DREH, 1, u) : eb;
       let c = pl.moved ? via(fa.c, pl.mid, fb.c, ef) : fa.c;
-      let rel = lerp(fa.rel, fb.rel, ef);
+      let rel = steht ? lerp(A.byaw + fa.rel, B.byaw + fb.rel, ef) - byaw : lerp(fa.rel, fb.rel, ef);
       // Drehen über die Ferse: der Knöchel bleibt, die Fußmitte kreist um ihn
       if (pl.dreh) c = add(mix(ankOf(A, s), ankOf(B, s), ef), mul(fwd(byaw + rel), FOOT_MID));
       // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
-      let y = lerp(fa.y, fb.y, ef) + (pl.moved && !pl.dreh ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * (pl.spaet ? Math.pow(Math.sin(Math.PI * ramp(0.35, 1, uf)), 2) : Math.pow(Math.sin(Math.PI * uf), 2))) : 0);
+      let y = lerp(fa.y, fb.y, ef) + (pl.moved && !pl.dreh && !pl.gleitet ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * (pl.spaet ? Math.pow(Math.sin(Math.PI * ramp(0.35, 1, uf)), 2) : Math.pow(Math.sin(Math.PI * uf), 2))) : 0);
       const v = seg.via && seg.via.s === s ? seg.via : null;
       let wl = null;
       if (v && seg.welle) {
@@ -878,6 +924,7 @@
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
+    if (hG != null) h = hG;
     if (seg.kv) {
       // Knie vor dem Körper: auf dem Standbein nur halb so tief wie im Stand danach, ganz hinunter erst mit dem Stampfen
       const pl = seg.feet[seg.kv.s];
@@ -1587,6 +1634,8 @@
       // Namigaeshi: der Fuß des Zwischenschritts (via) wird hochgerissen
       if (/namigaeshi/i.test(st.note || '')) o.welle = true;
       if (tech && tech.heran) o.heran = true;
+      // langsames Heranziehen eines Fußes am Boden (GLEITEN)
+      if (st.slow && (GLEITEN[k.id] || []).includes(Number(st.n))) o.gleiten = true;
       const seg = segment(cur, nk, o);
       // bleibt der Oberkörper stehen, bleibt auch der Blick, wo er ist
       if (tech && tech.halten && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
