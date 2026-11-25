@@ -89,6 +89,7 @@ Was der Nutzer bisher korrigiert hat (gilt auch für die nächsten Kata):
 - Heisoku-dachi: Füße geschlossen und genau nebeneinander (Heian Sandan: `BREITE` mit `'neben'`), nicht 20 cm breit wie auf der Karte und nicht versetzt.
 - Kokutsu-dachi tief und mit dem Gewicht hinten wie das Standbild im Lexikon (`S.kk`): hinteres Knie rechtwinklig gebeugt, die Kniescheibe zeigt genau 90° zur Seite (nicht schräg nach vorn, aber auch nicht weiter nach hinten – auch in den Kata, unabhängig von der Fußrichtung der Karte), Hüfte bei knapp 30 % des Standes vom hinteren Fuß aus; `kokutsu()` in `js/kata-figur.js` hält das hintere Knie auf allen Längen der Karte so gebeugt (Grenzen `KK_TIEF`, `KK_VOR`, `KK_REICHT`), lange Stände kürzt `KKMAX` auf die Länge der Figur.
 - Gyaku-hanmi nicht übertreiben: Hüfte 25° zur Gegenseite (Heian Nidan 16, 19; Kanku Dai 16, 21, 36). Abwehren im Kokutsu-dachi enden im Hanmi des Kokutsu-dachi (65°) wie im Lexikon, auch Uchi-uke (`uchi-uke-kk`).
+- Absetzen nach einem Tritt mit anschließender Technik (Heian Yondan 7, 10, Option `gleiten`): Fuß setzt aus dem angezogenen Knie gleich leicht mit dem Ballen auf und gleitet in den Stand; die Hüfte bleibt dabei weit offen und dreht erst mit dem Treffer explosiv ein.
 - Haltungen genau nach der Kata: Yoi in Tekki mit gestreckten Armen, die Handflächen mittig genau übereinander; im Koshi-kamae liegen die Fäuste genau übereinander.
 
 ## Buchwissen (ohne PDF)

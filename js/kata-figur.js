@@ -46,6 +46,14 @@
   const kvAuf = (u) => (u < KV_A ? smooth(u / KV_A) : 1);
   // nach vorn: weich anlaufen, dann schnell; hinunter wird er immer schneller (kvHoch)
   const kvVor = (u) => (u < KV_V ? 0 : smooth((u - KV_V) / (1 - KV_V)));
+  // Gleiten aus dem angezogenen Knie (gleiten, Heian Yondan 7, 10): bis GL_AUF (Anteil der Bewegung) setzt der Fuß leicht
+  // mit dem Ballen auf (Knöchel GL_Y hoch, Fuß GL_PITCH geneigt), GL_WO des Weges vom Knie zum Platz entfernt; dann gleitet
+  // er auf dem Ballen in den Stand (die Ferse senkt sich erst zum Schluss), bis GL_ENDE ist er dort
+  const GL_AUF = 0.3;
+  const GL_Y = 0.14;
+  const GL_PITCH = -28;
+  const GL_WO = 0.35;
+  const GL_ENDE = 0.96;
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
   const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
   const STRIKE = 0.17; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
@@ -238,6 +246,9 @@
   // die Arme gehen dabei in die Ausholhaltung), der Rest des Standes läuft langsam mit der Armtechnik (Heian Yondan 2);
   // zwischen (langsame Bewegung): { u, p } – Zwischenbild auf dem Weg in die Ausholhaltung beim Anteil u dieses Weges,
   // p mit Werten der Arme (echte Seiten, Bezug wie im Editor)
+  // gleiten: aus dem angezogenen Knie nach einem Tritt setzt der Fuß gleich leicht mit dem Ballen auf und gleitet in den Stand
+  // (GL_…); die Hüfte bleibt dabei weit offen (so viele Grad gegen die Endstellung) und dreht erst mit dem Treffer explosiv
+  // ein, die Hand der Gegenseite bleibt zum Ziel gestreckt (Heian Yondan 7, 10: Mae-enpi nach dem Yoko-geri);
   // hikiteBleibt (mit direkt): die Hand der Gegenseite bleibt beim Wenden im Raum stehen, wo sie ist (vorn), statt mit dem
   // Körper zur Seite zu drehen, und zieht erst mit dem Stoß an die Hüfte (Heian Sandan 10 nach dem Kentsui)
   const TECH = [
@@ -334,6 +345,7 @@
     [/koho-tsukiage/i, { def: 'tsukiage-enpi', side: 'R', from: 0.25, erst: true }],
     [/gedan kosa-uke/i, { def: 'gedan-kosa-uke', side: 'L', from: 0.25 }],
     [/koshi-kamae/i, { def: 'tc:koshi-kamae', side: 'R', from: 0 }],
+    [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25, gleiten: 90 }, /heian yondan/i],
     [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25 }],
     [/jodan-uke \+ .*shuto/i, { def: 'jodan-uke-shuto-uchi', side: 'R', from: 0.25, lang: true, dur: 0.9 }],
     [/kakiwake-uke/i, { def: 'tc:kakiwake-uke', side: 'L', from: 0.22 }],
@@ -776,7 +788,8 @@
 
   function poseAt(seg, u) {
     const { A, B } = seg;
-    const eb = seg.ease(u);
+    const gl = seg.gleit;
+    const eb = gl ? gl.gP(u) : seg.ease(u);
     const byaw = seg.yawAt ? seg.yawAt(u) : lerp(A.byaw, B.byaw, eb);
     const up = seg.arms(u);
     const P = { w: [lerp(A.low.w[0], B.low.w[0], eb), lerp(A.low.w[1], B.low.w[1], eb)] };
@@ -814,6 +827,7 @@
       const uk = clamp((u - pl.u0) / (pl.u1 - pl.u0));
       pel = add(mix(A.low.pel, seg.kv.pk, kvAuf(uk)), mul(sub(B.low.pel, seg.kv.pk), kvVor(uk)));
     }
+    if (gl) pel = mix(A.low.pel, B.low.pel, eb);
     if (seg.ab) pel = mix(A.low.pel, B.low.pel, u < ST_KNIE ? 0.08 * smooth(u / ST_KNIE) : 0.08 + 0.92 * smooth(clamp((u - ST_KNIE) / (0.94 - ST_KNIE))));
     ['L', 'R'].forEach((s) => {
       const fa = A.low[s];
@@ -855,6 +869,22 @@
       const so = seg.sole && seg.sole[s];
       P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
       if (wl) Object.assign(P[s], wl(P[s]));
+      // Gleiten aus dem angezogenen Knie: erst leicht mit dem Ballen aufsetzen, dann auf dem Ballen in den Stand gleiten –
+      // die Ferse senkt sich erst zum Schluss (Knöchel und Neigung so zusammen, dass der Ballen am Boden bleibt)
+      if (gl && gl.s === s) {
+        const a = u < gl.uT;
+        const w = a ? gl.w1(u) : 1;
+        const g = a ? 0 : gl.v(u);
+        const hz = ramp(0.55, 1, g);
+        const pr = a ? 0.6 * w : 0.6 + 0.4 * g;
+        const cc = a ? mix(fa.c, gl.T, w) : mix(gl.T, fb.c, g);
+        const yw = lerp(A.byaw + fa.rel, B.byaw + fb.rel, pr); // (Fußrichtung im Raum: geht gleichmäßig in die neue)
+        const ak = sub(cc, mul(fwd(yw), FOOT_MID));
+        const so = seg.sole && seg.sole[s];
+        Object.assign(P[s], { x: ak[0], z: ak[1], y: a ? lerp(fa.y, GL_Y, w) : lerp(GL_Y, fb.y, hz), yaw: yw,
+          pitch: a ? lerp(fa.pitch, GL_PITCH, w) : lerp(GL_PITCH, fb.pitch, hz), tu: lerp(fa.tu, fb.tu, pr),
+          kp: rotY(mix3(fa.kp, fb.kp, pr), byaw), sole: so ? rotY(mix3(so[0], so[1], pr), byaw) : [0, 0, 0] });
+      }
       // Fumikomi mit dem Knie vor dem Körper: hoch vor dem Körper und ohne Halt weiter, schnell nach vorn und hart hinunter
       if (seg.kv && seg.kv.s === s) {
         const wv = kvVor(uf);
@@ -1483,6 +1513,7 @@
         return;
       }
       const uS = tech && tech.lang ? 0.1 : tech && tech.schlag ? clamp(1 - tech.schlag / d, 0.22, 0.8) : clamp(1 - STRIKE / d, 0.3, 0.8);
+      let gleit = null; // Gleiten aus dem angezogenen Knie (tech.gleiten)
       let zw = []; // Bilder des Arm-Ablaufs als Anteile der Bewegung (Ausholen und Zwischenbilder im Editor)
       let az = null; // wo der Arm-Ablauf in der Bewegung liegt (armZeit)
       let arms;
@@ -1546,7 +1577,15 @@
           const dr = tech.drehung || 1;
           arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, tech.wechsel ? zweiteilig(tech.wechsel)(u) : smooth(u / dr)) }) : calm(cur.up, end);
         }
-        else if (tech.direkt) {
+        else if (tech.gleiten && cur.low[other(side)].y > 0.3) {
+          // Gleiten aus dem angezogenen Knie: die Hüfte bleibt offen und dreht erst mit dem Treffer ein (Werte erst, wenn die
+          // Endstellung nk feststeht – siehe unten bei gleit)
+          const pre = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: tr(0) }]);
+          gleit = { pre, tr };
+          arms = (u) => gleit.arms(u);
+          zw = armBilder(tech, uS);
+          az = armZeit(tech, uS);
+        } else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen
           const tl = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: cur.up }, { t: 1, p: end, e: 'kime' }]);
           arms = (u) => upper(tl(u));
@@ -1588,6 +1627,39 @@
       if (/namigaeshi/i.test(st.note || '')) o.welle = true;
       if (tech && tech.heran) o.heran = true;
       const seg = segment(cur, nk, o);
+      if (gleit) {
+        // Fuß: leicht mit dem Ballen aufsetzen (bis uT), dann auf dem Ballen in den Stand gleiten; Hüfte und Gewicht gehen
+        // fast ganz erst mit dem Gleiten mit (gP)
+        // (cur ändert sich nach dieser Bewegung – die Bilder davor und danach sind seg.A und seg.B)
+        const { A, B } = seg;
+        const s = other(side);
+        const uT = Math.min(GL_AUF, 0.6 * uS);
+        const w1 = (u) => smooth(u / uT);
+        const v = (u) => smooth((u - uT) / (GL_ENDE - uT));
+        const vP = (u) => smooth((u - uT + 0.08) / (GL_ENDE - uT + 0.08));
+        const gP = (u) => 0.12 * w1(u) + 0.88 * vP(u);
+        const T = mix(A.low[s].c, B.low[s].c, GL_WO);
+        seg.gleit = { s, uT, w1, v, gP, T };
+        seg.yawAt = (u) => lerp(A.byaw, B.byaw, gP(u));
+        seg.lookAbs = [A.byaw + A.up.look, B.byaw + B.up.look];
+        // Hüfte (Gesamtdrehung): erst weit offen (tech.gleiten Grad vor der Endstellung), mit dem Treffer explosiv hinein
+        const Y0 = A.byaw + A.up.yaw;
+        const Y1 = B.byaw + B.up.yaw;
+        const dir = Math.sign(Y1 - Y0) || 1;
+        const Yo = Math.abs(Y1 - Y0) > tech.gleiten ? Y1 - dir * tech.gleiten : Y0;
+        const ein = (x) => 1 - Math.pow(1 - clamp(x), 2.4);
+        const Y = (u) => (u < uS ? lerp(Y0, Yo, smooth(u / uS)) : lerp(Yo, Y1, ein((u - uS) / (1 - uS))));
+        // Die greifende Hand (Gegenseite) steht im Rahmen der Endstellung: zum Ziel gestreckt, auch während die Hüfte offen ist
+        const q = other(side);
+        const C1 = Y1 + B.up.chest;
+        const dreh = (p, deg) => { const o2 = Object.assign({}, p); ['h', 'e', 'p', 'f'].forEach((k) => { const x = o2[k + q]; if (Array.isArray(x) && (x[0] || x[2])) o2[k + q] = rotY(x, deg); }); return o2; };
+        const C0 = Y0 + A.up.chest;
+        const pre = E.timeline([{ t: 0, p: dreh(upper(A.up), C0 - C1) }, { t: uS, p: gleit.tr(0) }]);
+        gleit.arms = (u) => {
+          const p = u < uS ? upper(pre(u)) : gleit.tr((u - uS) / (1 - uS));
+          return M(dreh(p, C1 - Y(u) - p.chest), { yaw: Y(u) - seg.yawAt(u) });
+        };
+      }
       // bleibt der Oberkörper stehen, bleibt auch der Blick, wo er ist
       if (tech && tech.halten && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
       // blickt der Kopf schon dorthin, wohin sich der Körper wendet (Bassai Dai 41 → 42), läuft er nicht noch voraus
