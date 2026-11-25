@@ -29,15 +29,20 @@
   const PASS = 0.15; // Abstand der Fußmitten, wenn ein Fuß am Standfuß vorbeigleitet
   const UM = 0.24; // … wenn er um den Standfuß herum geht, der über die Ferse dreht (Abstand der Fußmitte vom Knöchel)
   const LIFT = 0.025; // so hoch hebt der gleitende Fuß ab (Suri-ashi: fast gar nicht)
-  // Langsames Heranziehen eines Fußes am Boden (je Kata die Bewegungen): Mit dem Abheben um LIFT über die ganze lange
-  // Dauer schwebte der Fuß knapp über dem Boden, die Hüfte hing zwischen den Füßen und der Standfuß drehte die ganze Zeit
-  // unter dem Gewicht – das sah aus wie auf einem Laufband. Stattdessen: erst geht das Gewicht aufs Standbein (so weit das
-  // gleitende Bein reicht), dann gleitet der Fuß mit der Sohle am Boden heran, die Hüfte bleibt über dem Standbein und
-  // richtet sich mit dem Heranziehen auf; der Standfuß dreht erst zum Schluss ein
-  const GLEITEN = { 'bassai-dai': [34, 36] };
+  // Langsame Bewegung, in der nur ein Fuß den Platz wechselt (heranziehen, hinausgleiten, Kreuzschritt): Mit dem Abheben
+  // um LIFT über die ganze lange Dauer schwebte der Fuß knapp über dem Boden, die Hüfte hing zwischen den Füßen und der
+  // Standfuß drehte die ganze Zeit unter dem Gewicht – das sah aus wie auf einem Laufband. Stattdessen: erst geht das
+  // Gewicht aufs Standbein (so weit das gleitende Bein reicht), dann gleitet der Fuß mit der Sohle am Boden, die Hüfte
+  // bleibt über dem Standbein (richtet sich mit dem Heranziehen auf bzw. sinkt vorher in den tieferen Stand); der
+  // Standfuß dreht erst zum Schluss ein – außer in einer Wendung (über GL_WENDE Grad), dort dreht er mit dem Körper.
+  // Nicht bei Bewegungen mit Knie hoch in der Fußarbeit (GLEITEN_NICHT, Bassai Dai 25)
+  const GLEITEN_NICHT = /knie hoch/i;
+  const GL_WENDE = 45;
+  const GL_RUECKT = 0.15;
   const GL_FUSS = [0.15, 0.88]; // Anteile der Dauer: so lange gleitet der Fuß
   const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
+  const GL_SINKEN = 0.75; // in einen tieferen Stand: bis hier ist die Hüfte unten (etwas vor dem gleitenden Fuß)
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
   // Kamera dabei: KAM_VORAUS so weit schaut ihre Glättung voraus (3 × 0,22 s, center()); KAM_ZURUECK: mindestens so
   // lange geht sie danach zurück ins gewöhnliche Folgen
@@ -696,18 +701,25 @@
       const [u0, u1] = seg.ab ? (s === lead ? [0, ST_AUF] : [ST_AUF - 0.1, 0.94]) : lead ? (s === lead ? [0, o.tobi ? 0.85 : 1 - vsp] : [o.tobi ? 0.15 : vsp, 1]) : both && !gleich ? (s === first ? [0, cut] : [cut, 1]) : [0, 1];
       seg.feet[s] = footPlan(A, B, s, s === 'L' ? 'R' : 'L', u0, u1, o.kreuz, o.heran, o.ferse);
     });
-    // langsames Heranziehen am Boden (GLEITEN): der Fuß gleitet erst, wenn das Gewicht hinübergeht
-    if (o.gleiten && !both) {
-      const s = ['L', 'R'].find((q) => seg.feet[q].moved);
+    // langsam gleitender Fuß (GLEITEN_NICHT): er gleitet erst, wenn das Gewicht hinübergeht (seg.gleiten: die Angaben dazu,
+    // nicht die Option o.gleiten, die Object.assign mitkopiert)
+    // (rückt der Standfuß beim Drehen nur ein wenig mit – unter GL_RUECKT Metern, Heian Yondan 14 –, gleitet er dabei mit,
+    // ohne abzuheben)
+    seg.gleiten = null;
+    if (o.gleiten && (!both || Math.min(way.L, way.R) < GL_RUECKT)) {
+      const s = ['L', 'R'].find((q) => seg.feet[q].moved && (!both || way[q] >= way[other(q)]));
       if (s) {
+        const o2 = other(s);
         Object.assign(seg.feet[s], { u0: GL_FUSS[0], u1: GL_FUSS[1], gleitet: true });
-        seg.gleiten = { s, o: other(s) };
+        if (both) seg.feet[o2].gleitet = true;
+        seg.gleiten = { s, o: o2, spaet: !both && Math.abs(wrap(B.byaw + B.low[o2].rel - A.byaw - A.low[o2].rel)) <= GL_WENDE };
       }
     }
     // Kreuzschritt aus einem breiten Stand (Tekki 7, 21 aus dem Kiba-dachi): erst geht das Gewicht hinüber – die Hüfte
     // wandert zur Seite über das Standbein –, dann löst sich der kreuzende Fuß; sonst stünde die Figur unterwegs mit der
     // Hüfte mitten zwischen den Füßen auf einem Bein und fiele um (aus dem geschlossenen Stand, Tekki 1, entfällt das)
-    if (o.kreuz > 0 && !both) {
+    // (gleitet der Fuß langsam, übernimmt das die Hüfte beim Gleiten)
+    if (o.kreuz > 0 && !both && !seg.gleiten) {
       const s = ['L', 'R'].find((q) => seg.feet[q].moved);
       if (s) {
         const sp = A.low[other(s)].c;
@@ -848,7 +860,7 @@
       // Knöchel des gleitenden Fußes jetzt (dorthin reicht das Bein) und Knöchel des Standfußes (darüber kommt die Hüfte)
       const ka = mix(sub(ankOf(A, g.s), A.low[g.s].c), sub(ankOf(B, g.s), B.low[g.s].c), ef);
       const fk = add(via(A.low[g.s].c, pl.mid, B.low[g.s].c, ef), ka);
-      hG = lerp(A.low.h, B.low.h, ef);
+      hG = lerp(A.low.h, B.low.h, B.low.h < A.low.h ? smooth(clamp(u / GL_SINKEN)) : ef);
       const fy = lerp(A.low[g.s].y, B.low[g.s].y, ef);
       const wa = smooth(clamp(u / GL_GEWICHT));
       // (reicht das Bein schon im Stand davor kaum, geht die Hüfte nicht weiter vom Fuß weg als dort – erst mit dem Fuß)
@@ -869,7 +881,7 @@
       const pl = seg.feet[s];
       const uf = clamp((u - pl.u0) / (pl.u1 - pl.u0));
       // (langsames Heranziehen am Boden: der Standfuß dreht erst zum Schluss ein, im Raum gerechnet)
-      const steht = seg.gleiten && seg.gleiten.o === s;
+      const steht = seg.gleiten && seg.gleiten.spaet && seg.gleiten.o === s;
       const ef = pl.moved ? seg.ease(uf) : steht ? ramp(GL_DREH, 1, u) : eb;
       let c = pl.moved ? via(fa.c, pl.mid, fb.c, ef) : fa.c;
       let rel = steht ? lerp(A.byaw + fa.rel, B.byaw + fb.rel, ef) - byaw : lerp(fa.rel, fb.rel, ef);
@@ -1638,8 +1650,8 @@
       // Namigaeshi: der Fuß des Zwischenschritts (via) wird hochgerissen
       if (/namigaeshi/i.test(st.note || '')) o.welle = true;
       if (tech && tech.heran) o.heran = true;
-      // langsames Heranziehen eines Fußes am Boden (GLEITEN)
-      if (st.slow && (GLEITEN[k.id] || []).includes(Number(st.n))) o.gleiten = true;
+      // langsam gleitender Fuß (wirkt nur, wenn genau ein Fuß den Platz wechselt)
+      if (st.slow && !o.hoch && !sprung && !yori && !GLEITEN_NICHT.test(m.h || '')) o.gleiten = true;
       const seg = segment(cur, nk, o);
       // bleibt der Oberkörper stehen, bleibt auch der Blick, wo er ist
       if (tech && tech.halten && Math.abs(nk.byaw + nk.up.look - cur.byaw - cur.up.look) < 20) seg.lookAbs = [cur.byaw + cur.up.look, nk.byaw + nk.up.look];
@@ -1694,7 +1706,7 @@
       const sg = segs[i];
       return sg.A ? Math.min(0.6, sg.A.low.h - 0.06, sg.B.low.h - 0.06) : 0.6;
     };
-    // Blickpunkt der Kamera bei langsamem Heranziehen am Boden (GLEITEN): Folgte sie der Hüfte, die dabei aufs Standbein
+    // Blickpunkt der Kamera bei langsam gleitendem Fuß: Folgte sie der Hüfte, die dabei aufs Standbein
     // geht, wanderte der Standfuß durchs Bild – am Anfang sogar weiter als der gleitende Fuß. Stattdessen bleibt sie stehen,
     // wo sie vor der Bewegung war (ohne Schwenk), auch in der Pause danach, und geht erst mit der nächsten Bewegung weich
     // zurück ins gewöhnliche Folgen (Bassai Dai 35, 37 stampfen ohnehin zurück an die alte Stelle).
