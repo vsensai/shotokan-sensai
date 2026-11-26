@@ -379,10 +379,10 @@
   const TRITT = {
     mae: { def: 'mae-geri-chudan', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
     'yoko-keage': { def: 'yoko-geri-keage', side: 'R', a: 0.32, b: 0.68, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.5, kniefuss: 0 },
-    'mae-jodan': { def: 'mv:mae-geri', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
+    'mae-jodan': { def: 'mae-geri-jodan', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
     // Kanku Dai 17, 22, 37: aus dem Ashi-zenkutsu hat die Hüfte einen weiten Weg bis über den Standfuß – im schnellsten
     // Takt bleibt dafür mehr Zeit (sonst wie mae-jodan)
-    'mae-jodan-weit': { def: 'mv:mae-geri', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.4, kurz: 0.24, huefte: 0.5 },
+    'mae-jodan-weit': { def: 'mae-geri-jodan', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.4, kurz: 0.24, huefte: 0.5 },
     // Kniestoß: vom Greifen (Knie angehoben) bis zum Treffer – dort bleibt das Knie oben; die Arme kommen aus dem Ablauf selbst
     hiza: { def: 'tc:hiza-geri', side: 'R', a: 0.346, b: 0.543, an: 0.5, anMin: 0.4, kurz: 0.2, huefte: 1, arme: true },
     // Kniestoß mit eigener Technik der Arme (Kanku Dai 42: Ura-zuki): das Knie wie oben, die Hüfte dreht nur halb mit

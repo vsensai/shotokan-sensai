@@ -1115,7 +1115,13 @@
     ], best: 1, dur: 1, eff: 'fistR', view: 'side3' });
     // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
     // Bewegungs-Editor, MG_KIME)
-    KATA['mae-geri-chudan'] = M(D['mv:mae-geri'], { keys: D['mv:mae-geri'].keys.map((k) => (k.e === 'kime' ? { t: k.t, e: k.e, p: MG_KIME } : k)) });
+    // In den Kata ist der Fuß im Treffer weiter gestreckt als im Lexikon (Wunsch des Nutzers: mehr, aber nicht ganz): der
+    // Spann bleibt nur noch etwa 12° gegen den Unterschenkel angewinkelt (vorher Chudan 43°, Jodan 17°), die Zehen bleiben
+    // hochgezogen (Fußballen)
+    const MG_KATA = (p, pitch) => (k) => (k.e === 'kime' ? { t: k.t, e: k.e, p: M(p, { R: { pitch } }) } : k);
+    KATA['mae-geri-chudan'] = M(D['mv:mae-geri'], { keys: D['mv:mae-geri'].keys.map(MG_KATA(MG_KIME, 13)) });
+    // Mae-geri-keage Jodan in den Kata (Heian Godan, Kanku Dai …): wie im Lexikon, nur mit gestrecktem Fuß
+    KATA['mae-geri-jodan'] = M(D['mv:mae-geri'], { keys: D['mv:mae-geri'].keys.map(MG_KATA(MG_JODAN, 43)) });
     // Chudan-zuki zur Seite im Kokutsu-dachi (Heian Nidan 3, 6): die vordere Faust stößt in Standrichtung auf die Mittellinie,
     // die andere geht an die Hüfte; die Hüfte bleibt seitlich wie im Stand
     KATA['kokutsu-zuki'] = TWIST(T(M(S.kk, { hL: L(H.hip), hR: H.hip }), M(S.kk, { hL: stretch(punch(S.kk, 'L', CH), 'L'), hR: H.hip })), 'L');
