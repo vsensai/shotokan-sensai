@@ -321,7 +321,7 @@
     // ein – die Füße bleiben am Platz und drehen nur ein (Fußskizze: Zehen links etwa geradeaus, rechts gut 30° nach innen),
     // der Abstand bleibt so lang wie im Zenkutsu-dachi. Linkes Knie gebeugt, rechtes Bein durchgestreckt, Hüfte und Blick
     // nach vorn. Hände: linke Handkante Jodan-uke über der Stirn, rechter Shuto Jodan Soto-mawashi-uchi zum Hals, Handfläche oben
-    const HZ = { pelvis: [0.13, 0.72, 0.0], yaw: 0, look: 0, L: { x: 0.53, z: 0.12, yaw: -3, kp: [0.3, 0, 1] }, R: { x: -0.55, z: -0.12, yaw: 35 }, w: [0.6, 0.4],
+    const HZ = { pelvis: [0.13, 0.72, 0.0], yaw: 0, look: 0, L: { x: 0.53, z: 0.12, yaw: -3, kp: [0.3, 0, 1] }, R: { x: -0.517, z: -0.12, yaw: 35 }, w: [0.6, 0.4],
       oL: 1, oR: 1, hL: [0.12, 0.3, 0.2], eL: [1, 0.2, 0.2], pL: [0, 0.4, 1], fL: [-1, 0.15, 0],
       hR: [-0.02, 0.0, 0.53], eR: [-1, -0.3, 0.1], pR: [0, 1, 0], fR: [0.8, 0, 0.6] };
     D['st:hizakutsu'] = { keys: [{ t: 0, p: HZ }], best: 0, still: true, view: 'front3', labels: true };
@@ -1171,7 +1171,8 @@
 
     /* Heian Yondan */
     // Hizakutsu nach vorn gedreht (Bewegung 11) als Stand für die Kata – die Beine aus dem Lexikon-Bild
-    S.hizaShomen = { pelvis: HZ.pelvis, yaw: 0, L: HZ.L, R: HZ.R, w: HZ.w };
+    // rechter Fuß in den Kata noch wie vor der Korrektur des Standbilds (x −0,55), bis der Nutzer sie dort abnimmt
+    S.hizaShomen = { pelvis: HZ.pelvis, yaw: 0, L: HZ.L, R: M(HZ.R, { x: -0.55 }), w: HZ.w };
     // 1, 2: Haiwan-uke mit offenen Händen, langsam. Zuerst öffnen sich die Hände: die rechte bleibt etwa, wo sie im Yoi
     // ist (vor dem Oberschenkel, kein Ellbogen nach hinten, Finger in einer Linie mit dem Unterarm), die linke kommt mit kleiner Lücke
     // daneben, ihre Fingerspitzen zeigen schon schräg zur rechten Hand. Von dort steigen
