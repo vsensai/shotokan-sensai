@@ -999,7 +999,7 @@
     // Fußfeger (Ashi-barai): weiter unten bei „Mit Partner“
 
     /* ---------- Haltungen ---------- */
-    D['tc:chudan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.1, -0.12, 0.42], hR: [-0.02, -0.22, 0.2] }), { view: 'side3' });
+    D['tc:chudan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.288, -0.088, 0.398], hR: [-0.054, -0.292, 0.205], eL: [0.157, -0.443, 0.372], eR: [-0.279, -0.53, -0.041] }), { view: 'side3' });
     D['tc:gedan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: L(H.gedan), hR: [-0.02, -0.22, 0.2] }), { view: 'side3' });
     D['tc:shuto-kamae'] = STILL(KK_SHUTO, { view: 'front3' });
     D['tc:koshi-kamae'] = STILL(M(S.hachiji, KOSHI_KAMAE), M(hit('fistR', 'Fäuste an der Hüfte'), { view: 'front3' }));
