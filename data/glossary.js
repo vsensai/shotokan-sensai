@@ -41,7 +41,7 @@
     ['Neko-ashi-dachi', 'Katzenfußstand: fast das gesamte Gewicht auf dem hinteren Bein', 'stand', st('neko')],
     ['Fudo-dachi', 'Unbeweglicher Stand: beide Knie gebeugt, Gewicht ausgeglichen (auch Sochin-dachi)', 'stand', st('fudo')],
     ['Hangetsu-dachi', 'Halbmondstand: etwas kürzer als Zenkutsu-dachi, Knie und Oberschenkelinnenseiten zur Mitte gespannt, länger als Sanchin-dachi', 'stand', st('hangetsu'), PDF2(41)],
-    ['Sanchin-dachi', 'Sanduhrstand: kurz, Fußspitzen und Knie nach innen', 'stand', st('sanchin')],
+    ['Sanchin-dachi', 'Sanduhrstand: kurz (vordere Ferse etwa auf Höhe der hinteren Zehen), etwa schulterbreit, vorderer Fuß stark nach innen gedreht, Knie nach innen gespannt, Gewicht mittig', 'stand', st('sanchin')],
     ['Renoji-dachi', 'L-förmiger Stand', 'stand', st('renoji')],
     ['Teiji-dachi', 'T-förmiger Stand', 'stand', st('teiji')],
     ['Ashi-zenkutsu', 'Kleiner Zenkutsu-dachi (kürzer und schmaler), z. B. in Gyaku-hanmi', 'stand', st('ashizenkutsu'), PDF(4)],
