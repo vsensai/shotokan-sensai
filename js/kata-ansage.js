@@ -1124,7 +1124,17 @@
     function jump(i) {
       i = (i + steps.length) % steps.length;
       if (running) start(i);
-      else { idx = i; render(i); figShow(true); }
+      else {
+        idx = i;
+        // auch beim Einzelschalten die Ansage sprechen; eine noch laufende bricht ab, damit sich nichts staut
+        if (tts) {
+          tts.cancel();
+          tts.resume();
+        }
+        speak(steps[i], 9);
+        render(i);
+        figShow(true);
+      }
     }
     function ui() {
       editUi();
