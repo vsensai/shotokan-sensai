@@ -1171,8 +1171,7 @@
 
     /* Heian Yondan */
     // Hizakutsu nach vorn gedreht (Bewegung 11) als Stand für die Kata – die Beine aus dem Lexikon-Bild
-    // rechter Fuß in den Kata noch wie vor der Korrektur des Standbilds (x −0,55), bis der Nutzer sie dort abnimmt
-    S.hizaShomen = { pelvis: HZ.pelvis, yaw: 0, L: HZ.L, R: M(HZ.R, { x: -0.55 }), w: HZ.w };
+    S.hizaShomen = { pelvis: HZ.pelvis, yaw: 0, L: HZ.L, R: HZ.R, w: HZ.w };
     // 1, 2: Haiwan-uke mit offenen Händen, langsam. Zuerst öffnen sich die Hände: die rechte bleibt etwa, wo sie im Yoi
     // ist (vor dem Oberschenkel, kein Ellbogen nach hinten, Finger in einer Linie mit dem Unterarm), die linke kommt mit kleiner Lücke
     // daneben, ihre Fingerspitzen zeigen schon schräg zur rechten Hand. Von dort steigen
