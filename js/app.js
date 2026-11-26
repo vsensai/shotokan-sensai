@@ -146,6 +146,14 @@
     );
   }
 
+  // Versionszeile unten auf jedem Bildschirm: Wird #app neu gefüllt, kommt sie (wieder) ans Ende – auch bei Ansichten,
+  // die sich selbst neu zeichnen (Quiz, Kata-Trainer).
+  new MutationObserver(() => {
+    const v = app.querySelector(':scope > .version');
+    if (!v) app.append(versionLine());
+    else if (app.lastElementChild !== v) app.append(v);
+  }).observe(app, { childList: true });
+
   // ---------- Lernen ----------
   function viewWissenList() {
     setNav('wissen');
