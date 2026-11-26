@@ -154,8 +154,8 @@
     ['Koshi-kamae', 'Beide Fäuste an der Hüfte übereinander (Ryoken Koshi-kamae)', 'kamae', tc('koshi-kamae'), PDF(19)],
     ['Mizunagare-no-kamae', '„Wasserfluss-Haltung“: Unterarm schräg vor dem Solarplexus, etwa zwei Fäuste entfernt', 'kamae', tc('mizunagare-no-kamae'), PDF(55)],
     ['Hanmi', 'Halbseitliche Körperhaltung (Oberkörper etwa 45° gedreht)', 'kamae', tc('hanmi'), PO],
+
     ['Kaisho Yama-gamae', '„Berghaltung“ mit offenen Händen: Unterarme senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe', 'kamae', tc('yama-gamae'), PDF2(45)],
-    ['Gyaku-hanmi', 'Umgekehrt halbseitliche Körperhaltung', 'kamae', tc('gyaku-hanmi'), PDF(24)],
     ['Shizentai', 'Natürliche Haltung', 'kamae', tc('shizentai'), PO],
 
     ['Te', 'Hand', 'begriff'],
