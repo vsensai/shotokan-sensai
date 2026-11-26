@@ -1001,7 +1001,7 @@
     /* ---------- Haltungen ---------- */
     D['tc:chudan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.288, -0.088, 0.398], hR: [-0.054, -0.292, 0.205], eL: [0.157, -0.443, 0.372], eR: [-0.279, -0.53, -0.041] }), { view: 'side3' });
     D['tc:gedan-kamae'] = STILL(M(S.zk, { pelvis: [0, 0.76, 0.06], L: { z: 0.5 }, R: { z: -0.42 }, hL: [0.342, -0.437, 0.304], hR: [-0.061, -0.328, 0.245], eR: [-0.196, -0.545, 0.156] }), { view: 'side3' });
-    D['tc:shuto-kamae'] = STILL(KK_SHUTO, { view: 'front3' });
+    D['tc:shuto-kamae'] = STILL(M(KK_SHUTO, { hL: [0.45, -0.085, 0.078], pL: [0, 0, -1], eL: [0.246, -0.547, -0.02], hR: [0.036, -0.233, 0.21] }), { view: 'front3' });
     D['tc:koshi-kamae'] = STILL(M(S.hachiji, KOSHI_KAMAE), M(hit('fistR', 'Fäuste an der Hüfte'), { view: 'front3' }));
     D['tc:mizunagare-no-kamae'] = STILL(M(KB, { hL: L(H.hip), hR: [0.1, -0.22, 0.27], eR: [-0.7, -0.3, 0.4] }), { view: 'front3' });
     D['tc:hanmi'] = STILL(M(ZK_KAMAE), M(hit('shL', 'vordere Schulter'), { view: 'front3' }));
