@@ -359,7 +359,7 @@
     [/koshi-kamae/i, { def: 'tc:koshi-kamae', side: 'R', from: 0 }],
     [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25 }],
     [/jodan-uke \+ .*shuto/i, { def: 'jodan-uke-shuto-uchi', side: 'R', from: 0.25, lang: true, dur: 0.9 }],
-    [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22 }, /heian yondan/i],
+    [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22, wechsel: 0.5 }, /heian yondan/i],
     [/kakiwake-uke/i, { def: 'tc:kakiwake-uke', side: 'L', from: 0.22 }],
     [/hiza-tsuchi/i, { tritt: 'hiza', dur: 0.75 }],
     [/gyaku-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],

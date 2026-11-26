@@ -1113,10 +1113,11 @@
       TS(0.78, -12, { hR: [-0.15, 0.45, 0.1], eR: [-0.7, 0.4, 0], pR: [1, 0, 0] }, 'fl'),
       TS(1, -25, { hR: [-0.04, 0.0, 0.46], pR: [1, 0, 0] }, 'kime'),
     ], best: 1, dur: 1, eff: 'fistR', view: 'side3' });
-    // Kakiwake-uke in Heian Yondan 14, 18 (Wunsch des Nutzers): die Handgelenke bleiben beim Schritt länger gekreuzt, der
-    // Block öffnet erst später und ist kurz vor Ende der Bewegung offen
+    // Kakiwake-uke in Heian Yondan 14, 18 (Wunsch des Nutzers): erst dreht der Körper mit gekreuzten Handgelenken in den
+    // Stand, dann öffnet der Block langsam bis zum Ende der Bewegung, während die Hüfte in ihre Endstellung drückt
+    // (Zeitteilung über wechsel in js/kata-figur.js)
     const KW = D['tc:kakiwake-uke'].keys;
-    KATA['kakiwake-uke-spaet'] = M(D['tc:kakiwake-uke'], { keys: [KW[0], KW[1], { t: 0.48, p: KW[1].p }, { t: 0.9, p: KW[2].p, e: 'io' }] });
+    KATA['kakiwake-uke-spaet'] = M(D['tc:kakiwake-uke'], { keys: [KW[0], KW[1], { t: 1, p: KW[2].p, e: 'io' }] });
     // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
     // Bewegungs-Editor, MG_KIME)
     // In den Kata ist der Fuß im Treffer weiter gestreckt als im Lexikon (Wunsch des Nutzers: mehr, aber nicht ganz): der
