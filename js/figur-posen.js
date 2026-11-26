@@ -134,7 +134,7 @@
       neko: { pelvis: [0, 0.72, -0.02], yaw: -35, L: { x: 0.04, z: 0.3, y: 0.11, yaw: 0, pitch: -28 }, R: { x: -0.07, z: -0.08, yaw: -30, kp: [-0.4, 0, 1] }, w: [0.1, 0.9] },
       fudo: { pelvis: [0, 0.66, 0.08], yaw: -45, L: { x: 0.12, z: 0.6, yaw: 0 }, R: { x: -0.16, z: -0.45, yaw: -45, kp: [-0.6, 0, 0.6] }, w: [0.5, 0.5] },
       // Hangetsu schulterbreit, Sanchin hüftbreit (Füße nicht auf einer Linie)
-      hangetsu: { pelvis: [0, 0.78, 0.03], yaw: 0, L: { x: 0.22, z: 0.36, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.22, z: -0.32, yaw: 22, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
+      hangetsu: { pelvis: [0, 0.78, 0.03], yaw: 0, L: { x: 0.22, z: 0.36, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.22, z: -0.32, yaw: 0, kp: [-0.201, -0.967, -0.157] }, w: [0.5, 0.5] },
       sanchin: { pelvis: [0, 0.85, 0.03], yaw: 0, L: { x: 0.17, z: 0.18, yaw: -22, kp: [-0.5, 0, 1] }, R: { x: -0.17, z: -0.12, yaw: 18, kp: [0.5, 0, 1] }, w: [0.5, 0.5] },
       // Renoji- und Teiji-dachi: Beine durchgestreckt, Hüfte hoch zwischen den Füßen
       renoji: { pelvis: [0, 0.935, 0.13], yaw: -30, L: { x: 0.03, z: 0.3, yaw: 0 }, R: { x: -0.04, z: -0.04, yaw: -90 }, w: [0.4, 0.6] },
@@ -500,13 +500,12 @@
     // langsame, gleichmäßige Bewegung statt schnellem Kime
     D['tc:kakiwake-uke'].keys[2].e = 'io';
     // Hangetsu 9–10 und 41 (Karate-Do Kata Vol. 2), alle langsam und kraftvoll im Hidari Ashi-mae Hangetsu-dachi bzw. Neko-ashi-dachi.
-    // Kaisho Yama-gamae: offene Hände kreuzen vor dem Gesicht (Handrücken zueinander) und ziehen auseinander –
+    // Kaisho Yama-gamae (Haltung): offene Hände,
     // die Unterarme stehen senkrecht neben dem Gesicht, Ellbogen auf Schulterhöhe, Handrücken nach außen
-    const HG = M(S.hangetsu, HANDS_HIP);
     const OPEN2 = { oL: 1, oR: 1 };
-    const YG0 = M(S.hangetsu, OPEN2, { hL: [-0.04, 0.16, 0.3], hR: [0.04, 0.16, 0.32], pL: [-1, 0, 0], pR: [1, 0, 0], fL: [0, 1, 0.1], fR: [0, 1, 0.1], eL: [0.5, -1, 0], eR: [-0.5, -1, 0] });
     const YG1 = M(S.hangetsu, OPEN2, { hL: [0.4, 0.24, 0.16], hR: [-0.4, 0.24, 0.16], pL: [-1, 0, 0], pR: [1, 0, 0], fL: [0, 1, 0], fR: [0, 1, 0], eL: [1, -0.15, 0.2], eR: [-1, -0.15, 0.2] });
-    D['tc:yama-gamae'] = M({ keys: [{ t: 0, p: HG }, { t: 0.12, p: HG }, { t: 0.4, p: YG0, e: 'io' }, { t: 0.8, p: YG1, e: 'io' }], best: 1, dur: 3.2, eff: 'wristR', view: 'front3' }, hit('elbowR', 'Ellbogen auf Schulterhöhe'));
+    // eine Haltung wie die anderen Kamae: nur das Standbild, keine Bewegung
+    D['tc:yama-gamae'] = STILL(YG1, M(hit('elbowR', 'Ellbogen auf Schulterhöhe'), { view: 'front3' }));
     // Gedan-kakiwake (Ryote Ryogawa Gedan-kakiwake): Handgelenke kreuzen vor dem Körper, dann gehen beide offenen Hände
     // seitlich nach unten neben den Unterbauch, Handrücken nach außen
     const GK0 = M(S.hangetsu, OPEN2, { hL: [-0.05, -0.12, 0.3], hR: [0.05, -0.1, 0.32], pL: [-0.3, 0, 1], pR: [0.3, 0, 1], fL: [0, 1, 0.2], fR: [0, 1, 0.2], eL: [0.6, -1, 0.2], eR: [-0.6, -1, 0.2] });
