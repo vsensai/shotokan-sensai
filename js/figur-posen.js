@@ -1005,7 +1005,7 @@
     D['tc:mizunagare-no-kamae'] = STILL(M(KB, { hL: L(H.hip), hR: [0.1, -0.22, 0.27], eR: [-0.7, -0.3, 0.4] }), { view: 'front3' });
     D['tc:hanmi'] = STILL(M(ZK_KAMAE, { hL: [0.366, -0.087, 0.286], hR: [-0.023, -0.258, 0.194], eL: [0.198, -0.527, 0.206], eR: [-0.102, -0.591, 0.025] }), M(hit('shL', 'vordere Schulter'), { view: 'front3' }));
     // (die vordere Hüfte steht zurück: damit das Knie über den Fußballen kommt, steht die Hüfte etwas weiter vorn und tiefer)
-    D['tc:gyaku-hanmi'] = STILL(M(S.zk, { yaw: 35, pelvis: [0, S.zk.pelvis[1] - 0.04, S.zk.pelvis[2] + 0.04], R: { z: S.zk.R.z + 0.05 }, hL: L(H.guardR), hR: H.guardF }), M(hit('shR', 'vordere Schulter'), { view: 'front3' }));
+    D['tc:gyaku-hanmi'] = STILL(M(S.zk, { yaw: 35, pelvis: [0, S.zk.pelvis[1] - 0.04, S.zk.pelvis[2] + 0.04], R: { z: S.zk.R.z + 0.05 }, hL: [0.181, -0.371, 0.081], hR: [-0.378, -0.147, 0.256], eL: [0.242, -0.497, -0.233], eR: [-0.027, -0.593, 0.088], pR: [0, 1, 0] }), M(hit('shR', 'vordere Schulter'), { view: 'front3' }));
     D['tc:shizentai'] = STILL(M(S.hachiji), { view: 'front3' });
     D['tc:hikite'] = T(M(S.zks, { hL: L(H.chudan), hR: H.hip }), M(S.zks, { hL: L(H.hip), hR: H.chudan }), M(hit('fistL', 'Hikite'), { eff: 'fistL', view: 'front3' }));
 
