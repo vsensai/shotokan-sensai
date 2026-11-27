@@ -1707,6 +1707,9 @@
       { t: 0.59, p: UR_HIT, e: 'kime', eGanz: true }, { t: 0.63, p: UR_HIT },
       { t: 0.75, p: UR(3, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] }), e: 'kime', eGanz: true },
     ], best: 0.59, dur: 1 }));
+    // Heian Nidan 7 (nur diese Stelle, Editor des Nutzers): im Ziel ganz gestreckt, die Faust gedreht – Handfläche nach hinten
+    const UR_HIT_N7 = M(UR_HIT, { hR: [-0.75, 0.04, 0.11], pR: [0, 0, -1] });
+    KATA['uraken-nidan-7'] = M(D['tc:uraken-uchi'], { keys: D['tc:uraken-uchi'].keys.map((k) => (k.p === UR_HIT ? M(k, { p: UR_HIT_N7 }) : k)) });
     // Furi-enpi: der Schritt ist schneller – Knie hoch in 0,3 s statt 0,6 s, Aufstampfen und Ellbogen gleich danach; das
     // Knie kommt dabei höher (Oberschenkel etwa waagerecht)
     const FEY = 0.6, FEP = -30;
