@@ -1117,7 +1117,8 @@
     // Stand, dann öffnet der Block langsam bis zum Ende der Bewegung, während die Hüfte in ihre Endstellung drückt
     // (Zeitteilung über standErst in js/kata-figur.js)
     const KW = D['tc:kakiwake-uke'].keys;
-    KATA['kakiwake-uke-spaet'] = M(D['tc:kakiwake-uke'], { keys: [KW[0], KW[1], { t: 1, p: KW[2].p, e: 'io' }] });
+    KATA['kakiwake-uke-spaet'] = M(D['tc:kakiwake-uke'], { keys: [KW[0], KW[1], { t: 1, p: KW[2].p, e: 'lin' }] });
+    // (Übergang 'lin': den Verlauf des Öffnens gibt kata-figur.js vor – standErst, auslauf)
     // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
     // Bewegungs-Editor, MG_KIME)
     // In den Kata ist der Fuß im Treffer weiter gestreckt als im Lexikon (Wunsch des Nutzers: mehr, aber nicht ganz): der

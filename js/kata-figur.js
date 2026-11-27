@@ -209,11 +209,19 @@
     const m = (0.5 * a) / (1 - a);
     return 0.8 * (x * x * (3 - 2 * x) + m * (x * x * x - x * x));
   };
-  // Hüftdrehung bei standErst: bis a mit dem Stand zum Anteil STAND_ERST_HUEFTE, dann langsam mit den Armen zu Ende
+  // Hüftdrehung bei standErst: mit dem Stand (bis a) zum Anteil STAND_ERST_HUEFTE, der Rest mit den Armen – der beginnt
+  // schon bei STAND_ERST_VOR · a, damit die Hüfte zwischen beiden Teilen nicht anhält
   const STAND_ERST_HUEFTE = 0.6;
-  const io3 = (u) => { u = clamp(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
-  const standErst = (a, u) => (u < a ? STAND_ERST_HUEFTE * smooth(u / a) : STAND_ERST_HUEFTE + (1 - STAND_ERST_HUEFTE) * io3((u - a) / (1 - a)));
-  // (im selben Verlauf wie das Öffnen der Arme: Übergang 'io' der Figur)
+  const STAND_ERST_VOR = 0.4;
+  // Verlauf des zweiten Teils: läuft im ersten Fünftel an (während der Stand noch zu Ende geht) und rollt dann lange und
+  // gleichmäßig aus – Tempo ∝ min(x / 0,2, 1) · (1 − x)^1,5, aufsummiert
+  const auslauf = (() => {
+    const N = 200;
+    const h = [0];
+    for (let i = 1; i <= N; i++) { const x = (i - 0.5) / N; h.push(h[i - 1] + Math.min(x / 0.2, 1) * Math.pow(1 - x, 1.5)); }
+    return (x) => { x = clamp(x) * N; const i = Math.min(N - 1, Math.floor(x)); return lerp(h[i], h[i + 1], x - i) / h[N]; };
+  })();
+  const standErst = (a, u) => STAND_ERST_HUEFTE * smooth(u / a) + (1 - STAND_ERST_HUEFTE) * auslauf((u - STAND_ERST_VOR * a) / (1 - STAND_ERST_VOR * a));
 
   const ramp = (a, b, v) => smooth((v - a) / (b - a));
   const wrap = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
@@ -1659,7 +1667,27 @@
           // (standErst: die Hüfte dreht im Raum – nicht nur mit den Füßen – erst zum Teil, den Rest mit den Armen; sw: Wendung
           // der Füße, im Gleichschritt mit dem Stand ausgeglichen)
           const sw = tech.standErst ? (m.turn != null ? m.turn : wrap(m.body + cur.byaw)) : 0;
-          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: tech.standErst ? lerp(y0 + sw, y1, standErst(tech.standErst, u)) - sw * (1 - smooth(u / tech.standErst)) : lerp(y0, y1, tech.wechsel ? zweiteilig(tech.wechsel)(u) : smooth(u / dr)) }) : calm(cur.up, end);
+          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, tech.wechsel ? zweiteilig(tech.wechsel)(u) : smooth(u / dr)) }) : calm(cur.up, end);
+          if (tech.standErst) {
+            // standErst: das Öffnen beginnt schon, während Stand und Kreuzen noch zu Ende gehen (ab STAND_ERST_VOR des
+            // Stand-Teils) – beide Teile überlappen, die Bewegung steht nie still. Die Hüfte dreht ebenso in zwei
+            // überlappenden Teilen (standErst)
+            const a = tech.standErst;
+            const ab = STAND_ERST_VOR * a;
+            const t0a = tr(0);
+            arms = (u) => {
+              const w = auslauf((u - ab) / (1 - ab));
+              const c = upper(pre(Math.min(u, a)));
+              const o = tr(w);
+              const r = {};
+              UP.forEach((k) => {
+                const [x, y, z] = [c[k], o[k], t0a[k]];
+                if (Array.isArray(x) && Array.isArray(y) && Array.isArray(z)) r[k] = x.map((v, i) => v + y[i] - z[i]);
+                else if (typeof x === 'number' && typeof y === 'number' && typeof z === 'number') r[k] = x + y - z;
+              });
+              return M(c, r, { yaw: lerp(y0 + sw, y1, standErst(a, u)) - sw * (1 - smooth(u / a)) });
+            };
+          }
           // (sinken: Arme und Hüfte sind bei SINKEN_U fertig, die Hüfte sinkt da schon)
           if (tech.sinken) { const a0 = arms; arms = (u) => a0(Math.min(1, u / SINKEN_U)); }
         }
