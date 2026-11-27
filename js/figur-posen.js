@@ -1207,6 +1207,17 @@
     // zieht heran), der rechte Ellbogen schlägt in ihre Handfläche
     KATA['mae-enpi-hand'] = T(M(S.zks, { oL: 1, hL: [0.1, -0.02, 0.6], pL: [-1, 0, 0], hR: H.hip }),
       M(MAE_ENPI, { oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }));
+    // 7, 10 (aus dem Uraken und Yoko-geri): der linke Arm bleibt gestreckt vorn, die Faust öffnet sich und greift; die Hüfte
+    // steht dabei stark im Hanmi (Werte im Rahmen der Endstellung, kata-figur.js: hanmi). Erst mit dem Treffer dreht sie
+    // ein, die Hand zieht zurück und der Ellbogen schlägt in sie
+    {
+      const GREIF = M(S.zks, { yaw: -92, chest: 0, hR: H.hip, oL: 1, hL: [0.72, -0.02, 0.1], eL: [0, -1, 0], pL: [0, -0.5, 0.85], fL: [1, 0, 0] });
+      KATA['mae-enpi-uraken'] = { keys: [
+        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.73, -0.01, 0.07], eL: [0.2, 0.5, -0.6], pL: [0, 0, 1] }) },
+        { t: 0.3, p: GREIF },
+        { t: 0.74, p: M(GREIF, { yaw: -88 }) },
+        { t: 1, p: M(MAE_ENPI, { oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }), e: 'kime' }] };
+    }
     // 11: Die linke Handkante fegt erst nach unten (Gedan-barai) und steigt dann zum Jodan-uke über die Stirn; dabei schlägt
     // der rechte Shuto vom Ohr im Bogen außen herum zum Hals (Endhaltung wie das Lexikon-Bild des Hizakutsu)
     const HZS = M(S.hizaShomen, { oL: 1, oR: 1 });

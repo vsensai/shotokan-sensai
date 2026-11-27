@@ -28,6 +28,11 @@
   const HIP = 0.09; // Hüftgelenk seitlich neben der Beckenmitte
   const PASS = 0.15; // Abstand der Fußmitten, wenn ein Fuß am Standfuß vorbeigleitet
   const UM = 0.24; // … wenn er um den Standfuß herum geht, der über die Ferse dreht (Abstand der Fußmitte vom Knöchel)
+  // Fuß, der nach einem Tritt gleich absetzt (absetzen): bis zu diesem Anteil seines Weges ist er unten, dann gleitet er
+  // so hoch über dem Boden (Knöchel) mit gesenkten Zehen (Grad) auf dem Fußballen in den Stand
+  const AB_U = 0.3;
+  const AB_Y = 0.02;
+  const AB_PITCH = 15;
   const LIFT = 0.025; // so hoch hebt der gleitende Fuß ab (Suri-ashi: fast gar nicht)
   // Langsame Bewegung, in der nur ein Fuß den Platz wechselt (heranziehen, hinausgleiten, Kreuzschritt): Mit dem Abheben
   // um LIFT über die ganze lange Dauer schwebte der Fuß knapp über dem Boden, die Hüfte hing zwischen den Füßen und der
@@ -261,6 +266,10 @@
   // die Arme gehen dabei in die Ausholhaltung), der Rest des Standes läuft langsam mit der Armtechnik (Heian Yondan 2);
   // zwischen (langsame Bewegung): { u, p } – Zwischenbild auf dem Weg in die Ausholhaltung beim Anteil u dieses Weges,
   // p mit Werten der Arme (echte Seiten, Bezug wie im Editor)
+  // hanmi: die Hüfte bleibt im Raum stehen, während die Füße wenden (die Hüftdrehung des Ablaufs gilt im Rahmen der
+  // Endstellung), und dreht erst mit dem Treffer ein (Heian Yondan 7, 10);
+  // absetzen: der Fuß aus dem angezogenen Knie (nach einem Tritt) setzt gleich ab und gleitet auf dem Fußballen über den
+  // Boden in den Stand, statt in der Luft hinüberzugehen (Heian Yondan 7, 10);
   // hikiteBleibt (mit direkt): die Hand der Gegenseite bleibt beim Wenden im Raum stehen, wo sie ist (vorn), statt mit dem
   // Körper zur Seite zu drehen, und zieht erst mit dem Stoß an die Hüfte (Heian Sandan 10 nach dem Kentsui)
   const TECH = [
@@ -357,6 +366,9 @@
     [/koho-tsukiage/i, { def: 'tsukiage-enpi', side: 'R', from: 0.25, erst: true }],
     [/gedan kosa-uke/i, { def: 'gedan-kosa-uke', side: 'L', from: 0.25 }],
     [/koshi-kamae/i, { def: 'tc:koshi-kamae', side: 'R', from: 0 }],
+    // Heian Yondan 7, 10: nach Uraken und Yoko-geri bleibt der Arm gestreckt vorn, der Fuß setzt gleich ab und gleitet in
+    // den Stand, die Hüfte bleibt im Hanmi und dreht erst mit dem Treffer ein
+    [/mae-enpi/i, { def: 'mae-enpi-uraken', side: 'R', from: 0, lang: true, hanmi: true, absetzen: true }, /heian yondan/i],
     [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25 }],
     [/jodan-uke \+ .*shuto/i, { def: 'jodan-uke-shuto-uchi', side: 'R', from: 0.25, lang: true, dur: 0.9 }],
     [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22, wechsel: 0.5 }, /heian yondan/i],
@@ -895,6 +907,14 @@
       // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
       let y = lerp(fa.y, fb.y, ef) + (pl.moved && !pl.dreh && !pl.gleitet ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * (pl.spaet ? Math.pow(Math.sin(Math.PI * ramp(0.35, 1, uf)), 2) : Math.pow(Math.sin(Math.PI * uf), 2))) : 0);
+      // absetzen: aus dem angezogenen Knie gleich hinunter, dann auf dem Fußballen über den Boden in den Stand
+      let ps = 0;
+      if (seg.absetzen && pl.moved && fa.y > fb.y + 0.1) {
+        const ab = smooth(clamp(uf / AB_U));
+        const da = 1 - ramp(0.82, 1, uf);
+        y = lerp(fa.y, fb.y + AB_Y * da, ab);
+        ps = AB_PITCH * ab * da;
+      }
       const v = seg.via && seg.via.s === s ? seg.via : null;
       let wl = null;
       if (v && seg.welle) {
@@ -920,7 +940,7 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up - ps, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
       if (wl) Object.assign(P[s], wl(P[s]));
       // Fumikomi mit dem Knie vor dem Körper: hoch vor dem Körper und ohne Halt weiter, schnell nach vorn und hart hinunter
       if (seg.kv && seg.kv.s === s) {
@@ -1619,8 +1639,12 @@
           const tl = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: cur.up }, { t: 1, p: end, e: 'kime' }]);
           arms = (u) => upper(tl(u));
         } else {
-          const pre = E.timeline([{ t: 0, p: cur.up }, { t: uS, p: tr(0) }]);
-          arms = (u) => (u < uS ? upper(pre(u)) : tr((u - uS) / (1 - uS)));
+          // (hanmi: Haltung davor im Rahmen der Endstellung, die Hüftdrehung des Ablaufs gleicht die Wendung der Füße aus)
+          const turn = tech.hanmi ? (m.turn != null ? m.turn : wrap(m.body + cur.byaw)) : 0;
+          const pre = E.timeline([{ t: 0, p: turn ? M(cur.up, { yaw: cur.up.yaw + turn }) : cur.up }, { t: uS, p: tr(0) }]);
+          const raw = (u) => (u < uS ? upper(pre(u)) : tr((u - uS) / (1 - uS)));
+          const ease = stepEase;
+          arms = turn ? (u) => { const a = raw(u); return M(a, { yaw: a.yaw - turn * (1 - ease(u)) }); } : raw;
           zw = armBilder(tech, uS);
           az = armZeit(tech, uS);
         }
@@ -1655,6 +1679,7 @@
       // Namigaeshi: der Fuß des Zwischenschritts (via) wird hochgerissen
       if (/namigaeshi/i.test(st.note || '')) o.welle = true;
       if (tech && tech.heran) o.heran = true;
+      if (tech && tech.absetzen) o.absetzen = true;
       // langsam gleitender Fuß (wirkt nur, wenn genau ein Fuß den Platz wechselt)
       if (st.slow && !o.hoch && !sprung && !yori && !GLEITEN_NICHT.test(m.h || '')) o.gleiten = true;
       const seg = segment(cur, nk, o);
