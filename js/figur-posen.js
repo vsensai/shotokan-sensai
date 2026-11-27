@@ -1217,8 +1217,8 @@
     {
       const GREIF = M(S.zks, { yaw: -92, chest: 0, hR: H.hip, oL: 1, hL: [0.72, -0.02, 0.1], eL: [0, -1, 0], pL: [0, -0.5, 0.85], fL: [1, 0, 0] });
       KATA['mae-enpi-uraken'] = { keys: [
-        // Anfang = Endstellung des Uraken-uchi im Lexikon (gespiegelt), sonst dreht der Ellbogen zwischendurch hin und her
-        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.72, 0.04, 0.11], eL: [0.5, 0.05, -0.3], pL: [0, 0, 1] }) },
+        // Anfang = Endstellung des Uraken mit Yoko-geri-keage (KATA['uraken-keage'], gespiegelt), sonst dreht der Ellbogen zwischendurch hin und her
+        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.75, 0.04, 0.11], eL: [0.5, 0.05, -0.3], pL: [0, 0, -1] }) },
         // Greifen: die Arme stehen still, nur die Hüfte dreht – je zwei gleiche Bilder, damit die Überblendung nicht zu den
         // Nachbarbildern hin ausschwingt (Hand und Ellbogen wackelten vor und zurück)
         { t: 0.3, p: GREIF }, { t: 0.32, p: GREIF },
@@ -1707,9 +1707,10 @@
       { t: 0.59, p: UR_HIT, e: 'kime', eGanz: true }, { t: 0.63, p: UR_HIT },
       { t: 0.75, p: UR(3, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] }), e: 'kime', eGanz: true },
     ], best: 0.59, dur: 1 }));
-    // Heian Nidan 7 (nur diese Stelle, Editor des Nutzers): im Ziel ganz gestreckt, die Faust gedreht – Handfläche nach hinten
-    const UR_HIT_N7 = M(UR_HIT, { hR: [-0.75, 0.04, 0.11], pR: [0, 0, -1] });
-    KATA['uraken-nidan-7'] = M(D['tc:uraken-uchi'], { keys: D['tc:uraken-uchi'].keys.map((k) => (k.p === UR_HIT ? M(k, { p: UR_HIT_N7 }) : k)) });
+    // Uraken mit Yoko-geri-keage (Heian Nidan 7, Heian Yondan 6, 9 – Editor des Nutzers): im Ziel ganz gestreckt, die Faust
+    // gedreht – Handfläche nach hinten
+    const UR_HIT_KEAGE = M(UR_HIT, { hR: [-0.75, 0.04, 0.11], pR: [0, 0, -1] });
+    KATA['uraken-keage'] = M(D['tc:uraken-uchi'], { keys: D['tc:uraken-uchi'].keys.map((k) => (k.p === UR_HIT ? M(k, { p: UR_HIT_KEAGE }) : k)) });
     // Furi-enpi: der Schritt ist schneller – Knie hoch in 0,3 s statt 0,6 s, Aufstampfen und Ellbogen gleich danach; das
     // Knie kommt dabei höher (Oberschenkel etwa waagerecht)
     const FEY = 0.6, FEP = -30;

@@ -374,7 +374,7 @@
     [/haiwan/i, { def: 'tc:haiwan-uke', side: 'L', from: 0.25 }],
     [/soto-nagashi-uke/i, { def: 'tc:soto-nagashi-uke', side: 'L', from: 0.513, lang: true, dur: 0.55, erst: true }],
     [/sokumen chudan-zuki/i, { def: 'kokutsu-zuki', side: 'L', from: 0.25, direkt: true }],
-    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'uraken-nidan-7', side: 'R', from: 0.3, bis: 0.59, koshi: true, dur: 1.3 }, /· heian nidan #7$/i],
+    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'uraken-keage', side: 'R', from: 0.3, bis: 0.59, koshi: true, dur: 1.3 }, /· heian (nidan #7|yondan #[69])$/i],
     [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'tc:uraken-uchi', side: 'R', from: 0.3, bis: 0.59, koshi: true, dur: 1.3 }],
     [/jodan mae-geri-keage/i, { tritt: 'mae-jodan', dur: 0.8 }],
     [/mae-geri-keage/i, { tritt: 'mae', dur: 0.8 }],
