@@ -1238,10 +1238,16 @@
 
     /* Heian Godan */
     // 15: Mikazuki-geri ohne Halt – das Knie kommt ohne Abbremsen hoch, der Tritt läuft mit Schwung weiter (kata-figur.js:
-    // TRITT mikazuki-fluss)
+    // TRITT mikazuki-fluss). Auf Wunsch des Nutzers enger als im Lexikon: erst dreht die Hüfte ein (der Fuß löst sich
+    // gerade vom Boden), dann zieht das Knie gerade vor dem Körper hoch und der Fuß schwingt auf kurzem Weg in die Hand –
+    // kein weiter Bogen nach vorn
     {
       const MK = D['mv:mikazuki-geri'];
-      KATA['mikazuki-fluss'] = M(MK, { keys: MK.keys.map((k, i) => (i === 3 ? Object.assign({}, k, { e: 'fl' }) : k)) });
+      const [K0, K1, , , K2] = MK.keys.map((k) => k.p);
+      const EIN = M(K1, { pelvis: [0.17, 0.71, 0.06], yaw: 40, R: { x: -0.3, z: 0.08, y: 0.16, yaw: 0, pitch: -15, kp: [-0.3, 0.3, 0.9] } });
+      const KNIE = M(K1, { pelvis: [0.25, 0.76, 0.03], yaw: 40, roll: 4, R: { x: 0.36, z: 0.25, y: 0.45, yaw: 40, pitch: -20, kp: [0.63, 0.17, 0.76] } });
+      const AUF = M(MK.keys[3].p, { pelvis: [0.3, 0.8, 0], yaw: 40, roll: 6, R: { x: 0.62, z: 0.35, y: 0.85, kp: [0.75, 0.5, 0.4] } });
+      KATA['mikazuki-fluss'] = M(MK, { keys: [{ t: 0, p: K0 }, { t: 0.06, p: K0 }, { t: 0.11, p: EIN, e: 'fl' }, { t: 0.16, p: KNIE, e: 'fl' }, { t: 0.205, p: AUF, e: 'in' }, { t: 0.25, p: K2, e: 'kime' }].concat(MK.keys.slice(5)) });
     }
     // 9 → 10: Ryosho Juji Chudan Osae-uke – die offenen Hände drücken rechts vor der Hüfte nach unten und liegen am Ende
     // aufeinander, Handballen auf Handballen: die rechte unten, Handrücken nach unten, Fingerspitzen nach vorn; die linke
