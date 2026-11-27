@@ -404,7 +404,9 @@
     [/mizunagare-no-kamae/i, { def: 'tc:mizunagare-no-kamae', side: 'R', from: 0 }],
     [/jodan kosa-uke/i, { def: 'tc:juji-uke', side: 'L', from: 0.25, direkt: true }],
     [/juji chudan osae-uke/i, { def: 'juji-osae-uke', side: 'L', from: 0.25, direkt: true }],
+    [/kake-uke/i, { def: 'kake-uke-godan', side: 'L', from: 0.12, lang: true }, /heian godan/i],
     [/kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.12, lang: true }],
+    [/mikazuki-geri/i, { tritt: 'mikazuki-fluss', dur: 0.8 }, /heian godan/i],
     [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 0.8 }],
     [/uho-tsukiage/i, { def: 'uho-tsukiage', side: 'R', from: 0.25, direkt: true }],
     [/jotai sonomama/i, { halten: true }],
@@ -430,6 +432,8 @@
     // ein – rahmen: vorne ist deshalb die Körperrichtung vor der Bewegung, erst danach gilt die neue. Die Technik endet
     // mit dem Fuß an der Hand (b = Treffer); die nächste Bewegung setzt ihn von dort ab
     mikazuki: { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true },
+    // ohne Halt (Heian Godan 15): das Knie kommt beschleunigt hoch (fluss: ohne Abbremsen), der Tritt läuft gleich weiter
+    'mikazuki-fluss': { def: 'mikazuki-fluss', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true, fluss: true },
     // Sokuto Gedan-kekomi zur Seite (Bassai Dai 19): Knie hoch, dann schräg nach unten; die Hände ziehen dabei heran und
     // sind am Körper, wenn der Fuß trifft (mit)
     'kekomi-gedan': { def: 'yoko-kekomi-gedan', side: 'R', a: 0.27, b: 0.53, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.35 },
@@ -1461,7 +1465,7 @@
         const tA = st.t + dK - tK;
         if (!ready) {
           const knee = { low: K.low(0), byaw, up: upAt(0) };
-          segs.push(segment(cur, knee, { t0: st.t, t1: tA, arms: calm(cur.up, knee.up), first: s }));
+          segs.push(segment(cur, knee, Object.assign({ t0: st.t, t1: tA, arms: calm(cur.up, knee.up), first: s }, tr.fluss ? { ease: (u) => u * u, arms: ((tl) => (u) => upper(tl(u)))(E.timeline([{ t: 0, p: cur.up }, { t: 1, p: knee.up, e: 'in' }])) } : {})));
         }
         segs.push({ t0: tA, t1: st.t + dK, at: (u) => K.pose(u, upAt(u)) });
         mark(st.t + dK, { aus: tA, ausName: 'Knie', tritt: { t0: tA, t1: st.t + dK, s: ko } });

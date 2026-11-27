@@ -1235,6 +1235,19 @@
     ], { eff: 'fistR' });
 
     /* Heian Godan */
+    // 14: Kake-uke wie im Lexikon, aber beim Ausholen weniger weit zur Gegenseite und mehr nach vorn – sonst drückt der linke
+    // Oberarm quer vor dem Körper in die Brust (Wunsch des Nutzers)
+    {
+      const KU = D['tc:kake-uke'].keys;
+      const aus = M(KU[3].p, { hL: stretch([-0.1, -0.3, 0.44], 'L'), eL: [0.6, -0.6, 0.5] });
+      KATA['kake-uke-godan'] = M(D['tc:kake-uke'], { keys: KU.map((k, i) => (i === 3 || i === 4 ? Object.assign({}, k, { p: aus }) : k)) });
+    }
+    // 15: Mikazuki-geri ohne Halt – das Knie kommt ohne Abbremsen hoch, der Tritt läuft mit Schwung weiter (kata-figur.js:
+    // TRITT mikazuki-fluss)
+    {
+      const MK = D['mv:mikazuki-geri'];
+      KATA['mikazuki-fluss'] = M(MK, { keys: MK.keys.map((k, i) => (i === 3 ? Object.assign({}, k, { e: 'fl' }) : k)) });
+    }
     // 9 → 10: Ryosho Juji Chudan Osae-uke – die offenen Hände drücken rechts vor der Hüfte nach unten und liegen am Ende
     // aufeinander, Handballen auf Handballen: die rechte unten, Handrücken nach unten, Fingerspitzen nach vorn; die linke
     // darauf, Handrücken nach oben, Fingerspitzen nach rechts
