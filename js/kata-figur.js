@@ -46,6 +46,7 @@
   const GL_RUECKT = 0.15;
   const GL_FUSS = [0.15, 0.88]; // Anteile der Dauer: so lange gleitet der Fuß
   const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
+  const KR_KNIE = [0.12, 0.37, 0.6]; // Kreuzschritt aus dem Kiba-dachi: Standknie dreht nach vorn, solange die Hüfte hinübergeht; danach das andere
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
   const GL_SINKEN = 0.75; // in einen tieferen Stand: bis hier ist die Hüfte unten (etwas vor dem gleitenden Fuß)
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
@@ -786,7 +787,9 @@
         // Kreuzschritt (Tekki 7, 21): Das Knie des Standbeins richtet sich mit dem Gewicht über dem Fuß aus und zeigt geradeaus
         // wie im Kreuzschritt – behielte es die Richtung des Kiba-dachi, stünde es über dem Fuß weit außen, und die Figur
         // kippte zur Seite
-        if (o.kreuz > 0 && !both) seg.knee = { w: (u) => ramp(0, GL_GEWICHT, u), [o2]: rotY(B.low[o2].kp, B.byaw), [s]: rotY(B.low[s].kp, B.byaw) };
+        // – aber erst, wenn die Hüfte hinüberwandert (KR_KNIE); im breiten Stand bleiben beide Knie nach außen gedrückt, sonst
+        // fielen sie zu Beginn nach innen. Das heranziehende Bein richtet sein Knie erst aus, wenn es unter den Körper kommt
+        if (o.kreuz > 0 && !both) seg.knee = { w: (u) => ramp(KR_KNIE[0], KR_KNIE[1], u), ws: { [s]: (u) => ramp(KR_KNIE[1], KR_KNIE[2], u) }, [o2]: rotY(B.low[o2].kp, B.byaw), [s]: rotY(B.low[s].kp, B.byaw) };
       }
     }
     // Kreuzschritt aus einem breiten Stand (Tekki 7, 21 aus dem Kiba-dachi): erst geht das Gewicht hinüber – die Hüfte
@@ -1003,7 +1006,7 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up - ps, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : kpDreht ? rotY(mix3(fa.kp, fb.kp, ef), lerp(A.byaw, B.byaw, ef)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up - ps, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], ((seg.knee.ws && seg.knee.ws[s]) || seg.knee.w)(u)) : kpDreht ? rotY(mix3(fa.kp, fb.kp, ef), lerp(A.byaw, B.byaw, ef)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
       if (wl) Object.assign(P[s], wl(P[s]));
       // Fumikomi mit dem Knie vor dem Körper: hoch vor dem Körper und ohne Halt weiter, schnell nach vorn und hart hinunter
       if (seg.kv && seg.kv.s === s) {
