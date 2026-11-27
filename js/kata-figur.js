@@ -46,8 +46,12 @@
   const GL_RUECKT = 0.15;
   const GL_FUSS = [0.15, 0.88]; // Anteile der Dauer: so lange gleitet der Fuß
   const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
-  const KR_KNIE = [0.15, 0.4, 0.65, 0.9]; // Kreuzschritt aus dem Kiba-dachi: bis [0] stellen sich die Knie über die Füße; das ziehende
-  // Bein bleibt so bis [1] und geht bis [2] in seine Kniestellung über, das Standbein ab [3]
+  const KR_KNIE = [0.15, 0.3, 0.8, 0.9]; // Kreuzschritt aus dem Kiba-dachi: bis [0] stellen sich die Knie über die Füße; das ziehende
+  // Bein bleibt so bis [1], dann führt sein Knie (KR_INNEN: so weit nach innen) bis [2], danach Kniestellung des Kreuzschritts;
+  // das Standbein ab [3]. KR_HEBEN: so weit hebt sich der kreuzende Fuß (Meter), ab KR_HEBEN_AB seines Weges
+  const KR_INNEN = 0.45;
+  const KR_HEBEN = 0.04;
+  const KR_HEBEN_AB = 0.3;
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
   const GL_SINKEN = 0.75; // in einen tieferen Stand: bis hier ist die Hüfte unten (etwas vor dem gleitenden Fuß)
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
@@ -971,6 +975,8 @@
       // Fuß, der den Platz wechselt: gleitet knapp über dem Boden; beim Stampfen (hoch) kommt er mit dem Knie hoch
       const up = pl.moved && seg.hoch ? stomp(uf) : 0;
       let y = lerp(fa.y, fb.y, ef) + (pl.moved && !pl.dreh && !pl.gleitet ? (seg.hoch ? (seg.hochY || HOCH) * up : (seg.hop || LIFT) * (pl.spaet ? Math.pow(Math.sin(Math.PI * ramp(0.35, 1, uf)), 2) : Math.pow(Math.sin(Math.PI * uf), 2))) : 0);
+      // Kreuzschritt: der Fuß löst sich beim Kreuzen knapp vom Boden, statt wie ein steifes Bein nachzuschleifen
+      if (seg.kreuzKnie && s === seg.kreuzKnie.s) y += KR_HEBEN * Math.pow(Math.sin(Math.PI * ramp(KR_HEBEN_AB, 1, uf)), 2);
       // absetzen: aus dem angezogenen Knie gleich hinunter, dann auf dem Fußballen über den Boden in den Stand
       let ps = 0;
       if (seg.absetzen && pl.moved && fa.y > fb.y + 0.1) {
@@ -1061,7 +1067,16 @@
     if (seg.kreuzKnie) {
       const e = [Math.cos(byaw * RAD), 0, -Math.sin(byaw * RAD)];
       const f3 = [Math.sin(byaw * RAD), 0, Math.cos(byaw * RAD)];
-      const wt = { [seg.kreuzKnie.o]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[3], 1, u)), [seg.kreuzKnie.s]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[1], KR_KNIE[2], u)) };
+      const wt = { [seg.kreuzKnie.o]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[3], 1, u)), [seg.kreuzKnie.s]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[1] - 0.1, KR_KNIE[1] + 0.1, u)) };
+      // das ziehende Bein: nach dem Halten führt das Knie – es beugt sich nach vorn und leicht nach innen zum Standbein, der
+      // Fuß folgt; zum Schluss geht es in die Kniestellung des Kreuzschritts
+      const sq = seg.kreuzKnie.s;
+      const wf = ramp(KR_KNIE[1] - 0.1, KR_KNIE[1] + 0.1, u) * (1 - ramp(KR_KNIE[2], 1, u));
+      if (wf > 0) {
+        const innen = e.map((v) => v * (sq === 'R' ? 1 : -1));
+        const fuehrt = norm3([f3[0] + KR_INNEN * innen[0], 0.35, f3[2] + KR_INNEN * innen[2]]);
+        P[sq] = Object.assign({}, P[sq], { kp: norm3(mix3(norm3(P[sq].kp), fuehrt, wf)) });
+      }
       ['L', 'R'].forEach((q) => {
         if (!(wt[q] > 0)) return;
         const lp3 = [Math.cos((P.yaw || 0) * RAD), 0, -Math.sin((P.yaw || 0) * RAD)];
