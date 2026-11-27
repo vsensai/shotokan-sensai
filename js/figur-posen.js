@@ -760,15 +760,16 @@
     // Mikazuki-geri wie in Heian Godan 15: aus Kiba-dachi, die linke offene Hand zur linken Seite gestreckt (Ziel), das linke
     // Bein trägt, die Hüfte dreht links herum; der rechte Fuß schwingt im Bogen von außen herein und tritt mit der Sohle
     // in die linke Handfläche
-    // Ablauf im Bewegungs-Editor eingestellt: bis zum Kime, danach derselbe Weg rückwärts zurück in Kiba-dachi
-    const MK_HL = { oL: 1, pL: [0, 0, 1], hR: [-0.215, -0.34, -0.01] };
-    const MK0 = M({ pelvis: [0, 0.68, 0], look: 90, L: { x: 0.42, yaw: 5, kp: [1, 0, 0.5] }, R: { x: -0.42, yaw: -5, kp: [-1, 0, 0.5] }, hL: [0.696, -0.204, 0.059], fL: [0, 1, 0.15] }, MK_HL);
-    const MK1 = M({ pelvis: [0.131, 0.73, 0.105], yaw: 25, look: 80, L: { x: 0.42, yaw: 30, kp: [0.866, -0.432, 0.252] }, R: { x: -0.108, z: 0.257, y: 0.269, yaw: 0, pitch: -10, kp: [-0.62, 0.013, 0.784] }, hL: [0.574, -0.224, 0.3], fL: [-0.063, 1, 0.136], w: [1, 0] }, MK_HL);
-    // Zwischenstellung vorn: der Fuß schwingt im Bogen (nicht auf geradem Weg) zur Hand
-    const MK15 = M({ pelvis: [0.181, 0.688, 0.074], yaw: 25, roll: 4, look: 80, L: { x: 0.42, yaw: 55, kp: [0.965, -0.137, 0.222] }, R: { x: 0.094, z: 0.636, y: 0.628, yaw: 0, pitch: 30, kp: [-0.2, 0.4, 1], sole: [1, 0, -0.3] }, hL: [0.611, -0.164, 0.298], fL: [-0.133, 0.993, 0.136], w: [1, 0] }, MK_HL);
-    const MK2 = M({ pelvis: [0.33, 0.82, -0.02], yaw: 40, roll: 8, look: 80, L: { x: 0.42, yaw: 55, kp: [0.871, -0.49, 0.039] }, R: { x: 0.883, z: 0.086, y: 1.04, yaw: 2, pitch: 71, kp: [0.471, 0.871, 0.139], sole: [0.408, 0.293, -0.865] }, hL: [0.411, -0.175, 0.418], fL: [-0.235, 0.977, 0.115], w: [1, 0] }, MK_HL);
-    // Timing und Kamera im Bewegungs-Editor eingestellt: schnell hinein (fließend), Kime, auslaufend zurück; 1,5 s
-    D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: MK0 }, { t: 0.06, p: MK0 }, { t: 0.11, p: MK1, e: 'fl' }, { t: 0.17, p: MK15, e: 'in' }, { t: 0.25, p: MK2, e: 'kime' }, { t: 0.35, p: MK15, e: 'out' }, { t: 0.43, p: MK1, e: 'fl' }, { t: 0.59, p: MK0, e: 'fl' }], best: 0.25, dur: 2.5253, eff: 'toeR', cam: { yaw: 14, pitch: 17 } }, hit('heelR', 'Fußsohle'));
+    // Ablauf im Bewegungs-Editor eingestellt: bis zum Kime, danach derselbe Weg rückwärts (Bild 3, 2, 1) zurück in Kiba-dachi
+    // Bilder 1–4 im Bewegungs-Editor eingestellt (Nutzer): die Hüfte dreht schon beim Anziehen weit ein, das Knie kommt
+    // gerade vor dem Körper hoch, der Fuß schwingt auf kurzem Weg in die Hand; die Handfläche zeigt zum Fuß
+    const MK_HL = { oL: 1, pL: [-1, 0, 0], hR: [-0.215, -0.34, -0.01] };
+    const MK0 = M({ pelvis: [0, 0.68, 0], look: 90, L: { x: 0.42, yaw: 5, kp: [1, 0, 0.5] }, R: { x: -0.42, yaw: -5, kp: [-1, 0, 0.5] }, hL: [0.7, -0.204, 0.054] }, MK_HL);
+    const MK1 = M({ pelvis: [0.131, 0.73, 0.105], yaw: 67, look: 80, L: { x: 0.42, yaw: 89, kp: [0.838, -0.541, 0.068] }, R: { x: 0.126, z: 0.233, y: 0.332, yaw: 68, pitch: -10, kp: [0.709, -0.544, 0.45] }, hL: [0.284, -0.257, 0.502], w: [1, 0] }, MK_HL);
+    const MK15 = M({ pelvis: [0.354, 0.753, 0.115], yaw: 67, look: 80, L: { x: 0.42, yaw: 89, kp: [0.952, -0.303, 0.028] }, R: { x: 0.53, z: 0.224, y: 0.475, yaw: 68, pitch: -10, kp: [0.932, -0.34, 0.128] }, hL: [0.387, -0.238, 0.473], w: [1, 0] }, MK_HL);
+    const MK2 = M({ pelvis: [0.33, 0.82, -0.02], yaw: 66, roll: 8, look: 80, L: { x: 0.42, yaw: 55, kp: [0.871, -0.49, 0.039] }, R: { x: 0.989, z: -0.018, y: 0.972, yaw: 2, pitch: 71, kp: [0.471, 0.871, 0.139], sole: [0.408, 0.293, -0.865] }, hL: [0.292, -0.216, 0.506], w: [1, 0] }, MK_HL);
+    // Timing und Kamera im Bewegungs-Editor eingestellt: schnell hinein (fließend, ohne Halt), Kime, auslaufend zurück
+    D['mv:mikazuki-geri'] = M({ keys: [{ t: 0, p: MK0 }, { t: 0.06, p: MK0 }, { t: 0.11, p: MK1, e: 'fl' }, { t: 0.17, p: MK15, e: 'fl' }, { t: 0.25, p: MK2, e: 'kime' }, { t: 0.35, p: MK15, e: 'out' }, { t: 0.43, p: MK1, e: 'fl' }, { t: 0.59, p: MK0, e: 'fl' }], best: 0.25, dur: 2.5253, eff: 'toeR', cam: { yaw: 14, pitch: 17 } }, hit('heelR', 'Fußsohle'));
     // Sohle so gewählt, dass sie beim Einschwingen zum Treffer (Sohle innen) nicht über das Knie dreht (validate: Sprunggelenk)
     // Ura-mawashi-geri (Hakentritt), gegenläufig zum Mawashi-geri: aus Hidari Zenkutsu-dachi mit derselben Deckung. Das rechte
     // Knie zieht hoch vor den Körper, der Standfuß dreht auf dem Ballen und die Hüfte dreht seitlich ein (rechte Seite zum
@@ -1237,18 +1238,6 @@
     ], { eff: 'fistR' });
 
     /* Heian Godan */
-    // 15: Mikazuki-geri ohne Halt – das Knie kommt ohne Abbremsen hoch, der Tritt läuft mit Schwung weiter (kata-figur.js:
-    // TRITT mikazuki-fluss). Auf Wunsch des Nutzers enger als im Lexikon: erst dreht die Hüfte ein (der Fuß löst sich
-    // gerade vom Boden), dann zieht das Knie gerade vor dem Körper hoch und der Fuß schwingt auf kurzem Weg in die Hand –
-    // kein weiter Bogen nach vorn
-    {
-      const MK = D['mv:mikazuki-geri'];
-      const [K0, K1, , , K2] = MK.keys.map((k) => k.p);
-      const EIN = M(K1, { pelvis: [0.17, 0.71, 0.06], yaw: 40, R: { x: -0.3, z: 0.08, y: 0.16, yaw: 0, pitch: -15, kp: [-0.3, 0.3, 0.9] } });
-      const KNIE = M(K1, { pelvis: [0.25, 0.76, 0.03], yaw: 40, roll: 4, R: { x: 0.36, z: 0.25, y: 0.45, yaw: 40, pitch: -20, kp: [0.63, 0.17, 0.76] } });
-      const AUF = M(MK.keys[3].p, { pelvis: [0.3, 0.8, 0], yaw: 40, roll: 6, R: { x: 0.62, z: 0.35, y: 0.85, kp: [0.75, 0.5, 0.4] } });
-      KATA['mikazuki-fluss'] = M(MK, { keys: [{ t: 0, p: K0 }, { t: 0.06, p: K0 }, { t: 0.11, p: EIN, e: 'fl' }, { t: 0.16, p: KNIE, e: 'fl' }, { t: 0.205, p: AUF, e: 'in' }, { t: 0.25, p: K2, e: 'kime' }].concat(MK.keys.slice(5)) });
-    }
     // 9 → 10: Ryosho Juji Chudan Osae-uke – die offenen Hände drücken rechts vor der Hüfte nach unten und liegen am Ende
     // aufeinander, Handballen auf Handballen: die rechte unten, Handrücken nach unten, Fingerspitzen nach vorn; die linke
     // darauf, Handrücken nach oben, Fingerspitzen nach rechts

@@ -432,7 +432,7 @@
     // mit dem Fuß an der Hand (b = Treffer); die nächste Bewegung setzt ihn von dort ab
     mikazuki: { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true },
     // ohne Halt (Heian Godan 15): das Knie kommt beschleunigt hoch (fluss: ohne Abbremsen), der Tritt läuft gleich weiter
-    'mikazuki-fluss': { def: 'mikazuki-fluss', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true, fluss: true },
+    'mikazuki-fluss': { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true, fluss: true },
     // Sokuto Gedan-kekomi zur Seite (Bassai Dai 19): Knie hoch, dann schräg nach unten; die Hände ziehen dabei heran und
     // sind am Körper, wenn der Fuß trifft (mit)
     'kekomi-gedan': { def: 'yoko-kekomi-gedan', side: 'R', a: 0.27, b: 0.53, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.35 },
