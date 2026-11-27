@@ -404,7 +404,6 @@
     [/mizunagare-no-kamae/i, { def: 'tc:mizunagare-no-kamae', side: 'R', from: 0 }],
     [/jodan kosa-uke/i, { def: 'tc:juji-uke', side: 'L', from: 0.25, direkt: true }],
     [/juji chudan osae-uke/i, { def: 'juji-osae-uke', side: 'L', from: 0.25, direkt: true }],
-    [/kake-uke/i, { def: 'kake-uke-godan', side: 'L', from: 0.12, lang: true }, /heian godan/i],
     [/kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.12, lang: true }],
     [/mikazuki-geri/i, { tritt: 'mikazuki-fluss', dur: 0.8 }, /heian godan/i],
     [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 0.8 }],

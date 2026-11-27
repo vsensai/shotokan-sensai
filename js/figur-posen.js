@@ -534,15 +534,17 @@
     // links): beide Arme holen zugleich aus – der rechte Unterarm kommt waagerecht vor die Brust, die Faust links; der linke
     // Arm wird unter ihm eng am Körper nach rechts geschoben, bis er gestreckt ganz nach rechts zeigt (offene Hand). Dann
     // langsam und kraftvoll wie beim Spannen eines Bogens: die rechte Faust zieht zur Hüfte, der linke Arm hakt ausgestreckt
-    // zur linken Seite (Chudan, Handgelenk außen, Handfläche nach vorn). Fließend durch die Zwischenbilder ('fl'); nur
-    // ausgeholt kommt der Arm kurz zur Ruhe
+    // zur linken Seite (Chudan, Handgelenk außen, Handfläche nach vorn). Fließend durch alle Zwischenbilder ('fl'), ohne
+    // Halt. Ausholen nach den Bildern des Nutzers aus dem Bewegungs-Editor (Heian Godan 14): die linke Hand holt nur knapp
+    // über die Mitte aus (weiter zur Gegenseite drückte der Oberarm in die Brust), die rechte kommt dabei vor die Brust
     const KU0 = M(KB, { look: 90 });
     const KU2 = M(KB, { look: 90, hL: [-0.13, -0.06, 0.3], oL: 1, pL: [0, 0, -1], fL: [-0.3, 1, 0], eL: [0.3, -1, 0.3], hR: [0.13, -0.17, 0.27], eR: [-0.4, -1, 0.3] });
     const KU3 = M(KB, { look: 90, hL: [0.705, -0.1, 0.18], oL: 1, pL: [0.1, 0, 1], fL: [0.15, 1, 0], hR: H.hip });
     const KU_MITTE = M(KB, { look: 90, oL: 1, hL: [0.02, -0.33, 0.2], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [-0.02, -0.2, 0.27], eR: [-0.7, -0.5, 0.2] });
-    const KU_AUS = M(KB, { look: 90, oL: 1, hL: stretch([-0.36, -0.3, 0.22], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.18, -0.14, 0.28], eR: [-0.8, -0.15, 0.2] });
-    const KU_ZURUECK = M(KB, { look: 90, oL: 1, hL: [0.25, -0.1, 0.38], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.1, -0.28, 0.16], eR: [-0.6, -0.8, 0] });
-    D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.12, p: KU0 }, { t: 0.22, p: KU_MITTE, e: 'fl' }, { t: 0.36, p: KU_AUS, e: 'fl' }, { t: 0.4, p: KU_AUS },
+    const KU_AUS = M(KB, { look: 90, oL: 1, hL: [-0.024, -0.324, 0.208], eL: [0.6, -0.6, 0.5], pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.049, -0.17, 0.227], eR: [-0.8, -0.15, 0.2] });
+    const KU_AUS2 = M(KU_AUS, { hL: [-0.106, -0.287, 0.221], hR: [0.104, -0.142, 0.217] });
+    const KU_ZURUECK = M(KB, { look: 90, oL: 1, hL: [0.25, -0.1, 0.38], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.1, -0.28, 0.165], eR: [-0.138, -0.577, 0.09] });
+    D['tc:kake-uke'] = M({ keys: [{ t: 0, p: KU0 }, { t: 0.12, p: KU0 }, { t: 0.22, p: KU_MITTE, e: 'fl' }, { t: 0.36, p: KU_AUS, e: 'fl' }, { t: 0.4, p: KU_AUS2, e: 'fl' },
       { t: 0.62, p: KU_ZURUECK, e: 'fl' }, { t: 0.88, p: KU3, e: 'fl' }], best: 1, dur: 3.6, eff: 'wristL', view: 'front' }, hit('wristL', 'Handgelenk'));
     // Sukui-uke wie in Bassai Dai 6: aus Migi Zenkutsu-dachi gleitet der rechte Fuß im Halbkreis am linken vorbei nach rechts,
     // Hüfte bleibt auf gleicher Höhe; Fuß und Faust gehen zusammen: die rechte Faust sinkt vor dem Körper nach links unten
@@ -1235,18 +1237,6 @@
     ], { eff: 'fistR' });
 
     /* Heian Godan */
-    // 14: Kake-uke wie im Lexikon, aber beim Ausholen weniger weit zur Gegenseite – sonst drückt der linke Oberarm quer vor
-    // dem Körper in die Brust (Wunsch des Nutzers)
-    {
-      const KU = D['tc:kake-uke'].keys;
-      // Bilder aus dem Bewegungs-Editor (Nutzer): die linke Hand holt nur knapp über die Mitte aus und zieht weiter, die
-      // rechte kommt dabei vor die Brust; alle Bilder fließend (kein Halt zwischen Ausholen und Abwehr)
-      const aus1 = M(KU[3].p, { hL: [-0.024, -0.324, 0.208], hR: [0.049, -0.17, 0.227], eL: [0.6, -0.6, 0.5] });
-      const aus2 = M(KU[4].p, { hL: [-0.106, -0.287, 0.221], hR: [0.104, -0.142, 0.217], eL: [0.6, -0.6, 0.5] });
-      const zur = M(KU[5].p, { eR: [-0.138, -0.577, 0.09] });
-      const neu = { 3: aus1, 4: aus2, 5: zur };
-      KATA['kake-uke-godan'] = M(D['tc:kake-uke'], { keys: KU.map((k, i) => (i >= 2 ? { t: k.t, p: neu[i] || k.p, e: 'fl' } : k)) });
-    }
     // 15: Mikazuki-geri ohne Halt – das Knie kommt ohne Abbremsen hoch, der Tritt läuft mit Schwung weiter (kata-figur.js:
     // TRITT mikazuki-fluss)
     {
@@ -1309,8 +1299,9 @@
     const TK_LINKS = M(KB, { look: 90, sL: 1, hL: stretch([0.74, -0.1, 0.04], 'L'), hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3] });
     const TK_AN = M(KB, { look: 90, hL: [0.17, -0.3, 0.2], eL: [0.5, -0.8, -0.2], pL: [0, -1, 0], hR: [0.12, -0.17, 0.3], eR: [-0.75, -0.2, 0.25] });
     const TK_MITTE = M(KB, { look: 90, oL: 1, hL: [-0.04, -0.31, 0.22], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [0.16, -0.15, 0.29], eR: [-0.8, -0.15, 0.2] });
-    const TK_RECHTS = M(KU_AUS, { sL: 1 });
-    const TK_ZURUECK = KU_ZURUECK;
+    // (Ausholen und Zurückziehen wie der Kake-uke des Lexikons vor der Änderung aus Heian Godan 14 – Tekki bleibt so)
+    const TK_RECHTS = M(KB, { look: 90, oL: 1, sL: 1, hL: stretch([-0.36, -0.3, 0.22], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.18, -0.14, 0.28], eR: [-0.8, -0.15, 0.2] });
+    const TK_ZURUECK = M(KU_ZURUECK, { hR: [-0.1, -0.28, 0.16], eR: [-0.6, -0.8, 0] });
     // Fließend durch die Zwischenbilder ('fl'); nur ganz rechts kommt der Arm kurz zur Ruhe, bevor er zurückzieht
     KATA['kake-uke-langsam'] = { keys: [{ t: 0, p: TK_LINKS }, { t: 0.1, p: TK_AN, e: 'fl' }, { t: 0.14, p: TK_MITTE, e: 'fl' }, { t: 0.2, p: TK_RECHTS, e: 'fl' },
       { t: 0.22, p: TK_RECHTS }, { t: 0.36, p: TK_ZURUECK, e: 'fl' }, { t: 0.5, p: KU3, e: 'fl' }] };
