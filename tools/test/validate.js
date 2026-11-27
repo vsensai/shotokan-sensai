@@ -260,8 +260,9 @@
   out.push(`3D-Figuren: ${Object.keys(SK.fig3dDefs || {}).length}`);
 
   // Kata als Figur (Kata-Trainer, Ansicht „Figur“): für jede freigegebene Kata ist der ganze Ablauf rechenbar – im
-  // Trainingstempo und im schnellsten Tempo –, jede Technik und jeder Stand hat eine Figur, Füße erreichen ihren Platz
-  SK.kataFigur.KATA.forEach((id) => {
+  // Trainingstempo und im schnellsten Tempo –, jede Technik und jeder Stand hat eine Figur, Füße erreichen ihren Platz.
+  // Vorschau-Kata werden genauso geprüft, damit eine zurückgestellte Kata nicht unbemerkt kaputtgeht.
+  SK.kataFigur.KATA.concat(SK.kataFigur.VORSCHAU).forEach((id) => {
     const k = SK.kata[id];
     if (!k || !k.ansage) { errors.push(`Kata-Figur ${id}: Kata ohne Ansage`); return; }
     [2, Math.min(...SK.ansageBeats)].forEach((beat) => {
@@ -271,7 +272,7 @@
       if (a.ends.length !== tl.length || a.ends.some((e, i) => e < tl[i].t || (tl[i + 1] && e > tl[i + 1].t))) errors.push(`Kata-Figur ${k.name}: Bewegungen passen nicht in den Takt der Ansage`);
     });
   });
-  out.push(`Kata als Figur: ${SK.kataFigur.KATA.join(', ')}`);
+  out.push(`Kata als Figur: ${SK.kataFigur.KATA.join(', ')}${SK.kataFigur.VORSCHAU.length ? ` · Vorschau: ${SK.kataFigur.VORSCHAU.join(', ')}` : ''}`);
 
   // Sprunggelenk: die Sohle zeigt nie zum eigenen Knie. Winkel zwischen Sohle und Unterschenkel (vom Knie weg): 0° im Stand,
   // um 90° bei gestrecktem Fuß (Seiza) – über F3.SOHLE_MAX (110°) geht anatomisch nicht. Zwischenbilder begrenzt die Figur selbst

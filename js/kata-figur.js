@@ -1922,10 +1922,11 @@
 
   /* ---------- Bühne für den Kata-Trainer ---------- */
   // Freigegebene Kata: Ablauf von Hand durchgesehen, alle Stände und Techniken haben eine Figur (validate.js prüft das)
-  const KATA = ['heian-shodan', 'heian-nidan', 'heian-sandan', 'heian-yondan', 'heian-godan', 'tekki-shodan', 'bassai-dai', 'kanku-dai'];
+  const KATA = ['heian-shodan', 'heian-nidan', 'heian-sandan', 'heian-yondan', 'heian-godan', 'tekki-shodan', 'bassai-dai'];
   // Vorschau: Kata, an denen gerade gebaut wird – nur im Bearbeiten-Modus (Einstellungen) im Kata-Trainer zu sehen, mit dem
   // Etikett „Figur · Vorschau“; zum Freigeben von hier nach KATA
-  const VORSCHAU = [];
+  // Kanku Dai: Figur noch unfertig – auf Wunsch des Nutzers wieder nur in der Vorschau
+  const VORSCHAU = ['kanku-dai'];
   const bearbeiten = () => !!(SK.poseEditor && SK.poseEditor.enabled());
   const vorschau = (k) => VORSCHAU.includes(k.id) && !KATA.includes(k.id);
   const can = (k) => (KATA.includes(k.id) || (vorschau(k) && bearbeiten())) && !!k.ansage && E.ok();
