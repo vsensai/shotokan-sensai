@@ -1217,9 +1217,12 @@
     {
       const GREIF = M(S.zks, { yaw: -92, chest: 0, hR: H.hip, oL: 1, hL: [0.72, -0.02, 0.1], eL: [0, -1, 0], pL: [0, -0.5, 0.85], fL: [1, 0, 0] });
       KATA['mae-enpi-uraken'] = { keys: [
-        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.73, -0.01, 0.07], eL: [0.2, 0.5, -0.6], pL: [0, 0, 1] }) },
-        { t: 0.3, p: GREIF },
-        { t: 0.74, p: M(GREIF, { yaw: -88 }) },
+        // Anfang = Endstellung des Uraken-uchi im Lexikon (gespiegelt), sonst dreht der Ellbogen zwischendurch hin und her
+        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.725, 0.08, 0.114], eL: [0.598, 0.08, 0.027], pL: [0, 0, 1] }) },
+        // Greifen: die Arme stehen still, nur die Hüfte dreht – je zwei gleiche Bilder, damit die Überblendung nicht zu den
+        // Nachbarbildern hin ausschwingt (Hand und Ellbogen wackelten vor und zurück)
+        { t: 0.3, p: GREIF }, { t: 0.32, p: GREIF },
+        { t: 0.72, p: M(GREIF, { yaw: -88 }) }, { t: 0.74, p: M(GREIF, { yaw: -88 }) },
         { t: 1, p: M(MAE_ENPI, { oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }), e: 'kime' }] };
     }
     // 11: Die linke Handkante fegt erst nach unten (Gedan-barai) und steigt dann zum Jodan-uke über die Stirn; dabei schlägt
