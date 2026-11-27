@@ -783,6 +783,10 @@
         Object.assign(seg.feet[s], { u0: GL_FUSS[0], u1: GL_FUSS[1], gleitet: true });
         if (both) seg.feet[o2].gleitet = true;
         seg.gleiten = { s, o: o2, spaet: !both && Math.abs(wrap(B.byaw + B.low[o2].rel - A.byaw - A.low[o2].rel)) <= GL_WENDE };
+        // Kreuzschritt (Tekki 7, 21): Das Knie des Standbeins richtet sich mit dem Gewicht über dem Fuß aus und zeigt geradeaus
+        // wie im Kreuzschritt – behielte es die Richtung des Kiba-dachi, stünde es über dem Fuß weit außen, und die Figur
+        // kippte zur Seite
+        if (o.kreuz > 0 && !both) seg.knee = { w: (u) => ramp(0, GL_GEWICHT, u), [o2]: rotY(B.low[o2].kp, B.byaw), [s]: rotY(B.low[s].kp, B.byaw) };
       }
     }
     // Kreuzschritt aus einem breiten Stand (Tekki 7, 21 aus dem Kiba-dachi): erst geht das Gewicht hinüber – die Hüfte
