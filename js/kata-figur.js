@@ -258,6 +258,8 @@
   // ohne den ruhigen Vorlauf in die Ausholhaltung (der Ablauf beginnt selbst mit der Haltung davor, Tekki 16);
   // erst: bei zwei Techniken („… + …“) gilt die Seite der zuerst genannten (sonst die der zuletzt genannten);
   // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind.
+  // bis: der Ablauf endet in der Kata schon bei diesem Schlüsselbild (t) – z. B. am Treffer, wenn das Lexikon danach
+  // zurückschnappt (Uraken-uchi in Heian Nidan 7, Heian Yondan 6, 9);
   // schnapp: nach dem Treffer schnappt der Arm gleich zurück in die Haltung, aus der der Ablauf beginnt (Uraken);
   // halten: der Oberkörper bleibt im Raum, wie er ist, auch wenn die Füße drehen (Jotai sonomama);
   // vor: die Bewegung hat einen ersten Teil in einem anderen Stand (stand) mit eigener Technik – die Füße stehen dabei schon
@@ -370,7 +372,7 @@
     [/haiwan/i, { def: 'tc:haiwan-uke', side: 'L', from: 0.25 }],
     [/soto-nagashi-uke/i, { def: 'tc:soto-nagashi-uke', side: 'L', from: 0.513, lang: true, dur: 0.55, erst: true }],
     [/sokumen chudan-zuki/i, { def: 'kokutsu-zuki', side: 'L', from: 0.25, direkt: true }],
-    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'tc:uraken-uchi', side: 'R', from: 0.513, dur: 1.3 }],
+    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'tc:uraken-uchi', side: 'R', from: 0.3, bis: 0.59, dur: 1.3 }],
     [/jodan mae-geri-keage/i, { tritt: 'mae-jodan', dur: 0.8 }],
     [/mae-geri-keage/i, { tritt: 'mae', dur: 0.8 }],
     [/^(saken|uken) chudan-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],
@@ -471,7 +473,7 @@
     const d = defOf(tech.def);
     const keys = d.keys.map((k) => ({ t: k.t, e: k.e, p: side === tech.side ? k.p : flip(k.p) }));
     const tl = E.timeline(keys);
-    const t1 = keys[keys.length - 1].t;
+    const t1 = tech.bis || keys[keys.length - 1].t;
     return (w) => upper(tl(lerp(tech.from, t1, clamp(w))));
   }
 
@@ -1233,7 +1235,7 @@
     const d = tech && tech.def && defOf(tech.def);
     if (!d || d.keys.length < 2) return [];
     const ta = tech.from || 0;
-    const tb = d.keys[d.keys.length - 1].t;
+    const tb = tech.bis || d.keys[d.keys.length - 1].t;
     if (tb - ta < 1e-6) return [];
     return [...new Set(d.keys.filter((k) => k.t >= ta - 1e-9 && k.t < tb - 1e-9).map((k) => Math.round((u0 + ((k.t - ta) / (tb - ta)) * (1 - u0)) * 1e4) / 1e4))];
   }
@@ -1242,13 +1244,13 @@
   function armZeit(tech, u0) {
     const d = tech && tech.def && defOf(tech.def);
     if (!d || d.keys.length < 2) return null;
-    return { u0, ta: tech.from || 0, tb: d.keys[d.keys.length - 1].t };
+    return { u0, ta: tech.from || 0, tb: tech.bis || d.keys[d.keys.length - 1].t };
   }
   // Woher die Arme einer Bewegung kommen (für den Bewegungs-Editor): Ablauf, Seite, ob gespiegelt, Optionen
   function quelleOf(tech, side) {
     if (!tech) return null;
     const def = tech.def || tech.ganz || (tech.vor && tech.vor.def) || null;
-    const opt = Object.keys(tech).filter((o) => !['def', 'side', 'from', 'dur', 'vor'].includes(o));
+    const opt = Object.keys(tech).filter((o) => !['def', 'side', 'from', 'bis', 'dur', 'vor'].includes(o));
     return { def, lexikon: !!(def && D[def]), seite: side, gespiegelt: !!(tech.side && side !== tech.side), from: tech.from, tritt: tech.tritt || null, opt };
   }
 

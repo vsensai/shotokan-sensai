@@ -1702,7 +1702,7 @@
       { t: 0.39, p: UR(8, { hR: [-0.12, 0.0, 0.22], eR: [-0.404, 0.077, 0.437], pR: [0, -1, 0] }), e: 'fl', eGanz: true },
       { t: 0.54, p: UR(3, { hR: [-0.467, 0.02, 0.388], eR: [-0.309, 0.031, -0.513], pR: [0, -1, 0] }), e: 'fl', eGanz: true },
       { t: 0.59, p: UR_HIT, e: 'kime', eGanz: true }, { t: 0.63, p: UR_HIT },
-      { t: 0.75, p: UR(-2, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] }), e: 'kime', eGanz: true },
+      { t: 0.75, p: UR(3, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] }), e: 'kime', eGanz: true },
     ], best: 0.59, dur: 1 }));
     // Furi-enpi: der Schritt ist schneller – Knie hoch in 0,3 s statt 0,6 s, Aufstampfen und Ellbogen gleich danach; das
     // Knie kommt dabei höher (Oberschenkel etwa waagerecht)
@@ -1732,8 +1732,8 @@
       hR: [0.24, -0.18, 0.26], eR: [-0.1, -1, 0.2], pR: [0, 1, 0] }), SNU_EIN)]), SNU_OPT));
 
     // Vom Nutzer für die Kata abgenommen: beim Vorgehen bleibt die Hüfte gerade und dreht erst mit dem Block in den Hanmi –
-    // die Kata nehmen dafür die Fassung des Lexikons (Hüfteinsatz) statt der davor
-    ['mv:age-uke', 'mv:gedan-barai', 'mv:uchi-uke', 'mv:soto-uke', 'tc:shuto-uke', 'tc:morote-uke', 'tc:haiwan-uke', 'tc:manji-uke']
+    // die Kata nehmen dafür die Fassung des Lexikons (Hüfteinsatz) statt der davor; Uraken-uchi nach dem Editor des Nutzers ebenso
+    ['mv:age-uke', 'mv:gedan-barai', 'mv:uchi-uke', 'mv:soto-uke', 'tc:shuto-uke', 'tc:morote-uke', 'tc:haiwan-uke', 'tc:manji-uke', 'tc:uraken-uchi']
       .forEach((id) => delete BISHER[id]);
 
     // Uchi-uke (rechter Arm) mit anderer Hüftdrehung: Hüfte auf yaw(alter Wert), der Blockarm bleibt dabei im Raum, wo er
