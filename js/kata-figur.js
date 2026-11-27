@@ -247,6 +247,7 @@
   const WEICH = (u) => smooth(Math.pow(clamp(u), 1.2));
   let stepEase = EXPLOSIV;
   // Stampfen: Fuß in der ersten Hälfte hoch, kurz oben halten, im letzten guten Viertel immer schneller hinunter
+  const SPAET_U = 0.75;
   const stomp = (u) => (u < 0.5 ? smooth(u / 0.5) : u < 0.72 ? 1 : 1 - ((u - 0.72) / 0.28) ** 2);
 
   /* ---------- Stände und Techniken ---------- */
@@ -298,6 +299,8 @@
   // p mit Werten der Arme (echte Seiten, Bezug wie im Editor)
   // hanmi: die Hüfte bleibt im Raum stehen, während die Füße wenden (die Hüftdrehung des Ablaufs gilt im Rahmen der
   // Endstellung), und dreht erst mit dem Treffer ein (Heian Yondan 7, 10);
+  // spaet: das Gewicht (Hüfte über dem Boden) bleibt hinten, während der Fuß schon absetzt, und kommt erst zum Schluss
+  // explosiv nach vorn (SPAET_U), sie sinkt auch erst dann ganz; tiefer: der Stand am Ende ist um so viele Meter tiefer (Heian Yondan 7, 10; Kanku Dai 28, 31);
   // absetzen: der Fuß aus dem angezogenen Knie (nach einem Tritt) setzt gleich ab und gleitet auf dem Fußballen über den
   // Boden in den Stand, statt in der Luft hinüberzugehen (Heian Yondan 7, 10);
   // hikiteBleibt (mit direkt): die Hand der Gegenseite bleibt beim Wenden im Raum stehen, wo sie ist (vorn), statt mit dem
@@ -374,7 +377,7 @@
     [/haiwan/i, { def: 'tc:haiwan-uke', side: 'L', from: 0.25 }],
     [/soto-nagashi-uke/i, { def: 'tc:soto-nagashi-uke', side: 'L', from: 0.513, lang: true, dur: 0.55, erst: true }],
     [/sokumen chudan-zuki/i, { def: 'kokutsu-zuki', side: 'L', from: 0.25, direkt: true }],
-    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'uraken-keage', side: 'R', from: 0.3, bis: 0.59, koshi: true, dur: 1.3 }, /· heian (nidan #7|yondan #[69])$/i],
+    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'uraken-keage', side: 'R', from: 0.3, bis: 0.59, koshi: true, dur: 1.3 }, /· (heian nidan #7|heian yondan #[69]|kanku dai #(27|30))$/i],
     [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'tc:uraken-uchi', side: 'R', from: 0.3, bis: 0.59, koshi: true, dur: 1.3 }],
     [/jodan mae-geri-keage/i, { tritt: 'mae-jodan', dur: 0.8 }],
     [/mae-geri-keage/i, { tritt: 'mae', dur: 0.8 }],
@@ -399,7 +402,7 @@
     [/koshi-kamae/i, { def: 'tc:koshi-kamae', side: 'R', from: 0 }],
     // Heian Yondan 7, 10: nach Uraken und Yoko-geri bleibt der Arm gestreckt vorn, der Fuß setzt gleich ab und gleitet in
     // den Stand, die Hüfte bleibt im Hanmi und dreht erst mit dem Treffer ein
-    [/mae-enpi/i, { def: 'mae-enpi-uraken', side: 'R', from: 0, lang: true, hanmi: true, absetzen: true }, /heian yondan/i],
+    [/mae-enpi/i, { def: 'mae-enpi-uraken', side: 'R', from: 0, lang: true, hanmi: true, absetzen: true, spaet: true, tiefer: 0.06 }, /· (heian yondan|kanku dai #(28|31)$)/i],
     [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25 }],
     [/jodan-uke \+ .*shuto/i, { def: 'jodan-uke-shuto-uchi', side: 'R', from: 0.25, lang: true, dur: 0.9 }],
     [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22, standErst: 0.3, anteil: 0.76, sinken: 0.04 }, /heian yondan/i],
@@ -917,6 +920,8 @@
       const uk = clamp((u - pl.u0) / (pl.u1 - pl.u0));
       pel = add(mix(A.low.pel, seg.kv.pk, kvAuf(uk)), mul(sub(B.low.pel, seg.kv.pk), kvVor(uk)));
     }
+    // spaet: Gewicht bleibt hinten (bis SPAET_U ein Viertel des Weges), dann explosiv nach vorn
+    if (seg.spaet) pel = mix(A.low.pel, B.low.pel, u < SPAET_U ? 0.25 * smooth(u / SPAET_U) : 0.25 + 0.75 * (1 - Math.pow(1 - (u - SPAET_U) / (1 - SPAET_U), 3)));
     if (seg.ab) pel = mix(A.low.pel, B.low.pel, u < ST_KNIE ? 0.08 * smooth(u / ST_KNIE) : 0.08 + 0.92 * smooth(clamp((u - ST_KNIE) / (0.94 - ST_KNIE))));
     // langsames Heranziehen am Boden: Die Hüfte geht über den Standfuß, aber nur so weit, wie das gleitende Bein in der
     // Höhe, auf der sie gerade ist, reicht (am Anfang mindestens so weit, wie es schon steht – sonst spränge sie); mit dem
@@ -1018,7 +1023,7 @@
       }
     });
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
-    let h = lerp(A.low.h, B.low.h, eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
+    let h = lerp(A.low.h, B.low.h, seg.spaet ? (u < SPAET_U ? 0.62 * smooth(u / SPAET_U) : 0.62 + 0.38 * (1 - Math.pow(1 - (u - SPAET_U) / (1 - SPAET_U), 3))) : eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
     if (hG != null) h = hG;
     // sinken: B steht schon tiefer – bis SINKEN_AB bleibt die Hüfte auf der Höhe davor, dann sinkt sie
     if (seg.sinken) h += seg.sinken * eb * (1 - ramp(SINKEN_AB, 1, uRoh));
@@ -1739,6 +1744,7 @@
       }
       const nk = key(m, st.stance, cur, end, tech && tech.stand);
       if (st.slow && tech && tech.sinken) nk.low = Object.assign({}, nk.low, { h: nk.low.h - tech.sinken });
+      if (tech && tech.tiefer) nk.low = Object.assign({}, nk.low, { h: nk.low.h - tech.tiefer });
       const o = { t0: st.t, t1: st.t + d, arms };
       if (tech && tech.direkt && tech.hikiteBleibt) o.halteHand = { s: side === 'R' ? 'L' : 'R', uS };
       if (st.slow) o.ease = tech && tech.wechsel ? zweiteilig(tech.wechsel) : smooth;
@@ -1765,6 +1771,7 @@
       if (/namigaeshi/i.test(st.note || '')) o.welle = true;
       if (tech && tech.heran) o.heran = true;
       if (tech && tech.absetzen) o.absetzen = true;
+      if (tech && tech.spaet) o.spaet = true;
       // langsam gleitender Fuß (wirkt nur, wenn genau ein Fuß den Platz wechselt)
       if (st.slow && !o.hoch && !sprung && !yori && !GLEITEN_NICHT.test(m.h || '')) o.gleiten = true;
       const seg = segment(cur, nk, o);

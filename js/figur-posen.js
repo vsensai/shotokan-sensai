@@ -1211,19 +1211,21 @@
     // zieht heran), der rechte Ellbogen schlägt in ihre Handfläche
     KATA['mae-enpi-hand'] = T(M(S.zks, { oL: 1, hL: [0.1, -0.02, 0.6], pL: [-1, 0, 0], hR: H.hip }),
       M(MAE_ENPI, { oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }));
-    // 7, 10 (aus dem Uraken und Yoko-geri): der linke Arm bleibt gestreckt vorn, die Faust öffnet sich und greift; die Hüfte
-    // steht dabei stark im Hanmi (Werte im Rahmen der Endstellung, kata-figur.js: hanmi). Erst mit dem Treffer dreht sie
+    // 7, 10 (aus dem Uraken und Yoko-geri; Kanku Dai 28, 31 ebenso) nach dem Editor des Nutzers: der linke Arm bleibt
+    // gestreckt vorn, die Faust öffnet sich und greift; die Hüfte steht dabei im Hanmi (Werte im Rahmen der Endstellung,
+    // kata-figur.js: hanmi), das Gewicht bleibt hinten (spaet). Alles fließend; erst zum Schluss explosiv: die Hüfte dreht
     // ein, die Hand zieht zurück und der Ellbogen schlägt in sie
     {
-      const GREIF = M(S.zks, { yaw: -92, chest: 0, hR: H.hip, oL: 1, hL: [0.72, -0.02, 0.1], eL: [0, -1, 0], pL: [0, -0.5, 0.85], fL: [1, 0, 0] });
+      const GREIF = M(S.zks, { yaw: -95, chest: 0, hR: H.hip, oL: 1, eL: [0, -1, 0], pL: [0, 0, -1] });
       KATA['mae-enpi-uraken'] = { keys: [
-        // Anfang = Endstellung des Uraken mit Yoko-geri-keage (KATA['uraken-keage'], gespiegelt), sonst dreht der Ellbogen zwischendurch hin und her
-        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.75, 0.04, 0.11], eL: [0.5, 0.05, -0.3], pL: [0, 0, -1] }) },
-        // Greifen: die Arme stehen still, nur die Hüfte dreht – je zwei gleiche Bilder, damit die Überblendung nicht zu den
-        // Nachbarbildern hin ausschwingt (Hand und Ellbogen wackelten vor und zurück)
-        { t: 0.3, p: GREIF }, { t: 0.32, p: GREIF },
-        { t: 0.72, p: M(GREIF, { yaw: -88 }) }, { t: 0.74, p: M(GREIF, { yaw: -88 }) },
-        { t: 1, p: M(MAE_ENPI, { oL: 1, hL: [-0.03, -0.1, 0.32], eL: [1, -0.6, 0.2], pL: [0, 0, -1], fL: [-1, 0.2, 0] }), e: 'kime' }] };
+        // Anfang nahe der Endstellung des Uraken mit Yoko-geri-keage (KATA['uraken-keage'], gespiegelt)
+        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.723, 0.019, 0.178], eL: [0.5, 0.05, -0.3], pL: [0, 0, -1] }) },
+        { t: 0.3, p: M(GREIF, { hL: [0.75, 0.04, 0.11] }), e: 'fl' },
+        { t: 0.32, p: M(GREIF, { hL: [0.743, 0.023, 0.084] }), e: 'fl' },
+        { t: 0.72, p: M(GREIF, { hL: [0.743, 0.02, 0.096] }), e: 'fl' },
+        { t: 0.86, p: M(GREIF, { yaw: -55, hL: [0.543, -0.1, 0.42] }), e: 'fl' },
+        { t: 1, p: M(S.zks, { chest: 5, oL: 1, hL: [-0.111, -0.183, 0.329], eL: [0.061, -0.306, 0.512], pL: [0, 0, -1],
+          hR: [0.066, -0.177, 0.161], eR: [-0.004, -0.299, 0.52] }), e: 'kime' }] };
     }
     // 11: Die linke Handkante fegt erst nach unten (Gedan-barai) und steigt dann zum Jodan-uke über die Stirn; dabei schlägt
     // der rechte Shuto vom Ohr im Bogen außen herum zum Hals (Endhaltung wie das Lexikon-Bild des Hizakutsu)
