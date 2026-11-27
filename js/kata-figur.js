@@ -75,7 +75,10 @@
   // nach vorn: weich anlaufen, dann schnell; hinunter wird er immer schneller (kvHoch)
   const kvVor = (u) => (u < KV_V ? 0 : smooth((u - KV_V) / (1 - KV_V)));
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
-  const SINKEN_U = 0.84; // sinken: bis hier sind Arme und Hüftdrehung fertig, danach sinkt die Hüfte tiefer
+  // sinken: bis SINKEN_U sind Arme und Hüftdrehung fertig; die Hüfte sinkt schon ab SINKEN_AB – die letzten Zentimeter der
+  // Arme und der Drehung gehen fließend ins Absinken über, ohne Halt dazwischen
+  const SINKEN_U = 0.95;
+  const SINKEN_AB = 0.72;
   const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
   const STRIKE = 0.17; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
   // Dauer einer gewöhnlichen Bewegung (Sekunden): Grundwert und Zuschlag je Grad Drehung – kurz, damit sie explosiv wirkt
@@ -277,8 +280,8 @@
   // (Heian Yondan 14, 18) – die Füße, Knie und das Gewicht laufen dabei wie bei einer langsamen Bewegung, nur eben in
   // diesem ersten Teil der Zeit;
   // anteil (langsame Bewegung): eigener Anteil der Zeit bis zur nächsten Ansage statt SLOW;
-  // sinken (langsame Bewegung): ist alles fertig (ab SINKEN_U), geht die Hüfte zum Abschluss noch so viele Meter tiefer in
-  // den Stand (Heian Yondan 14, 18);
+  // sinken (langsame Bewegung): zum Abschluss geht die Hüfte noch so viele Meter tiefer in den Stand – sie beginnt damit
+  // schon, während Arme und Hüftdrehung zu Ende gehen (SINKEN_AB, SINKEN_U), und ist mit der Bewegung fertig (Heian Yondan 14, 18);
   // zwischen (langsame Bewegung): { u, p } – Zwischenbild auf dem Weg in die Ausholhaltung beim Anteil u dieses Weges,
   // p mit Werten der Arme (echte Seiten, Bezug wie im Editor)
   // hanmi: die Hüfte bleibt im Raum stehen, während die Füße wenden (die Hüftdrehung des Ablaufs gilt im Rahmen der
@@ -985,8 +988,8 @@
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
     if (hG != null) h = hG;
-    // sinken: B steht schon tiefer – bis zum Schluss bleibt die Hüfte auf der Höhe davor, dann sinkt sie
-    if (seg.sinken) h += seg.sinken * eb * (1 - ramp(SINKEN_U, 1, uRoh));
+    // sinken: B steht schon tiefer – bis SINKEN_AB bleibt die Hüfte auf der Höhe davor, dann sinkt sie
+    if (seg.sinken) h += seg.sinken * eb * (1 - ramp(SINKEN_AB, 1, uRoh));
     if (seg.kv) {
       // Knie vor dem Körper: auf dem Standbein nur halb so tief wie im Stand danach, ganz hinunter erst mit dem Stampfen
       const pl = seg.feet[seg.kv.s];
@@ -1657,7 +1660,7 @@
           // der Füße, im Gleichschritt mit dem Stand ausgeglichen)
           const sw = tech.standErst ? (m.turn != null ? m.turn : wrap(m.body + cur.byaw)) : 0;
           arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: tech.standErst ? lerp(y0 + sw, y1, standErst(tech.standErst, u)) - sw * (1 - smooth(u / tech.standErst)) : lerp(y0, y1, tech.wechsel ? zweiteilig(tech.wechsel)(u) : smooth(u / dr)) }) : calm(cur.up, end);
-          // (sinken: Arme und Hüfte sind schon bei SINKEN_U fertig, danach sinkt nur noch die Hüfte)
+          // (sinken: Arme und Hüfte sind bei SINKEN_U fertig, die Hüfte sinkt da schon)
           if (tech.sinken) { const a0 = arms; arms = (u) => a0(Math.min(1, u / SINKEN_U)); }
         }
         else if (tech.direkt) {
