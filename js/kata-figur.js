@@ -416,11 +416,14 @@
   // Knie über den Treffer zurück zum angezogenen Knie; an: Anteil der Bewegung bis das Knie angezogen ist;
   // huefte: wie weit Hüftdrehung und Neigung des Tritts gelten (1 = ganz wie im Ablauf, darunter anteilig neben der Haltung
   // der Arme – beim Mae-geri bleibt die Abwehr davor stehen); mit: Anteil des Tritts, bei dem die Technik der Arme trifft;
+  // bremst: die Technik der Arme läuft nicht gleichmäßig bis mit, sondern bremst wie der Tritt lange ab (1 − (1 − x)^bremst) –
+  // der Tritt ist schon bei gut einem Drittel fast gestreckt; so kommen Faust und Fuß gemeinsam ins Ziel (Uraken mit
+  // Yoko-geri-keage, Heian Nidan 7, Heian Yondan 6, 9);
   // kurz, anMin: im schnellen Takt behält der Tritt selbst mindestens kurz Sekunden, solange fürs Anziehen der Anteil
   // anMin bleibt (sonst würde das Bein unglaubwürdig schnell)
   const TRITT = {
     mae: { def: 'mae-geri-chudan', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
-    'yoko-keage': { def: 'yoko-geri-keage', side: 'R', a: 0.32, b: 0.68, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.5, kniefuss: 0 },
+    'yoko-keage': { def: 'yoko-geri-keage', side: 'R', a: 0.32, b: 0.68, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.5, bremst: 2, kniefuss: 0 },
     'mae-jodan': { def: 'mae-geri-jodan', side: 'R', a: 0.27, b: 0.47, an: 0.42, anMin: 0.25, kurz: 0.24, huefte: 0.5 },
     // Kanku Dai 17, 22, 37: aus dem Ashi-zenkutsu hat die Hüfte einen weiten Weg bis über den Standfuß – im schnellsten
     // Takt bleibt dafür mehr Zeit (sonst wie mae-jodan)
@@ -471,7 +474,7 @@
   // Ablauf einer Technik als Funktion w = 0 (ausgeholt) … 1 (Endstellung)
   function track(tech, side) {
     const d = defOf(tech.def);
-    const keys = d.keys.map((k) => ({ t: k.t, e: k.e, p: side === tech.side ? k.p : flip(k.p) }));
+    const keys = d.keys.map((k) => ({ t: k.t, e: k.e, eGanz: k.eGanz, p: side === tech.side ? k.p : flip(k.p) }));
     const tl = E.timeline(keys);
     const t1 = tech.bis || keys[keys.length - 1].t;
     return (w) => upper(tl(lerp(tech.from, t1, clamp(w))));
@@ -1463,7 +1466,7 @@
           hand = ready ? (w) => (w < 0.35 ? upper(pre(w)) : tk((w - 0.35) / 0.65)) : tk;
         }
         const mit = tr.mit || 1;
-        const upAt = (u) => K.body(hand(Math.min(1, u / mit)), K.at(u).p, look);
+        const upAt = (u) => K.body(hand(tr.bremst ? 1 - (1 - Math.min(1, u / mit)) ** tr.bremst : Math.min(1, u / mit)), K.at(u).p, look);
         const tA = st.t + dK - tK;
         if (!ready) {
           const knee = { low: K.low(0), byaw, up: upAt(0) };
