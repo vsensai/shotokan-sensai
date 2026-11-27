@@ -1235,12 +1235,17 @@
     ], { eff: 'fistR' });
 
     /* Heian Godan */
-    // 14: Kake-uke wie im Lexikon, aber beim Ausholen weniger weit zur Gegenseite und mehr nach vorn – sonst drückt der linke
-    // Oberarm quer vor dem Körper in die Brust (Wunsch des Nutzers)
+    // 14: Kake-uke wie im Lexikon, aber beim Ausholen weniger weit zur Gegenseite – sonst drückt der linke Oberarm quer vor
+    // dem Körper in die Brust (Wunsch des Nutzers)
     {
       const KU = D['tc:kake-uke'].keys;
-      const aus = M(KU[3].p, { hL: stretch([-0.1, -0.3, 0.44], 'L'), eL: [0.6, -0.6, 0.5] });
-      KATA['kake-uke-godan'] = M(D['tc:kake-uke'], { keys: KU.map((k, i) => (i === 3 || i === 4 ? Object.assign({}, k, { p: aus }) : k)) });
+      // Bilder aus dem Bewegungs-Editor (Nutzer): die linke Hand holt nur knapp über die Mitte aus und zieht weiter, die
+      // rechte kommt dabei vor die Brust; alle Bilder fließend (kein Halt zwischen Ausholen und Abwehr)
+      const aus1 = M(KU[3].p, { hL: [-0.024, -0.324, 0.208], hR: [0.049, -0.17, 0.227], eL: [0.6, -0.6, 0.5] });
+      const aus2 = M(KU[4].p, { hL: [-0.106, -0.287, 0.221], hR: [0.104, -0.142, 0.217], eL: [0.6, -0.6, 0.5] });
+      const zur = M(KU[5].p, { eR: [-0.138, -0.577, 0.09] });
+      const neu = { 3: aus1, 4: aus2, 5: zur };
+      KATA['kake-uke-godan'] = M(D['tc:kake-uke'], { keys: KU.map((k, i) => (i >= 2 ? { t: k.t, p: neu[i] || k.p, e: 'fl' } : k)) });
     }
     // 15: Mikazuki-geri ohne Halt – das Knie kommt ohne Abbremsen hoch, der Tritt läuft mit Schwung weiter (kata-figur.js:
     // TRITT mikazuki-fluss)
