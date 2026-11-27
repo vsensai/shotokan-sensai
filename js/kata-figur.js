@@ -75,6 +75,7 @@
   // nach vorn: weich anlaufen, dann schnell; hinunter wird er immer schneller (kvHoch)
   const kvVor = (u) => (u < KV_V ? 0 : smooth((u - KV_V) / (1 - KV_V)));
   const SLOW = 0.6; // langsame Bewegung: Anteil der Zeit bis zur nächsten Ansage, den sie dauert
+  const SINKEN_U = 0.84; // sinken: bis hier sind Arme und Hüftdrehung fertig, danach sinkt die Hüfte tiefer
   const YORI = 0.45; // Dauer eines Yori-ashi (Sekunden): kurz und schnell
   const STRIKE = 0.17; // Sekunden für den Schlag bzw. Block am Ende einer Bewegung
   // Dauer einer gewöhnlichen Bewegung (Sekunden): Grundwert und Zuschlag je Grad Drehung – kurz, damit sie explosiv wirkt
@@ -273,7 +274,11 @@
   // standErst (langsame Bewegung): der Stand ist schon nach diesem Anteil der Zeit ganz eingenommen, die Arme bleiben
   // dabei in der Ausholhaltung (Kakiwake-uke: gekreuzt) und die Hüfte dreht im Raum erst zum Teil (STAND_ERST_HUEFTE); danach
   // öffnen die Arme langsam, und die Hüfte dreht gleichzeitig in ihre Endstellung – beide sind zugleich fertig
-  // (Heian Yondan 14, 18);
+  // (Heian Yondan 14, 18) – die Füße, Knie und das Gewicht laufen dabei wie bei einer langsamen Bewegung, nur eben in
+  // diesem ersten Teil der Zeit;
+  // anteil (langsame Bewegung): eigener Anteil der Zeit bis zur nächsten Ansage statt SLOW;
+  // sinken (langsame Bewegung): ist alles fertig (ab SINKEN_U), geht die Hüfte zum Abschluss noch so viele Meter tiefer in
+  // den Stand (Heian Yondan 14, 18);
   // zwischen (langsame Bewegung): { u, p } – Zwischenbild auf dem Weg in die Ausholhaltung beim Anteil u dieses Weges,
   // p mit Werten der Arme (echte Seiten, Bezug wie im Editor)
   // hanmi: die Hüfte bleibt im Raum stehen, während die Füße wenden (die Hüftdrehung des Ablaufs gilt im Rahmen der
@@ -381,7 +386,7 @@
     [/mae-enpi/i, { def: 'mae-enpi-uraken', side: 'R', from: 0, lang: true, hanmi: true, absetzen: true }, /heian yondan/i],
     [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25 }],
     [/jodan-uke \+ .*shuto/i, { def: 'jodan-uke-shuto-uchi', side: 'R', from: 0.25, lang: true, dur: 0.9 }],
-    [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22, standErst: 0.35 }, /heian yondan/i],
+    [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22, standErst: 0.3, anteil: 0.76, sinken: 0.04 }, /heian yondan/i],
     [/kakiwake-uke/i, { def: 'tc:kakiwake-uke', side: 'L', from: 0.22 }],
     [/hiza-tsuchi/i, { tritt: 'hiza', dur: 0.75 }],
     [/gyaku-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],
@@ -835,11 +840,13 @@
   // Namigaeshi: der Fuß wird hochgerissen, steht kurz oben und fällt dann immer schneller zurück auf seinen Platz
   const welle = (u) => (u < 0.28 ? smooth(u / 0.28) : u < 0.52 ? 1 : 1 - ((u - 0.52) / 0.48) ** 2);
 
-  function poseAt(seg, u) {
+  function poseAt(seg, uRoh) {
     const { A, B } = seg;
+    // (standZeit: die Arme laufen über die ganze Zeit, Füße, Hüfte und Gewicht schon bis standZeit)
+    const u = seg.standZeit ? clamp(uRoh / seg.standZeit) : uRoh;
     const eb = seg.ease(u);
     const byaw = seg.yawAt ? seg.yawAt(u) : lerp(A.byaw, B.byaw, eb);
-    const up = seg.arms(u);
+    const up = seg.arms(uRoh);
     const P = { w: [lerp(A.low.w[0], B.low.w[0], eb), lerp(A.low.w[1], B.low.w[1], eb)] };
     UP.forEach((k) => (P[k] = up[k]));
     if (seg.halteHand) {
@@ -910,6 +917,8 @@
       // (langsames Heranziehen am Boden: der Standfuß dreht erst zum Schluss ein, im Raum gerechnet)
       const steht = seg.gleiten && seg.gleiten.spaet && seg.gleiten.o === s;
       const ef = pl.moved ? seg.ease(uf) : steht ? ramp(GL_DREH, 1, u) : eb;
+      // (standZeit: das Knie des Standfußes dreht mit dem Fuß, nicht schon vorher mit dem Körper – sonst knickt es zur Seite)
+      const kpDreht = steht && seg.standZeit;
       let c = pl.moved ? via(fa.c, pl.mid, fb.c, ef) : fa.c;
       let rel = steht ? lerp(A.byaw + fa.rel, B.byaw + fb.rel, ef) - byaw : lerp(fa.rel, fb.rel, ef);
       // Drehen über die Ferse: der Knöchel bleibt, die Fußmitte kreist um ihn
@@ -950,7 +959,7 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up - ps, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up - ps, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : kpDreht ? rotY(mix3(fa.kp, fb.kp, ef), lerp(A.byaw, B.byaw, ef)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
       if (wl) Object.assign(P[s], wl(P[s]));
       // Fumikomi mit dem Knie vor dem Körper: hoch vor dem Körper und ohne Halt weiter, schnell nach vorn und hart hinunter
       if (seg.kv && seg.kv.s === s) {
@@ -976,6 +985,8 @@
     // Hüfthöhe: wie im Stand, aber nie höher, als beide Beine reichen (die Stände der Karte sind verschieden lang)
     let h = lerp(A.low.h, B.low.h, eb) + (seg.air ? seg.air * Math.pow(Math.sin(Math.PI * u), 2) : 0);
     if (hG != null) h = hG;
+    // sinken: B steht schon tiefer – bis zum Schluss bleibt die Hüfte auf der Höhe davor, dann sinkt sie
+    if (seg.sinken) h += seg.sinken * eb * (1 - ramp(SINKEN_U, 1, uRoh));
     if (seg.kv) {
       // Knie vor dem Körper: auf dem Standbein nur halb so tief wie im Stand danach, ganz hinunter erst mit dem Stampfen
       const pl = seg.feet[seg.kv.s];
@@ -1396,7 +1407,7 @@
       // Sprungschritt aus dem aufrechten Stand: etwas mehr Zeit für Absprung und Flug
       const ausStand = sprung && cur.low.h > 0.85;
       const tobi = /tobikomi/i.test(m.h || '');
-      const d = st.slow ? SLOW * gap
+      const d = st.slow ? ((tech && tech.anteil) || SLOW) * gap
         : Math.min((tech && tech.dur) || (m.via ? 0.9 : yori ? YORI : tobi ? 0.9 : ausStand ? 1.0 : sprung ? 0.75 : STEP[0] + STEP[1] * Math.abs(m.turn || 0)), (tech && tech.schnapp ? 0.55 : 0.85) * gap);
       // Blick zur Seite, wenn die Bodenkarte einen nennt (bezogen auf die Körperrichtung)
       // Genau entgegen (Bassai Dai 41: Blick schräg nach links vorn, Fuß und Hand nach rechts hinten) wäre die Seite offen:
@@ -1646,6 +1657,8 @@
           // der Füße, im Gleichschritt mit dem Stand ausgeglichen)
           const sw = tech.standErst ? (m.turn != null ? m.turn : wrap(m.body + cur.byaw)) : 0;
           arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: tech.standErst ? lerp(y0 + sw, y1, standErst(tech.standErst, u)) - sw * (1 - smooth(u / tech.standErst)) : lerp(y0, y1, tech.wechsel ? zweiteilig(tech.wechsel)(u) : smooth(u / dr)) }) : calm(cur.up, end);
+          // (sinken: Arme und Hüfte sind schon bei SINKEN_U fertig, danach sinkt nur noch die Hüfte)
+          if (tech.sinken) { const a0 = arms; arms = (u) => a0(Math.min(1, u / SINKEN_U)); }
         }
         else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen
@@ -1670,9 +1683,13 @@
         arms = (u) => M(raw(u), { look: lerp(from, look, ramp(0, 0.3, u)) });
       }
       const nk = key(m, st.stance, cur, end, tech && tech.stand);
+      if (st.slow && tech && tech.sinken) nk.low = Object.assign({}, nk.low, { h: nk.low.h - tech.sinken });
       const o = { t0: st.t, t1: st.t + d, arms };
       if (tech && tech.direkt && tech.hikiteBleibt) o.halteHand = { s: side === 'R' ? 'L' : 'R', uS };
-      if (st.slow) o.ease = tech && tech.wechsel ? zweiteilig(tech.wechsel) : tech && tech.standErst ? (u) => smooth(clamp(u / tech.standErst)) : smooth;
+      if (st.slow) o.ease = tech && tech.wechsel ? zweiteilig(tech.wechsel) : smooth;
+      // standErst: die Beine laufen wie eine langsame Bewegung, nur im ersten Teil der Zeit (poseAt: standZeit)
+      if (st.slow && tech && tech.standErst) o.standZeit = tech.standErst * (tech.sinken ? SINKEN_U : 1);
+      if (st.slow && tech && tech.sinken) o.sinken = tech.sinken;
       // Wechseln beide Füße den Platz, geht zuerst der, mit dem die Füße dazwischen näher beieinander stehen (Heian Sandan 19:
       // erst der rechte neben den linken, dann der linke hinaus); beim Yori-ashi gleiten beide zugleich
       const gap2 = (a, b) => len(sub(a.low.L.c, b.low.R.c));
