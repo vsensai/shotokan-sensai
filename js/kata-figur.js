@@ -46,7 +46,8 @@
   const GL_RUECKT = 0.15;
   const GL_FUSS = [0.15, 0.88]; // Anteile der Dauer: so lange gleitet der Fuß
   const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
-  const KR_KNIE = [0.12, 0.37, 0.6]; // Kreuzschritt aus dem Kiba-dachi: Standknie dreht nach vorn, solange die Hüfte hinübergeht; danach das andere
+  const KR_KNIE = [0.15, 0.4, 0.65, 0.9]; // Kreuzschritt aus dem Kiba-dachi: bis [0] stellen sich die Knie über die Füße; das ziehende
+  // Bein bleibt so bis [1] und geht bis [2] in seine Kniestellung über, das Standbein ab [3]
   const GL_DREH = 0.8; // ab hier dreht der Standfuß ein und die Hüfte geht in die Mitte des Standes
   const GL_SINKEN = 0.75; // in einen tieferen Stand: bis hier ist die Hüfte unten (etwas vor dem gleitenden Fuß)
   const GL_REICHT = 0.88; // so weit (Anteil der Reichweite) streckt sich das gleitende Bein dabei höchstens
@@ -784,12 +785,9 @@
         Object.assign(seg.feet[s], { u0: GL_FUSS[0], u1: GL_FUSS[1], gleitet: true });
         if (both) seg.feet[o2].gleitet = true;
         seg.gleiten = { s, o: o2, spaet: !both && Math.abs(wrap(B.byaw + B.low[o2].rel - A.byaw - A.low[o2].rel)) <= GL_WENDE };
-        // Kreuzschritt (Tekki 7, 21): Das Knie des Standbeins richtet sich mit dem Gewicht über dem Fuß aus und zeigt geradeaus
-        // wie im Kreuzschritt – behielte es die Richtung des Kiba-dachi, stünde es über dem Fuß weit außen, und die Figur
-        // kippte zur Seite
-        // – aber erst, wenn die Hüfte hinüberwandert (KR_KNIE); im breiten Stand bleiben beide Knie nach außen gedrückt, sonst
-        // fielen sie zu Beginn nach innen. Das heranziehende Bein richtet sein Knie erst aus, wenn es unter den Körper kommt
-        if (o.kreuz > 0 && !both) seg.knee = { w: (u) => ramp(KR_KNIE[0], KR_KNIE[1], u), ws: { [s]: (u) => ramp(KR_KNIE[1], KR_KNIE[2], u) }, [o2]: rotY(B.low[o2].kp, B.byaw), [s]: rotY(B.low[s].kp, B.byaw) };
+        // Kreuzschritt (Tekki 7, 21): Die Knie bleiben (von vorne gesehen) über ihren Füßen stehen, nur die Hüfte wandert
+        // über das Standbein; danach zieht das andere Bein nach (kreuzKnie, gerechnet mit der fertigen Hüfte)
+        if (o.kreuz > 0 && !both) seg.kreuzKnie = { o: o2, s };
       }
     }
     // Kreuzschritt aus einem breiten Stand (Tekki 7, 21 aus dem Kiba-dachi): erst geht das Gewicht hinüber – die Hüfte
@@ -1006,7 +1004,7 @@
       const ank = sub(c, mul(fwd(yaw), FOOT_MID));
       // Sohle: von selbst (nach unten), außer ein Bild gibt sie vor (angezogenes Knie vor und nach einem Tritt)
       const so = seg.sole && seg.sole[s];
-      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up - ps, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], ((seg.knee.ws && seg.knee.ws[s]) || seg.knee.w)(u)) : kpDreht ? rotY(mix3(fa.kp, fb.kp, ef), lerp(A.byaw, B.byaw, ef)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
+      P[s] = { x: ank[0], z: ank[1], y, yaw, pitch: lerp(fa.pitch, fb.pitch, ef) - 25 * up - ps, tu: lerp(fa.tu, fb.tu, ef), kp: seg.knee && seg.knee[s] ? mix3(rotY(mix3(fa.kp, fb.kp, ef), byaw), seg.knee[s], seg.knee.w(u)) : kpDreht ? rotY(mix3(fa.kp, fb.kp, ef), lerp(A.byaw, B.byaw, ef)) : rotY(mix3(fa.kp, fb.kp, ef), byaw), sole: so ? rotY(mix3(so[0], so[1], ef), byaw) : [0, 0, 0] };
       if (wl) Object.assign(P[s], wl(P[s]));
       // Fumikomi mit dem Knie vor dem Körper: hoch vor dem Körper und ohne Halt weiter, schnell nach vorn und hart hinunter
       if (seg.kv && seg.kv.s === s) {
@@ -1058,6 +1056,33 @@
       h = wk > 0 ? lerp(Math.min(h, reach), -KV_WEICH * Math.log(Math.exp(-h / KV_WEICH) + Math.exp(-reach / KV_WEICH)), wk) : Math.min(h, reach);
     });
     P.pelvis = [pel[0], h, pel[1]];
+    // Kreuzschritt: Knie von vorne gesehen über dem Knöchel (seitlich im Körperrahmen), nach vorn so weit es das Bein
+    // verlangt – das Standknie fällt nicht nach innen, während die Hüfte hinüberwandert
+    if (seg.kreuzKnie) {
+      const e = [Math.cos(byaw * RAD), 0, -Math.sin(byaw * RAD)];
+      const f3 = [Math.sin(byaw * RAD), 0, Math.cos(byaw * RAD)];
+      const wt = { [seg.kreuzKnie.o]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[3], 1, u)), [seg.kreuzKnie.s]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[1], KR_KNIE[2], u)) };
+      ['L', 'R'].forEach((q) => {
+        if (!(wt[q] > 0)) return;
+        const lp3 = [Math.cos((P.yaw || 0) * RAD), 0, -Math.sin((P.yaw || 0) * RAD)];
+        const hip = [P.pelvis[0] + lp3[0] * (q === 'L' ? HIP : -HIP), P.pelvis[1], P.pelvis[2] + lp3[2] * (q === 'L' ? HIP : -HIP)];
+        const an = [P[q].x, P[q].y, P[q].z];
+        const d = [an[0] - hip[0], an[1] - hip[1], an[2] - hip[2]];
+        const dist = Math.min(Math.hypot(...d), 0.88 * 0.999);
+        const dn = norm3(d);
+        const c = hip.map((v, i) => v + dn[i] * dist / 2);
+        const r = Math.sqrt(Math.max(0, 0.44 * 0.44 - (dist / 2) ** 2));
+        const u1 = norm3(e.map((v, i) => v - dn[i] * dot3(e, dn)));
+        let v1 = cross3(dn, u1);
+        if (dot3(v1, f3) < 0) v1 = v1.map((v) => -v);
+        const ue = dot3(u1, e);
+        if (r < 1e-4 || Math.abs(ue) < 1e-4) return;
+        const want = dot3(an.map((v, i) => v - c[i]), e);
+        const cs = clamp(want / (r * ue), -1, 1);
+        const pole = u1.map((v, i) => v * cs + v1[i] * Math.sqrt(1 - cs * cs));
+        P[q] = Object.assign({}, P[q], { kp: norm3(mix3(norm3(P[q].kp), pole, wt[q])) });
+      });
+    }
     return E.full(P);
   }
 

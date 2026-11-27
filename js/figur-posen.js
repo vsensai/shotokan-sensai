@@ -1269,12 +1269,13 @@
       M(S.zks, { oL: 1, oR: 1, hL: [-0.13, 0.18, 0.12], eL: [-0.1, -0.2, 1], pL: [-1, 0, 0], hR: stretch([0.04, -0.46, 0.42], 'R'), pR: [1, 0, 0] }));
 
     /* Tekki Shodan */
-    // Kreuzschritt (Hidari Ashi-mae Kosa: 1, 21; gespiegelt 7): das linke Bein steht ganz vor dem rechten – der linke Fuß
-    // gut eine Fußlänge weiter vorn und knapp rechts vom rechten. Jedes Knie steht über seinem Fuß und zeigt geradeaus: das
-    // tragende rechte über dem Fuß (sonst kippte die Figur zur Seite), das kreuzende linke direkt davor, die Knie schließen
-    // sich. Die Hüfte bleibt tief, kaum höher als im Kiba-dachi (Tekki). Früher zeigten beide Knie weit nach außen, gut 20 cm
-    // neben dem Fuß, und die Hüfte kam 12 cm hoch. Der Abstand nach vorn (L.z) gilt auch für die Füße der Kata (KVOR).
-    S.kosamae = { pelvis: [-0.05, 0.72, 0.05], L: { x: -0.1, z: 0.45, yaw: 0, kp: [-0.1, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [0, 0, 1] }, w: [0.1, 0.9] };
+    // Kreuzschritt (Hidari Ashi-mae Kosa: 1, 21; gespiegelt 7), ähnlich einem Kosa-dachi nach vorn: der linke Fuß landet
+    // fast neben dem rechten, knapp auf dessen anderer Seite und etwas weiter vorn. Die Knie kreuzen sich nicht – das
+    // rechte (tragende) steht über seinem Fuß und zeigt geradeaus, das linke liegt außen daneben; gekreuzt sind nur die
+    // Unterschenkel, der linke vor dem rechten. Die Hüfte bleibt tief, kaum höher als im Kiba-dachi (Tekki). Auf dem Weg
+    // dorthin bleiben die Knie über den Füßen, nur die Hüfte wandert (kreuzKnie in js/kata-figur.js). Der Abstand nach
+    // vorn (L.z) gilt auch für die Füße der Kata (KVOR).
+    S.kosamae = { pelvis: [-0.03, 0.7, -0.1], L: { x: -0.06, z: 0.26, yaw: 0, kp: [0.6, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [0, 0, 1] }, w: [0.1, 0.9] };
     // Yoi: Heisoku-dachi, beide Arme gestreckt, die offenen Hände mittig vor dem Körper genau übereinander – die rechte am
     // Körper, die linke Handfläche auf ihrem Rücken. Das Handgelenk bleibt gerade: die Finger zeigen in der Linie des Arms
     // (Schulter → Hand) schräg nach unten zur Mitte, die Handfläche zum Körper
