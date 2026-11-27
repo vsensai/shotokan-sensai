@@ -1298,13 +1298,14 @@
     // links (das Lexikon beginnt mit den Fäusten an den Hüften, wie in Heian Godan 14)
     const TK_LINKS = M(KB, { look: 90, sL: 1, hL: stretch([0.74, -0.1, 0.04], 'L'), hR: [0.07, -0.2, 0.3], eR: [-0.7, -0.25, 0.3] });
     const TK_AN = M(KB, { look: 90, hL: [0.17, -0.3, 0.2], eL: [0.5, -0.8, -0.2], pL: [0, -1, 0], hR: [0.12, -0.17, 0.3], eR: [-0.75, -0.2, 0.25] });
-    const TK_MITTE = M(KB, { look: 90, oL: 1, hL: [-0.04, -0.31, 0.22], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [0.16, -0.15, 0.29], eR: [-0.8, -0.15, 0.2] });
-    // (Ausholen und Zurückziehen wie der Kake-uke des Lexikons vor der Änderung aus Heian Godan 14 – Tekki bleibt so)
-    const TK_RECHTS = M(KB, { look: 90, oL: 1, sL: 1, hL: stretch([-0.36, -0.3, 0.22], 'L'), pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.18, -0.14, 0.28], eR: [-0.8, -0.15, 0.2] });
-    const TK_ZURUECK = M(KU_ZURUECK, { hR: [-0.1, -0.28, 0.16], eR: [-0.6, -0.8, 0] });
-    // Fließend durch die Zwischenbilder ('fl'); nur ganz rechts kommt der Arm kurz zur Ruhe, bevor er zurückzieht
+    // Ausholen und Zurückziehen wie der Kake-uke des Lexikons (Bilder des Nutzers aus Heian Godan 14): die linke Hand holt
+    // nur knapp über die Mitte aus; die rechte Faust steht vom Kagi-zuki schon links und bleibt dabei vor der Brust
+    const TK_MITTE = M(KB, { look: 90, oL: 1, hL: KU_MITTE.hL, eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [0.16, -0.15, 0.29], eR: [-0.8, -0.15, 0.2] });
+    const TK_RECHTS = M(KU_AUS, { sL: 1, hR: [0.15, -0.155, 0.25] });
+    const TK_RECHTS2 = M(KU_AUS2, { sL: 1 });
+    // Fließend durch alle Zwischenbilder ('fl'), ohne Halt
     KATA['kake-uke-langsam'] = { keys: [{ t: 0, p: TK_LINKS }, { t: 0.1, p: TK_AN, e: 'fl' }, { t: 0.14, p: TK_MITTE, e: 'fl' }, { t: 0.2, p: TK_RECHTS, e: 'fl' },
-      { t: 0.22, p: TK_RECHTS }, { t: 0.36, p: TK_ZURUECK, e: 'fl' }, { t: 0.5, p: KU3, e: 'fl' }] };
+      { t: 0.22, p: TK_RECHTS2, e: 'fl' }, { t: 0.36, p: KU_ZURUECK, e: 'fl' }, { t: 0.5, p: KU3, e: 'fl' }] };
     // 3, 17: Mae-enpi zur Seite in die offene Hand – die Hand steht vom Kake-uke noch seitlich draußen, Hüfte und Oberkörper
     // drehen zu ihr ein und der Ellbogen schlägt in ihre Handfläche (Arme zur Brust wie beim Mae-enpi in Heian Yondan); die
     // Füße bleiben im Kiba-dachi
