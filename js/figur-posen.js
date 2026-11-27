@@ -1690,19 +1690,20 @@
     ['tc:otoshi-enpi', 'tc:otoshi-zuki'].forEach((id) => NEU(id, IMPULS(D[id], { y: 0.025 })));
 
     /* ---------- Korrekturen des Nutzers am Lexikon (die freigegebenen Kata behalten die Fassung davor, BISHER) ---------- */
-    // Uraken-uchi: dynamischer wie eine Peitsche – der Ellbogen führt zur Seite, der Unterarm schnellt hart ins Ziel und
-    // schnappt sofort zurück an die rechte Brustwarze, Faustrücken oben, Ellbogen zur Seite. Die Hüfte federt beim Ausholen
-    // kurz zur Gegenseite und dreht mit dem Treffer etwas zur Seite des Schlags
+    // Uraken-uchi: dynamischer wie eine Peitsche – der Ellbogen führt auf einer Linie genau zur Seite, der Unterarm schnellt
+    // hart ins Ziel und schnappt sofort zurück an die rechte Brustwarze, Faustrücken oben, Ellbogen zur Seite. Die Hüfte
+    // federt beim Ausholen kurz zur Gegenseite und dreht mit dem Treffer etwas zur Seite des Schlags (Bilder nach dem Editor
+    // des Nutzers)
     const UR = (yaw, o) => M(KB, { yaw, look: -90 }, o);
-    const UR0 = UR(0, { hR: [0.16, -0.06, 0.2], eR: [-0.6, -0.2, 0.8], pR: [0.3, 0, -1] });
-    const UR_HIT = UR(-5, { hR: [-0.74, -0.01, 0.06], eR: [-0.2, 0.5, -0.6], pR: [0, 0, 1] });
+    const UR0 = UR(0, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] });
+    const UR_HIT = UR(-5, { hR: [-0.725, 0.08, 0.114], eR: [-0.598, 0.038, 0.027], pR: [0, 0, 1] });
     NEU('tc:uraken-uchi', M(D['tc:uraken-uchi'], { keys: [
       { t: 0, p: UR0 }, { t: 0.3, p: UR0 },
-      { t: 0.39, p: UR(8, { hR: [-0.12, 0.0, 0.22], eR: [-1, 0.2, 0.1], pR: [0.5, 0, -0.87] }), e: 'fl' },
-      { t: 0.44, p: UR(3, { hR: [-0.48, 0.0, 0.18], eR: [-1, 0.25, -0.2], pR: [0.8, 0, 0.5] }), e: 'fl' },
-      { t: 0.48, p: UR_HIT, e: 'kime' }, { t: 0.52, p: UR_HIT },
-      { t: 0.64, p: UR(-2, { hR: [-0.1, -0.1, 0.21], eR: [-1, -0.2, -0.1], pR: [0, -1, 0] }), e: 'kime' },
-    ], best: 0.48, dur: 1 }));
+      { t: 0.39, p: UR(8, { hR: [-0.12, 0.0, 0.22], eR: [-0.404, 0.077, 0.437], pR: [0, -1, 0] }), e: 'fl', eGanz: true },
+      { t: 0.54, p: UR(3, { hR: [-0.467, 0.02, 0.388], eR: [-0.309, 0.031, -0.513], pR: [0, -1, 0] }), e: 'fl', eGanz: true },
+      { t: 0.59, p: UR_HIT, e: 'kime', eGanz: true }, { t: 0.63, p: UR_HIT },
+      { t: 0.75, p: UR(-2, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] }), e: 'kime', eGanz: true },
+    ], best: 0.59, dur: 1 }));
     // Furi-enpi: der Schritt ist schneller – Knie hoch in 0,3 s statt 0,6 s, Aufstampfen und Ellbogen gleich danach; das
     // Knie kommt dabei höher (Oberschenkel etwa waagerecht)
     const FEY = 0.6, FEP = -30;

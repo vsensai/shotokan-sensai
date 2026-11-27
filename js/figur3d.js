@@ -791,7 +791,7 @@ void main(){
   }
   // fix: optionale Korrektur jedes fertig gemischten Bildes (z. B. Fuß fest zum Unterschenkel), ändert die Pose nicht in place
   function timeline(keys, fix) {
-    const K = keys.map((k) => Object.assign({ t: k.t, e: k.e || 'io' }, { p: full(k.p) }));
+    const K = keys.map((k) => Object.assign({ t: k.t, e: k.e || 'io', eGanz: !!k.eGanz }, { p: full(k.p) }));
     // Bilder ohne Sohlenangabe (automatisch, Sohle nach unten bzw. hinten): die berechnete Sohle eintragen – das Bild bleibt gleich,
     // aber der Übergang zu einem Bild mit vorgegebener Sohle wird stetig (sonst schnappt die Sohle beim Überblenden um)
     K.forEach((k) => {
@@ -822,7 +822,27 @@ void main(){
       const g = (j) => K[Math.max(0, Math.min(K.length - 1, j))].p;
       return blend(g(i - 1), g(i), g(i + 1), g(i + 2), u);
     };
-    return fix ? (t) => fix(raw(t), t) : raw;
+    // Ellbogenrichtung (nur zu Bildern mit eGanz): Haben beide Bilder eine ganze Vorgabe (Länge ≥ 0,5), bleibt sie auch
+    // dazwischen ganz. Wert für Wert gemischt wird der Vektor beim Schwenken (z. B. von vorn nach hinten) kurz und die
+    // automatische Richtung (nach unten) blendete sich ein – der Ellbogen sackte mitten in der Bewegung ab (Uraken-uchi im
+    // Lexikon; als Vorgabe je Bild, damit die freigegebenen Kata unverändert bleiben)
+    const ganz = (t) => {
+      const p = raw(t);
+      if (t <= K[0].t || t >= K[K.length - 1].t) return p;
+      let i = 0;
+      while (K[i + 1].t < t) i++;
+      let o = p;
+      ['L', 'R'].forEach((s) => {
+        const k = 'e' + s;
+        const v = p[k];
+        const l = len(v);
+        if (!K[i + 1].eGanz || l >= 0.5 || l < 1e-6 || len(K[i].p[k]) < 0.5 || len(K[i + 1].p[k]) < 0.5) return;
+        if (o === p) o = Object.assign({}, p);
+        o[k] = mul(v, 0.5 / l);
+      });
+      return o;
+    };
+    return fix ? (t) => fix(ganz(t), t) : ganz;
   }
 
   /* ---------- Bildqualität: Auflösung beim Bewegen (Lexikon und Kata-Trainer) ---------- */
