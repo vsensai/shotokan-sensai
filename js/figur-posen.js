@@ -1218,7 +1218,7 @@
       const GREIF = M(S.zks, { yaw: -92, chest: 0, hR: H.hip, oL: 1, hL: [0.72, -0.02, 0.1], eL: [0, -1, 0], pL: [0, -0.5, 0.85], fL: [1, 0, 0] });
       KATA['mae-enpi-uraken'] = { keys: [
         // Anfang = Endstellung des Uraken-uchi im Lexikon (gespiegelt), sonst dreht der Ellbogen zwischendurch hin und her
-        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.725, 0.08, 0.114], eL: [0.598, 0.08, 0.027], pL: [0, 0, 1] }) },
+        { t: 0, p: M(S.zks, { yaw: -95, chest: 0, hR: H.hip, hL: [0.725, 0.03, 0.114], eL: [0.598, 0.08, 0.027], pL: [0, 0, 1] }) },
         // Greifen: die Arme stehen still, nur die Hüfte dreht – je zwei gleiche Bilder, damit die Überblendung nicht zu den
         // Nachbarbildern hin ausschwingt (Hand und Ellbogen wackelten vor und zurück)
         { t: 0.3, p: GREIF }, { t: 0.32, p: GREIF },
@@ -1699,11 +1699,11 @@
     // des Nutzers)
     const UR = (yaw, o) => M(KB, { yaw, look: -90 }, o);
     const UR0 = UR(0, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] });
-    const UR_HIT = UR(-5, { hR: [-0.725, 0.08, 0.114], eR: [-0.598, 0.08, 0.027], pR: [0, 0, 1] });
+    const UR_HIT = UR(-5, { hR: [-0.725, 0.03, 0.114], eR: [-0.598, 0.08, 0.027], pR: [0, 0, 1] });
     NEU('tc:uraken-uchi', M(D['tc:uraken-uchi'], { keys: [
       { t: 0, p: UR0 }, { t: 0.3, p: UR0 },
       { t: 0.39, p: UR(8, { hR: [-0.12, 0.0, 0.22], eR: [-0.404, 0.04, 0.437], pR: [0, -1, 0] }), e: 'fl', eGanz: true },
-      { t: 0.54, p: UR(3, { hR: [-0.467, 0.02, 0.388], eR: [-0.309, 0.031, -0.513], pR: [0, -1, 0] }), e: 'fl', eGanz: true },
+      { t: 0.54, p: UR(3, { hR: [-0.467, 0.02, 0.388], eR: [-0.309, 0, -0.513], pR: [0, -1, 0] }), e: 'fl', eGanz: true },
       { t: 0.59, p: UR_HIT, e: 'kime', eGanz: true }, { t: 0.63, p: UR_HIT },
       { t: 0.75, p: UR(3, { hR: [0.149, -0.07, 0.208], eR: [-0.315, 0.031, 0.51], pR: [0, -1, 0] }), e: 'kime', eGanz: true },
     ], best: 0.59, dur: 1 }));
