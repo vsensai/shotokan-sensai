@@ -1270,12 +1270,13 @@
 
     /* Tekki Shodan */
     // Kreuzschritt (Hidari Ashi-mae Kosa: 1, 21; gespiegelt 7): das linke Bein steht ganz vor dem rechten – der linke Fuß
-    // gut eine Fußlänge weiter vorn und rechts vom rechten. Das rechte Bein trägt und steht gerade darunter: sein Knie zeigt
-    // nach vorn (nur wenig nach außen) und knickt nicht zur Seite weg; das linke kreuzt mit dem Knie nach vorn ganz vor dem
-    // rechten Bein. Damit die Beine dabei nicht ineinander geraten, steht der linke Fuß so weit vorn und die Hüfte etwas
-    // höher als im Kiba-dachi, aber nicht aufgerichtet (Tekki). Der Abstand nach vorn (L.z) gilt auch für die Füße der Kata
-    // (KVOR).
-    S.kosamae = { pelvis: [-0.08, 0.78, 0.1], L: { x: -0.18, z: 0.3, yaw: 0, kp: [0.6, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [-0.7, 0, 1] }, w: [0.1, 0.9] };
+    // gut eine Fußlänge weiter vorn und eine Fußbreite rechts vom rechten. Jedes Knie steht über seinem Fuß: das kreuzende
+    // linke senkrecht darüber und vor dem rechten Knie, das tragende rechte zeigt nur leicht nach außen. Früher zeigten beide
+    // Knie weit nach außen (gut 20 cm neben dem Fuß) – die Beine sahen aus wie ein X, so kann niemand stehen. Damit die
+    // Oberschenkel dabei nicht ineinander geraten, kreuzen die Füße seitlich nur wenig (L.x), der linke steht weiter vorn
+    // und die Hüfte etwas höher als im Kiba-dachi, aber nicht aufgerichtet (Tekki). Der Abstand nach vorn (L.z) gilt auch
+    // für die Füße der Kata (KVOR).
+    S.kosamae = { pelvis: [-0.05, 0.8, 0.19], L: { x: -0.1, z: 0.38, yaw: 0, kp: [-0.2, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [-0.4, 0, 1] }, w: [0.1, 0.9] };
     // Yoi: Heisoku-dachi, beide Arme gestreckt, die offenen Hände mittig vor dem Körper genau übereinander – die rechte am
     // Körper, die linke Handfläche auf ihrem Rücken. Das Handgelenk bleibt gerade: die Finger zeigen in der Linie des Arms
     // (Schulter → Hand) schräg nach unten zur Mitte, die Handfläche zum Körper
