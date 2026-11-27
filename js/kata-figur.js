@@ -205,6 +205,12 @@
     const m = (0.5 * a) / (1 - a);
     return 0.8 * (x * x * (3 - 2 * x) + m * (x * x * x - x * x));
   };
+  // Hüftdrehung bei standErst: bis a mit dem Stand zum Anteil STAND_ERST_HUEFTE, dann langsam mit den Armen zu Ende
+  const STAND_ERST_HUEFTE = 0.6;
+  const io3 = (u) => { u = clamp(u); return u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
+  const standErst = (a, u) => (u < a ? STAND_ERST_HUEFTE * smooth(u / a) : STAND_ERST_HUEFTE + (1 - STAND_ERST_HUEFTE) * io3((u - a) / (1 - a)));
+  // (im selben Verlauf wie das Öffnen der Arme: Übergang 'io' der Figur)
+
   const ramp = (a, b, v) => smooth((v - a) / (b - a));
   const wrap = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
   const fwd = (deg) => [Math.sin(deg * RAD), Math.cos(deg * RAD)];
@@ -264,6 +270,10 @@
   // ganz: Ablauf des Lexikons samt Beinen und Hüfte (Sprung), ab Schlüsselbild von – er wird an die Plätze der Kata gelegt
   // wechsel (langsame Bewegung): der Stand wechselt bis zu diesem Anteil der Zeit schnell zu 80 % (Gewichtsverlagerung,
   // die Arme gehen dabei in die Ausholhaltung), der Rest des Standes läuft langsam mit der Armtechnik (Heian Yondan 2);
+  // standErst (langsame Bewegung): der Stand ist schon nach diesem Anteil der Zeit ganz eingenommen, die Arme bleiben
+  // dabei in der Ausholhaltung (Kakiwake-uke: gekreuzt) und die Hüfte dreht im Raum erst zum Teil (STAND_ERST_HUEFTE); danach
+  // öffnen die Arme langsam, und die Hüfte dreht gleichzeitig in ihre Endstellung – beide sind zugleich fertig
+  // (Heian Yondan 14, 18);
   // zwischen (langsame Bewegung): { u, p } – Zwischenbild auf dem Weg in die Ausholhaltung beim Anteil u dieses Weges,
   // p mit Werten der Arme (echte Seiten, Bezug wie im Editor)
   // hanmi: die Hüfte bleibt im Raum stehen, während die Füße wenden (die Hüftdrehung des Ablaufs gilt im Rahmen der
@@ -371,7 +381,7 @@
     [/mae-enpi/i, { def: 'mae-enpi-uraken', side: 'R', from: 0, lang: true, hanmi: true, absetzen: true }, /heian yondan/i],
     [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25 }],
     [/jodan-uke \+ .*shuto/i, { def: 'jodan-uke-shuto-uchi', side: 'R', from: 0.25, lang: true, dur: 0.9 }],
-    [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22, wechsel: 0.5 }, /heian yondan/i],
+    [/kakiwake-uke/i, { def: 'kakiwake-uke-spaet', side: 'L', from: 0.22, standErst: 0.35 }, /heian yondan/i],
     [/kakiwake-uke/i, { def: 'tc:kakiwake-uke', side: 'L', from: 0.22 }],
     [/hiza-tsuchi/i, { tritt: 'hiza', dur: 0.75 }],
     [/gyaku-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],
@@ -1601,7 +1611,7 @@
         if (tech.ruhig) arms = calm(cur.up, end);
         else if (st.slow) {
           // langsam: ruhig in die Ausholhaltung, dann der Ablauf über den Rest (Haltungen ohne Ablauf: einfach hinein)
-          const uA = tech.wechsel || 0.35;
+          const uA = tech.wechsel || tech.standErst || 0.35;
           // zwischen: Zwischenbild auf dem Weg in die Ausholhaltung (Arm sinkt im Bogen, Ellbogen geht mit)
           const zb = tech.zwischen;
           const gerade = zb && E.timeline([{ t: 0, p: cur.up }, { t: 1, p: tr(0), e: 'lin' }]);
@@ -1632,7 +1642,10 @@
           const lauf = tech.lang ? (w) => { const a = tr(w); const f = 1 - smooth(clamp(w / 0.35)); return f > 0 ? M(a, vor(a, f)) : a; } : tr;
           // (drehung: die Hüfte ist schon nach diesem Anteil der Bewegung fertig gedreht – Bassai Dai 18)
           const dr = tech.drehung || 1;
-          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: lerp(y0, y1, tech.wechsel ? zweiteilig(tech.wechsel)(u) : smooth(u / dr)) }) : calm(cur.up, end);
+          // (standErst: die Hüfte dreht im Raum – nicht nur mit den Füßen – erst zum Teil, den Rest mit den Armen; sw: Wendung
+          // der Füße, im Gleichschritt mit dem Stand ausgeglichen)
+          const sw = tech.standErst ? (m.turn != null ? m.turn : wrap(m.body + cur.byaw)) : 0;
+          arms = defOf(tech.def).keys.length > 1 ? (u) => M(u < uP ? upper(pre(u)) : lauf((u - uP) / (1 - uP)), { yaw: tech.standErst ? lerp(y0 + sw, y1, standErst(tech.standErst, u)) - sw * (1 - smooth(u / tech.standErst)) : lerp(y0, y1, tech.wechsel ? zweiteilig(tech.wechsel)(u) : smooth(u / dr)) }) : calm(cur.up, end);
         }
         else if (tech.direkt) {
           // Stoß: Haltung bleibt, bis der Schritt fast steht – dann Hüfte, Stoß und Hikite zusammen
@@ -1659,7 +1672,7 @@
       const nk = key(m, st.stance, cur, end, tech && tech.stand);
       const o = { t0: st.t, t1: st.t + d, arms };
       if (tech && tech.direkt && tech.hikiteBleibt) o.halteHand = { s: side === 'R' ? 'L' : 'R', uS };
-      if (st.slow) o.ease = tech && tech.wechsel ? zweiteilig(tech.wechsel) : smooth;
+      if (st.slow) o.ease = tech && tech.wechsel ? zweiteilig(tech.wechsel) : tech && tech.standErst ? (u) => smooth(clamp(u / tech.standErst)) : smooth;
       // Wechseln beide Füße den Platz, geht zuerst der, mit dem die Füße dazwischen näher beieinander stehen (Heian Sandan 19:
       // erst der rechte neben den linken, dann der linke hinaus); beim Yori-ashi gleiten beide zugleich
       const gap2 = (a, b) => len(sub(a.low.L.c, b.low.R.c));

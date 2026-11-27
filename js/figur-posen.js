@@ -1115,7 +1115,7 @@
     ], best: 1, dur: 1, eff: 'fistR', view: 'side3' });
     // Kakiwake-uke in Heian Yondan 14, 18 (Wunsch des Nutzers): erst dreht der Körper mit gekreuzten Handgelenken in den
     // Stand, dann öffnet der Block langsam bis zum Ende der Bewegung, während die Hüfte in ihre Endstellung drückt
-    // (Zeitteilung über wechsel in js/kata-figur.js)
+    // (Zeitteilung über standErst in js/kata-figur.js)
     const KW = D['tc:kakiwake-uke'].keys;
     KATA['kakiwake-uke-spaet'] = M(D['tc:kakiwake-uke'], { keys: [KW[0], KW[1], { t: 1, p: KW[2].p, e: 'io' }] });
     // Mae-geri-keage Chudan (Heian Nidan 17, 20): wie der Mae-geri des Lexikons, Treffer aber in Bauchhöhe (Bild aus dem
