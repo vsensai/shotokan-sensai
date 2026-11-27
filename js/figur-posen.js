@@ -540,7 +540,7 @@
     const KU0 = M(KB, { look: 90 });
     const KU2 = M(KB, { look: 90, hL: [-0.13, -0.06, 0.3], oL: 1, pL: [0, 0, -1], fL: [-0.3, 1, 0], eL: [0.3, -1, 0.3], hR: [0.13, -0.17, 0.27], eR: [-0.4, -1, 0.3] });
     const KU3 = M(KB, { look: 90, hL: [0.705, -0.1, 0.18], oL: 1, pL: [0.1, 0, 1], fL: [0.15, 1, 0], hR: H.hip });
-    const KU_MITTE = M(KB, { look: 90, oL: 1, hL: [0.102, -0.332, 0.187], eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [-0.02, -0.2, 0.27], eR: [-0.233, -0.529, 0.16] });
+    const KU_MITTE = M(KB, { look: 90, oL: 1, hL: [0.102, -0.332, 0.187], eL: [0.171, -0.571, 0.072], pL: [0, -1, 0], hR: [-0.02, -0.2, 0.27], eR: [-0.233, -0.529, 0.16] });
     const KU_AUS = M(KB, { look: 90, oL: 1, hL: [-0.024, -0.324, 0.208], eL: [0.6, -0.6, 0.5], pL: [0, -1, 0], fL: [-1, 0, 0.2], hR: [0.049, -0.17, 0.227], eR: [-0.8, -0.15, 0.2] });
     const KU_AUS2 = M(KU_AUS, { hL: [-0.141, -0.291, 0.228], hR: [0.135, -0.159, 0.216] });
     const KU_ZURUECK = M(KB, { look: 90, oL: 1, hL: [0.25, -0.1, 0.38], eL: [0.3, -1, 0.1], pL: [-0.3, 0, 0.9], fL: [0.1, 1, 0], hR: [-0.1, -0.28, 0.165], eR: [-0.138, -0.577, 0.09] });
@@ -1300,7 +1300,7 @@
     const TK_AN = M(KB, { look: 90, hL: [0.17, -0.3, 0.2], eL: [0.5, -0.8, -0.2], pL: [0, -1, 0], hR: [0.12, -0.17, 0.3], eR: [-0.75, -0.2, 0.25] });
     // Ausholen und Zurückziehen wie der Kake-uke des Lexikons (Bilder des Nutzers aus Heian Godan 14): die linke Hand holt
     // nur knapp über die Mitte aus; die rechte Faust steht vom Kagi-zuki schon links und bleibt dabei vor der Brust
-    const TK_MITTE = M(KB, { look: 90, oL: 1, hL: KU_MITTE.hL, eL: [0.4, -0.9, 0.2], pL: [0, -1, 0], hR: [0.16, -0.15, 0.29], eR: [-0.8, -0.15, 0.2] });
+    const TK_MITTE = M(KB, { look: 90, oL: 1, hL: KU_MITTE.hL, eL: KU_MITTE.eL, pL: [0, -1, 0], hR: [0.16, -0.15, 0.29], eR: [-0.8, -0.15, 0.2] });
     const TK_RECHTS = M(KU_AUS, { sL: 1, hR: [0.15, -0.155, 0.25] });
     const TK_RECHTS2 = M(KU_AUS2, { sL: 1 });
     // Fließend durch alle Zwischenbilder ('fl'), ohne Halt
