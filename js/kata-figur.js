@@ -46,8 +46,8 @@
   const GL_RUECKT = 0.15;
   const GL_FUSS = [0.15, 0.88]; // Anteile der Dauer: so lange gleitet der Fuß
   const GL_GEWICHT = 0.4; // bis hier geht das Gewicht hinüber
-  const KR_KNIE = [0.15, 0.3, 0.8, 0.9]; // Kreuzschritt aus dem Kiba-dachi: bis [0] stellen sich die Knie über die Füße; das ziehende
-  // Bein bleibt so bis [1], dann führt sein Knie (KR_INNEN: so weit nach innen) bis [2], danach Kniestellung des Kreuzschritts;
+  const KR_KNIE = [0, 0.3, 0.8, 0.75]; // Kreuzschritt aus dem Kiba-dachi: das ziehende
+  // Bein bleibt im Knie wie im Stand bis [1], dann führt sein Knie (KR_INNEN: so weit nach innen) bis [2], danach Kniestellung des Kreuzschritts;
   // das Standbein ab [3]. KR_HEBEN: so weit hebt sich der kreuzende Fuß (Meter), ab KR_HEBEN_AB seines Weges
   const KR_INNEN = 0.45;
   const KR_HEBEN = 0.04;
@@ -1067,9 +1067,38 @@
     if (seg.kreuzKnie) {
       const e = [Math.cos(byaw * RAD), 0, -Math.sin(byaw * RAD)];
       const f3 = [Math.sin(byaw * RAD), 0, Math.cos(byaw * RAD)];
-      const wt = { [seg.kreuzKnie.o]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[3], 1, u)), [seg.kreuzKnie.s]: ramp(0, KR_KNIE[0], u) * (1 - ramp(KR_KNIE[1] - 0.1, KR_KNIE[1] + 0.1, u)) };
-      // das ziehende Bein: nach dem Halten führt das Knie – es beugt sich nach vorn und leicht nach innen zum Standbein, der
-      // Fuß folgt; zum Schluss geht es in die Kniestellung des Kreuzschritts
+      // Kreis, auf dem das Knie zwischen Hüfte und Knöchel liegen kann (Mitte, Radius, Achsen: u1 seitlich, v1 nach vorn)
+      const kreis = (q, pelv, yawP) => {
+        const lp3 = [Math.cos(yawP * RAD), 0, -Math.sin(yawP * RAD)];
+        const hip = [pelv[0] + lp3[0] * (q === 'L' ? HIP : -HIP), pelv[1], pelv[2] + lp3[2] * (q === 'L' ? HIP : -HIP)];
+        const an = [P[q].x, P[q].y, P[q].z];
+        const d = [an[0] - hip[0], an[1] - hip[1], an[2] - hip[2]];
+        const dist = Math.min(Math.hypot(...d), 0.88 * 0.999);
+        const dn = norm3(d);
+        const u1 = norm3(e.map((v, i) => v - dn[i] * dot3(e, dn)));
+        let v1 = cross3(dn, u1);
+        if (dot3(v1, f3) < 0) v1 = v1.map((v) => -v);
+        return { an, dn, u1, v1, c: hip.map((v, i) => v + dn[i] * dist / 2), r: Math.sqrt(Math.max(0, 0.44 * 0.44 - (dist / 2) ** 2)) };
+      };
+      // Standbein: das Knie bleibt seitlich, wo es im Stand davor war (über dem Fuß, nicht nach innen, nicht nach außen) –
+      // nur die Hüfte wandert darüber; zum Schluss geht es in die Kniestellung des Kreuzschritts
+      const o = seg.kreuzKnie.o;
+      const wo = 1 - ramp(KR_KNIE[3], 1, u);
+      if (wo > 0) {
+        const K0 = kreis(o, [A.low.pel[0], A.low.h, A.low.pel[1]], A.byaw + (A.up.yaw || 0));
+        const p0 = norm3(rotY(A.low[o].kp, A.byaw));
+        const pp = norm3(p0.map((v, i) => v - K0.dn[i] * dot3(p0, K0.dn)));
+        const off0 = dot3(K0.c.map((v, i) => v + pp[i] * K0.r - K0.an[i]), e);
+        const K = kreis(o, P.pelvis, P.yaw || 0);
+        const ue = dot3(K.u1, e);
+        if (K.r > 1e-4 && Math.abs(ue) > 1e-4) {
+          const cs = clamp(dot3(K.an.map((v, i) => v - K.c[i]), e) + off0, -K.r * Math.abs(ue), K.r * Math.abs(ue)) / (K.r * ue);
+          const pole = K.u1.map((v, i) => v * cs + K.v1[i] * Math.sqrt(Math.max(0, 1 - cs * cs)));
+          P[o] = Object.assign({}, P[o], { kp: norm3(mix3(wo < 1 ? norm3(rotY(B.low[o].kp, B.byaw)) : norm3(P[o].kp), pole, wo)) });
+        }
+      }
+      // das ziehende Bein: Das Knie bleibt, wie es im Stand ist, bis die Hüfte drüben ist; dann führt es – es beugt sich nach
+      // vorn und leicht nach innen zum Standbein, der Fuß folgt; zum Schluss geht es in die Kniestellung des Kreuzschritts
       const sq = seg.kreuzKnie.s;
       const wf = ramp(KR_KNIE[1] - 0.1, KR_KNIE[1] + 0.1, u) * (1 - ramp(KR_KNIE[2], 1, u));
       if (wf > 0) {
@@ -1077,26 +1106,6 @@
         const fuehrt = norm3([f3[0] + KR_INNEN * innen[0], 0.35, f3[2] + KR_INNEN * innen[2]]);
         P[sq] = Object.assign({}, P[sq], { kp: norm3(mix3(norm3(P[sq].kp), fuehrt, wf)) });
       }
-      ['L', 'R'].forEach((q) => {
-        if (!(wt[q] > 0)) return;
-        const lp3 = [Math.cos((P.yaw || 0) * RAD), 0, -Math.sin((P.yaw || 0) * RAD)];
-        const hip = [P.pelvis[0] + lp3[0] * (q === 'L' ? HIP : -HIP), P.pelvis[1], P.pelvis[2] + lp3[2] * (q === 'L' ? HIP : -HIP)];
-        const an = [P[q].x, P[q].y, P[q].z];
-        const d = [an[0] - hip[0], an[1] - hip[1], an[2] - hip[2]];
-        const dist = Math.min(Math.hypot(...d), 0.88 * 0.999);
-        const dn = norm3(d);
-        const c = hip.map((v, i) => v + dn[i] * dist / 2);
-        const r = Math.sqrt(Math.max(0, 0.44 * 0.44 - (dist / 2) ** 2));
-        const u1 = norm3(e.map((v, i) => v - dn[i] * dot3(e, dn)));
-        let v1 = cross3(dn, u1);
-        if (dot3(v1, f3) < 0) v1 = v1.map((v) => -v);
-        const ue = dot3(u1, e);
-        if (r < 1e-4 || Math.abs(ue) < 1e-4) return;
-        const want = dot3(an.map((v, i) => v - c[i]), e);
-        const cs = clamp(want / (r * ue), -1, 1);
-        const pole = u1.map((v, i) => v * cs + v1[i] * Math.sqrt(1 - cs * cs));
-        P[q] = Object.assign({}, P[q], { kp: norm3(mix3(norm3(P[q].kp), pole, wt[q])) });
-      });
     }
     return E.full(P);
   }

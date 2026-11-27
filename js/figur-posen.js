@@ -1275,7 +1275,7 @@
     // dicht vor dem rechten; das linke Bein liegt vor dem rechten. Die Hüfte bleibt tief, kaum höher als im Kiba-dachi (Tekki). Auf dem Weg
     // dorthin bleiben die Knie über den Füßen, nur die Hüfte wandert (kreuzKnie in js/kata-figur.js). Der Abstand nach
     // vorn (L.z) gilt auch für die Füße der Kata (KVOR).
-    S.kosamae = { pelvis: [-0.03, 0.7, -0.1], L: { x: -0.06, z: 0.26, yaw: 0, kp: [-0.15, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [0, 0, 1] }, w: [0.1, 0.9] };
+    S.kosamae = { pelvis: [-0.03, 0.7, -0.1], L: { x: -0.06, z: 0.26, yaw: 0, kp: [-0.15, 0.1, 1] }, R: { x: 0, z: 0, yaw: 0, kp: [0.3, 0, 1] }, w: [0.1, 0.9] };
     // Yoi: Heisoku-dachi, beide Arme gestreckt, die offenen Hände mittig vor dem Körper genau übereinander – die rechte am
     // Körper, die linke Handfläche auf ihrem Rücken. Das Handgelenk bleibt gerade: die Finger zeigen in der Linie des Arms
     // (Schulter → Hand) schräg nach unten zur Mitte, die Handfläche zum Körper
