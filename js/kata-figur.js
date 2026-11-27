@@ -329,7 +329,7 @@
     [/hasami-uchi/i, { def: 'tc:hasami-uchi', side: 'L', from: 0.563, lang: true, dur: 0.8 }],
     [/nagashi-uke \+ .*gedan-uchikomi/i, { def: 'nagashi-shuto-gedan', side: 'R', from: 0.25 }],
     [/jodan uchi-uke \+ .*gedan-uke/i, { def: 'manji-uke-heisoku', side: 'L', from: 0.25, zuvor: 'wende', zeit: 1.1 }, /heisoku/i],
-    [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25, zuvor: 'tritt', zeit: 0.9 }, /teil 1: .*mikazuki-geri/i],
+    [/mae-enpi/i, { def: 'mae-enpi-hand', side: 'R', from: 0.25, zuvor: 'tritt', zeit: 0.6 }, /teil 1: .*mikazuki-geri/i],
     // Bassai Dai 29: aus dem Mae-enpi ohne Ausholen – der rechte Unterarm geht gleich nach unten, die linke Hand schließt
     // zur Faust und kommt an die Innenseite des rechten Ellbogens (erst 30 und 31 wechseln die Arme über Kreuz)
     [/gedan-uke \+ .*mune-mae-kamae/i, { def: 'gedan-uke-mune-mae', side: 'R', from: 0.25, direkt: true, erst: true }, /bassai dai #29$/i],
@@ -405,8 +405,8 @@
     [/jodan kosa-uke/i, { def: 'tc:juji-uke', side: 'L', from: 0.25, direkt: true }],
     [/juji chudan osae-uke/i, { def: 'juji-osae-uke', side: 'L', from: 0.25, direkt: true }],
     [/kake-uke/i, { def: 'tc:kake-uke', side: 'L', from: 0.12, lang: true }],
-    [/mikazuki-geri/i, { tritt: 'mikazuki-fluss', dur: 0.8 }, /heian godan/i],
-    [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 0.8 }],
+    [/mikazuki-geri/i, { tritt: 'mikazuki-fluss', dur: 0.5 }, /heian godan/i],
+    [/mikazuki-geri/i, { tritt: 'mikazuki', dur: 0.5 }],
     [/uho-tsukiage/i, { def: 'uho-tsukiage', side: 'R', from: 0.25, direkt: true }],
     [/jotai sonomama/i, { halten: true }],
   ];
@@ -429,10 +429,11 @@
     'hiza-hoch': { def: 'tc:hiza-geri', side: 'R', a: 0.346, b: 0.543, an: 0.5, anMin: 0.4, kurz: 0.2, huefte: 0.5 },
     // Mikazuki-geri in die offene Hand (Heian Godan 15): der Ablauf steht im Kiba-dachi davor und dreht die Hüfte selbst
     // ein – rahmen: vorne ist deshalb die Körperrichtung vor der Bewegung, erst danach gilt die neue. Die Technik endet
-    // mit dem Fuß an der Hand (b = Treffer); die nächste Bewegung setzt ihn von dort ab
-    mikazuki: { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true },
+    // mit dem Fuß an der Hand (b = Treffer); die nächste Bewegung setzt ihn von dort ab. Tempo wie im Lexikon (dur 0,5 s,
+    // davon gut ein Viertel fürs Anziehen)
+    mikazuki: { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.27, anMin: 0.25, kurz: 0.2, huefte: 1, arme: true, rahmen: true },
     // ohne Halt (Heian Godan 15): das Knie kommt beschleunigt hoch (fluss: ohne Abbremsen), der Tritt läuft gleich weiter
-    'mikazuki-fluss': { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.4, anMin: 0.3, kurz: 0.2, huefte: 1, arme: true, rahmen: true, fluss: true },
+    'mikazuki-fluss': { def: 'mv:mikazuki-geri', side: 'R', a: 0.11, b: 0.25, an: 0.27, anMin: 0.25, kurz: 0.2, huefte: 1, arme: true, rahmen: true, fluss: true },
     // Sokuto Gedan-kekomi zur Seite (Bassai Dai 19): Knie hoch, dann schräg nach unten; die Hände ziehen dabei heran und
     // sind am Körper, wenn der Fuß trifft (mit)
     'kekomi-gedan': { def: 'yoko-kekomi-gedan', side: 'R', a: 0.27, b: 0.53, an: 0.45, anMin: 0.4, kurz: 0.3, huefte: 1, mit: 0.35 },
