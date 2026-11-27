@@ -258,6 +258,8 @@
   // ohne den ruhigen Vorlauf in die Ausholhaltung (der Ablauf beginnt selbst mit der Haltung davor, Tekki 16);
   // erst: bei zwei Techniken („… + …“) gilt die Seite der zuerst genannten (sonst die der zuletzt genannten);
   // tritt: Fußtritt (siehe TRITT) – die Arme kommen aus dem übrigen Eintrag, ohne def bleiben sie, wie sie sind.
+  // koshi: ausgeholt wird im Koshi-kamae (Fäuste gestapelt an der Hüfte der Gegenseite) statt in der Ausholhaltung des
+  // Lexikons (Uraken mit Yoko-geri-keage);
   // bis: der Ablauf endet in der Kata schon bei diesem Schlüsselbild (t) – z. B. am Treffer, wenn das Lexikon danach
   // zurückschnappt (Uraken-uchi in Heian Nidan 7, Heian Yondan 6, 9);
   // schnapp: nach dem Treffer schnappt der Arm gleich zurück in die Haltung, aus der der Ablauf beginnt (Uraken);
@@ -372,7 +374,7 @@
     [/haiwan/i, { def: 'tc:haiwan-uke', side: 'L', from: 0.25 }],
     [/soto-nagashi-uke/i, { def: 'tc:soto-nagashi-uke', side: 'L', from: 0.513, lang: true, dur: 0.55, erst: true }],
     [/sokumen chudan-zuki/i, { def: 'kokutsu-zuki', side: 'L', from: 0.25, direkt: true }],
-    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'tc:uraken-uchi', side: 'R', from: 0.3, bis: 0.59, dur: 1.3 }],
+    [/yoko-geri-keage/i, { tritt: 'yoko-keage', def: 'tc:uraken-uchi', side: 'R', from: 0.3, bis: 0.59, koshi: true, dur: 1.3 }],
     [/jodan mae-geri-keage/i, { tritt: 'mae-jodan', dur: 0.8 }],
     [/mae-geri-keage/i, { tritt: 'mae', dur: 0.8 }],
     [/^(saken|uken) chudan-zuki/i, { def: 'gyaku-zuki', side: 'R', from: 0.25, direkt: true }],
@@ -474,7 +476,19 @@
   // Ablauf einer Technik als Funktion w = 0 (ausgeholt) … 1 (Endstellung)
   function track(tech, side) {
     const d = defOf(tech.def);
-    const keys = d.keys.map((k) => ({ t: k.t, e: k.e, eGanz: k.eGanz, p: side === tech.side ? k.p : flip(k.p) }));
+    let dk = d.keys;
+    if (tech.koshi) {
+      // Ausholen im Koshi-kamae: beide Fäuste gestapelt an der Hüfte der Gegenseite (wie tc:koshi-kamae) statt der
+      // Ausholhaltung des Lexikons – das ersetzt alle Bilder bis from
+      const kk = defOf('tc:koshi-kamae').keys[0].p;
+      const ko = tech.side === 'R' ? flip(kk) : kk;
+      const start = dk.filter((k) => k.t <= tech.from + 1e-9).pop();
+      const kf = E.full(ko);
+      const arme = {};
+      ['hL', 'hR', 'eL', 'eR', 'oL', 'oR', 'pL', 'pR', 'fL', 'fR', 'qL', 'qR', 'sL', 'sR'].forEach((q) => (arme[q] = kf[q]));
+      dk = [{ t: tech.from, p: M(start.p, arme) }].concat(dk.filter((k) => k.t > tech.from + 1e-9));
+    }
+    const keys = dk.map((k) => ({ t: k.t, e: k.e, eGanz: k.eGanz, p: side === tech.side ? k.p : flip(k.p) }));
     const tl = E.timeline(keys);
     const t1 = tech.bis || keys[keys.length - 1].t;
     return (w) => upper(tl(lerp(tech.from, t1, clamp(w))));
